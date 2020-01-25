@@ -1,0 +1,9 @@
+#!/bin/bash
+#
+# Xi compiler build script
+#
+
+# mvn package
+
+echo "java -cp $(dirname $(readlink -f $0))/target/cowabunga-1.0.jar cyr7.cli.CLI \"\$@\"" > xic
+chmod +x xic
