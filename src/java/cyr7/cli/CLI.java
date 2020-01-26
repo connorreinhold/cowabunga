@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.function.Consumer;
@@ -85,8 +87,7 @@ public class CLI {
      * Calls the xi lexer to lex the contents of {@code input} and writes the output into
      * {@code output}.
      */
-    public static void useLexer(BufferedInputStream input,
-	    BufferedOutputStream output) {
+    public static void useLexer(InputStream input, OutputStream output) {
 	try {
 	    output.write(input.readAllBytes());
 	    output.flush();
@@ -96,11 +97,11 @@ public class CLI {
     }
 
     /**
-     * Removes the extension of a filename if an extension exists.
+     * Returns the filename without its extension if an extension exists.
      * @param file A filename
-     * @return The filename without the extension.
+     * @return The filename of {@code file} without the extension.
      */
-    public static String removeExtension(File file) {
+    public static String getMainFilename(File file) {
 	String name = file.getName();
 	int pos = name.lastIndexOf(".");
 	if (pos > 0) {
@@ -108,6 +109,23 @@ public class CLI {
 	}
 	return name;
     }
+    
+    /**
+     * Returns the filename's extension name. If an extension does not exist, then an empty
+     * string is returned.
+     * @param file A filename
+     * @return The extension name of {@code file}.
+     */
+    public static String getExtensionName(File file) {
+	String name = file.getName();
+	int pos = name.lastIndexOf(".");
+	if (pos > 0) {
+	    return name.substring(pos + 1, name.length());
+	} else {
+	    return "";
+	}
+    }
+    
 
     public static void main(String[] args) {
 
@@ -156,6 +174,10 @@ public class CLI {
 	    String[] sourceFiles = cmd.getArgs();
 	    for (String filename : sourceFiles) {
 		File file = new File(filename);
+		if (!getExtensionName(file).equals("xi")) {
+		    continue;
+		}
+		
 		BufferedInputStream inputStream;
 		BufferedOutputStream outputStream;
 		try {
@@ -163,7 +185,7 @@ public class CLI {
 			    new FileInputStream(file));
 		    File destination = new File(
 			    pathDestination.getAbsolutePath(),
-			    removeExtension(file) + ".lexed");
+			    getMainFilename(file) + ".lexed");
 		    outputStream = new BufferedOutputStream(
 			    new FileOutputStream(destination));
 		    useLexer(inputStream, outputStream);
