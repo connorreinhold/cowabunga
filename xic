@@ -1,1 +1,0 @@
-java -cp /home/vagrant/shared/cowabunga/target/cowabunga-1.0.jar cyr7.cli.CLI "$@"
