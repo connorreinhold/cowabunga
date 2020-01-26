@@ -81,17 +81,25 @@ public class CLI {
 	writer.flush();
     }
 
+    /**
+     * Calls the xi lexer to lex the contents of {@code input} and writes the output into
+     * {@code output}.
+     */
     public static void useLexer(BufferedInputStream input,
 	    BufferedOutputStream output) {
 	try {
 	    output.write(input.readAllBytes());
 	    output.flush();
 	} catch (IOException e) {
-	    // TODO Auto-generated catch block
 	    e.printStackTrace();
 	}
     }
 
+    /**
+     * Removes the extension of a filename if an extension exists.
+     * @param file A filename
+     * @return The filename without the extension.
+     */
     public static String removeExtension(File file) {
 	String name = file.getName();
 	int pos = name.lastIndexOf(".");
@@ -103,6 +111,7 @@ public class CLI {
 
     public static void main(String[] args) {
 
+	// If no arguments or options given, print help.
 	if (args.length == 0) {
 	    printHelpMessage();
 	    return;
@@ -116,6 +125,7 @@ public class CLI {
 	    return;
 	}
 
+	// For each option given, perform task corresponding to option.
 	cmd.iterator().forEachRemaining(new Consumer<Option>() {
 	    @Override
 	    public void accept(Option t) {
