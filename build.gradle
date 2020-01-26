@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+}
+
+group 'cs4120.cyr7'
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile fileTree(dir: 'dependencies', include: ['*.jar'])
+}
+
+jar {
+    manifest {
+        attributes "Main-Class": "cyr7.cli.CLI"
+    }
+
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ['src/resources']
+        }
+    }
+    test {
+        java {
+            srcDirs = ['tests/java']
+        }
+        resources {
+            srcDirs = ['tests/resources']
+        }
+    }
+}

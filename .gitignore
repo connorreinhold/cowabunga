@@ -1,3 +1,9 @@
+# <-- COWABUNGA SPECIFIC
+
+xic
+
+# <-- COWABUNGA SPECIFIC
+
 # General
 .DS_Store
 .AppleDouble
@@ -125,7 +131,6 @@ gradle-app.setting
 .mtj.tmp/
 
 # Package Files #
-*.jar
 *.war
 *.nar
 *.ear

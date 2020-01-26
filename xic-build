@@ -3,7 +3,7 @@
 # Xi compiler build script
 #
 
-# mvn package
+gradle build
 
-echo "java -cp $(dirname $(readlink -f $0))/target/cowabunga-1.0.jar cyr7.cli.CLI \"\$@\"" > xic
+echo "java -jar $(dirname $(readlink -f $0))/build/libs/cowabunga-1.0.jar \"\$@\"" > xic
 chmod +x xic
