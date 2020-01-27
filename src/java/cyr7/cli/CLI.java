@@ -8,16 +8,21 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import cyr7.lexer.MyLexer;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.io.Reader;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -88,7 +93,12 @@ public class CLI {
      */
     public static void useLexer(InputStream input, OutputStream output) {
         try {
-            output.write(input.readAllBytes());
+            Reader rd = new BufferedReader(new InputStreamReader(input));
+            MyLexer lexer = new MyLexer(rd);
+            MyLexer.Token token;
+            while ((token = lexer.nextToken()) != null) {
+                output.write(((token.line + 1) + ":" + (token.column + 1) + " " + token + "\n").getBytes());
+            }
             output.flush();
         } catch (IOException e) {
             e.printStackTrace();

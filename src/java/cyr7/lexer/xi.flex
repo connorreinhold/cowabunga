@@ -2,7 +2,9 @@
 
 %public
 %class MyLexer
+%public
 %type Token
+%public
 %function nextToken
 
 %unicode
@@ -69,7 +71,7 @@
 
         final TokenType type;
         final Object attribute;
-        final int line, column;
+        final public int line, column;
 
         private Token(TokenType tt) {
             type = tt; attribute = null;
