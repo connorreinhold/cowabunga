@@ -39,48 +39,47 @@ public class CLI {
      * instance, an {@code Option} instance is created for at least each of the
      * following CLI options: {@literal --help}, {@literal --lex}, and
      * {@literal -D <path>}.
-     * 
      */
     public static Options createOptions() {
-	Options options = new Options();
+        Options options = new Options();
 
-	Option help = Option.builder("h").longOpt("help")
-		.desc("Print a synopsis of options").hasArg(false).argName(null)
-		.numberOfArgs(0).required(false).build();
+        Option help = Option.builder("h").longOpt("help")
+                .desc("Print a synopsis of options").hasArg(false).argName(null)
+                .numberOfArgs(0).required(false).build();
 
-	Option lex = Option.builder("l").longOpt("lex")
-		.desc("Generate output from lexical analysis").hasArg(false)
-		.argName(null).numberOfArgs(0).required(false).build();
+        Option lex = Option.builder("l").longOpt("lex")
+                .desc("Generate output from lexical analysis").hasArg(false)
+                .argName(null).numberOfArgs(0).required(false).build();
 
-	Option destination = Option.builder("D").longOpt(null)
-		.desc("Specify where to place generated diagnostic files")
-		.hasArg(true).argName("path").numberOfArgs(1).required(false)
-		.build();
+        Option destination = Option.builder("D").longOpt(null)
+                .desc("Specify where to place generated diagnostic files")
+                .hasArg(true).argName("path").numberOfArgs(1).required(false)
+                .build();
 
-	Option version = Option.builder("v").longOpt("version")
-		.desc("Version information").hasArg(false).argName(null)
-		.numberOfArgs(0).required(false).build();
+        Option version = Option.builder("v").longOpt("version")
+                .desc("Version information").hasArg(false).argName(null)
+                .numberOfArgs(0).required(false).build();
 
-	return options.addOption(help).addOption(lex).addOption(destination)
-		.addOption(version);
+        return options.addOption(help).addOption(lex).addOption(destination)
+                .addOption(version);
     }
 
     /**
      * Prints a synopsis of the options.
      */
     public static void printHelpMessage() {
-	helpFormatter.printHelp(writer, consoleWidth, usage,
-		"where possible options include:", options, 0, leftPadding,
-		"\n");
-	writer.flush();
+        helpFormatter.printHelp(writer, consoleWidth, usage,
+                "where possible options include:", options, 0, leftPadding,
+                "\n");
+        writer.flush();
     }
 
     /**
      * Prints the version of xic.
      */
     public static void printVersionMessage() {
-	writer.println("xic 1.0");
-	writer.flush();
+        writer.println("xic 1.0");
+        writer.flush();
     }
 
     /**
@@ -88,113 +87,112 @@ public class CLI {
      * {@code output}.
      */
     public static void useLexer(InputStream input, OutputStream output) {
-	try {
-	    output.write(input.readAllBytes());
-	    output.flush();
-	} catch (IOException e) {
-	    e.printStackTrace();
-	}
+        try {
+            output.write(input.readAllBytes());
+            output.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     /**
      * Returns the filename without its extension if an extension exists.
+     *
      * @param file A filename
      * @return The filename of {@code file} without the extension.
      */
     public static String getMainFilename(File file) {
-	String name = file.getName();
-	int pos = name.lastIndexOf(".");
-	if (pos > 0) {
-	    name = name.substring(0, pos);
-	}
-	return name;
+        String name = file.getName();
+        int pos = name.lastIndexOf(".");
+        if (pos > 0) {
+            name = name.substring(0, pos);
+        }
+        return name;
     }
-    
+
     /**
      * Returns the filename's extension name. If an extension does not exist, then an empty
      * string is returned.
+     *
      * @param file A filename
      * @return The extension name of {@code file}.
      */
     public static String getExtensionName(File file) {
-	String name = file.getName();
-	int pos = name.lastIndexOf(".");
-	if (pos > 0) {
-	    return name.substring(pos + 1, name.length());
-	} else {
-	    return "";
-	}
+        String name = file.getName();
+        int pos = name.lastIndexOf(".");
+        if (pos > 0) {
+            return name.substring(pos + 1, name.length());
+        } else {
+            return "";
+        }
     }
-    
+
 
     public static void main(String[] args) {
 
-	// If no arguments or options given, print help.
-	if (args.length == 0) {
-	    printHelpMessage();
-	    return;
-	}
+        // If no arguments or options given, print help.
+        if (args.length == 0) {
+            printHelpMessage();
+            return;
+        }
 
-	CommandLine cmd;
-	try {
-	    cmd = parser.parse(options, args);
-	} catch (ParseException e) {
-	    System.out.println(e.getMessage());
-	    return;
-	}
+        CommandLine cmd;
+        try {
+            cmd = parser.parse(options, args);
+        } catch (ParseException e) {
+            System.out.println(e.getMessage());
+            return;
+        }
 
-	// For each option given, perform task corresponding to option.
-	cmd.iterator().forEachRemaining(new Consumer<Option>() {
-	    @Override
-	    public void accept(Option t) {
-		String opt = t.getOpt();
-		switch (opt) {
-		case "h":
-		    printHelpMessage();
-		    break;
-		case "l": {
-		    wantsLexing = true;
-		    break;
-		}
-		case "D":
-		    String directory = cmd.getOptionValue("D");
-		    pathDestination = new File(directory);
-		    break;
-		case "v":
-		    printVersionMessage();
-		    break;
-		default:
-		    System.out.println("No case for given for option: " + opt);
-		    break;
-		}
-	    }
-	});
+        // For each option given, perform task corresponding to option.
+        cmd.iterator().forEachRemaining(t -> {
+            String opt = t.getOpt();
+            switch (opt) {
+                case "h":
+                    printHelpMessage();
+                    break;
+                case "l": {
+                    wantsLexing = true;
+                    break;
+                }
+                case "D":
+                    String directory = cmd.getOptionValue("D");
+                    pathDestination = new File(directory);
+                    break;
+                case "v":
+                    printVersionMessage();
+                    break;
+                default:
+                    System.out.println("No case for given for option: " + opt);
+                    break;
+            }
+        });
 
-	if (wantsLexing) {
-	    String[] sourceFiles = cmd.getArgs();
-	    for (String filename : sourceFiles) {
-		File file = new File(filename);
-		if (!getExtensionName(file).equals("xi")) {
-		    continue;
-		}
-		
-		BufferedInputStream inputStream;
-		BufferedOutputStream outputStream;
-		try {
-		    inputStream = new BufferedInputStream(
-			    new FileInputStream(file));
-		    File destination = new File(
-			    pathDestination.getAbsolutePath(),
-			    getMainFilename(file) + ".lexed");
-		    outputStream = new BufferedOutputStream(
-			    new FileOutputStream(destination));
-		    useLexer(inputStream, outputStream);
-		} catch (FileNotFoundException e) {
-		    writer.write(e.getMessage());
-		    writer.flush();
-		}
-	    }
-	}
-	writer.close();
+        if (wantsLexing) {
+            String[] sourceFiles = cmd.getArgs();
+            for (String filename : sourceFiles) {
+                File file = new File(filename);
+                if (!getExtensionName(file).equals("xi")) {
+                    continue;
+                }
+
+                BufferedInputStream inputStream;
+                BufferedOutputStream outputStream;
+                try {
+                    inputStream = new BufferedInputStream(
+                            new FileInputStream(file));
+                    File destination = new File(
+                            pathDestination.getAbsolutePath(),
+                            getMainFilename(file) + ".lexed");
+                    outputStream = new BufferedOutputStream(
+                            new FileOutputStream(destination));
+                    useLexer(inputStream, outputStream);
+                } catch (FileNotFoundException e) {
+                    writer.write(e.getMessage());
+                    writer.flush();
+                }
+            }
+        }
+        writer.close();
     }
 }
