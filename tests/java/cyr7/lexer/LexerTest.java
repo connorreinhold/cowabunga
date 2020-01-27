@@ -11,7 +11,7 @@ class LexerTest {
 
     @Test
     void add() {
-        Reader inputFile = new InputStreamReader(getClass().getClassLoader().getResourceAsStream("add.xi"));
+        MyLexer lexer = new MyLexer(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("add.xi")));
 
     }
 

@@ -3,6 +3,8 @@
 # Xi compiler build script
 #
 
+make mylexer
+
 gradle build
 
 echo "java -jar $(dirname $(readlink -f $0))/build/libs/cowabunga-1.0.jar \"\$@\"" > xic

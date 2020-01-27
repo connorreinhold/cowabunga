@@ -11,7 +11,7 @@
 %column
 
 %{
-    enum TokenType {
+    public enum TokenType {
 
         // keywords
         IF,
@@ -65,19 +65,19 @@
 
     }
 
-    class Token {
+    public class Token {
 
-        TokenType type;
-        Object attribute;
+        final TokenType type;
+        final Object attribute;
         final int line, column;
 
-        Token(TokenType tt) {
+        private Token(TokenType tt) {
             type = tt; attribute = null;
             line = yyline;
             column = yycolumn;
         }
 
-        Token(TokenType tt, Object attr) {
+        private Token(TokenType tt, Object attr) {
             type = tt; attribute = attr;
             line = yyline;
             column = yycolumn;
@@ -89,7 +89,7 @@
 
     }
 
-    StringBuffer stringBuffer = new StringBuffer();
+    private StringBuffer stringBuffer = new StringBuffer();
 %}
 
 Whitespace = [ \t\f\r\n]
