@@ -5,7 +5,7 @@ plugins {
 group 'cs4120.cyr7'
 version '1.0'
 
-sourceCompatibility = 1.11
+sourceCompatibility = 8
 
 repositories {
     mavenCentral()
