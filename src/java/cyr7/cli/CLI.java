@@ -139,7 +139,6 @@ public class CLI {
 
 
     public static void main(String[] args) {
-
         // If no arguments or options given, print help.
         if (args.length == 0) {
             printHelpMessage();
