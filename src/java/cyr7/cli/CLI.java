@@ -210,6 +210,10 @@ public class CLI {
                 try {
                     inputStream = new BufferedInputStream(new FileInputStream(file));
                     File destination = new File(pathDestination.getAbsolutePath(), getMainFilename(file) + ".lexed");
+                    if (!destination.exists()) {
+                    	// Create directories if they don't exist
+                    	destination.getParentFile().mkdirs();
+                    }
                     outputStream = new BufferedOutputStream(new FileOutputStream(destination));
                     useLexer(inputStream, outputStream);
                 } catch (FileNotFoundException e) {
