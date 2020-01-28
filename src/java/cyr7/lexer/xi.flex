@@ -102,12 +102,14 @@ Integer = "0"|[1-9]{Digit}*
 Character = "'"[\u0000-\uFFFF]"'"
 
 %state STRING
+%state COMMENT
 
 %%
 
 <YYINITIAL> {
     {Whitespace}        { /* IGNORE */ }
-
+    "//"				{ yybegin(COMMENT); }
+    
     "use"               { return new Token(TokenType.USE); }
     "if"                { return new Token(TokenType.IF); }
     "while"             { return new Token(TokenType.WHILE); }
@@ -157,6 +159,11 @@ Character = "'"[\u0000-\uFFFF]"'"
     "&"                 { return new Token(TokenType.LOGICAL_AND); }
     "|"                 { return new Token(TokenType.LOGICAL_OR); }
 
+}
+
+<COMMENT> {
+	"\n"				{ yybegin(YYINITIAL); }
+	.					{ /* IGNORE */ }
 }
 
 <STRING> {

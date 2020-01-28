@@ -91,7 +91,7 @@ class CLITest {
 	    CLI.parseCommand(args);
 	    fail("ParseException failed to be thrown");
 	} catch (ParseException e) {
-	}
+	}	
     }
 
     @Test
@@ -127,7 +127,8 @@ class CLITest {
 	    }
 	}
     }
-
+    
+    
     @Test
     void getsAllSourceFiles() {
 	final String[] noFiles = "--lex".split(" ");
