@@ -126,6 +126,30 @@ class LexerTest {
     }
 
     @Test
+    void commentDifferentLineEndings() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader(
+                "// this is a comment have a good day\r"
+                        + "1234 asdf // whatever\n"
+                        + "while () // blkj \t asdf\r\n"
+                        + "if use\u0085"
+                        + "++ \"// comment // inside a string\" // comment\n"
+        ));
+
+        assertEquals(MyLexer.TokenType.INT_LITERAL, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.ID, lexer.nextToken().type);
+
+        assertEquals(MyLexer.TokenType.WHILE, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
+
+        assertEquals(MyLexer.TokenType.IF, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.USE, lexer.nextToken().type);
+
+        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
+    }
+
+    @Test
     void integerOverflow() throws IOException {
         MyLexer lexer = new MyLexer(new StringReader("99999999999999999999999"));
         MyLexer.Token token;
