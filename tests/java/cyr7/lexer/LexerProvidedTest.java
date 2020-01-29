@@ -15,10 +15,15 @@ public class LexerProvidedTest {
         MyLexer lexer = new MyLexer(new FileReader(getClass().getClassLoader().getResource("lexer/pa1/" + filename + ".xi").getFile()));
         Scanner solution = new Scanner(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("lexer/pa1/" + filename + ".lexedsol")));
 
-        MyLexer.Token token;
-        while ((token = lexer.nextToken()) != null && solution.hasNextLine()) {
+        while (solution.hasNextLine()) {
             String line = solution.nextLine();
+            System.out.print(line);
+
+            MyLexer.Token token = lexer.nextToken();
+
             assertEquals(line, TokenUtils.fullDescription(token));
+
+            System.out.println(" (pass)");
         }
 
         assertNull(lexer.nextToken());

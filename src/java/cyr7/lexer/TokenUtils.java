@@ -22,6 +22,7 @@ public class TokenUtils {
             case BOOL_LITERAL: return "boolean " + token.attribute;
             case INT_LITERAL: return "integer " + token.attribute;
             case CHAR_LITERAL: return "character " + token.attribute;
+            case STRING_LITERAL: return "string " + token.attribute;
 
             case ID: return "id " + token.attribute;
 
@@ -33,6 +34,8 @@ public class TokenUtils {
             case R_BRACE: return "}";
             case COLON: return ":";
             case SEMICOLON: return ";";
+            case COMMA: return ",";
+            case UNDERSCORE: return "_";
 
             case ASSIGN: return "=";
 
@@ -56,7 +59,7 @@ public class TokenUtils {
             case LOGICAL_AND: return "&";
             case LOGICAL_OR: return "|";
 
-            default: return "";
+            default: throw new RuntimeException("Token " + token +  " is missing a description.");
         }
     }
 
