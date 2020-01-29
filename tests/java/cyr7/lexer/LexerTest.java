@@ -207,6 +207,24 @@ class LexerTest {
     }
 
     @Test
+    void stringInvalidEscaping() {
+        MyLexer lexer = new MyLexer(new StringReader("\"\\x\"")); // \x
+        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("\"asdf\\g\"")); // \g
+        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("\"\\b1324\"")); // \b
+        assertThrows(Exception.class, lexer::nextToken);
+    }
+
+    @Test
+    void stringEmpty() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader("\"\"")); // ""
+        MyLexer.Token token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
+        assertEquals("", token.attribute);
+    }
+
+    @Test
     void characterEscapingUnicode() throws IOException {
         MyLexer lexer = new MyLexer(new StringReader("'\\xAAAA'")); // \xAAAA
         MyLexer.Token token = lexer.nextToken();
@@ -251,6 +269,26 @@ class LexerTest {
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
         assertEquals('\n', token.attribute);
+    }
+
+    @Test
+    void characterInvalidEscaping() {
+        MyLexer lexer = new MyLexer(new StringReader("'\\x'")); // \x
+        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("'\\g'")); // \g
+        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("'\\b'")); // \b
+        assertThrows(Exception.class, lexer::nextToken);
+    }
+
+    @Test
+    void characterInvalidFormat() {
+        MyLexer lexer = new MyLexer(new StringReader("''")); // empty character literal
+        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("'as'")); // two line character literal
+        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("'🍆'")); // outside of (unicode) BMP
+        assertThrows(Exception.class, lexer::nextToken);
     }
 
     @Test
