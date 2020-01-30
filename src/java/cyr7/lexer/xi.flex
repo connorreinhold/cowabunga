@@ -99,7 +99,8 @@ Letter = [a-zA-Z]
 Digit = [0-9]
 Identifier = {Letter}({Digit}|{Letter}|_|')*
 Integer = "0"|[1-9]{Digit}*
-Character = "'"[\u0000-\uFFFF]"'"
+CharacterEscape = \\n | \\t |\\f | \\r | \\ | \\' | \\\"
+Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'" 
 
 %state STRING
 %state COMMENT
