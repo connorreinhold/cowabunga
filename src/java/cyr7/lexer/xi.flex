@@ -91,8 +91,14 @@
         }
 
     }
+    public String fromHex(String hex) {
+    	hex = hex.substring(2);
+    	int hexVal = Integer.parseInt(hex, 16);
+    	return ""+(char)hexVal;
+    }
 
     private StringBuffer stringBuffer = new StringBuffer();
+    
 %}
 
 Whitespace = [ \t\f\r\n]
@@ -100,8 +106,7 @@ Letter = [a-zA-Z]
 Digit = [0-9]
 Identifier = {Letter}({Digit}|{Letter}|_|')*
 Integer = "0"|[1-9]{Digit}*
-CharacterEscape = \\n | \\t |\\f | \\r | \\ | \\' | \\\"
-Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'" 
+Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 %state STRING
 %state COMMENT
@@ -178,7 +183,7 @@ Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'"
     \\t					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\t");}
     \\r					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\r");}
     \\f					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\f");}
-    
+    {Hex}				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, fromHex(yytext())); }
     \\'					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "'");}
     \\\"				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\"");}
     \\\\				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\\");} 

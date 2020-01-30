@@ -256,12 +256,12 @@ class LexerTest {
 
         lexer = new MyLexer(new StringReader("'\\xFD'")); // \xFD
         token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
         assertEquals("\u00FD", token.attribute);
 
         lexer = new MyLexer(new StringReader("'\\x0'")); // \x0
         token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
         assertEquals("\u0000", token.attribute);
     }
 
