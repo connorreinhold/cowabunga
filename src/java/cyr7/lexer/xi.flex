@@ -104,6 +104,8 @@ Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'"
 
 %state STRING
 %state COMMENT
+%state CHARACTER
+%state CHAR_END
 
 %%
 
@@ -124,7 +126,7 @@ Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'"
     "true"              { return new Token(TokenType.BOOL_LITERAL, true); }
     "false"             { return new Token(TokenType.BOOL_LITERAL, false); }
     {Integer}           { return new Token(TokenType.INT_LITERAL, Integer.parseInt(yytext())); }
-    {Character}         { return new Token(TokenType.CHAR_LITERAL, yytext()); }
+    \'		            { yybegin(CHARACTER); }
     \"                  { stringBuffer.delete(0, stringBuffer.length()); yybegin(STRING); }
 
     {Identifier}        { return new Token(TokenType.ID, yytext()); }
@@ -165,6 +167,22 @@ Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'"
 <COMMENT> {
 	"\n"				{ yybegin(YYINITIAL); }
 	.					{ /* IGNORE */ }
+}
+
+<CHARACTER> {
+    [\u0000-\uFFFF]     {yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, yytext()); }
+    \\n				    {yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\n");}
+    \\t					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\t");}
+    \\r					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\r");}
+    \\f					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\f");}
+    
+    \\'					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "'");}
+    \\\"				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\"");}
+    \\\\				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\\");} 
+}
+
+<CHAR_END> {
+	\'					{yybegin(YYINITIAL);}
 }
 
 <STRING> {
