@@ -21,7 +21,7 @@ public class LexerProvidedTest {
 
             MyLexer.Token token = lexer.nextToken();
 
-            assertEquals(line, TokenUtils.fullDescription(token));
+            assertEquals(line, LexerUtil.fullDescription(token));
 
             System.out.println(" (pass)");
         }

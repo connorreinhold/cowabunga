@@ -13,7 +13,7 @@ public class TokenUtilsTest {
     void testTypeAttributeDescription() {
         for (MyLexer.TokenType tokenType : MyLexer.TokenType.values()) {
             MyLexer lexer = new MyLexer(new StringReader(""));
-            String description = TokenUtils.typeAttributeDescription(lexer.new Token(tokenType, "blah"));
+            String description = LexerUtil.typeAttributeDescription(lexer.new Token(tokenType, "blah"));
             assertNotNull(description);
             assertFalse(description.isEmpty());
         }

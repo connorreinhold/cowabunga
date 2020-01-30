@@ -1,12 +1,23 @@
 package cyr7.lexer;
 
-public class TokenUtils {
+import java.io.*;
 
-    public static String fullDescription(MyLexer.Token token) {
-        return (token.line + 1) + ":" + (token.column + 1) + " " + TokenUtils.typeAttributeDescription(token);
+public class LexerUtil {
+
+    public static void lex(Reader reader, Writer writer) throws IOException {
+        MyLexer lexer = new MyLexer(new BufferedReader(reader));
+        MyLexer.Token token;
+        while ((token = lexer.nextToken()) != null) {
+            writer.append(fullDescription(token)).append(System.lineSeparator());
+        }
+        writer.flush();
     }
 
-    public static String typeAttributeDescription(MyLexer.Token token) {
+    static String fullDescription(MyLexer.Token token) {
+        return (token.line + 1) + ":" + (token.column + 1) + " " + typeAttributeDescription(token);
+    }
+
+    static String typeAttributeDescription(MyLexer.Token token) {
         switch (token.type) {
             case USE: return "use";
             case IF: return "if";
@@ -62,5 +73,7 @@ public class TokenUtils {
             default: throw new RuntimeException("Token " + token +  " is missing a description.");
         }
     }
+
+    private LexerUtil() { }
 
 }

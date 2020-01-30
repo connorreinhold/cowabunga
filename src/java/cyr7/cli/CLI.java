@@ -1,5 +1,6 @@
 package cyr7.cli;
 
+import cyr7.lexer.LexerUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -10,19 +11,7 @@ import org.apache.commons.cli.ParseException;
 
 import cyr7.lexer.MyLexer;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Reader;
+import java.io.*;
 import java.util.Arrays;
 import java.util.function.Consumer;
 
@@ -100,13 +89,8 @@ public class CLI {
      */
     public static void useLexer(InputStream input, OutputStream output) {
         try {
-            Reader rd = new BufferedReader(new InputStreamReader(input));
-            MyLexer lexer = new MyLexer(rd);
-            MyLexer.Token token;
-            while ((token = lexer.nextToken()) != null) {
-                output.write(((token.line + 1) + ":" + (token.column + 1) + " " + token + "\n").getBytes());
-            }
-            output.flush();
+            // TODO: Replace InputStream with Reader and OutputStream with writer to reduce conversion overhead.
+            LexerUtil.lex(new InputStreamReader(input), new OutputStreamWriter(output));
         } catch (IOException e) {
             e.printStackTrace();
         }
