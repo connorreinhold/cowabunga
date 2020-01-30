@@ -157,6 +157,16 @@ class LexerTest {
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
         assertEquals(0, token.attribute); // TODO: Update this with the correct value
+
+        lexer = new MyLexer(new StringReader("" + Integer.MAX_VALUE));
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
+        assertEquals(Integer.MAX_VALUE, token.attribute);
+
+        lexer = new MyLexer(new StringReader("" + Integer.MIN_VALUE));
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
+        assertEquals(Integer.MIN_VALUE, token.attribute);
     }
 
     @Test
@@ -196,6 +206,14 @@ class LexerTest {
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
         assertEquals("'", token.attribute);
+    }
+
+    @Test
+    void stringEscapingBackslash() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader("\"\\\\\"")); // \\
+        MyLexer.Token token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
+        assertEquals("\\", token.attribute);
     }
 
     @Test
@@ -282,6 +300,14 @@ class LexerTest {
     }
 
     @Test
+    void characterEscapingBackslash() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader("'\\\\'")); // \\
+        MyLexer.Token token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
+        assertEquals("\\", token.attribute);
+    }
+
+    @Test
     void characterInvalidFormat() {
         MyLexer lexer = new MyLexer(new StringReader("''")); // empty character literal
         assertThrows(Exception.class, lexer::nextToken);
@@ -325,6 +351,32 @@ class LexerTest {
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
         assertEquals('我', token.attribute);
+    }
+
+    @Test
+    void tabsAsWhitespace() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader("\twilliam(\t-\t5)\t+\t\t\t\t\t\t'我'\t\t\t"));
+        MyLexer.Token token;
+
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.ID, token.type);
+        assertEquals("william", token.attribute);
+
+        assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.MINUS, lexer.nextToken().type);
+
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
+        assertEquals(5, token.attribute);
+
+        assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
+        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
+
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
+        assertEquals('我', token.attribute);
+
+        assertNull(lexer.nextToken());
     }
 
 }
