@@ -3,4 +3,4 @@ mylexer:
 
 zip:
 	rm cowabunga.zip
-	zip -r cowabunga.zip README.md dependencies src tests xic-build build.gradle
+	zip -r cowabunga.zip README.md dependencies src tests xic-build build.gradle Makefile
