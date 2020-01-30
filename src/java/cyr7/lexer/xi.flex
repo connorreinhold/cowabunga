@@ -42,6 +42,8 @@
         R_BRACE,
         COLON,
         SEMICOLON,
+        COMMA,
+        UNDERSCORE,
 
         // operators
         ASSIGN, // =
@@ -63,7 +65,6 @@
 
         // misc
         ID,
-        DOT,
 
     }
 
@@ -73,13 +74,13 @@
         final Object attribute;
         final public int line, column;
 
-        private Token(TokenType tt) {
+        Token(TokenType tt) {
             type = tt; attribute = null;
             line = yyline;
             column = yycolumn;
         }
 
-        private Token(TokenType tt, Object attr) {
+        Token(TokenType tt, Object attr) {
             type = tt; attribute = attr;
             line = yyline;
             column = yycolumn;
@@ -139,6 +140,8 @@ Character = "'"([\u0000-\uFFFF] | {CharacterEscape})"'"
     "}"                 { return new Token(TokenType.R_BRACE); }
     ":"                 { return new Token(TokenType.COLON); }
     ";"                 { return new Token(TokenType.SEMICOLON); }
+    ","                 { return new Token(TokenType.COMMA); }
+    "_"                 { return new Token(TokenType.UNDERSCORE); }
 
     "="                 { return new Token(TokenType.ASSIGN); }
 

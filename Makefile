@@ -1,3 +1,8 @@
 mylexer:
-	rm -f ~/shared/cowabunga/src/java/cyr7/lexer/MyLexer.java;
-	cd ~/shared/cowabunga/src/java/cyr7/lexer; jflex xi.flex && sed -i '1i package cyr7.lexer;' MyLexer.java
+
+	cd src/java/cyr7/lexer; rm -f MyLexer.java; jflex xi.flex && sed -i '1i package cyr7.lexer;' MyLexer.java
+
+zip:
+	rm cowabunga.zip
+	zip -r cowabunga.zip README.md dependencies src tests xic-build build.gradle
+
