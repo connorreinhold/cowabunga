@@ -3,5 +3,7 @@ mylexer:
 
 zip:
 	rm cowabunga.zip
-	zip -r cowabunga.zip README.md dependencies src tests xic-build build.gradle Makefile
+	zip -r cowabunga.zip \
+		README.md dependencies src tests xic-build build.gradle Makefile \
+		-x *.DS_Store* -x *MyLexer.java*
 

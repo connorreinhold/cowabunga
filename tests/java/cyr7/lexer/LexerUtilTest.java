@@ -7,7 +7,7 @@ import java.io.StringReader;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class TokenUtilsTest {
+public class LexerUtilTest {
 
     @Test
     void testTypeAttributeDescription() {

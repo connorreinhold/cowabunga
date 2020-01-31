@@ -12,8 +12,10 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LexerProvidedTest {
 
     private void testFile(String filename) throws IOException {
-        MyLexer lexer = new MyLexer(new FileReader(getClass().getClassLoader().getResource("lexer/pa1/" + filename + ".xi").getFile()));
-        Scanner solution = new Scanner(new InputStreamReader(getClass().getClassLoader().getResourceAsStream("lexer/pa1/" + filename + ".lexedsol")));
+        MyLexer lexer = new MyLexer(new FileReader(
+                getClass().getClassLoader().getResource("lexer/pa1/" + filename + ".xi").getFile()));
+        Scanner solution = new Scanner(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream("lexer/pa1/" + filename + ".lexedsol")));
 
         while (solution.hasNextLine()) {
             String line = solution.nextLine();
