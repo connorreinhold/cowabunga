@@ -198,7 +198,7 @@ public class CLI {
                     	destination.getParentFile().mkdirs();
                     }
                     outputStream = new BufferedOutputStream(new FileOutputStream(destination));
-                    useLexer(inputStream, System.out);
+                    useLexer(inputStream, outputStream);
                 } catch (FileNotFoundException e) {
                     writer.write(e.getMessage());
                 }
