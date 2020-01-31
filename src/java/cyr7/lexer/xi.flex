@@ -195,10 +195,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 <STRING> {
     \"                  { yybegin(YYINITIAL); return new Token(TokenType.STRING_LITERAL, stringBuffer.toString()); }
-    [^\n\r\"\\]+        { stringBuffer.append( yytext() ); }
-    \\t                 { stringBuffer.append('\t'); }
-    \\n                 { stringBuffer.append('\n'); }
-    \\'                 { stringBuffer.append('\''); }
-    \\\"                { stringBuffer.append('\"'); }
-    \\                  { stringBuffer.append('\\'); }
+    \\n				    {stringBuffer.append("\n");}
+    \\t					{stringBuffer.append("\t");}
+    \\r					{stringBuffer.append("\r");}
+    \\f					{stringBuffer.append("\f");}
+    {Hex}				{stringBuffer.append(fromHex(yytext())); }
+    \\'					{stringBuffer.append("'");}
+    \\\"				{stringBuffer.append("\"");}
+    \\\\				{stringBuffer.append("\\");} 
+    [^\n\f\t\r\"\\]+        { stringBuffer.append( yytext() ); }
 }

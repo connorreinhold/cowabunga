@@ -202,7 +202,7 @@ class LexerTest {
 
     @Test
     void stringEscapingSingleQuote() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\"\\\\'\"")); // \'
+        MyLexer lexer = new MyLexer(new StringReader("\"\\\'\"")); // \'
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
         assertEquals("'", token.attribute);
