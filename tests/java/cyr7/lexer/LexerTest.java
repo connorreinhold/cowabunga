@@ -131,7 +131,7 @@ class LexerTest {
                 "// this is a comment have a good day\r"
                         + "1234 asdf // whatever\n"
                         + "while () // blkj \t asdf\r\n"
-                        + "if use\u0085"
+                        + "if use\n"
                         + "++ \"// comment // inside a string\" // comment\n"
         ));
 
@@ -291,8 +291,10 @@ class LexerTest {
 
     @Test
     void characterInvalidEscaping() {
-        MyLexer lexer = new MyLexer(new StringReader("'\\x'")); // \x
+	System.out.println("Start this test");
+	MyLexer lexer = new MyLexer(new StringReader("'\\x'")); // \x
         assertThrows(Exception.class, lexer::nextToken);
+        System.out.println("End of test");
         lexer = new MyLexer(new StringReader("'\\g'")); // \g
         assertThrows(Exception.class, lexer::nextToken);
         lexer = new MyLexer(new StringReader("'\\b'")); // \b
@@ -313,7 +315,7 @@ class LexerTest {
         assertThrows(Exception.class, lexer::nextToken);
         lexer = new MyLexer(new StringReader("'as'")); // two line character literal
         assertThrows(Exception.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("'🍆'")); // outside of (unicode) BMP
+        lexer = new MyLexer(new StringReader("\u583c\u5f46")); // outside of (unicode) BMP
         assertThrows(Exception.class, lexer::nextToken);
     }
 
@@ -350,7 +352,7 @@ class LexerTest {
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals('我', token.attribute);
+        assertEquals("我", token.attribute);
     }
 
     @Test
@@ -374,7 +376,7 @@ class LexerTest {
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals('我', token.attribute);
+        assertEquals("我", token.attribute);
 
         assertNull(lexer.nextToken());
     }

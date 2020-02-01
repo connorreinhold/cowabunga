@@ -98,6 +98,7 @@
     }
 
     private StringBuffer stringBuffer = new StringBuffer();
+    private StringBuffer charBuffer = new StringBuffer();
     
 %}
 
@@ -132,7 +133,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     "true"              { return new Token(TokenType.BOOL_LITERAL, true); }
     "false"             { return new Token(TokenType.BOOL_LITERAL, false); }
     {Integer}           { return new Token(TokenType.INT_LITERAL, Integer.parseInt(yytext())); }
-    \'		            { yybegin(CHARACTER); }
+    \'		            { charBuffer.delete(0, charBuffer.length()); yybegin(CHARACTER); }
     \"                  { stringBuffer.delete(0, stringBuffer.length()); yybegin(STRING); }
 
     {Identifier}        { return new Token(TokenType.ID, yytext()); }
@@ -173,24 +174,27 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <COMMENT> {
-	"\n"				{ yybegin(YYINITIAL); }
+	\n|\r|\r\n			{ yybegin(YYINITIAL); }
 	.					{ /* IGNORE */ }
 }
 
 <CHARACTER> {
-    [\u0000-\uFFFF]     {yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, yytext()); }
-    \\n				    {yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\n");}
-    \\t					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\t");}
-    \\r					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\r");}
-    \\f					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\f");}
-    {Hex}				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, fromHex(yytext())); }
-    \\'					{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "'");}
-    \\\"				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\"");}
-    \\\\				{yybegin(CHAR_END); return new Token(TokenType.CHAR_LITERAL, "\\");} 
+    \'					{throw new java.io.IOException("Illegal character token");}
+    [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
+    \\n				    {yybegin(CHAR_END); charBuffer.append("\n"); }
+    \\t					{yybegin(CHAR_END); charBuffer.append("\t"); }
+    \\r					{yybegin(CHAR_END); charBuffer.append("\r"); }
+    \\f					{yybegin(CHAR_END); charBuffer.append("\f"); }
+    {Hex}				{yybegin(CHAR_END); charBuffer.append(fromHex(yytext())); }
+    \\'					{yybegin(CHAR_END); charBuffer.append("'"); }
+    \\\"				{yybegin(CHAR_END); charBuffer.append("\""); }
+    \\\\				{yybegin(CHAR_END); charBuffer.append("\\"); }
+    \\[^]				{yybegin(CHAR_END); throw new java.io.IOException("Illegal character token");}  /*Invalid escape characters*/
 }
 
 <CHAR_END> {
-	\'					{yybegin(YYINITIAL);}
+	\'					{yybegin(YYINITIAL); return new Token(TokenType.CHAR_LITERAL, charBuffer.toString());}
+	[^]					{throw new java.io.IOException("Illegal stuff.");}
 }
 
 <STRING> {
@@ -203,5 +207,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\'					{stringBuffer.append("'");}
     \\\"				{stringBuffer.append("\"");}
     \\\\				{stringBuffer.append("\\");} 
-    [^\n\f\t\r\"\\]+        { stringBuffer.append( yytext() ); }
+    [^\n\f\t\r\"\\]+    { stringBuffer.append( yytext() ); }
+    \\[^]				{throw new java.io.IOException("Illegal character in string.");}
 }
