@@ -15,7 +15,8 @@
 %yylexthrow{
 	cyr7.exceptions.InvalidCharacterLiteralException, 
 	cyr7.exceptions.InvalidStringEscapeCharacterException,
-	cyr7.exceptions.LeadingZeroIntegerException
+	cyr7.exceptions.LeadingZeroIntegerException,
+	cyr7.exceptions.InvalidTokenException
 %yylexthrow}
 
 %{
@@ -224,7 +225,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "&"                 { return new Token(TokenType.LOGICAL_AND); }
     "|"                 { return new Token(TokenType.LOGICAL_OR); }
-
+    .					{ throw new cyr7.exceptions.InvalidTokenException(yytext(), yyline, yycolumn); }
 }
 
 <COMMENT> {
