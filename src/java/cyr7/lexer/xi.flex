@@ -235,7 +235,15 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <CHARACTER> {
-    \'					{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+    \'
+        {
+            yybegin(YYINITIAL);
+            throw new cyr7.exceptions.InvalidCharacterLiteralException(
+                "'" + yytext(),
+                charBuffer.getLineNumber(),
+                charBuffer.getColumnNumber()
+            );
+        }
     [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
     \\n				    {yybegin(CHAR_END); charBuffer.append("\n"); }
     \\t					{yybegin(CHAR_END); charBuffer.append("\t"); }
@@ -246,12 +254,29 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\\"				{yybegin(CHAR_END); charBuffer.append("\""); }
     \\\\				{yybegin(CHAR_END); charBuffer.append("\\"); }
     /* More than one character inside single quote string OR no characters */
-    \\[^]				{yybegin(CHAR_END); throw new cyr7.exceptions.InvalidCharacterLiteralException(yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}  /*Invalid escape characters*/
+    
+    \\[^] /*Invalid escape characters*/
+        {
+            yybegin(CHAR_END);
+            throw new cyr7.exceptions.InvalidCharacterLiteralException(
+                yytext(),
+                charBuffer.getLineNumber(),
+                charBuffer.getColumnNumber()
+            );
+        }
 }
 
 <CHAR_END> {
 	\'					{yybegin(YYINITIAL); return charBuffer.generateToken(TokenType.CHAR_LITERAL); }
-	[^\']				{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+	[^\']
+	    {
+	        yybegin(YYINITIAL);
+	        throw new cyr7.exceptions.InvalidCharacterLiteralException(
+	            "'" + yytext(),
+	            charBuffer.getLineNumber(),
+	            charBuffer.getColumnNumber()
+	        );
+	    }
 }
 
 <STRING> {
@@ -263,13 +288,24 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     {Hex}				{stringBuffer.append(fromHex(yytext())); }
     \\'					{stringBuffer.append("'");}
     \\\"				{stringBuffer.append("\"");}
-    \\\\				{stringBuffer.append("\\");} 
-    \\[^]				{throw new cyr7.exceptions.InvalidStringEscapeCharacterException(yytext(), stringBuffer.getLineNumber(), stringBuffer.getColumnNumber());}
+    \\\\				{stringBuffer.append("\\");}
+
+    \\[^]
+        {
+            throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
+                yytext(),
+                stringBuffer.getLineNumber(),
+                stringBuffer.getColumnNumber()
+            );
+        }
+
     [^\n\f\r\"\\]+      {stringBuffer.append(yytext()); }
+
     {LineEnd}
         {
             throw new cyr7.exceptions.MultilineStringLiteralException(
                 stringBuffer.getLineNumber(),
-                stringBuffer.getColumnNumber());
+                stringBuffer.getColumnNumber()
+            );
         }
 }
