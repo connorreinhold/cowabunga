@@ -165,6 +165,8 @@ class LexerTest {
 
         lexer = new MyLexer(new StringReader("" + Integer.MIN_VALUE));
         token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.MINUS, token.type);
+        token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
         assertEquals(Integer.MIN_VALUE, token.attribute);
     }
