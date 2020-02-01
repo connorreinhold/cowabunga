@@ -226,7 +226,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "&"                 { return new Token(TokenType.LOGICAL_AND); }
     "|"                 { return new Token(TokenType.LOGICAL_OR); }
-    .					{ throw new cyr7.exceptions.InvalidTokenException(yytext(), yyline, yycolumn); }
 }
 
 <COMMENT> {
@@ -309,3 +308,5 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
             );
         }
 }
+
+[^]					    { throw new cyr7.exceptions.InvalidTokenException(yytext(), yyline, yycolumn); }
