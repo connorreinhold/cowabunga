@@ -422,4 +422,12 @@ class LexerTest {
         assertThrows(Exception.class, lexer::nextToken);
     }
 
+    @Test
+    void stringWithTabs() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader("\"\t\t\t\""));
+        MyLexer.Token token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
+        assertEquals("\t\t\t", token.attribute);
+    }
+
 }
