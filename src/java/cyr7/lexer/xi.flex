@@ -12,6 +12,10 @@
 %line
 %column
 
+%yylexthrow{
+	cyr7.exceptions.InvalidCharacterException
+%yylexthrow}
+
 %{
     public enum TokenType {
 
@@ -132,7 +136,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "true"              { return new Token(TokenType.BOOL_LITERAL, true); }
     "false"             { return new Token(TokenType.BOOL_LITERAL, false); }
-    {Integer}           { return new Token(TokenType.INT_LITERAL, Integer.parseInt(yytext())); }
+    {Integer}           { return new Token(TokenType.INT_LITERAL, yytext()); }
     \'		            { charBuffer.delete(0, charBuffer.length()); yybegin(CHARACTER); }
     \"                  { stringBuffer.delete(0, stringBuffer.length()); yybegin(STRING); }
 
@@ -179,7 +183,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <CHARACTER> {
-    \'					{throw new java.io.IOException("Illegal character token");}
+	[^][^]+\'			{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterException("'" + yytext(), yyline, yycolumn);}
+    \'					{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterException("''", yyline, yycolumn);}
     [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
     \\n				    {yybegin(CHAR_END); charBuffer.append("\n"); }
     \\t					{yybegin(CHAR_END); charBuffer.append("\t"); }
@@ -189,16 +194,15 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\'					{yybegin(CHAR_END); charBuffer.append("'"); }
     \\\"				{yybegin(CHAR_END); charBuffer.append("\""); }
     \\\\				{yybegin(CHAR_END); charBuffer.append("\\"); }
-    \\[^]				{yybegin(CHAR_END); throw new java.io.IOException("Illegal character token");}  /*Invalid escape characters*/
+    \\[^]				{yybegin(CHAR_END); throw new cyr7.exceptions.InvalidCharacterException(yytext(), yyline, yycolumn);}  /*Invalid escape characters*/
 }
 
 <CHAR_END> {
 	\'					{yybegin(YYINITIAL); return new Token(TokenType.CHAR_LITERAL, charBuffer.toString());}
-	[^]					{throw new java.io.IOException("Illegal stuff.");}
 }
 
 <STRING> {
-    \"                  { yybegin(YYINITIAL); return new Token(TokenType.STRING_LITERAL, stringBuffer.toString()); }
+    \"                  {yybegin(YYINITIAL); return new Token(TokenType.STRING_LITERAL, stringBuffer.toString()); }
     \\n				    {stringBuffer.append("\n");}
     \\t					{stringBuffer.append("\t");}
     \\r					{stringBuffer.append("\r");}
@@ -207,6 +211,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\'					{stringBuffer.append("'");}
     \\\"				{stringBuffer.append("\"");}
     \\\\				{stringBuffer.append("\\");} 
-    [^\n\f\t\r\"\\]+    { stringBuffer.append( yytext() ); }
-    \\[^]				{throw new java.io.IOException("Illegal character in string.");}
+    [^\n\f\t\r\"\\]+    {stringBuffer.append( yytext()); }
+    \\[^]				{throw new cyr7.exceptions.InvalidCharacterException(yytext(), yyline, yycolumn);}
 }

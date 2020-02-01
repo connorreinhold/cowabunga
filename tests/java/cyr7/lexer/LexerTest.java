@@ -59,7 +59,7 @@ class LexerTest {
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(1234, token.attribute);
+        assertEquals("1234", token.attribute);
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.MINUS, token.type);
@@ -74,14 +74,14 @@ class LexerTest {
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(5, token.attribute);
+        assertEquals("5", token.attribute);
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.MINUS, token.type);
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(10, token.attribute);
+        assertEquals("10", token.attribute);
     }
 
     @Test
@@ -96,7 +96,7 @@ class LexerTest {
 
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(1234, token.attribute);
+        assertEquals("1234", token.attribute);
 
         assertNull(lexer.nextToken());
     }
@@ -151,24 +151,25 @@ class LexerTest {
 
     @Test
     void integerOverflow() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("99999999999999999999999"));
+	String veryBigNumber = "99999999999999999999999";
+        MyLexer lexer = new MyLexer(new StringReader(veryBigNumber));
         MyLexer.Token token;
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(0, token.attribute); // TODO: Update this with the correct value
+        assertEquals(veryBigNumber, token.attribute);
 
         lexer = new MyLexer(new StringReader("" + Integer.MAX_VALUE));
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(Integer.MAX_VALUE, token.attribute);
+        assertEquals(String.valueOf(Integer.MAX_VALUE), token.attribute);
 
         lexer = new MyLexer(new StringReader("" + Integer.MIN_VALUE));
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.MINUS, token.type);
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(Integer.MIN_VALUE, token.attribute);
+        assertEquals(String.valueOf(Integer.MIN_VALUE).substring(1), token.attribute);
     }
 
     @Test
@@ -347,7 +348,7 @@ class LexerTest {
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(5, token.attribute);
+        assertEquals("5", token.attribute);
 
         assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
@@ -371,7 +372,7 @@ class LexerTest {
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(5, token.attribute);
+        assertEquals("5", token.attribute);
 
         assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);

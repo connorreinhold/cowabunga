@@ -65,7 +65,7 @@ public class CLI {
      * Prints the version of xic.
      */
     public static void printVersionMessage() {
-        writer.println("xic 1.0");
+        writer.append("xic 1.0").append(System.lineSeparator());
         writer.flush();
     }
 
