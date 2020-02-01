@@ -154,9 +154,9 @@ class LexerTest {
         MyLexer lexer = new MyLexer(new StringReader("99999999999999999999999"));
         MyLexer.Token token;
 
-//        token = lexer.nextToken();
-//        assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-//        assertEquals(0, token.attribute); // TODO: Update this with the correct value
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
+        assertEquals(0, token.attribute); // TODO: Update this with the correct value
 
         lexer = new MyLexer(new StringReader("" + Integer.MAX_VALUE));
         token = lexer.nextToken();
