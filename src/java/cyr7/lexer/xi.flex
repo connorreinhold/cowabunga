@@ -156,6 +156,7 @@
     
 %}
 
+LineEnd = \n|\r|\r\n
 Whitespace = [ \t\f\r\n]
 Letter = [a-zA-Z]
 Digit = [0-9]
@@ -229,7 +230,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <COMMENT> {
-	\n|\r|\r\n			{ yybegin(YYINITIAL); }
+	{LineEnd}			{ yybegin(YYINITIAL); }
 	.					{ /* IGNORE */ }
 }
 
@@ -264,5 +265,11 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\\"				{stringBuffer.append("\"");}
     \\\\				{stringBuffer.append("\\");} 
     \\[^]				{throw new cyr7.exceptions.InvalidStringEscapeCharacterException(yytext(), stringBuffer.getLineNumber(), stringBuffer.getColumnNumber());}
-    [^\n\f\t\r\"\\]+    {stringBuffer.append(yytext()); }
+    [^\n\f\r\"\\]+      {stringBuffer.append(yytext()); }
+    {LineEnd}
+        {
+            throw new cyr7.exceptions.MultilineStringLiteralException(
+                stringBuffer.getLineNumber(),
+                stringBuffer.getColumnNumber());
+        }
 }
