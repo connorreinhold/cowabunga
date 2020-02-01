@@ -2,7 +2,8 @@ package cyr7.lexer;
 
 import java.io.*;
 
-import cyr7.exceptions.InvalidCharacterException;
+import cyr7.exceptions.InvalidCharacterLiteralException;
+import cyr7.exceptions.LexerException;
 
 public class LexerUtil {
 
@@ -15,11 +16,8 @@ public class LexerUtil {
 		writer.append(fullDescription(token))
 			.append(System.lineSeparator());
 	    }
-	} catch (InvalidCharacterException e) {
+	} catch (LexerException e) {
 	    writer.append(e.getMessage()).append(System.lineSeparator());
-	} catch (IOException e) {
-	    // TODO Auto-generated catch block
-	    writer.append(e.getMessage());
 	}
 	writer.flush();
     }

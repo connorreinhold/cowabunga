@@ -164,7 +164,3 @@ buildNumber.properties
 .project
 .settings/
 bin/
-
-#Any testing xi and lexed files
-*.xi
-*.lexed

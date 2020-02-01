@@ -2,6 +2,10 @@ package cyr7.lexer;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.exceptions.InvalidCharacterLiteralException;
+import cyr7.exceptions.InvalidStringEscapeCharacterException;
+import cyr7.exceptions.LeadingZeroIntegerException;
+
 import java.io.*;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -170,6 +174,16 @@ class LexerTest {
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
         assertEquals(String.valueOf(Integer.MIN_VALUE).substring(1), token.attribute);
+    }
+    
+    @Test
+    void integerEdgeCases() throws InvalidCharacterLiteralException, InvalidStringEscapeCharacterException, IOException {
+	String illegalInt = "0010";
+        MyLexer lexer = new MyLexer(new StringReader(illegalInt));
+        assertThrows(LeadingZeroIntegerException.class, lexer::nextToken);
+        
+        lexer = new MyLexer(new StringReader("00"));
+        assertThrows(LeadingZeroIntegerException.class, lexer::nextToken);
     }
 
     @Test
