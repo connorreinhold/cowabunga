@@ -1,19 +1,9 @@
 package cyr7.cli;
 
 import cyr7.lexer.LexerUtil;
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
-import cyr7.lexer.MyLexer;
+import org.apache.commons.cli.*;
 
 import java.io.*;
-import java.util.Arrays;
-import java.util.function.Consumer;
 
 public class CLI {
 
@@ -72,10 +62,10 @@ public class CLI {
     /**
      * Parses the command given by {@code args} under the options setting
      * {@code options}.
-     * 
+     *
      * @param args The options and arguments in a command.
      * @return A CommandLine instance which represents the results of the parsed
-     *         {@code args}.
+     * {@code args}.
      * @throws ParseException Command contains invalid flags or incorrect number of
      *                        arguments.
      */
@@ -114,6 +104,7 @@ public class CLI {
     /**
      * Return {@code true} if {@code file} is a {@literal .xi} file.
      * Otherwise, return {@code false}.
+     *
      * @param file A filename
      */
     public static boolean isAXiFile(File file) {
@@ -159,24 +150,24 @@ public class CLI {
         cmd.iterator().forEachRemaining(t -> {
             String opt = t.getOpt();
             switch (opt) {
-            case "h":
-                printHelpMessage();
-                break;
-            case "l": {
-                wantsLexing = true;
-                break;
-            }
-            case "D":
-                String directory = cmd.getOptionValue("D");
-                pathDestination = new File(directory);
-                break;
-            case "v":
-                printVersionMessage();
-                break;
-            default:
-                writer.write("No case for given for option: " + opt);
-                writer.flush();
-                break;
+                case "h":
+                    printHelpMessage();
+                    break;
+                case "l": {
+                    wantsLexing = true;
+                    break;
+                }
+                case "D":
+                    String directory = cmd.getOptionValue("D");
+                    pathDestination = new File(directory);
+                    break;
+                case "v":
+                    printVersionMessage();
+                    break;
+                default:
+                    writer.write("No case for given for option: " + opt);
+                    writer.flush();
+                    break;
             }
         });
 
@@ -194,8 +185,8 @@ public class CLI {
                     inputStream = new BufferedInputStream(new FileInputStream(file));
                     File destination = new File(pathDestination.getAbsolutePath(), getMainFilename(file) + ".lexed");
                     if (!destination.exists()) {
-                    	// Create directories if they don't exist
-                    	destination.getParentFile().mkdirs();
+                        // Create directories if they don't exist
+                        destination.getParentFile().mkdirs();
                     }
                     outputStream = new BufferedOutputStream(new FileOutputStream(destination));
                     useLexer(inputStream, outputStream);

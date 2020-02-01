@@ -1,11 +1,11 @@
 package cyr7.lexer;
 
-import org.junit.jupiter.api.Test;
+        import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
+        import java.io.StringReader;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+        import static org.junit.jupiter.api.Assertions.assertFalse;
+        import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class LexerUtilTest {
 

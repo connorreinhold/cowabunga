@@ -15,10 +15,10 @@ class LexerTest {
 
     @Test
     void doesNotBreakLexer() {
-	MyLexer lexer = new MyLexer(new StringReader("##"));
-	assertThrows(InvalidTokenException.class, lexer::nextToken);
+        MyLexer lexer = new MyLexer(new StringReader("##"));
+        assertThrows(InvalidTokenException.class, lexer::nextToken);
     }
-    
+
     @Test
     void highMultAndGreaterThan() throws IOException {
         MyLexer lexer = new MyLexer(new StringReader("*>>>"));
@@ -162,7 +162,7 @@ class LexerTest {
 
     @Test
     void integerOverflow() throws IOException {
-	String veryBigNumber = "99999999999999999999999";
+        String veryBigNumber = "99999999999999999999999";
         MyLexer lexer = new MyLexer(new StringReader(veryBigNumber));
         MyLexer.Token token;
 
@@ -182,13 +182,13 @@ class LexerTest {
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
         assertEquals(String.valueOf(Integer.MIN_VALUE).substring(1), token.attribute);
     }
-    
+
     @Test
     void integerEdgeCases() throws InvalidCharacterLiteralException, InvalidStringEscapeCharacterException, IOException {
-	String illegalInt = "0010";
+        String illegalInt = "0010";
         MyLexer lexer = new MyLexer(new StringReader(illegalInt));
         assertThrows(LeadingZeroIntegerException.class, lexer::nextToken);
-        
+
         lexer = new MyLexer(new StringReader("00"));
         assertThrows(LeadingZeroIntegerException.class, lexer::nextToken);
     }
@@ -315,7 +315,7 @@ class LexerTest {
 
     @Test
     void characterInvalidEscaping() {
-	MyLexer lexer = new MyLexer(new StringReader("'\\x'")); // \x
+        MyLexer lexer = new MyLexer(new StringReader("'\\x'")); // \x
         assertThrows(Exception.class, lexer::nextToken);
         lexer = new MyLexer(new StringReader("'\\g'")); // \g
         assertThrows(Exception.class, lexer::nextToken);

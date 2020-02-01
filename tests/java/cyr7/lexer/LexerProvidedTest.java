@@ -1,11 +1,7 @@
 package cyr7.lexer;
 
-import org.junit.jupiter.api.Test;
-
-import cyr7.exceptions.InvalidCharacterLiteralException;
-import cyr7.exceptions.InvalidStringEscapeCharacterException;
-import cyr7.exceptions.LeadingZeroIntegerException;
 import cyr7.exceptions.LexerException;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
 import java.io.IOException;
@@ -19,116 +15,116 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LexerProvidedTest {
 
     private void testFile(String filename) throws IOException {
-	MyLexer lexer = new MyLexer(new FileReader(getClass().getClassLoader()
-		.getResource("lexer/pa1/" + filename + ".xi").getFile()));
-	Scanner solution = new Scanner(new InputStreamReader(
-		getClass().getClassLoader().getResourceAsStream(
-			"lexer/pa1/" + filename + ".lexedsol")));
+        MyLexer lexer = new MyLexer(new FileReader(getClass().getClassLoader()
+                .getResource("lexer/pa1/" + filename + ".xi").getFile()));
+        Scanner solution = new Scanner(new InputStreamReader(
+                getClass().getClassLoader().getResourceAsStream(
+                        "lexer/pa1/" + filename + ".lexedsol")));
 
-	while (solution.hasNextLine()) {
-	    String line = solution.nextLine();
-	    System.out.print(line);
+        while (solution.hasNextLine()) {
+            String line = solution.nextLine();
+            System.out.print(line);
 
-	    MyLexer.Token token;
-	    try {
-		token = lexer.nextToken();
-		assertEquals(line, LexerUtil.fullDescription(token));
-	    } catch (LexerException e) {
-		Pattern regexActual = Pattern.compile("[1-9][0-9]*");
-		Matcher matchActual = regexActual.matcher(e.getMessage());
+            MyLexer.Token token;
+            try {
+                token = lexer.nextToken();
+                assertEquals(line, LexerUtil.fullDescription(token));
+            } catch (LexerException e) {
+                Pattern regexActual = Pattern.compile("[1-9][0-9]*");
+                Matcher matchActual = regexActual.matcher(e.getMessage());
 
-		Pattern regexExpected = Pattern.compile("[1-9][0-9]*");
-		Matcher matchExpected = regexExpected.matcher(line);
-		for (int i = 0; i < 2; i++) {
-		    if (matchActual.find() && matchExpected.find()) {
-			String numberActual = matchActual.group();
-			String numberExpected = matchExpected.group();
-			assertEquals(numberActual, numberExpected);
-		    } else {
-			fail("Error message does not contain line and column numbers.");
-		    }
-		}
-		assertFalse(solution.hasNextLine());
-		solution.close();
-		System.out.println(" (pass)");
-		return;
-	    }
-	    System.out.println(" (pass)");
-	}
+                Pattern regexExpected = Pattern.compile("[1-9][0-9]*");
+                Matcher matchExpected = regexExpected.matcher(line);
+                for (int i = 0; i < 2; i++) {
+                    if (matchActual.find() && matchExpected.find()) {
+                        String numberActual = matchActual.group();
+                        String numberExpected = matchExpected.group();
+                        assertEquals(numberActual, numberExpected);
+                    } else {
+                        fail("Error message does not contain line and column numbers.");
+                    }
+                }
+                assertFalse(solution.hasNextLine());
+                solution.close();
+                System.out.println(" (pass)");
+                return;
+            }
+            System.out.println(" (pass)");
+        }
 
-	assertNull(lexer.nextToken());
-	assertFalse(solution.hasNextLine());
-	solution.close();
+        assertNull(lexer.nextToken());
+        assertFalse(solution.hasNextLine());
+        solution.close();
     }
 
     @Test
     void testAdd() throws IOException {
-	testFile("add");
+        testFile("add");
     }
 
     @Test
     void testArrayInit() throws IOException {
-	testFile("arrayinit");
+        testFile("arrayinit");
     }
 
     @Test
     void testArrayInit2() throws IOException {
-	testFile("arrayinit2");
+        testFile("arrayinit2");
     }
 
     @Test
     void testBeauty() throws IOException {
-	testFile("beauty");
+        testFile("beauty");
     }
 
     @Test
     void testEx1() throws IOException {
-	testFile("ex1");
+        testFile("ex1");
     }
 
     @Test
     void testEx2() throws IOException {
-	testFile("ex2");
+        testFile("ex2");
     }
 
     @Test
     void testGcd() throws IOException {
-	testFile("gcd");
+        testFile("gcd");
     }
 
     @Test
     void testInsertionSort() throws IOException {
-	testFile("insertionSort");
+        testFile("insertionSort");
     }
 
     @Test
     void testMdarrays() throws IOException {
-	testFile("mdarrays");
+        testFile("mdarrays");
     }
 
     @Test
     void testRatAdd() throws IOException {
-	testFile("ratadd");
+        testFile("ratadd");
     }
 
     @Test
     void testRatAddUse() throws IOException {
-	testFile("ratAddUse");
+        testFile("ratAddUse");
     }
 
     @Test
     void testSpec1() throws IOException {
-	testFile("spec1");
+        testFile("spec1");
     }
 
     @Test
     void testSpec2() throws IOException {
-	testFile("spec2");
+        testFile("spec2");
     }
 
     @Test
     void testSpec3() throws IOException {
-	testFile("spec3");
+        testFile("spec3");
     }
 
 }
