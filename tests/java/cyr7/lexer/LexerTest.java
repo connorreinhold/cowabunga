@@ -226,8 +226,13 @@ class LexerTest {
 
     @Test
     void stringEscapingSingleQuote() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\"\\\'\"")); // \'
+        MyLexer lexer = new MyLexer(new StringReader("\"\\'\"")); // \'
         MyLexer.Token token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
+        assertEquals("'", token.attribute);
+
+        lexer = new MyLexer(new StringReader("\"'\"")); // \'
+        token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
         assertEquals("'", token.attribute);
     }
@@ -295,14 +300,19 @@ class LexerTest {
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
         assertEquals("\"", token.attribute);
+
+        lexer = new MyLexer(new StringReader("'\"'")); // \"
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
+        assertEquals("\"", token.attribute);
     }
 
     @Test
     void characterEscapingSingleQuote() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("'\\\''")); // \'
+        MyLexer lexer = new MyLexer(new StringReader("'\\''")); // \'
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\'", token.attribute);
+        assertEquals("'", token.attribute);
     }
 
     @Test
@@ -401,6 +411,15 @@ class LexerTest {
         assertEquals("我", token.attribute);
 
         assertNull(lexer.nextToken());
+    }
+
+    @Test
+    void stringWithNewlineThrowsError() throws IOException {
+        MyLexer lexer = new MyLexer(new StringReader("\"\n\"")); // single string with newline
+        assertThrows(Exception.class, lexer::nextToken);
+
+        lexer = new MyLexer(new StringReader("\"blah blah \n\""));
+        assertThrows(Exception.class, lexer::nextToken);
     }
 
 }
