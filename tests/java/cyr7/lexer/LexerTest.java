@@ -6,6 +6,8 @@ import cyr7.exceptions.InvalidCharacterLiteralException;
 import cyr7.exceptions.InvalidStringEscapeCharacterException;
 import cyr7.exceptions.InvalidTokenException;
 import cyr7.exceptions.LeadingZeroIntegerException;
+import cyr7.exceptions.MultiLineCharacterException;
+import cyr7.exceptions.MultiLineStringException;
 
 import java.io.*;
 
@@ -14,9 +16,30 @@ import static org.junit.jupiter.api.Assertions.*;
 class LexerTest {
 
     @Test
-    void doesNotBreakLexer() {
+    void doesNotBreakLexer() throws IOException {
 	MyLexer lexer = new MyLexer(new StringReader("##"));
 	assertThrows(InvalidTokenException.class, lexer::nextToken);
+	
+	lexer = new MyLexer(new StringReader("\"		\""));
+	assertEquals("\t\t", lexer.nextToken().attribute);
+
+	lexer = new MyLexer(new StringReader("\"\n\n\nHello World\""));
+	assertThrows(MultiLineStringException.class, lexer::nextToken);
+	
+	lexer = new MyLexer(new StringReader("\'\n\'")); // Characters cannot span multiple lines.
+	assertThrows(MultiLineCharacterException.class, lexer::nextToken);
+
+	lexer = new MyLexer(new StringReader("'\r\n'")); // Characters cannot span multiple lines.
+	assertThrows(MultiLineCharacterException.class, lexer::nextToken);
+
+	lexer = new MyLexer(new StringReader("'\r'")); // Characters cannot span multiple lines.
+	assertThrows(MultiLineCharacterException.class, lexer::nextToken);
+
+	lexer = new MyLexer(new StringReader("\'\\xAFFFF\'")); // Characters cannot span multiple lines.
+	assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
+	
+	lexer = new MyLexer(new StringReader("'\f'")); // Characters cannot span multiple lines.
+	assertDoesNotThrow(lexer::nextToken);
     }
     
     @Test
@@ -337,8 +360,8 @@ class LexerTest {
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
         lexer = new MyLexer(new StringReader("'as'")); // two line character literal
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("\u583c\u5f46")); // outside of (unicode) BMP
-        assertThrows(Exception.class, lexer::nextToken);
+        lexer = new MyLexer(new StringReader("\'\u583c\u5f46\'")); // outside of (unicode) BMP
+        assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
     }
 
     @Test
