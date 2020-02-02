@@ -49,9 +49,8 @@ public class LexerUtil {
 			case TYPE_BOOL:
 				return "bool";
 
-			// since true and false are keywords, should they be their own tokens?
 			case BOOL_LITERAL:
-				return "boolean " + token.attribute;
+				return token.attribute.toString();
 			case INT_LITERAL:
 				return "integer " + token.attribute;
 			case CHAR_LITERAL:
