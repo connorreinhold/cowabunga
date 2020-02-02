@@ -131,9 +131,9 @@ public class LexerUtil {
 		for (int i = 0; i < s.length(); i++)
 			switch (s.charAt(i)){
 				case '\n': sb.append("\\n"); break;
-				case '\\': sb.append("\\"); break;
-				case '\'': sb.append("\\'"); break;
-				case '\"': sb.append("\""); break;
+				case '\t': sb.append("\\t"); break;
+				case '\r': sb.append("\\r"); break;
+				case '\f': sb.append("\\f"); break;
 				default: sb.append(s.charAt(i));
 			}
 		return sb.toString();
