@@ -54,7 +54,7 @@ public class LexerUtil {
 			case INT_LITERAL:
 				return "integer " + token.attribute;
 			case CHAR_LITERAL:
-				return "character " + token.attribute;
+				return "character " + unescapeString((String) token.attribute);
 			case STRING_LITERAL:
 				return "string " + unescapeString((String) token.attribute);
 
