@@ -42,7 +42,7 @@ public class LexerUtilTest {
         // " \n \r \f \t "
         lexer = new MyLexer(new StringReader("\" \\n \\r \\f \\t \""));
         token = lexer.nextToken();
-        assertEquals("1:1 string \\n \\r \\f \\t ",
+        assertEquals("1:1 string  \\n \\r \\f \\t ", 
                 LexerUtil.fullDescription(token));
 
         lexer = new MyLexer(new StringReader("'\\n'"));
@@ -65,7 +65,7 @@ public class LexerUtilTest {
     @Test
     void testEscapedVisiblesAreEscaped() throws IOException {
         // "\t''\""
-        MyLexer lexer = new MyLexer(new StringReader("\"\\t\\''\""));
+        MyLexer lexer = new MyLexer(new StringReader("\"\\t\\''\\\"\""));
         MyLexer.Token token = lexer.nextToken();
         assertEquals("1:1 string \\t''\"", LexerUtil.fullDescription(token));
 
