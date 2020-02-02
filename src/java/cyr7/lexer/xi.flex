@@ -16,7 +16,9 @@
 	cyr7.exceptions.InvalidCharacterLiteralException, 
 	cyr7.exceptions.InvalidStringEscapeCharacterException,
 	cyr7.exceptions.LeadingZeroIntegerException,
-	cyr7.exceptions.InvalidTokenException
+	cyr7.exceptions.InvalidTokenException,
+	cyr7.exceptions.MultiLineStringException,
+	cyr7.exceptions.MultiLineCharacterException
 %yylexthrow}
 
 %{
@@ -149,6 +151,10 @@
 			return new Token(type, buffer.toString(), lineNumber, columnNumber);
 		}
 		
+		public String toString() {
+			return buffer.toString();
+		}
+		
 	}
 	
     private LexerStringBuffer stringBuffer = new LexerStringBuffer();
@@ -157,6 +163,7 @@
 %}
 
 Whitespace = [ \t\f\r\n]
+Newline = [\n\r(\r\n)]
 Letter = [a-zA-Z]
 Digit = [0-9]
 Identifier = {Letter}({Digit}|{Letter}|_|')*
@@ -234,35 +241,40 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <CHARACTER> {
-    \'					{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+    /* No characters */
+    {Newline}			{throw new cyr7.exceptions.MultiLineCharacterException(charBuffer.getLineNumber(), charBuffer.getColumnNumber()); }
+    \'					{throw new cyr7.exceptions.InvalidCharacterLiteralException("''", charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+
     [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
     \\n				    {yybegin(CHAR_END); charBuffer.append("\n"); }
-    \\t					{yybegin(CHAR_END); charBuffer.append("\t"); }
+    \\t|\t				{yybegin(CHAR_END); charBuffer.append("\t"); }
     \\r					{yybegin(CHAR_END); charBuffer.append("\r"); }
-    \\f					{yybegin(CHAR_END); charBuffer.append("\f"); }
+    \\f|\f				{yybegin(CHAR_END); charBuffer.append("\f"); }
     {Hex}				{yybegin(CHAR_END); charBuffer.append(fromHex(yytext())); }
     \\'					{yybegin(CHAR_END); charBuffer.append("'"); }
     \\\"				{yybegin(CHAR_END); charBuffer.append("\""); }
     \\\\				{yybegin(CHAR_END); charBuffer.append("\\"); }
-    /* More than one character inside single quote string OR no characters */
-    \\[^]				{yybegin(CHAR_END); throw new cyr7.exceptions.InvalidCharacterLiteralException(yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}  /*Invalid escape characters*/
+    
+    /*Invalid escape characters*/
+    \\[^]				{yybegin(CHAR_END); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + charBuffer.toString() + "'", charBuffer.getLineNumber(), charBuffer.getColumnNumber());} 
 }
 
 <CHAR_END> {
 	\'					{yybegin(YYINITIAL); return charBuffer.generateToken(TokenType.CHAR_LITERAL); }
-	[^\']				{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+	[^\']				{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + charBuffer.toString() + yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
 }
 
 <STRING> {
+	{Newline}      		{throw new cyr7.exceptions.MultiLineStringException(stringBuffer.getLineNumber(), stringBuffer.getColumnNumber()); }
     \"                  {yybegin(YYINITIAL); return stringBuffer.generateToken(TokenType.STRING_LITERAL); }
     \\n				    {stringBuffer.append("\n");}
-    \\t					{stringBuffer.append("\t");}
+    \\t|\t				{stringBuffer.append("\t");}
     \\r					{stringBuffer.append("\r");}
-    \\f					{stringBuffer.append("\f");}
+    \\f|\f				{stringBuffer.append("\f");}
     {Hex}				{stringBuffer.append(fromHex(yytext())); }
     \\'					{stringBuffer.append("'");}
     \\\"				{stringBuffer.append("\"");}
-    \\\\				{stringBuffer.append("\\");} 
-    \\[^]				{throw new cyr7.exceptions.InvalidStringEscapeCharacterException(yytext(), stringBuffer.getLineNumber(), stringBuffer.getColumnNumber());}
-    [^\n\f\t\r\"\\]+    {stringBuffer.append(yytext()); }
+    \\\\				{stringBuffer.append("\\");}
+    \\[^]				{throw new cyr7.exceptions.InvalidStringEscapeCharacterException(yytext(), stringBuffer.getLineNumber(), stringBuffer.getColumnNumber()); }
+    . 	 	  			{stringBuffer.append(yytext()); }
 }
