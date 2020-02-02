@@ -56,7 +56,7 @@ public class LexerUtil {
 			case CHAR_LITERAL:
 				return "character " + token.attribute;
 			case STRING_LITERAL:
-				return "string " + token.attribute;
+				return "string " + unescapeString((String) token.attribute);
 
 			case ID:
 				return "id " + token.attribute;
@@ -124,6 +124,19 @@ public class LexerUtil {
 				throw new RuntimeException(
 						"Token " + token + " is missing a description.");
 		}
+	}
+
+	public static String unescapeString(String s){
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length(); i++)
+			switch (s.charAt(i)){
+				case '\n': sb.append("\\n"); break;
+				case '\\': sb.append("\\"); break;
+				case '\'': sb.append("\\'"); break;
+				case '\"': sb.append("\""); break;
+				default: sb.append(s.charAt(i));
+			}
+		return sb.toString();
 	}
 
 	private LexerUtil() {
