@@ -139,7 +139,7 @@ public class LexerUtil {
 		return sb.toString();
 	}
 
-	private LexerUtil() {
-	}
+    private LexerUtil() {
+    }
 
 }

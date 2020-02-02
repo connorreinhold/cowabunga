@@ -13,7 +13,9 @@ public class LexerStringTest {
 
     @Test
     void stringWithNewlineThrowsError() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\"\n\"")); // single string with newline
+
+        // single string with newline
+        MyLexer lexer = new MyLexer(new StringReader("\"\n\""));
         assertThrows(Exception.class, lexer::nextToken);
 
         lexer = new MyLexer(new StringReader("\"blah blah \n\""));
@@ -30,7 +32,8 @@ public class LexerStringTest {
 
     @Test
     void stringEscapingUnicode() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\"\\xAAAA\"")); // \xAAAA
+        // \xAAAA
+        MyLexer lexer = new MyLexer(new StringReader("\"\\xAAAA\""));
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
         assertEquals("\uAAAA", token.attribute);
@@ -91,11 +94,14 @@ public class LexerStringTest {
     @Test
     void stringInvalidEscaping() {
         MyLexer lexer = new MyLexer(new StringReader("\"\\x\"")); // \x
-        assertThrows(InvalidStringEscapeCharacterException.class, lexer::nextToken);
+        assertThrows(InvalidStringEscapeCharacterException.class,
+                lexer::nextToken);
         lexer = new MyLexer(new StringReader("\"asdf\\g\"")); // \g
-        assertThrows(InvalidStringEscapeCharacterException.class, lexer::nextToken);
+        assertThrows(InvalidStringEscapeCharacterException.class,
+                lexer::nextToken);
         lexer = new MyLexer(new StringReader("\"\\b1324\"")); // \b
-        assertThrows(InvalidStringEscapeCharacterException.class, lexer::nextToken);
+        assertThrows(InvalidStringEscapeCharacterException.class,
+                lexer::nextToken);
     }
 
     @Test

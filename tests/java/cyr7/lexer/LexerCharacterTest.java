@@ -83,11 +83,16 @@ public class LexerCharacterTest {
 
     @Test
     void characterInvalidFormat() {
-        MyLexer lexer = new MyLexer(new StringReader("''")); // empty character literal
+        // empty character literal
+        MyLexer lexer = new MyLexer(new StringReader("''"));
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("'as'")); // two line character literal
+
+        // two line character literal
+        lexer = new MyLexer(new StringReader("'as'"));
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("\u583c\u5f46")); // outside of (unicode) BMP
+
+        // outside of (unicode) BMP
+        lexer = new MyLexer(new StringReader("\u583c\u5f46"));
         assertThrows(Exception.class, lexer::nextToken);
     }
 

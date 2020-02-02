@@ -27,26 +27,55 @@ public class CLI {
     public static Options createOptions() {
         Options options = new Options();
 
-        Option help = Option.builder("h").longOpt("help").desc("Print a synopsis of options").hasArg(false)
-                .argName(null).numberOfArgs(0).required(false).build();
+        Option help = Option.builder("h")
+                            .longOpt("help")
+                            .desc("Print a synopsis of options")
+                            .hasArg(false)
+                            .argName(null)
+                            .numberOfArgs(0)
+                            .required(false)
+                            .build();
 
-        Option lex = Option.builder("l").longOpt("lex").desc("Generate output from lexical analysis").hasArg(false)
-                .argName(null).numberOfArgs(0).required(false).build();
+        Option lex = Option.builder("l")
+                           .longOpt("lex")
+                           .desc("Generate output from lexical analysis")
+                           .hasArg(false)
+                           .argName(null)
+                           .numberOfArgs(0)
+                           .required(false)
+                           .build();
 
-        Option destination = Option.builder("D").longOpt(null).desc("Specify where to place generated diagnostic files")
-                .hasArg(true).argName("path").numberOfArgs(1).required(false).build();
+        Option destination = Option.builder("D")
+                                   .longOpt(null)
+                                   .desc("Specify where to place generated "
+                                           + "diagnostic files")
+                                   .hasArg(true)
+                                   .argName("path")
+                                   .numberOfArgs(1)
+                                   .required(false)
+                                   .build();
 
-        Option version = Option.builder("v").longOpt("version").desc("Version information").hasArg(false).argName(null)
-                .numberOfArgs(0).required(false).build();
+        Option version = Option.builder("v")
+                               .longOpt("version")
+                               .desc("Version information")
+                               .hasArg(false)
+                               .argName(null)
+                               .numberOfArgs(0)
+                               .required(false)
+                               .build();
 
-        return options.addOption(help).addOption(lex).addOption(destination).addOption(version);
+        return options.addOption(help)
+                      .addOption(lex)
+                      .addOption(destination)
+                      .addOption(version);
     }
 
     /**
      * Prints a synopsis of the options.
      */
     public static void printHelpMessage() {
-        helpFormatter.printHelp(writer, consoleWidth, usage, "where possible options include:", options, 0, leftPadding,
+        helpFormatter.printHelp(writer, consoleWidth, usage,
+                "where possible options include:", options, 0, leftPadding,
                 "\n");
         writer.flush();
     }
@@ -55,7 +84,8 @@ public class CLI {
      * Prints the version of xic.
      */
     public static void printVersionMessage() {
-        writer.append("xic 1.0").append(System.lineSeparator());
+        writer.append("xic 1.0")
+              .append(System.lineSeparator());
         writer.flush();
     }
 
@@ -65,22 +95,25 @@ public class CLI {
      *
      * @param args The options and arguments in a command.
      * @return A CommandLine instance which represents the results of the parsed
-     * {@code args}.
-     * @throws ParseException Command contains invalid flags or incorrect number of
-     *                        arguments.
+     *         {@code args}.
+     * @throws ParseException Command contains invalid flags or incorrect number
+     *                        of arguments.
      */
-    public static CommandLine parseCommand(String[] args) throws ParseException {
+    public static CommandLine parseCommand(String[] args)
+            throws ParseException {
         return parser.parse(options, args);
     }
 
     /**
-     * Calls the xi lexer to lex the contents of {@code input} and writes the output
-     * into {@code output}.
+     * Calls the xi lexer to lex the contents of {@code input} and writes the
+     * output into {@code output}.
      */
     public static void useLexer(InputStream input, OutputStream output) {
         try {
-            // TODO: Replace InputStream with Reader and OutputStream with writer to reduce conversion overhead.
-            LexerUtil.lex(new InputStreamReader(input), new OutputStreamWriter(output));
+            // TODO: Replace InputStream with Reader and OutputStream with
+            // writer to reduce conversion overhead.
+            LexerUtil.lex(new InputStreamReader(input), new OutputStreamWriter(
+                    output));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,8 +135,8 @@ public class CLI {
     }
 
     /**
-     * Return {@code true} if {@code file} is a {@literal .xi} file.
-     * Otherwise, return {@code false}.
+     * Return {@code true} if {@code file} is a {@literal .xi} file. Otherwise,
+     * return {@code false}.
      *
      * @param file A filename
      */
@@ -112,8 +145,8 @@ public class CLI {
     }
 
     /**
-     * Returns the filename's extension name. If an extension does not exist, then
-     * an empty string is returned.
+     * Returns the filename's extension name. If an extension does not exist,
+     * then an empty string is returned.
      *
      * @param file A filename
      * @return The extension name of {@code file}.
@@ -147,29 +180,30 @@ public class CLI {
         }
 
         // For each option given, perform task corresponding to option.
-        cmd.iterator().forEachRemaining(t -> {
-            String opt = t.getOpt();
-            switch (opt) {
-                case "h":
-                    printHelpMessage();
-                    break;
-                case "l": {
-                    wantsLexing = true;
-                    break;
-                }
-                case "D":
-                    String directory = cmd.getOptionValue("D");
-                    pathDestination = new File(directory);
-                    break;
-                case "v":
-                    printVersionMessage();
-                    break;
-                default:
-                    writer.write("No case for given for option: " + opt);
-                    writer.flush();
-                    break;
-            }
-        });
+        cmd.iterator()
+           .forEachRemaining(t -> {
+               String opt = t.getOpt();
+               switch (opt) {
+               case "h":
+                   printHelpMessage();
+                   break;
+               case "l": {
+                   wantsLexing = true;
+                   break;
+               }
+               case "D":
+                   String directory = cmd.getOptionValue("D");
+                   pathDestination = new File(directory);
+                   break;
+               case "v":
+                   printVersionMessage();
+                   break;
+               default:
+                   writer.write("No case for given for option: " + opt);
+                   writer.flush();
+                   break;
+               }
+           });
 
         if (wantsLexing) {
             String[] sourceFiles = cmd.getArgs();
@@ -182,13 +216,19 @@ public class CLI {
                 BufferedInputStream inputStream;
                 BufferedOutputStream outputStream;
                 try {
-                    inputStream = new BufferedInputStream(new FileInputStream(file));
-                    File destination = new File(pathDestination.getAbsolutePath(), getMainFilename(file) + ".lexed");
+                    inputStream = new BufferedInputStream(new FileInputStream(
+                            file));
+                    String absolutePath = pathDestination.getAbsolutePath();
+                    String mainFilename = getMainFilename(file);
+                    File destination = new File(absolutePath, String.format(
+                            "%s.lexed", mainFilename));
                     if (!destination.exists()) {
                         // Create directories if they don't exist
-                        destination.getParentFile().mkdirs();
+                        destination.getParentFile()
+                                   .mkdirs();
                     }
-                    outputStream = new BufferedOutputStream(new FileOutputStream(destination));
+                    outputStream = new BufferedOutputStream(
+                            new FileOutputStream(destination));
                     useLexer(inputStream, outputStream);
                 } catch (FileNotFoundException e) {
                     writer.write(e.getMessage());

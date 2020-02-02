@@ -13,7 +13,8 @@ public class LexerUtilTest {
     void testTypeAttributeDescriptionExist() {
         for (MyLexer.TokenType tokenType : MyLexer.TokenType.values()) {
             MyLexer lexer = new MyLexer(new StringReader(""));
-            String description = LexerUtil.typeAttributeDescription(lexer.new Token(tokenType, "blah"));
+            String description = LexerUtil.typeAttributeDescription(
+                    lexer.new Token(tokenType, "blah"));
             assertNotNull(description);
             assertFalse(description.isEmpty());
         }
@@ -22,7 +23,8 @@ public class LexerUtilTest {
     @Test
     void testBooleanLiteralDescription() {
         MyLexer lexer = new MyLexer(new StringReader(""));
-        MyLexer.Token token = lexer.new Token(MyLexer.TokenType.BOOL_LITERAL, true);
+        MyLexer.Token token = lexer.new Token(MyLexer.TokenType.BOOL_LITERAL,
+                true);
         assertEquals("1:1 true", LexerUtil.fullDescription(token));
 
         token = lexer.new Token(MyLexer.TokenType.BOOL_LITERAL, false);
@@ -31,13 +33,17 @@ public class LexerUtilTest {
 
     @Test
     void testEscapedNewlineIsUnescaped() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\"Hello, Worl\\x64!\\n\""));
+        MyLexer lexer = new MyLexer(new StringReader(
+                "\"Hello, Worl\\x64!\\n\""));
         MyLexer.Token token = lexer.nextToken();
-        assertEquals("1:1 string Hello, World!\\n", LexerUtil.fullDescription(token));
+        assertEquals("1:1 string Hello, World!\\n",
+                LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("\" \\n \\r \\f \\t \"")); // " \n \r \f \t "
+        // " \n \r \f \t "
+        lexer = new MyLexer(new StringReader("\" \\n \\r \\f \\t \""));
         token = lexer.nextToken();
-        assertEquals("1:1 string \\n \\r \\f \\t ", LexerUtil.fullDescription(token));
+        assertEquals("1:1 string \\n \\r \\f \\t ",
+                LexerUtil.fullDescription(token));
 
         lexer = new MyLexer(new StringReader("'\\n'"));
         token = lexer.nextToken();
@@ -58,7 +64,8 @@ public class LexerUtilTest {
 
     @Test
     void testEscapedVisiblesAreEscaped() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\"\\t\\''\"")); // "\t''\""
+        // "\t''\""
+        MyLexer lexer = new MyLexer(new StringReader("\"\\t\\''\""));
         MyLexer.Token token = lexer.nextToken();
         assertEquals("1:1 string \\t''\"", LexerUtil.fullDescription(token));
 

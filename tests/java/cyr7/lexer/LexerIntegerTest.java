@@ -33,7 +33,8 @@ public class LexerIntegerTest {
         assertEquals(MyLexer.TokenType.MINUS, token.type);
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(String.valueOf(Integer.MIN_VALUE).substring(1), token.attribute);
+        assertEquals(String.valueOf(Integer.MIN_VALUE)
+                           .substring(1), token.attribute);
     }
 
     @Test

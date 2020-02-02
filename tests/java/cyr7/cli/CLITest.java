@@ -15,12 +15,12 @@ class CLITest {
 
     @Test
     void checksXiFile() {
-        String[] correctFilenames = new String[]{"correct.xi",
-                "/path/to/file.xi", "../../../../here.xi"};
+        String[] correctFilenames = new String[]
+            { "correct.xi", "/path/to/file.xi", "../../../../here.xi" };
 
-        String[] incorrectFilenames = new String[]{"incorrect.xipp",
-                "almost.c", "not_close.cpp", "wrong_lang.java",
-                "just_a_raw_file", ".xi", "xi"};
+        String[] incorrectFilenames = new String[]
+            { "incorrect.xipp", "almost.c", "not_close.cpp", "wrong_lang.java",
+                    "just_a_raw_file", ".xi", "xi" };
 
         for (String correct : correctFilenames) {
             assertTrue(CLI.isAXiFile(new File(correct)));
@@ -42,8 +42,8 @@ class CLITest {
         final String[] args3 = ". -q -p --this_is_a_bad_option".split(" ");
         assertThrows(ParseException.class, () -> CLI.parseCommand(args3));
 
-        final String[] args4 = "--help --this_is_a_bad_option -D . --lex a.xi"
-                .split(" ");
+        final String[] args4 = 
+                "--help --this_is_a_bad_option -D . --lex a.xi".split(" ");
         assertThrows(ParseException.class, () -> CLI.parseCommand(args4));
 
     }
@@ -79,8 +79,9 @@ class CLITest {
     @Test
     void getsCorrectPathForD() throws ParseException {
         final String command = "-D ";
-        String[] paths = new String[]{".", "..", "../..",
-                "/base/path/to/some/loc", "~/Desktop/results"};
+        String[] paths = new String[]
+            { ".", "..", "../..", "/base/path/to/some/loc",
+                    "~/Desktop/results" };
         for (String path : paths) {
             String[] args = (command + path).split(" ");
             CommandLine cmd = CLI.parseCommand(args);
@@ -99,8 +100,8 @@ class CLITest {
         final String[] twoFiles = "--lex a.xi b.xi".split(" ");
         final String[] noOptions = "a.xi b.xi c.xi".split(" ");
         final String[] includesD = "-D . a.xi c.xi b.xi".split(" ");
-        final String[] includesAllOptions = "-D . -v --lex --help a.xi b.xi c.xi"
-                .split(" ");
+        final String[] includesAllOptions = 
+                "-D . -v --lex --help a.xi b.xi c.xi".split(" ");
 
         assertDoesNotThrow(() -> CLI.parseCommand(noFiles));
         CommandLine cmd = CLI.parseCommand(noFiles);

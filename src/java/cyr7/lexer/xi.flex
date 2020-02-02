@@ -195,9 +195,25 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     "true"              { return new Token(TokenType.BOOL_LITERAL, true); }
     "false"             { return new Token(TokenType.BOOL_LITERAL, false); }
     {Integer}           { return new Token(TokenType.INT_LITERAL, yytext()); }
-    0{Integer}+			{ throw new cyr7.exceptions.LeadingZeroIntegerException(yytext(), yyline, yycolumn); }
-    \'		            { charBuffer.init(yyline, yycolumn); yybegin(CHARACTER); }
-    \"                  { stringBuffer.init(yyline, yycolumn); yybegin(STRING); }
+    0{Integer}+	 
+    	{ 
+    		throw new cyr7.exceptions.LeadingZeroIntegerException(
+    			yytext(), 
+				yyline, 
+				yycolumn); 
+		}
+    
+    \'	
+    	{ 
+    		charBuffer.init(yyline, yycolumn);
+    		yybegin(CHARACTER); 
+    	}
+    
+    \"                  
+    	{ 
+    		stringBuffer.init(yyline, yycolumn); 
+    		yybegin(STRING);
+    	}
 
     {Identifier}        { return new Token(TokenType.ID, yytext()); }
 
@@ -233,7 +249,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "&"                 { return new Token(TokenType.LOGICAL_AND); }
     "|"                 { return new Token(TokenType.LOGICAL_OR); }
-    .					{ throw new cyr7.exceptions.InvalidTokenException(yytext(), yyline, yycolumn); }
+    
+    .					
+    	{ 
+    		throw new cyr7.exceptions.InvalidTokenException(yytext(), 
+    														yyline, 
+    														yycolumn); 
+		}
 }
 
 <COMMENT> {
@@ -243,31 +265,82 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 <CHARACTER> {
     /* No characters */
-    {Newline}			{throw new cyr7.exceptions.MultiLineCharacterException(charBuffer.getLineNumber(), charBuffer.getColumnNumber()); }
-    \'					{throw new cyr7.exceptions.InvalidCharacterLiteralException("''", charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+    {Newline}			
+    	{
+    		yybegin(YYINITIAL);
+    		throw new cyr7.exceptions.MultiLineCharacterException(
+    				charBuffer.getLineNumber(), 
+    				charBuffer.getColumnNumber()); 
+    	}
+    	
+    \'					
+    	{
+    		yybegin(YYINITIAL);
+    		throw new cyr7.exceptions.InvalidCharacterLiteralException(
+    				"''", 
+    				charBuffer.getLineNumber(), 
+    				charBuffer.getColumnNumber());
+    	}
 
     [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
     \\n				    {yybegin(CHAR_END); charBuffer.append("\n"); }
     \\t|\t				{yybegin(CHAR_END); charBuffer.append("\t"); }
     \\r					{yybegin(CHAR_END); charBuffer.append("\r"); }
     \\f|\f				{yybegin(CHAR_END); charBuffer.append("\f"); }
-    {Hex}				{yybegin(CHAR_END); charBuffer.append(fromHex(yytext())); }
+    
+    {Hex}				
+    	{
+    		yybegin(CHAR_END); 
+    		charBuffer.append(fromHex(yytext())); 
+    	}
+    	
     \\'					{yybegin(CHAR_END); charBuffer.append("'"); }
     \\\"				{yybegin(CHAR_END); charBuffer.append("\""); }
     \\\\				{yybegin(CHAR_END); charBuffer.append("\\"); }
     
     /*Invalid escape characters*/
-    \\[^]				{yybegin(CHAR_END); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + charBuffer.toString() + "'", charBuffer.getLineNumber(), charBuffer.getColumnNumber());} 
+    \\[^]				
+    	{
+    		yybegin(YYINITIAL);
+    		throw new cyr7.exceptions.InvalidCharacterLiteralException(
+    			"'" + charBuffer.toString() + "'", 
+    			charBuffer.getLineNumber(), 
+    			charBuffer.getColumnNumber());
+    	} 
 }
 
 <CHAR_END> {
-	\'					{yybegin(YYINITIAL); return charBuffer.generateToken(TokenType.CHAR_LITERAL); }
-	[^\']				{yybegin(YYINITIAL); throw new cyr7.exceptions.InvalidCharacterLiteralException("'" + charBuffer.toString() + yytext(), charBuffer.getLineNumber(), charBuffer.getColumnNumber());}
+	\'					
+		{
+			yybegin(YYINITIAL); 
+			return charBuffer.generateToken(TokenType.CHAR_LITERAL); 
+		}
+		
+	[^\']		
+		{
+			yybegin(YYINITIAL); 
+			throw new cyr7.exceptions.InvalidCharacterLiteralException(
+				"'" + charBuffer.toString() + yytext(), 
+				charBuffer.getLineNumber(), 
+				charBuffer.getColumnNumber());
+		}
 }
 
 <STRING> {
-	{Newline}      		{throw new cyr7.exceptions.MultiLineStringException(stringBuffer.getLineNumber(), stringBuffer.getColumnNumber()); }
-    \"                  {yybegin(YYINITIAL); return stringBuffer.generateToken(TokenType.STRING_LITERAL); }
+	{Newline}      		
+		{
+			yybegin(YYINITIAL);
+			throw new cyr7.exceptions.MultiLineStringException(
+				stringBuffer.getLineNumber(), 
+				stringBuffer.getColumnNumber()); 
+		}
+		
+    \"                  
+    	{
+    		yybegin(YYINITIAL); 
+    		return stringBuffer.generateToken(TokenType.STRING_LITERAL); 
+    	}
+    	
     \\n				    {stringBuffer.append("\n");}
     \\t|\t				{stringBuffer.append("\t");}
     \\r					{stringBuffer.append("\r");}
@@ -276,6 +349,14 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\'					{stringBuffer.append("'");}
     \\\"				{stringBuffer.append("\"");}
     \\\\				{stringBuffer.append("\\");}
-    \\[^]				{throw new cyr7.exceptions.InvalidStringEscapeCharacterException(yytext(), stringBuffer.getLineNumber(), stringBuffer.getColumnNumber()); }
+    
+    \\[^]				
+    	{
+    		throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
+    			yytext(), 
+    			stringBuffer.getLineNumber(), 
+    			stringBuffer.getColumnNumber()); 
+    	}
+    	
     . 	 	  			{stringBuffer.append(yytext()); }
 }

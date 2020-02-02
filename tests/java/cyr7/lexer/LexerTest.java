@@ -26,19 +26,26 @@ class LexerTest {
         lexer = new MyLexer(new StringReader("\"\n\n\nHello World\""));
         assertThrows(MultiLineStringException.class, lexer::nextToken);
 
-        lexer = new MyLexer(new StringReader("\'\n\'")); // Characters cannot span multiple lines.
+        lexer = new MyLexer(new StringReader("\'\n\'")); // Characters cannot
+                                                         // span multiple lines.
         assertThrows(MultiLineCharacterException.class, lexer::nextToken);
 
-        lexer = new MyLexer(new StringReader("'\r\n'")); // Characters cannot span multiple lines.
+        lexer = new MyLexer(new StringReader("'\r\n'")); // Characters cannot
+                                                         // span multiple lines.
         assertThrows(MultiLineCharacterException.class, lexer::nextToken);
 
-        lexer = new MyLexer(new StringReader("'\r'")); // Characters cannot span multiple lines.
+        lexer = new MyLexer(new StringReader("'\r'")); // Characters cannot span
+                                                       // multiple lines.
         assertThrows(MultiLineCharacterException.class, lexer::nextToken);
 
-        lexer = new MyLexer(new StringReader("\'\\xAFFFF\'")); // Characters cannot span multiple lines.
+        lexer = new MyLexer(new StringReader("\'\\xAFFFF\'")); // Characters
+                                                               // cannot span
+                                                               // multiple
+                                                               // lines.
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
 
-        lexer = new MyLexer(new StringReader("'\f'")); // Characters cannot span multiple lines.
+        lexer = new MyLexer(new StringReader("'\f'")); // Characters cannot span
+                                                       // multiple lines.
         assertDoesNotThrow(lexer::nextToken);
     }
 
@@ -101,7 +108,8 @@ class LexerTest {
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.MINUS, token.type);
 
-        // see insertionsort.xi for why this should be minus token and int literal instead of negative int literal.
+        // see insertionsort.xi for why this should be minus token and int
+        // literal instead of negative int literal.
 
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.MINUS, token.type);
@@ -120,13 +128,15 @@ class LexerTest {
 
     @Test
     void commentSingleLine() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("// this is a comment 'a' \" testing \" have a good day"));
+        MyLexer lexer = new MyLexer(new StringReader(
+                "// this is a comment 'a' \" testing \" have a good day"));
         assertNull(lexer.nextToken());
     }
 
     @Test
     void idThenComment() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("1234 // this is a comment have a good day"));
+        MyLexer lexer = new MyLexer(new StringReader(
+                "1234 // this is a comment have a good day"));
 
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
@@ -140,10 +150,8 @@ class LexerTest {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment have a good day\n"
                         + "1234 asdf // whatever\n"
-                        + "while () // blkj \t asdf\n"
-                        + "if use\n"
-                        + "++ \"// comment // inside a string\" // comment\n"
-        ));
+                        + "while () // blkj \t asdf\n" + "if use\n"
+                        + "++ \"// comment // inside a string\" // comment\n"));
 
         assertEquals(MyLexer.TokenType.INT_LITERAL, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.ID, lexer.nextToken().type);
@@ -164,10 +172,8 @@ class LexerTest {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment have a good day\r"
                         + "1234 asdf // whatever\n"
-                        + "while () // blkj \t asdf\r\n"
-                        + "if use\n"
-                        + "++ \"// comment // inside a string\" // comment\n"
-        ));
+                        + "while () // blkj \t asdf\r\n" + "if use\n"
+                        + "++ \"// comment // inside a string\" // comment\n"));
 
         assertEquals(MyLexer.TokenType.INT_LITERAL, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.ID, lexer.nextToken().type);
@@ -203,11 +209,13 @@ class LexerTest {
         assertEquals(MyLexer.TokenType.MINUS, token.type);
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals(String.valueOf(Integer.MIN_VALUE).substring(1), token.attribute);
+        assertEquals(String.valueOf(Integer.MIN_VALUE)
+                           .substring(1), token.attribute);
     }
 
     @Test
-    void integerEdgeCases() throws InvalidCharacterLiteralException, InvalidStringEscapeCharacterException, IOException {
+    void integerEdgeCases() throws InvalidCharacterLiteralException,
+            InvalidStringEscapeCharacterException, IOException {
         String illegalInt = "0010";
         MyLexer lexer = new MyLexer(new StringReader(illegalInt));
         assertThrows(LeadingZeroIntegerException.class, lexer::nextToken);
@@ -274,11 +282,14 @@ class LexerTest {
     @Test
     void stringInvalidEscaping() {
         MyLexer lexer = new MyLexer(new StringReader("\"\\x\"")); // \x
-        assertThrows(InvalidStringEscapeCharacterException.class, lexer::nextToken);
+        assertThrows(InvalidStringEscapeCharacterException.class,
+                lexer::nextToken);
         lexer = new MyLexer(new StringReader("\"asdf\\g\"")); // \g
-        assertThrows(InvalidStringEscapeCharacterException.class, lexer::nextToken);
+        assertThrows(InvalidStringEscapeCharacterException.class,
+                lexer::nextToken);
         lexer = new MyLexer(new StringReader("\"\\b1324\"")); // \b
-        assertThrows(InvalidStringEscapeCharacterException.class, lexer::nextToken);
+        assertThrows(InvalidStringEscapeCharacterException.class,
+                lexer::nextToken);
     }
 
     @Test
@@ -356,11 +367,14 @@ class LexerTest {
 
     @Test
     void characterInvalidFormat() {
-        MyLexer lexer = new MyLexer(new StringReader("''")); // empty character literal
+        // empty character literal
+        MyLexer lexer = new MyLexer(new StringReader("''"));
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("'as'")); // two line character literal
+        // two line character literal
+        lexer = new MyLexer(new StringReader("'as'"));
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("\'\u583c\u5f46\'")); // outside of (unicode) BMP
+        // outside of (unicode) BMP
+        lexer = new MyLexer(new StringReader("\'\u583c\u5f46\'"));
         assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
     }
 
@@ -402,7 +416,8 @@ class LexerTest {
 
     @Test
     void tabsAsWhitespace() throws IOException {
-        MyLexer lexer = new MyLexer(new StringReader("\twilliam(\t-\t5)\t+\t\t\t\t\t\t'我'\t\t\t"));
+        MyLexer lexer = new MyLexer(new StringReader(
+                "\twilliam(\t-\t5)\t+\t\t\t\t\t\t'我'\t\t\t"));
         MyLexer.Token token;
 
         token = lexer.nextToken();

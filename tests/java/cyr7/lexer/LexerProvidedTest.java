@@ -15,11 +15,18 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LexerProvidedTest {
 
     private void testFile(String filename) throws IOException {
-        MyLexer lexer = new MyLexer(new FileReader(getClass().getClassLoader()
-                .getResource("lexer/pa1/" + filename + ".xi").getFile()));
+        MyLexer lexer = new MyLexer(new FileReader(
+                           getClass().getClassLoader()
+                                     .getResource(
+                                             "lexer/pa1/"+ filename+ ".xi")
+                                     .getFile()));
+        
         Scanner solution = new Scanner(new InputStreamReader(
-                getClass().getClassLoader().getResourceAsStream(
-                        "lexer/pa1/" + filename + ".lexedsol")));
+                            getClass().getClassLoader()
+                                      .getResourceAsStream(
+                                              "lexer/pa1/"
+                                              + filename 
+                                              + ".lexedsol")));
 
         while (solution.hasNextLine()) {
             String line = solution.nextLine();
@@ -41,7 +48,8 @@ public class LexerProvidedTest {
                         String numberExpected = matchExpected.group();
                         assertEquals(numberActual, numberExpected);
                     } else {
-                        fail("Error message does not contain line and column numbers.");
+                        fail("Error message does not contain "
+                                + "line and column numbers.");
                     }
                 }
                 assertFalse(solution.hasNextLine());
