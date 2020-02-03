@@ -18,6 +18,20 @@ public class LexerCharacterTest {
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
         assertEquals("\uAAAA", token.attribute);
 
+        // Lowercase is just as good.
+        lexer = new MyLexer(new StringReader("'\\xaaaa'")); // \xAAAA
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
+        assertEquals("\uAAAA", token.attribute);
+        
+
+        // Lowercase is just as good.
+        lexer = new MyLexer(new StringReader("'\\xAAaa'")); // \xAAAA
+        token = lexer.nextToken();
+        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
+        assertEquals("\uAAAA", token.attribute);
+
+        
         lexer = new MyLexer(new StringReader("'\\x123'")); // \x123
         token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
