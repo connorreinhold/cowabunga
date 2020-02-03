@@ -1,9 +1,0 @@
-1:1 string \t
-2:1 string \n
-3:1 string \f
-4:1 string \t\t\t\n\n\n\r\r\r\f\f\f
-5:1 character t
-6:1 character \t
-7:1 character '
-8:1 character "
-9:1 error:Strings cannot span multiple lines.
