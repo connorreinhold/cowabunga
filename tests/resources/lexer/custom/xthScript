@@ -36,4 +36,6 @@ xic ("Test --lex") "--lex" {
     factorial.xi;
     unescaping.xi;
     fibonacci.xi;
+    unescapingstring.xi;
+    unescapingchar.xi;
 }
