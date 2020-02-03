@@ -360,3 +360,12 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     	
     . 	 	  			{stringBuffer.append(yytext()); }
 }
+
+[^]
+    {
+        throw new cyr7.exceptions.InvalidTokenException(
+            yytext(),
+            yyline,
+            yycolumn
+        );
+    }
