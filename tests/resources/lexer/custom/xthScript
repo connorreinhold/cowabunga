@@ -33,4 +33,5 @@ build
 
 xic ("Test --lex") "--lex" {
     unescaping.xi;
+    fibonacci.xi;
 }
