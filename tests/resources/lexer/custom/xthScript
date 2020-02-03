@@ -34,4 +34,6 @@ build
 xic ("Test --lex") "--lex" {
     escapechars.xi;
     factorial.xi;
+    unescaping.xi;
+    fibonacci.xi;
 }
