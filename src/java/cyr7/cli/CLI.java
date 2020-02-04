@@ -112,8 +112,8 @@ public class CLI {
         try {
             // TODO: Replace InputStream with Reader and OutputStream with
             // writer to reduce conversion overhead.
-            LexerUtil.lex(new InputStreamReader(input), new OutputStreamWriter(
-                    output));
+            LexerUtil.lex(new InputStreamReader(input, "UTF-8"), 
+                    new OutputStreamWriter(output, "UTF-8"));
         } catch (IOException e) {
             e.printStackTrace();
         }
