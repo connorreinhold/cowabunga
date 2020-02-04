@@ -9,6 +9,13 @@ import java.io.Writer;
 
 public class LexerUtil {
 
+	/**
+	 * Read contents and write a line by line description of the lexed output.
+	 *
+	 * @param reader the contents to read
+	 * @param writer the place to write
+	 * @throws IOException if the reader throws an {@code IOException}
+	 */
 	public static void lex(Reader reader, Writer writer) throws IOException {
 		MyLexer lexer = new MyLexer(new BufferedReader(reader));
 		MyLexer.Token token;
@@ -24,11 +31,25 @@ public class LexerUtil {
 		writer.flush();
 	}
 
+	/**
+	 * A description of a token including line and column number in the format:
+	 *
+	 * {@code $line:$column $desc}
+	 *
+	 * @param token the token to describe
+	 * @return a description of the token
+	 */
 	static String fullDescription(MyLexer.Token token) {
 		return (token.line + 1) + ":" + (token.column + 1) + " "
 				+ typeAttributeDescription(token);
 	}
 
+	/**
+	 * A string representation of the token type and attribute.
+	 *
+	 * @param token the token to describe
+	 * @return a description of the token
+	 */
 	static String typeAttributeDescription(MyLexer.Token token) {
 		switch (token.type) {
 			case USE:
@@ -126,6 +147,16 @@ public class LexerUtil {
 		}
 	}
 
+	/**
+	 * Replace whitespace characters that were escaped by the lexer back into
+	 * their escaped form.
+	 *
+	 * For example: {@code unescapeString("\t")`} is a literal backslash and character
+	 * 't'
+	 *
+	 * @param s The string to unescape
+	 * @return The escaped string
+	 */
 	public static String unescapeString(String s){
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < s.length(); i++)
