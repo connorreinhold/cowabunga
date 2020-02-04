@@ -110,8 +110,6 @@ public class CLI {
      */
     public static void useLexer(InputStream input, OutputStream output) {
         try {
-            // TODO: Replace InputStream with Reader and OutputStream with
-            // writer to reduce conversion overhead.
             LexerUtil.lex(new InputStreamReader(input, "UTF-8"), 
                     new OutputStreamWriter(output, "UTF-8"));
         } catch (IOException e) {
