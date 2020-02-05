@@ -1,11 +1,8 @@
 package cyr7.lexer;
 
-import cyr7.exceptions.InvalidCharacterLiteralException;
-import cyr7.exceptions.InvalidStringEscapeCharacterException;
 import cyr7.exceptions.LeadingZeroIntegerException;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class LexerIntegerTest {
 
     @Test
-    void integerOverflow() throws IOException {
+    void integerOverflow() throws Exception {
         String veryBigNumber = "99999999999999999999999";
         MyLexer lexer = new MyLexer(new StringReader(veryBigNumber));
         MyLexer.Token token;
@@ -48,7 +45,7 @@ public class LexerIntegerTest {
     }
 
     @Test
-    void integerGeneral() throws IOException {
+    void integerGeneral() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("100 1234567890"));
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);

@@ -2,7 +2,6 @@ package cyr7.lexer;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -11,14 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class LexerCommentTest {
 
     @Test
-    void commentSingleLine() throws IOException {
+    void commentSingleLine() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment 'a' \" testing \" have a good day"));
         assertNull(lexer.nextToken());
     }
 
     @Test
-    void idThenComment() throws IOException {
+    void idThenComment() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "1234 // this is a comment have a good day"));
 
@@ -30,7 +29,7 @@ public class LexerCommentTest {
     }
 
     @Test
-    void commentMultipleLines() throws IOException {
+    void commentMultipleLines() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment have a good day\n"
                         + "1234 asdf // whatever\n"
@@ -52,7 +51,7 @@ public class LexerCommentTest {
     }
 
     @Test
-    void commentDifferentLineEndings() throws IOException {
+    void commentDifferentLineEndings() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment have a good day\r"
                         + "1234 asdf // whatever\n"

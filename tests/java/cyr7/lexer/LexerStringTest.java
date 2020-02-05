@@ -23,7 +23,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringWithTabs() throws IOException {
+    void stringWithTabs() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\t\t\t\""));
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -31,7 +31,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringEscapingUnicode() throws IOException {
+    void stringEscapingUnicode() throws Exception {
         // \xAAAA
         MyLexer lexer = new MyLexer(new StringReader("\"\\xAAAA\""));
         MyLexer.Token token = lexer.nextToken();
@@ -55,7 +55,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringEscapingDoubleQuote() throws IOException {
+    void stringEscapingDoubleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\\"\"")); // \"
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -63,7 +63,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringEscapingSingleQuote() throws IOException {
+    void stringEscapingSingleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\'\"")); // \'
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -76,7 +76,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringEscapingBackslash() throws IOException {
+    void stringEscapingBackslash() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\\\\"")); // \\
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -84,7 +84,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringEscapingNewLine() throws IOException {
+    void stringEscapingNewLine() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\n\"")); // \n
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -105,7 +105,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringEmpty() throws IOException {
+    void stringEmpty() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\"")); // ""
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);

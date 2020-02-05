@@ -4,7 +4,6 @@ import cyr7.exceptions.LexerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Scanner;
 import java.util.regex.Matcher;
@@ -14,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public class LexerProvidedTest {
 
-    private void testFile(String filename) throws IOException {
+    private void testFile(String filename) throws Exception {
         MyLexer lexer = new MyLexer(new FileReader(
                            getClass().getClassLoader()
                                      .getResource(
@@ -66,72 +65,72 @@ public class LexerProvidedTest {
     }
 
     @Test
-    void testAdd() throws IOException {
+    void testAdd() throws Exception {
         testFile("add");
     }
 
     @Test
-    void testArrayInit() throws IOException {
+    void testArrayInit() throws Exception {
         testFile("arrayinit");
     }
 
     @Test
-    void testArrayInit2() throws IOException {
+    void testArrayInit2() throws Exception {
         testFile("arrayinit2");
     }
 
     @Test
-    void testBeauty() throws IOException {
+    void testBeauty() throws Exception {
         testFile("beauty");
     }
 
     @Test
-    void testEx1() throws IOException {
+    void testEx1() throws Exception {
         testFile("ex1");
     }
 
     @Test
-    void testEx2() throws IOException {
+    void testEx2() throws Exception {
         testFile("ex2");
     }
 
     @Test
-    void testGcd() throws IOException {
+    void testGcd() throws Exception {
         testFile("gcd");
     }
 
     @Test
-    void testInsertionSort() throws IOException {
+    void testInsertionSort() throws Exception {
         testFile("insertionSort");
     }
 
     @Test
-    void testMdarrays() throws IOException {
+    void testMdarrays() throws Exception {
         testFile("mdarrays");
     }
 
     @Test
-    void testRatAdd() throws IOException {
+    void testRatAdd() throws Exception {
         testFile("ratadd");
     }
 
     @Test
-    void testRatAddUse() throws IOException {
+    void testRatAddUse() throws Exception {
         testFile("ratAddUse");
     }
 
     @Test
-    void testSpec1() throws IOException {
+    void testSpec1() throws Exception {
         testFile("spec1");
     }
 
     @Test
-    void testSpec2() throws IOException {
+    void testSpec2() throws Exception {
         testFile("spec2");
     }
 
     @Test
-    void testSpec3() throws IOException {
+    void testSpec3() throws Exception {
         testFile("spec3");
     }
 

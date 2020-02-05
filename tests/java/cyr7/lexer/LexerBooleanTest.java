@@ -2,7 +2,6 @@ package cyr7.lexer;
 
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class LexerBooleanTest {
 
     @Test
-    void booleanLiteralTest() throws IOException {
+    void booleanLiteralTest() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("( true false ) "));
         MyLexer.Token token;
 
@@ -28,7 +27,7 @@ public class LexerBooleanTest {
     }
 
     @Test
-    void booleanTypeTest() throws IOException {
+    void booleanTypeTest() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("( bool ) "));
         assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.TYPE_BOOL, lexer.nextToken().type);
