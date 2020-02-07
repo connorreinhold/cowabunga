@@ -1,6 +1,7 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LexerException;
+import java_cup.runtime.Symbol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,10 +19,10 @@ public class LexerUtil {
 	 */
 	public static void lex(Reader reader, Writer writer) throws IOException {
 		MyLexer lexer = new MyLexer(new BufferedReader(reader));
-		MyLexer.Token token;
+		Symbol token;
 
 		try {
-			while ((token = lexer.nextToken()) != null) {
+			while ((token = lexer.next_token()) != null) {
 				writer.append(fullDescription(token))
 						.append(System.lineSeparator());
 			}

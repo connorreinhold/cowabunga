@@ -43,7 +43,7 @@ terminal String ID;
 terminal String TYPE_INT, TYPE_BOOL;
 
 // Values
-terminal Long INTEGER_LITERAL;
+terminal Long INT_LITERAL;
 terminal String STRING_LITERAL;
 terminal Character CHAR_LITERAL;
 terminal Boolean BOOL_LITERAL;

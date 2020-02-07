@@ -1,17 +1,17 @@
 import java_cup.runtime.Symbol;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+import cyr7.parser.sym;
 
 %%
 %public
 %class MyLexer
 %cup
-%implements sym
 %char
 %public
-%type Token
+%type Symbol
 %public
-%function nextToken
+%function next_token
 
 %unicode
 %pack
@@ -30,167 +30,87 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 %{
     StringBuffer string = new StringBuffer();
     ComplexSymbolFactory symbolFactory;
-    public Lexer(java.io.Reader in, ComplexSymbolFactory sf) {
+    public MyLexer(java.io.Reader in, ComplexSymbolFactory sf) {
 	    this(in);
 	    symbolFactory = sf;
     }
 
-    private Symbol symbol(String name, int sym) {
-        return symbolFactory.newSymbol(name, 
-            sym, 
-            new Location(yyline+1,yycolumn+1,yychar), 
+    private Symbol symbol(int id) {
+    	String name = sym.terminalNames[id];
+        return symbolFactory.newSymbol(name, id, 
+            new Location(yyline+1,yycolumn+1,yychar),
             new Location(yyline+1,yycolumn+yylength(),yychar+yylength()));
     }
     
-    private Symbol symbol(String name, int sym, Object val) {
+   
+    private Symbol symbol(int id, Object val) {
+    	String name = sym.terminalNames[id];
         Location left = new Location(yyline+1,yycolumn+1,yychar);
-        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
-        return symbolFactory.newSymbol(name, sym, left, right,val);
+        Location right = new Location(yyline+1,
+        						      yycolumn+yylength(), 
+        							  yychar+yylength());
+        							  
+        return symbolFactory.newSymbol(name, id, left, right, val);
+    }
+    
+    private Symbol symbol(int id, String val, int line, int col) {
+    	String name = sym.terminalNames[id];
+        Location left = new Location(line+1,col+1);
+        Location right = new Location(line + 1, col + 1 + val.length());
+        							  
+        return symbolFactory.newSymbol(name, id, left, right, val);
     }
 
-    private Symbol symbol(String name, int sym, Object val) {
-        Location left = new Location(yyline+1,yycolumn+1,yychar);
-        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
-        return symbolFactory.newSymbol(name, sym, left, right,val);
-    }
+    public String fromHex(String hex) {
+     	hex = hex.substring(2);
+     	int hexVal = Integer.parseInt(hex, 16);
+     	return ""+(char)hexVal;
+     }
 
-    private void error(String message) {
-        System.out.println("Error at line "+(yyline+1)+", column "+(yycolumn+1)+" : "+message);
-    }
-    // public enum TokenType {
-
-    //     // keywords
-    //     IF,
-    //     ELSE,
-    //     RETURN,
-    //     USE,
-    //     WHILE,
-    //     LENGTH,
-
-    //     // primitives
-    //     TYPE_INT,
-    //     TYPE_BOOL,
-
-    //     // literals
-    //     INT_LITERAL,
-    //     CHAR_LITERAL,
-    //     STRING_LITERAL,
-    //     BOOL_LITERAL,
-
-    //     // punctuation
-    //     L_PAREN,
-    //     R_PAREN,
-    //     L_SQ_BRKT,
-    //     R_SQ_BRKT,
-    //     L_BRACE,
-    //     R_BRACE,
-    //     COLON,
-    //     SEMICOLON,
-    //     COMMA,
-    //     UNDERSCORE,
-
-    //     // operators
-    //     ASSIGN, // =
-    //     PLUS,
-    //     MINUS,
-    //     MULT,
-    //     HIGH_MULT, // *>>
-    //     DIVIDE,
-    //     EQUALS, // ==
-    //     NOT_EQUALS, // !=
-    //     LT, // <
-    //     LTE, // <=
-    //     GT, // >
-    //     GTE, // >=
-    //     NEG_BOOL, // !
-    //     REMAINDER, // %
-    //     LOGICAL_AND, // &
-    //     LOGICAL_OR, // |
-
-    //     // misc
-    //     ID,
-
-    // }
-
-    // public class Token {
-
-    //     final TokenType type;
-    //     final Object attribute;
-    //     final public int line, column;
-
-    //     Token(TokenType tt) {
-    //         type = tt; attribute = null;
-    //         line = yyline;
-    //         column = yycolumn;
-    //     }
-
-    //     Token(TokenType tt, Object attr) {
-    //         type = tt; attribute = attr;
-    //         line = yyline;
-    //         column = yycolumn;
-    //     }
-        
-    //     Token(TokenType tt, Object attr, int lineNumber, int col) {
-    //         type = tt; attribute = attr;
-    //         line = lineNumber;
-    //         column = col;
-    //     }
-        
-    //     public String toString() {
-    //         return "" + type + "(" + attribute + ")";
-    //     }
-
-    // }
-    	public String fromHex(String hex) {
-     		hex = hex.substring(2);
-     		int hexVal = Integer.parseInt(hex, 16);
-     		return ""+(char)hexVal;
-     	}
-
-	// public class LexerStringBuffer {
-	// 	private StringBuffer buffer;
-	// 	private int lineNumber;
-	// 	private int columnNumber;
+	public class LexerStringBuffer {
+		private StringBuffer buffer;
+		private int lineNumber;
+		private int columnNumber;
 		
-	// 	public LexerStringBuffer() {
-	// 		buffer = new StringBuffer();
-	// 		lineNumber = -1;
-	// 		columnNumber = -1;
-	// 	}
+		public LexerStringBuffer() {
+			buffer = new StringBuffer();
+			lineNumber = -1;
+			columnNumber = -1;
+		}
 		
-	// 	private void clear() {
-	// 		buffer.delete(0, buffer.length());
-	// 		lineNumber = -1;
-	// 		columnNumber = -1;
-	// 	}
+		private void clear() {
+			buffer.delete(0, buffer.length());
+			lineNumber = -1;
+			columnNumber = -1;
+		}
 		
-	// 	public void init(int line, int column) {
-	// 		this.clear();
-	// 		lineNumber = line;
-	// 		columnNumber = column;
-	// 	}
+		public void init(int line, int column) {
+			this.clear();
+			lineNumber = line;
+			columnNumber = column;
+		}
 		
-	// 	public void append(String s) {
-	// 		buffer.append(s);
-	// 	}
+		public void append(String s) {
+			buffer.append(s);
+		}
 		
-	// 	public int getLineNumber() {
-	// 		return lineNumber;
-	// 	}
+		public int getLineNumber() {
+			return lineNumber;
+		}
 		
-	// 	public int getColumnNumber() {
-	// 		return columnNumber;
-	// 	}
+		public int getColumnNumber() {
+			return columnNumber;
+		}
 		
-	// 	public Token generateToken(TokenType type) {
-	// 		return new Token(type, buffer.toString(), lineNumber, columnNumber);
-	// 	}
+		public Symbol generateSymbol(int id) {
+			return symbol(id, buffer.toString(), lineNumber, columnNumber);
+		}
 		
-	// 	public String toString() {
-	// 		return buffer.toString();
-	// 	}
+		public String toString() {
+			return buffer.toString();
+		}
 		
-	// }
+	}
 	
     private LexerStringBuffer stringBuffer = new LexerStringBuffer();
     private LexerStringBuffer charBuffer = new LexerStringBuffer();
@@ -217,19 +137,19 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     {Whitespace}        { /* IGNORE */ }
     "//"				{ yybegin(COMMENT); }
     
-    "use"               { return new Token(TokenType.USE); }
-    "if"                { return new Token(TokenType.IF); }
-    "while"             { return new Token(TokenType.WHILE); }
-    "else"              { return new Token(TokenType.ELSE); }
-    "return"            { return new Token(TokenType.RETURN); }
-    "length"            { return new Token(TokenType.LENGTH); }
+    "use"               { return symbol(sym.USE); }
+    "if"                { return symbol(sym.IF); }
+    "while"             { return symbol(sym.WHILE); }
+    "else"              { return symbol(sym.ELSE); }
+    "return"            { return symbol(sym.RETURN); }
+    "length"            { return symbol(sym.LENGTH); }
 
-    "int"               { return new Token(TokenType.TYPE_INT); }
-    "bool"              { return new Token(TokenType.TYPE_BOOL); }
+    "int"               { return symbol(sym.TYPE_INT); }
+    "bool"              { return symbol(sym.TYPE_BOOL); }
 
-    "true"              { return new Token(TokenType.BOOL_LITERAL, true); }
-    "false"             { return new Token(TokenType.BOOL_LITERAL, false); }
-    {Integer}           { return new Token(TokenType.INT_LITERAL, yytext()); }
+    "true"              { return symbol(sym.BOOL_LITERAL, true); }
+    "false"             { return symbol(sym.BOOL_LITERAL, false); }
+    {Integer}           { return symbol(sym.INT_LITERAL, yytext()); }
     0{Integer}+	 
     	{ 
     		throw new cyr7.exceptions.LeadingZeroIntegerException(
@@ -250,40 +170,40 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     		yybegin(STRING);
     	}
 
-    {Identifier}        { return new Token(TokenType.ID, yytext()); }
+    {Identifier}        { return symbol(sym.ID, yytext()); }
 
-    "("                 { return new Token(TokenType.L_PAREN); }
-    ")"                 { return new Token(TokenType.R_PAREN); }
-    "["                 { return new Token(TokenType.L_SQ_BRKT); }
-    "]"                 { return new Token(TokenType.R_SQ_BRKT); }
-    "{"                 { return new Token(TokenType.L_BRACE); }
-    "}"                 { return new Token(TokenType.R_BRACE); }
-    ":"                 { return new Token(TokenType.COLON); }
-    ";"                 { return new Token(TokenType.SEMICOLON); }
-    ","                 { return new Token(TokenType.COMMA); }
-    "_"                 { return new Token(TokenType.UNDERSCORE); }
+    "("                 { return symbol(sym.L_PAREN); }
+    ")"                 { return symbol(sym.R_PAREN); }
+    "["                 { return symbol(sym.L_SQ_BRKT); }
+    "]"                 { return symbol(sym.R_SQ_BRKT); }
+    "{"                 { return symbol(sym.L_BRACE); }
+    "}"                 { return symbol(sym.R_BRACE); }
+    ":"                 { return symbol(sym.COLON); }
+    ";"                 { return symbol(sym.SEMICOLON); }
+    ","                 { return symbol(sym.COMMA); }
+    "_"                 { return symbol(sym.UNDERSCORE); }
 
-    "="                 { return new Token(TokenType.ASSIGN); }
+    "="                 { return symbol(sym.ASSIGN); }
 
-    "+"                 { return new Token(TokenType.PLUS); }
-    "-"                 { return new Token(TokenType.MINUS); }
-    "*"                 { return new Token(TokenType.MULT); }
-    "*>>"               { return new Token(TokenType.HIGH_MULT); }
-    "/"                 { return new Token(TokenType.DIVIDE); }
-    "%"                 { return new Token(TokenType.REMAINDER); }
+    "+"                 { return symbol(sym.PLUS); }
+    "-"                 { return symbol(sym.MINUS); }
+    "*"                 { return symbol(sym.MULT); }
+    "*>>"               { return symbol(sym.HIGH_MULT); }
+    "/"                 { return symbol(sym.DIVIDE); }
+    "%"                 { return symbol(sym.REMAINDER); }
 
-    "!"                 { return new Token(TokenType.NEG_BOOL); }
+    "!"                 { return symbol(sym.NEG_BOOL); }
 
-    "<"                 { return new Token(TokenType.LT); }
-    "<="                { return new Token(TokenType.LTE); }
-    ">"                 { return new Token(TokenType.GT); }
-    ">="                { return new Token(TokenType.GTE); }
+    "<"                 { return symbol(sym.LT); }
+    "<="                { return symbol(sym.LTE); }
+    ">"                 { return symbol(sym.GT); }
+    ">="                { return symbol(sym.GTE); }
 
-    "=="                { return new Token(TokenType.EQUALS); }
-    "!="                { return new Token(TokenType.NOT_EQUALS); }
+    "=="                { return symbol(sym.EQUALS); }
+    "!="                { return symbol(sym.NOT_EQUALS); }
 
-    "&"                 { return new Token(TokenType.LOGICAL_AND); }
-    "|"                 { return new Token(TokenType.LOGICAL_OR); }
+    "&"                 { return symbol(sym.LOGICAL_AND); }
+    "|"                 { return symbol(sym.LOGICAL_OR); }
     
     .					
     	{ 
@@ -348,7 +268,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 	\'					
 		{
 			yybegin(YYINITIAL); 
-			return charBuffer.generateToken(TokenType.CHAR_LITERAL); 
+			return charBuffer.generateSymbol(sym.CHAR_LITERAL); 
 		}
 		
 	[^\']		
@@ -373,7 +293,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \"                  
     	{
     		yybegin(YYINITIAL); 
-    		return stringBuffer.generateToken(TokenType.STRING_LITERAL); 
+    		return stringBuffer.generateSymbol(sym.STRING_LITERAL); 
     	}
     	
     \\n				    {stringBuffer.append("\n");}
