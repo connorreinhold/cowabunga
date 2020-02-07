@@ -32,6 +32,7 @@ import cyr7.parser.sym;
 %{
     StringBuffer string = new StringBuffer();
     ComplexSymbolFactory symbolFactory;
+
     public MyLexer(java.io.Reader in, ComplexSymbolFactory sf) {
 	    this(in);
 	    symbolFactory = sf;
