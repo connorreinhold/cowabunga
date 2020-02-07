@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class LexerTest {
 
     @Test
-    void doesNotBreakLexer() throws IOException {
+    void doesNotBreakLexer() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("##"));
         assertThrows(InvalidTokenException.class, lexer::nextToken);
 
@@ -50,7 +50,7 @@ class LexerTest {
     }
 
     @Test
-    void highMultAndGreaterThan() throws IOException {
+    void highMultAndGreaterThan() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("*>>>"));
         MyLexer.Token token;
 
@@ -62,7 +62,7 @@ class LexerTest {
     }
 
     @Test
-    void multAndHighMult() throws IOException {
+    void multAndHighMult() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("***>>>*>*>>*>>"));
         assertEquals(MyLexer.TokenType.MULT, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.MULT, lexer.nextToken().type);
@@ -75,7 +75,7 @@ class LexerTest {
     }
 
     @Test
-    void lessThanEqualsGreaterThan() throws IOException {
+    void lessThanEqualsGreaterThan() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("<<=>>="));
         assertEquals(MyLexer.TokenType.LT, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.LTE, lexer.nextToken().type);
@@ -84,7 +84,7 @@ class LexerTest {
     }
 
     @Test
-    void equalsNotEquals() throws IOException {
+    void equalsNotEquals() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("=!!===="));
         assertEquals(MyLexer.TokenType.ASSIGN, lexer.nextToken().type);
         assertEquals(MyLexer.TokenType.NEG_BOOL, lexer.nextToken().type);
@@ -94,7 +94,7 @@ class LexerTest {
     }
 
     @Test
-    void minusAndNegativeIntLiteral() throws IOException {
+    void minusAndNegativeIntLiteral() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("1234---5-10"));
         MyLexer.Token token;
 
@@ -127,14 +127,14 @@ class LexerTest {
     }
 
     @Test
-    void commentSingleLine() throws IOException {
+    void commentSingleLine() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment 'a' \" testing \" have a good day"));
         assertNull(lexer.nextToken());
     }
 
     @Test
-    void idThenComment() throws IOException {
+    void idThenComment() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "1234 // this is a comment have a good day"));
 
@@ -146,7 +146,7 @@ class LexerTest {
     }
 
     @Test
-    void commentMultipleLines() throws IOException {
+    void commentMultipleLines() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment have a good day\n"
                         + "1234 asdf // whatever\n"
@@ -168,7 +168,7 @@ class LexerTest {
     }
 
     @Test
-    void commentDifferentLineEndings() throws IOException {
+    void commentDifferentLineEndings() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "// this is a comment have a good day\r"
                         + "1234 asdf // whatever\n"
@@ -190,7 +190,7 @@ class LexerTest {
     }
 
     @Test
-    void integerOverflow() throws IOException {
+    void integerOverflow() throws Exception {
         String veryBigNumber = "99999999999999999999999";
         MyLexer lexer = new MyLexer(new StringReader(veryBigNumber));
         MyLexer.Token token;
@@ -214,8 +214,7 @@ class LexerTest {
     }
 
     @Test
-    void integerEdgeCases() throws InvalidCharacterLiteralException,
-            InvalidStringEscapeCharacterException, IOException {
+    void integerEdgeCases() {
         String illegalInt = "0010";
         MyLexer lexer = new MyLexer(new StringReader(illegalInt));
         assertThrows(LeadingZeroIntegerException.class, lexer::nextToken);
@@ -225,7 +224,7 @@ class LexerTest {
     }
 
     @Test
-    void stringEscapingUnicode() throws IOException {
+    void stringEscapingUnicode() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\xAAAA\"")); // \xAAAA
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -248,7 +247,7 @@ class LexerTest {
     }
 
     @Test
-    void stringEscapingDoubleQuote() throws IOException {
+    void stringEscapingDoubleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\\"\"")); // \"
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -256,7 +255,7 @@ class LexerTest {
     }
 
     @Test
-    void stringEscapingSingleQuote() throws IOException {
+    void stringEscapingSingleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\\'\"")); // \'
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -264,7 +263,7 @@ class LexerTest {
     }
 
     @Test
-    void stringEscapingBackslash() throws IOException {
+    void stringEscapingBackslash() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\\\\"")); // \\
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -272,7 +271,7 @@ class LexerTest {
     }
 
     @Test
-    void stringEscapingNewLine() throws IOException {
+    void stringEscapingNewLine() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\\n\"")); // \n
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -293,7 +292,7 @@ class LexerTest {
     }
 
     @Test
-    void stringEmpty() throws IOException {
+    void stringEmpty() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("\"\"")); // ""
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.STRING_LITERAL, token.type);
@@ -301,7 +300,7 @@ class LexerTest {
     }
 
     @Test
-    void characterEscapingUnicode() throws IOException {
+    void characterEscapingUnicode() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\xAAAA'")); // \xAAAA
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -324,7 +323,7 @@ class LexerTest {
     }
 
     @Test
-    void characterEscapingDoubleQuote() throws IOException {
+    void characterEscapingDoubleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\\"'")); // \"
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -332,7 +331,7 @@ class LexerTest {
     }
 
     @Test
-    void characterEscapingSingleQuote() throws IOException {
+    void characterEscapingSingleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\\''")); // \'
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -340,7 +339,7 @@ class LexerTest {
     }
 
     @Test
-    void characterEscapingNewLine() throws IOException {
+    void characterEscapingNewLine() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\n'")); // \n
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -358,7 +357,7 @@ class LexerTest {
     }
 
     @Test
-    void characterEscapingBackslash() throws IOException {
+    void characterEscapingBackslash() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\\\'")); // \\
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -379,7 +378,7 @@ class LexerTest {
     }
 
     @Test
-    void identifierAndCharacter() throws IOException {
+    void identifierAndCharacter() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("blip'a'asdf"));
         MyLexer.Token token;
 
@@ -391,7 +390,7 @@ class LexerTest {
     }
 
     @Test
-    void functionCallTest() throws IOException {
+    void functionCallTest() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("william(-5) + '我'"));
         MyLexer.Token token;
 
@@ -415,7 +414,7 @@ class LexerTest {
     }
 
     @Test
-    void tabsAsWhitespace() throws IOException {
+    void tabsAsWhitespace() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "\twilliam(\t-\t5)\t+\t\t\t\t\t\t'我'\t\t\t"));
         MyLexer.Token token;

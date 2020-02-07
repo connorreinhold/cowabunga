@@ -1,5 +1,6 @@
 package cyr7.lexer;
 
+import cyr7.exceptions.LexerException;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -32,7 +33,7 @@ public class LexerUtilTest {
     }
 
     @Test
-    void testEscapedNewlineIsUnescaped() throws IOException {
+    void testEscapedNewlineIsUnescaped() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader(
                 "\"Hello, Worl\\x64!\\n\""));
         MyLexer.Token token = lexer.nextToken();
@@ -63,7 +64,7 @@ public class LexerUtilTest {
     }
 
     @Test
-    void testEscapedVisiblesAreEscaped() throws IOException {
+    void testEscapedVisiblesAreEscaped() throws Exception {
         // "\t''\""
         MyLexer lexer = new MyLexer(new StringReader("\"\\t\\''\\\"\""));
         MyLexer.Token token = lexer.nextToken();

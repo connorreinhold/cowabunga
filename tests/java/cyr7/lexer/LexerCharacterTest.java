@@ -3,7 +3,6 @@ package cyr7.lexer;
 import cyr7.exceptions.InvalidCharacterLiteralException;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -12,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class LexerCharacterTest {
 
     @Test
-    void characterEscapingUnicode() throws IOException {
+    void characterEscapingUnicode() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\xAAAA'")); // \xAAAA
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -49,7 +48,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterEscapingDoubleQuote() throws IOException {
+    void characterEscapingDoubleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\\"'")); // \"
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -62,7 +61,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterEscapingSingleQuote() throws IOException {
+    void characterEscapingSingleQuote() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\''")); // \'
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -70,7 +69,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterEscapingNewLine() throws IOException {
+    void characterEscapingNewLine() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\n'")); // \n
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -88,7 +87,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterEscapingBackslash() throws IOException {
+    void characterEscapingBackslash() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\\\\'")); // \\
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
@@ -111,7 +110,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterTabTest() throws IOException {
+    void characterTabTest() throws Exception {
         MyLexer lexer = new MyLexer(new StringReader("'\t'"));
         MyLexer.Token token = lexer.nextToken();
         assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
