@@ -1,7 +1,5 @@
 package cyr7.exceptions;
 
-import java.io.IOException;
-
 public class LexerException extends Exception {
 
     /**
