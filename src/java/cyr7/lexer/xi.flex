@@ -1,7 +1,13 @@
-%%
+import java_cup.runtime.Symbol;
+import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
+%%
 %public
 %class MyLexer
+%cup
+%implements sym
+%char
 %public
 %type Token
 %public
@@ -22,140 +28,169 @@
 %yylexthrow}
 
 %{
-    public enum TokenType {
-
-        // keywords
-        IF,
-        ELSE,
-        RETURN,
-        USE,
-        WHILE,
-        LENGTH,
-
-        // primitives
-        TYPE_INT,
-        TYPE_BOOL,
-
-        // literals
-        INT_LITERAL,
-        CHAR_LITERAL,
-        STRING_LITERAL,
-        BOOL_LITERAL,
-
-        // punctuation
-        L_PAREN,
-        R_PAREN,
-        L_SQ_BRKT,
-        R_SQ_BRKT,
-        L_BRACE,
-        R_BRACE,
-        COLON,
-        SEMICOLON,
-        COMMA,
-        UNDERSCORE,
-
-        // operators
-        ASSIGN, // =
-        PLUS,
-        MINUS,
-        MULT,
-        HIGH_MULT, // *>>
-        DIVIDE,
-        EQUALS, // ==
-        NOT_EQUALS, // !=
-        LT, // <
-        LTE, // <=
-        GT, // >
-        GTE, // >=
-        NEG_BOOL, // !
-        REMAINDER, // %
-        LOGICAL_AND, // &
-        LOGICAL_OR, // |
-
-        // misc
-        ID,
-
+    StringBuffer string = new StringBuffer();
+    ComplexSymbolFactory symbolFactory;
+    public Lexer(java.io.Reader in, ComplexSymbolFactory sf) {
+	    this(in);
+	    symbolFactory = sf;
     }
 
-    public class Token {
+    private Symbol symbol(String name, int sym) {
+        return symbolFactory.newSymbol(name, 
+            sym, 
+            new Location(yyline+1,yycolumn+1,yychar), 
+            new Location(yyline+1,yycolumn+yylength(),yychar+yylength()));
+    }
+    
+    private Symbol symbol(String name, int sym, Object val) {
+        Location left = new Location(yyline+1,yycolumn+1,yychar);
+        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
+        return symbolFactory.newSymbol(name, sym, left, right,val);
+    }
 
-        final TokenType type;
-        final Object attribute;
-        final public int line, column;
+    private Symbol symbol(String name, int sym, Object val) {
+        Location left = new Location(yyline+1,yycolumn+1,yychar);
+        Location right= new Location(yyline+1,yycolumn+yylength(), yychar+yylength());
+        return symbolFactory.newSymbol(name, sym, left, right,val);
+    }
 
-        Token(TokenType tt) {
-            type = tt; attribute = null;
-            line = yyline;
-            column = yycolumn;
-        }
+    private void error(String message) {
+        System.out.println("Error at line "+(yyline+1)+", column "+(yycolumn+1)+" : "+message);
+    }
+    // public enum TokenType {
 
-        Token(TokenType tt, Object attr) {
-            type = tt; attribute = attr;
-            line = yyline;
-            column = yycolumn;
-        }
+    //     // keywords
+    //     IF,
+    //     ELSE,
+    //     RETURN,
+    //     USE,
+    //     WHILE,
+    //     LENGTH,
+
+    //     // primitives
+    //     TYPE_INT,
+    //     TYPE_BOOL,
+
+    //     // literals
+    //     INT_LITERAL,
+    //     CHAR_LITERAL,
+    //     STRING_LITERAL,
+    //     BOOL_LITERAL,
+
+    //     // punctuation
+    //     L_PAREN,
+    //     R_PAREN,
+    //     L_SQ_BRKT,
+    //     R_SQ_BRKT,
+    //     L_BRACE,
+    //     R_BRACE,
+    //     COLON,
+    //     SEMICOLON,
+    //     COMMA,
+    //     UNDERSCORE,
+
+    //     // operators
+    //     ASSIGN, // =
+    //     PLUS,
+    //     MINUS,
+    //     MULT,
+    //     HIGH_MULT, // *>>
+    //     DIVIDE,
+    //     EQUALS, // ==
+    //     NOT_EQUALS, // !=
+    //     LT, // <
+    //     LTE, // <=
+    //     GT, // >
+    //     GTE, // >=
+    //     NEG_BOOL, // !
+    //     REMAINDER, // %
+    //     LOGICAL_AND, // &
+    //     LOGICAL_OR, // |
+
+    //     // misc
+    //     ID,
+
+    // }
+
+    // public class Token {
+
+    //     final TokenType type;
+    //     final Object attribute;
+    //     final public int line, column;
+
+    //     Token(TokenType tt) {
+    //         type = tt; attribute = null;
+    //         line = yyline;
+    //         column = yycolumn;
+    //     }
+
+    //     Token(TokenType tt, Object attr) {
+    //         type = tt; attribute = attr;
+    //         line = yyline;
+    //         column = yycolumn;
+    //     }
         
-        Token(TokenType tt, Object attr, int lineNumber, int col) {
-            type = tt; attribute = attr;
-            line = lineNumber;
-            column = col;
-        }
+    //     Token(TokenType tt, Object attr, int lineNumber, int col) {
+    //         type = tt; attribute = attr;
+    //         line = lineNumber;
+    //         column = col;
+    //     }
         
-        public String toString() {
-            return "" + type + "(" + attribute + ")";
-        }
+    //     public String toString() {
+    //         return "" + type + "(" + attribute + ")";
+    //     }
 
-    }
-    public String fromHex(String hex) {
-    	hex = hex.substring(2);
-    	int hexVal = Integer.parseInt(hex, 16);
-    	return ""+(char)hexVal;
-    }
+    // }
+    	public String fromHex(String hex) {
+     		hex = hex.substring(2);
+     		int hexVal = Integer.parseInt(hex, 16);
+     		return ""+(char)hexVal;
+     	}
 
-	public class LexerStringBuffer {
-		private StringBuffer buffer;
-		private int lineNumber;
-		private int columnNumber;
+	// public class LexerStringBuffer {
+	// 	private StringBuffer buffer;
+	// 	private int lineNumber;
+	// 	private int columnNumber;
 		
-		public LexerStringBuffer() {
-			buffer = new StringBuffer();
-			lineNumber = -1;
-			columnNumber = -1;
-		}
+	// 	public LexerStringBuffer() {
+	// 		buffer = new StringBuffer();
+	// 		lineNumber = -1;
+	// 		columnNumber = -1;
+	// 	}
 		
-		private void clear() {
-			buffer.delete(0, buffer.length());
-			lineNumber = -1;
-			columnNumber = -1;
-		}
+	// 	private void clear() {
+	// 		buffer.delete(0, buffer.length());
+	// 		lineNumber = -1;
+	// 		columnNumber = -1;
+	// 	}
 		
-		public void init(int line, int column) {
-			this.clear();
-			lineNumber = line;
-			columnNumber = column;
-		}
+	// 	public void init(int line, int column) {
+	// 		this.clear();
+	// 		lineNumber = line;
+	// 		columnNumber = column;
+	// 	}
 		
-		public void append(String s) {
-			buffer.append(s);
-		}
+	// 	public void append(String s) {
+	// 		buffer.append(s);
+	// 	}
 		
-		public int getLineNumber() {
-			return lineNumber;
-		}
+	// 	public int getLineNumber() {
+	// 		return lineNumber;
+	// 	}
 		
-		public int getColumnNumber() {
-			return columnNumber;
-		}
+	// 	public int getColumnNumber() {
+	// 		return columnNumber;
+	// 	}
 		
-		public Token generateToken(TokenType type) {
-			return new Token(type, buffer.toString(), lineNumber, columnNumber);
-		}
+	// 	public Token generateToken(TokenType type) {
+	// 		return new Token(type, buffer.toString(), lineNumber, columnNumber);
+	// 	}
 		
-		public String toString() {
-			return buffer.toString();
-		}
+	// 	public String toString() {
+	// 		return buffer.toString();
+	// 	}
 		
-	}
+	// }
 	
     private LexerStringBuffer stringBuffer = new LexerStringBuffer();
     private LexerStringBuffer charBuffer = new LexerStringBuffer();
