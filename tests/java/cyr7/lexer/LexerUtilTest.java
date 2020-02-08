@@ -1,6 +1,9 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LexerException;
+import cyr7.parser.sym;
+import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,10 +15,9 @@ public class LexerUtilTest {
 
     @Test
     void testTypeAttributeDescriptionExist() {
-        for (MyLexer.TokenType tokenType : MyLexer.TokenType.values()) {
-            MyLexer lexer = new MyLexer(new StringReader(""));
-            String description = LexerUtil.typeAttributeDescription(
-                    lexer.new Token(tokenType, "blah"));
+        for (int i = 0; i < sym.terminalNames.length; i++) {
+            MyLexer lexer = LexerFactory.make("");
+            String description = LexerUtil.typeAttributeDescription(lexer.symbolFactory.newSymbol("", i));
             assertNotNull(description);
             assertFalse(description.isEmpty());
         }
@@ -23,59 +25,68 @@ public class LexerUtilTest {
 
     @Test
     void testBooleanLiteralDescription() {
-        MyLexer lexer = new MyLexer(new StringReader(""));
-        MyLexer.Token token = lexer.new Token(MyLexer.TokenType.BOOL_LITERAL,
+        MyLexer lexer = LexerFactory.make("");
+        Symbol token = lexer.symbolFactory.newSymbol(
+                "",
+                sym.BOOL_LITERAL,
+                new ComplexSymbolFactory.Location(1, 1),
+                new ComplexSymbolFactory.Location(1, 1),
                 true);
         assertEquals("1:1 true", LexerUtil.fullDescription(token));
 
-        token = lexer.new Token(MyLexer.TokenType.BOOL_LITERAL, false);
+        token = lexer.symbolFactory.newSymbol(
+                "",
+                sym.BOOL_LITERAL,
+                new ComplexSymbolFactory.Location(1, 1),
+                new ComplexSymbolFactory.Location(1, 1),
+                false);
         assertEquals("1:1 false", LexerUtil.fullDescription(token));
     }
 
     @Test
     void testEscapedNewlineIsUnescaped() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader(
-                "\"Hello, Worl\\x64!\\n\""));
-        MyLexer.Token token = lexer.nextToken();
+        MyLexer lexer = LexerFactory.make(
+                "\"Hello, Worl\\x64!\\n\"");
+        Symbol token = lexer.next_token();
         assertEquals("1:1 string Hello, World!\\n",
                 LexerUtil.fullDescription(token));
 
         // " \n \r \f \t "
-        lexer = new MyLexer(new StringReader("\" \\n \\r \\f \\t \""));
-        token = lexer.nextToken();
-        assertEquals("1:1 string  \\n \\r \\f \\t ", 
+        lexer = LexerFactory.make("\" \\n \\r \\f \\t \"");
+        token = lexer.next_token();
+        assertEquals("1:1 string  \\n \\r \\f \\t ",
                 LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("'\\n'"));
-        token = lexer.nextToken();
+        lexer = LexerFactory.make("'\\n'");
+        token = lexer.next_token();
         assertEquals("1:1 character \\n", LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("'\\r'"));
-        token = lexer.nextToken();
+        lexer = LexerFactory.make("'\\r'");
+        token = lexer.next_token();
         assertEquals("1:1 character \\r", LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("'\\f'"));
-        token = lexer.nextToken();
+        lexer = LexerFactory.make("'\\f'");
+        token = lexer.next_token();
         assertEquals("1:1 character \\f", LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("'\\t'"));
-        token = lexer.nextToken();
+        lexer = LexerFactory.make("'\\t'");
+        token = lexer.next_token();
         assertEquals("1:1 character \\t", LexerUtil.fullDescription(token));
     }
 
     @Test
     void testEscapedVisiblesAreEscaped() throws Exception {
         // "\t''\""
-        MyLexer lexer = new MyLexer(new StringReader("\"\\t\\''\\\"\""));
-        MyLexer.Token token = lexer.nextToken();
+        MyLexer lexer = LexerFactory.make("\"\\t\\''\\\"\"");
+        Symbol token = lexer.next_token();
         assertEquals("1:1 string \\t''\"", LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("'\\''"));
-        token = lexer.nextToken();
+        lexer = LexerFactory.make("'\\''");
+        token = lexer.next_token();
         assertEquals("1:1 character '", LexerUtil.fullDescription(token));
 
-        lexer = new MyLexer(new StringReader("'\\\"'"));
-        token = lexer.nextToken();
+        lexer = LexerFactory.make("'\\\"'");
+        token = lexer.next_token();
         assertEquals("1:1 character \"", LexerUtil.fullDescription(token));
     }
 

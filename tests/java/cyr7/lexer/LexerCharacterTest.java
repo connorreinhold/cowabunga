@@ -1,6 +1,8 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.InvalidCharacterLiteralException;
+import cyr7.parser.sym;
+import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -12,109 +14,109 @@ public class LexerCharacterTest {
 
     @Test
     void characterEscapingUnicode() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("'\\xAAAA'")); // \xAAAA
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\uAAAA", token.attribute);
+        MyLexer lexer = LexerFactory.make("'\\xAAAA'");
+        Symbol token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\uAAAA", token.value);
 
         // Lowercase is just as good.
-        lexer = new MyLexer(new StringReader("'\\xaaaa'")); // \xAAAA
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\uAAAA", token.attribute);
+        lexer = LexerFactory.make("'\\xaaaa'");
+        token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\uAAAA", token.value);
         
 
         // Lowercase is just as good.
-        lexer = new MyLexer(new StringReader("'\\xAAaa'")); // \xAAAA
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\uAAAA", token.attribute);
+        lexer = LexerFactory.make("'\\xAAaa'"); // \xAAAA
+        token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\uAAAA", token.value);
 
         
-        lexer = new MyLexer(new StringReader("'\\x123'")); // \x123
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\u0123", token.attribute);
+        lexer = LexerFactory.make("'\\x123'"); // \x123
+        token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\u0123", token.value);
 
-        lexer = new MyLexer(new StringReader("'\\xFD'")); // \xFD
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\u00FD", token.attribute);
+        lexer = LexerFactory.make("'\\xFD'"); // \xFD
+        token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\u00FD", token.value);
 
-        lexer = new MyLexer(new StringReader("'\\x0'")); // \x0
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\u0000", token.attribute);
+        lexer = LexerFactory.make("'\\x0'"); // \x0
+        token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\u0000", token.value);
     }
 
     @Test
     void characterEscapingDoubleQuote() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("'\\\"'")); // \"
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\"", token.attribute);
+        MyLexer lexer = LexerFactory.make("'\\\"'"); // \"
+        Symbol token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\"", token.value);
 
-        lexer = new MyLexer(new StringReader("'\"'")); // \"
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\"", token.attribute);
+        lexer = LexerFactory.make("'\"'"); // \"
+        token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\"", token.value);
     }
 
     @Test
     void characterEscapingSingleQuote() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("'\\''")); // \'
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("'", token.attribute);
+        MyLexer lexer = LexerFactory.make("'\\''"); // \'
+        Symbol token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("'", token.value);
     }
 
     @Test
     void characterEscapingNewLine() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("'\\n'")); // \n
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\n", token.attribute);
+        MyLexer lexer = LexerFactory.make("'\\n'"); // \n
+        Symbol token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\n", token.value);
     }
 
     @Test
     void characterInvalidEscaping() {
-        MyLexer lexer = new MyLexer(new StringReader("'\\x'")); // \x
-        assertThrows(Exception.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("'\\g'")); // \g
-        assertThrows(Exception.class, lexer::nextToken);
-        lexer = new MyLexer(new StringReader("'\\b'")); // \b
-        assertThrows(Exception.class, lexer::nextToken);
+        MyLexer lexer = LexerFactory.make("'\\x'"); // \x
+        assertThrows(Exception.class, lexer::next_token);
+        lexer = LexerFactory.make("'\\g'"); // \g
+        assertThrows(Exception.class, lexer::next_token);
+        lexer = LexerFactory.make("'\\b'"); // \b
+        assertThrows(Exception.class, lexer::next_token);
     }
 
     @Test
     void characterEscapingBackslash() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("'\\\\'")); // \\
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\\", token.attribute);
+        MyLexer lexer = LexerFactory.make("'\\\\'"); // \\
+        Symbol token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\\", token.value);
     }
 
     @Test
     void characterInvalidFormat() {
         // empty character literal
-        MyLexer lexer = new MyLexer(new StringReader("''"));
-        assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
+        MyLexer lexer = LexerFactory.make("''");
+        assertThrows(InvalidCharacterLiteralException.class, lexer::next_token);
 
         // two line character literal
-        lexer = new MyLexer(new StringReader("'as'"));
-        assertThrows(InvalidCharacterLiteralException.class, lexer::nextToken);
+        lexer = LexerFactory.make("'as'");
+        assertThrows(InvalidCharacterLiteralException.class, lexer::next_token);
 
         // outside of (unicode) BMP
-        lexer = new MyLexer(new StringReader("\u583c\u5f46"));
-        assertThrows(Exception.class, lexer::nextToken);
+        lexer = LexerFactory.make("\u583c\u5f46");
+        assertThrows(Exception.class, lexer::next_token);
     }
 
     @Test
     void characterTabTest() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("'\t'"));
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.CHAR_LITERAL, token.type);
-        assertEquals("\t", token.attribute);
+        MyLexer lexer = LexerFactory.make("'\t'");
+        Symbol token = lexer.next_token();
+        assertEquals(sym.CHAR_LITERAL, token.sym);
+        assertEquals("\t", token.value);
     }
 
 }

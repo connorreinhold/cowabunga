@@ -1,5 +1,8 @@
 package cyr7.lexer;
 
+import cyr7.parser.sym;
+import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -10,28 +13,28 @@ public class LexerBooleanTest {
 
     @Test
     void booleanLiteralTest() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("( true false ) "));
-        MyLexer.Token token;
+        MyLexer lexer = LexerFactory.make("( true false ) ");
+        Symbol token;
 
-        assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
+        assertEquals(sym.L_PAREN, lexer.next_token().sym);
 
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.BOOL_LITERAL, token.type);
-        assertEquals(true, token.attribute);
+        token = lexer.next_token();
+        assertEquals(sym.BOOL_LITERAL, token.sym);
+        assertEquals(true, token.value);
 
-        token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.BOOL_LITERAL, token.type);
-        assertEquals(false, token.attribute);
+        token = lexer.next_token();
+        assertEquals(sym.BOOL_LITERAL, token.sym);
+        assertEquals(false, token.value);
 
-        assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
+        assertEquals(sym.R_PAREN, lexer.next_token().sym);
     }
 
     @Test
     void booleanTypeTest() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader("( bool ) "));
-        assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.TYPE_BOOL, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
+        MyLexer lexer = LexerFactory.make("( bool )");
+        assertEquals(sym.L_PAREN, lexer.next_token().sym);
+        assertEquals(sym.TYPE_BOOL, lexer.next_token().sym);
+        assertEquals(sym.R_PAREN, lexer.next_token().sym);
     }
 
 }

@@ -1,5 +1,7 @@
 package cyr7.lexer;
 
+import cyr7.parser.sym;
+import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -11,65 +13,65 @@ public class LexerCommentTest {
 
     @Test
     void commentSingleLine() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader(
-                "// this is a comment 'a' \" testing \" have a good day"));
-        assertNull(lexer.nextToken());
+        MyLexer lexer = LexerFactory.make(
+                "// this is a comment 'a' \" testing \" have a good day");
+        assertEquals(sym.EOF, lexer.next_token().sym);
     }
 
     @Test
     void idThenComment() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader(
-                "1234 // this is a comment have a good day"));
+        MyLexer lexer = LexerFactory.make(
+                "1234 // this is a comment have a good day");
 
-        MyLexer.Token token = lexer.nextToken();
-        assertEquals(MyLexer.TokenType.INT_LITERAL, token.type);
-        assertEquals("1234", token.attribute);
+        Symbol token = lexer.next_token();
+        assertEquals(sym.INT_LITERAL, token.sym);
+        assertEquals("1234", token.value);
 
-        assertNull(lexer.nextToken());
+        assertEquals(sym.EOF, lexer.next_token().sym);
     }
 
     @Test
     void commentMultipleLines() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader(
+        MyLexer lexer = LexerFactory.make(
                 "// this is a comment have a good day\n"
                         + "1234 asdf // whatever\n"
                         + "while () // blkj \t asdf\n" + "if use\n"
-                        + "++ \"// comment // inside a string\" // comment\n"));
+                        + "++ \"// comment // inside a string\" // comment\n");
 
-        assertEquals(MyLexer.TokenType.INT_LITERAL, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.ID, lexer.nextToken().type);
+        assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
+        assertEquals(sym.ID, lexer.next_token().sym);
 
-        assertEquals(MyLexer.TokenType.WHILE, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
+        assertEquals(sym.WHILE, lexer.next_token().sym);
+        assertEquals(sym.L_PAREN, lexer.next_token().sym);
+        assertEquals(sym.R_PAREN, lexer.next_token().sym);
 
-        assertEquals(MyLexer.TokenType.IF, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.USE, lexer.nextToken().type);
+        assertEquals(sym.IF, lexer.next_token().sym);
+        assertEquals(sym.USE, lexer.next_token().sym);
 
-        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
+        assertEquals(sym.PLUS, lexer.next_token().sym);
+        assertEquals(sym.PLUS, lexer.next_token().sym);
     }
 
     @Test
     void commentDifferentLineEndings() throws Exception {
-        MyLexer lexer = new MyLexer(new StringReader(
+        MyLexer lexer = LexerFactory.make(
                 "// this is a comment have a good day\r"
                         + "1234 asdf // whatever\n"
                         + "while () // blkj \t asdf\r\n" + "if use\n"
-                        + "++ \"// comment // inside a string\" // comment\n"));
+                        + "++ \"// comment // inside a string\" // comment\n");
 
-        assertEquals(MyLexer.TokenType.INT_LITERAL, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.ID, lexer.nextToken().type);
+        assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
+        assertEquals(sym.ID, lexer.next_token().sym);
 
-        assertEquals(MyLexer.TokenType.WHILE, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.L_PAREN, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.R_PAREN, lexer.nextToken().type);
+        assertEquals(sym.WHILE, lexer.next_token().sym);
+        assertEquals(sym.L_PAREN, lexer.next_token().sym);
+        assertEquals(sym.R_PAREN, lexer.next_token().sym);
 
-        assertEquals(MyLexer.TokenType.IF, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.USE, lexer.nextToken().type);
+        assertEquals(sym.IF, lexer.next_token().sym);
+        assertEquals(sym.USE, lexer.next_token().sym);
 
-        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
-        assertEquals(MyLexer.TokenType.PLUS, lexer.nextToken().type);
+        assertEquals(sym.PLUS, lexer.next_token().sym);
+        assertEquals(sym.PLUS, lexer.next_token().sym);
     }
 
 }

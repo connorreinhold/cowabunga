@@ -1,6 +1,8 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LexerException;
+import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
@@ -18,22 +20,23 @@ public class LexerProvidedTest {
                            getClass().getClassLoader()
                                      .getResource(
                                              "lexer/pa1/"+ filename+ ".xi")
-                                     .getFile()));
-        
+                                     .getFile()),
+                new ComplexSymbolFactory());
+
         Scanner solution = new Scanner(new InputStreamReader(
                             getClass().getClassLoader()
                                       .getResourceAsStream(
                                               "lexer/pa1/"
-                                              + filename 
+                                              + filename
                                               + ".lexedsol")));
 
         while (solution.hasNextLine()) {
             String line = solution.nextLine();
             System.out.print(line);
 
-            MyLexer.Token token;
+            Symbol token;
             try {
-                token = lexer.nextToken();
+                token = lexer.next_token();
                 assertEquals(line, LexerUtil.fullDescription(token));
             } catch (LexerException e) {
                 Pattern regexActual = Pattern.compile("[1-9][0-9]*");
@@ -59,7 +62,7 @@ public class LexerProvidedTest {
             System.out.println(" (pass)");
         }
 
-        assertNull(lexer.nextToken());
+        assertNull(lexer.next_token());
         assertFalse(solution.hasNextLine());
         solution.close();
     }
