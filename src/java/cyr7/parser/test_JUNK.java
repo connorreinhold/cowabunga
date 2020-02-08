@@ -7,8 +7,7 @@ import cyr7.lexer.MyLexer;
 
 public class test_JUNK {
 	public static void main(String args[]) throws Exception {
-		MyParser p = new MyParser();
-        p.setScanner(new MyLexer(new InputStreamReader(System.in)));
+		MyParser p = new MyParser(new MyLexer(new InputStreamReader(System.in)), null);
 		p.parse();
 	}
 }

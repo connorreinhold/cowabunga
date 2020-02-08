@@ -4,6 +4,9 @@ mylexer:
 myparser:
 	java -jar dependencies/java_cup.jar -parser "MyParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/xi.cup
 
+ixiparser:
+	java -jar dependencies/java_cup.jar -parser "IxiParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/ixi.cup
+
 xth.lexer:
 	xth --testpath ~/xth/tests/pa1 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa1/xthScript
 	xth --testpath ~/shared/cowabunga/tests/resources/lexer/custom/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/custom/xthScript
