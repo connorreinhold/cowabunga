@@ -22,6 +22,11 @@ import cyr7.parser.sym;
 	cyr7.exceptions.MultiLineCharacterException
 %yylexthrow}
 
+// %eofval{
+//   return new java_cup.runtime.Symbol(sym.EOF);
+// %eofval}
+// %eofclose
+
 %{
     StringBuffer string = new StringBuffer();
     ComplexSymbolFactory symbolFactory;
@@ -316,6 +321,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     . 	 	  			{stringBuffer.append(yytext()); }
 }
 
+<<EOF>>  { return new java_cup.runtime.Symbol(sym.EOF);}
 [^]
     {
         throw new cyr7.exceptions.InvalidTokenException(
