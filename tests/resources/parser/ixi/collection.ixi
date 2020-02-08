@@ -1,0 +1,4 @@
+add(val: int): boolean
+remove(val: int): boolean
+clear(): boolean
+size(): int
