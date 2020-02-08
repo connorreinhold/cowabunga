@@ -32,17 +32,41 @@ terminal COLON, SEMICOLON, COMMA;
 terminal TYPE_INT, TYPE_BOOL;
 
 // misc
-terminal ID, 
+terminal ID;
 
 // Program-wide
 nonterminal program, FunctionDeclList, Statement, FunctionDecl, StatementEnd;
 
-nonterminal Arg, Arglist, ReturnType, ReturnTypeList, Type, Primitive, ArrayStruct;
+nonterminal Arg, Arglist, ReturnType, ReturnTypeList, Type, Primitive, 
+ArrayStruct;
 
 
-program ::= FunctionDeclList                {System.out.println("FunctionDeclList")};
-
-
+program ::= FunctionDeclList   {: System.out.println("Program"); :};
+FunctionDeclList ::= Statement FunctionDeclList   {: System.out.println("FunctionalDeclList"); :}
+					| 			// epsilon
+					;		
+Statement ::= FunctionDecl StatementEnd {: System.out.println("Statement"):};
+FunctionDecl ::= ID L_PAREN Arg R_PAREN ReturnType
+				|		// epsilon
+				;
+StatementEnd ::= SEMICOLON
+				| 
+				;
+Arg ::= ID COLON Type Arglist
+		| 
+		;
+Arglist ::= COMMA ID COLON Type Arglist
+		  |
+		  ;
+ReturnType ::= COLON Type ReturnTypeList
+			|
+			;
+ReturnTypeList ::= COMMA Type ReturnTypeList
+				|
+				;
+Type ::= Primitive ArrayStruct;
+Primitive ::= TYPE_INT | TYPE_BOOL;
+ArrayStruct ::= L_SQ_BRKT R_SQ_BRKT ArrayStruct;
 
 
 
