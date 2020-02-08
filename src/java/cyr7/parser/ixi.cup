@@ -42,14 +42,14 @@ ArrayStruct;
 
 start with program;
 
-program ::= FunctionDeclList   {: System.out.println("Program"); :};
-FunctionDeclList ::= Statement FunctionDeclList   {: System.out.println("FunctionalDeclList"); :}
+program ::= FunctionDeclList;
+FunctionDeclList ::= FunctionDeclList Statement
 					| 			// epsilon
 					;		
-Statement ::= FunctionDecl StatementEnd {: System.out.println("Statement"):};
-FunctionDecl ::= ID L_PAREN Arg R_PAREN ReturnType
-				|		// epsilon
-				;
+Statement ::= FunctionDecl StatementEnd;
+
+FunctionDecl ::= ID L_PAREN Arg R_PAREN ReturnType;
+
 StatementEnd ::= SEMICOLON
 				| 
 				;
