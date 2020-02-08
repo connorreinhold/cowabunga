@@ -3,10 +3,14 @@
 xic
 
 /src/java/cyr7/lexer/MyLexer.java
-
 /src/java/cyr7/lexer/MyLexer.java~
+/src/java/cyr7/lexer/ixi/IxiLexer.java
+/src/java/cyr7/lexer/ixi/IxiLexer.java~
 
 /src/java/cyr7/parser/MyParser.java
+/src/java/cyr7/parser/sym.java
+/src/java/cyr7/parser/ixi/IxiParser.java
+/src/java/cyr7/parser/ixi/sym.java
 
 cowabunga.zip
 
