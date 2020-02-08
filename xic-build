@@ -5,6 +5,8 @@
 
 make mylexer
 
+make myparser
+
 gradle assemble
 
 echo "Compiler built: $(dirname $(readlink -f $0))"

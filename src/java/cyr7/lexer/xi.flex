@@ -1,22 +1,15 @@
 package cyr7.lexer;
 
-import java_cup.runtime.Symbol;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import cyr7.parser.sym;
 
 %%
 %public
 %class MyLexer
-%cup
-%char
-%public
-%type Symbol
-%public
-%function next_token
-
 %unicode
-%pack
+%cup
+
 %line
 %column
 
@@ -119,6 +112,10 @@ import cyr7.parser.sym;
     private LexerStringBuffer charBuffer = new LexerStringBuffer();
     
 %}
+
+%eofval{
+    return symbol(sym.EOF, "EOF", yyline, yycolumn);
+%eofval}
 
 LineEnd = \n|\r|\r\n
 Whitespace = [ \t\f\r\n]

@@ -1,4 +1,4 @@
-xer:
+mylexer:
 	cd src/java/cyr7/lexer; rm -f MyLexer.java; jflex xi.flex
 
 myparser:

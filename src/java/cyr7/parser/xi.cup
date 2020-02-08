@@ -12,25 +12,14 @@ import java.io.File;
 import java.io.FileInputStream;
 
 parser code {:
-  protected MyLexer lexer;
-  Parser(scanner s){ this.s = s; }
+    MyLexer lexer;
 :};
 
 /* define how to connect to the scanner! */
 init with {:
-  ComplexSymbolFactory f = new ComplexSymbolFactory();
-  symbolFactory = f;
-  File file = new File("input.txt");
-  FileInputStream fis = null;
-  try {
-    fis = new FileInputStream(file);
-  } catch (IOException e) {
-    e.printStackTrace();
-  } 
-  lexer = new MyLexer(f,fis);	
 :};
 
-scan with {: return lexer.nextToken(); :};
+scan with {: return lexer.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
 // Keywords

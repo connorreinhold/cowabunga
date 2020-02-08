@@ -1,6 +1,8 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LexerException;
+import cyr7.parser.sym;
+import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.Symbol;
 
 import java.io.BufferedReader;
@@ -18,15 +20,20 @@ public class LexerUtil {
 	 * @throws IOException if the reader throws an {@code IOException}
 	 */
 	public static void lex(Reader reader, Writer writer) throws IOException {
-		MyLexer lexer = new MyLexer(new BufferedReader(reader));
+		MyLexer lexer = new MyLexer(new BufferedReader(reader), new ComplexSymbolFactory());
 		Symbol token;
 
 		try {
-			while ((token = lexer.next_token()) != null) {
-				writer.append(fullDescription(token))
+			System.out.println(lexer);
+			while ((token = lexer.next_token()).sym != sym.EOF) {
+				writer.append(token.toString())
 						.append(System.lineSeparator());
 			}
 		} catch (LexerException e) {
+			writer.append(e.getMessage()).append(System.lineSeparator());
+		} catch (Exception e) {
+			//TODO: Should be gracefuller
+			e.printStackTrace();
 			writer.append(e.getMessage()).append(System.lineSeparator());
 		}
 		writer.flush();
@@ -37,12 +44,12 @@ public class LexerUtil {
 	 *
 	 * {@code $line:$column $desc}
 	 *
-	 * @param token the token to describe
+	 * @param token the symbol to describe
 	 * @return a description of the token
 	 */
-	static String fullDescription(MyLexer.Token token) {
-		return (token.line + 1) + ":" + (token.column + 1) + " "
-				+ typeAttributeDescription(token);
+	static String fullDescription(Symbol token) {
+		System.out.println(token.toString());
+		return token.toString();
 	}
 
 	/**
@@ -51,6 +58,7 @@ public class LexerUtil {
 	 * @param token the token to describe
 	 * @return a description of the token
 	 */
+	/**
 	static String typeAttributeDescription(MyLexer.Token token) {
 		switch (token.type) {
 			case USE:
@@ -147,6 +155,7 @@ public class LexerUtil {
 						"Token " + token + " is missing a description.");
 		}
 	}
+	 */
 
 	/**
 	 * Replace whitespace characters that were escaped by the lexer back into
