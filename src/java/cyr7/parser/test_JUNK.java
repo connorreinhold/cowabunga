@@ -9,6 +9,7 @@ import java.io.Reader;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 import polyglot.util.OptimalCodeWriter;
+import cyr7.ast.IxiProgramNode;
 import cyr7.ast.NodeInterface;
 import cyr7.lexer.ixi.IxiLexer;
 import cyr7.parser.ixi.IxiParser;
@@ -23,6 +24,7 @@ public class test_JUNK {
                 new ComplexSymbolFactory()));
         IxiParser p = new IxiParser(lexer, new ComplexSymbolFactory());
         Object v = p.parse().value;
+        IxiProgramNode b = (IxiProgramNode) v;
         CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(
                 new PrintWriter(System.out));
         ((NodeInterface)v).prettyPrint(printer);

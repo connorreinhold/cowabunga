@@ -22,4 +22,9 @@ public class ArrayTypeNode implements TypeNode {
         printer.endList();
     }
     
+    @Override
+    public boolean equals(Object o) {
+    	return (o instanceof ArrayTypeNode) && ((ArrayTypeNode)o).t.equals(this.t);
+    }
+    
 }
