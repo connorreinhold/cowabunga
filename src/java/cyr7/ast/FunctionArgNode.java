@@ -18,4 +18,13 @@ public class FunctionArgNode implements NodeInterface {
         type.prettyPrint(printer);
         printer.endList();
     }
+    
+    @Override
+    public boolean equals(Object o) {
+    	if (o instanceof FunctionArgNode) {
+    		return this.identifier.equals(((FunctionArgNode) o).identifier) && 
+    				this.type.equals(((FunctionArgNode) o).type);
+    	}
+    	return false;
+    }
 }
