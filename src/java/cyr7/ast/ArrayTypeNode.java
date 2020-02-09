@@ -24,7 +24,8 @@ public class ArrayTypeNode implements TypeNode {
     
     @Override
     public boolean equals(Object o) {
-    	return (o instanceof ArrayTypeNode) && ((ArrayTypeNode)o).t.equals(this.t);
+    	return (o instanceof ArrayTypeNode) 
+    	        && ((ArrayTypeNode)o).t.equals(this.t);
     }
     
 }
