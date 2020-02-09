@@ -6,7 +6,13 @@
 package cyr7.parser.ixi;
 
 import java_cup.runtime.*;
-import cyr7.ast.*;
+import cyr7.ast.ArrayTypeNode;
+import cyr7.ast.FunctionArgNode;
+import cyr7.ast.FunctionDeclNode;
+import cyr7.ast.IxiProgramNode;
+import cyr7.ast.PrimitiveEnum;
+import cyr7.ast.PrimitiveTypeNode;
+import cyr7.ast.TypeNode;
 import java.util.List;
 import java.util.LinkedList;
 
