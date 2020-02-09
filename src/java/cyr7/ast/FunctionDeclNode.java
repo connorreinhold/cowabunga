@@ -41,7 +41,7 @@ public class FunctionDeclNode implements NodeInterface {
 	public boolean equals(Object o) {
 		if (o instanceof FunctionDeclNode) {
 			FunctionDeclNode oNode = (FunctionDeclNode) o;
-			return this.identifier.contentEquals(oNode.identifier) && this.args.equals(oNode.args)
+			return this.identifier.equals(oNode.identifier) && this.args.equals(oNode.args)
 					&& this.returnTypes.equals(oNode.returnTypes);
 		}
 		return false;
