@@ -1,11 +1,9 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LeadingZeroIntegerException;
-import cyr7.parser.sym;
+import cyr7.parser.xi.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
-
-import java.io.StringReader;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

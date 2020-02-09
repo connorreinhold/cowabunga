@@ -3,9 +3,7 @@
 # Xi compiler build script
 #
 
-make mylexer
-
-make myparser
+make cowabunga
 
 gradle assemble
 

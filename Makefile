@@ -1,16 +1,13 @@
 mylexer:
 	cd src/java/cyr7/lexer; rm -f MyLexer.java; jflex xi.flex
 
-myparser:
-	java -jar dependencies/java_cup.jar -parser "MyParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/xi.cup
-
-ixilexer:
-	cd src/java/cyr7/lexer/ixi; jflex ixi.flex
+xiparser:
+	java -jar dependencies/java_cup.jar -parser "XiParser" -destdir ./src/java/cyr7/parser/xi/ ./src/java/cyr7/parser/xi/xi.cup
 
 ixiparser:
-	java -jar dependencies/java_cup.jar -parser "IxiParser" -destdir ./src/java/cyr7/parser/ixi ./src/java/cyr7/parser/ixi/ixi.cup
+	java -jar dependencies/java_cup.jar -parser "IxiParser" -destdir ./src/java/cyr7/parser/ixi/ ./src/java/cyr7/parser/ixi/ixi.cup
 
-cowabunga: ixiparser ixilexer myparser mylexer
+cowabunga: ixiparser xiparser mylexer
 
 xth.lexer:
 	xth --testpath ~/xth/tests/pa1 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa1/xthScript
