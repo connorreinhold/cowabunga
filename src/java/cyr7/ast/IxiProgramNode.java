@@ -1,5 +1,6 @@
 package cyr7.ast;
 
+import java.util.Iterator;
 import java.util.List;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
@@ -27,14 +28,7 @@ public class IxiProgramNode extends ProgramNode implements NodeInterface {
     public boolean equals(Object o) {
     	if (o instanceof IxiProgramNode) {
     		IxiProgramNode oNode = (IxiProgramNode) o;
-    		if (this.functionDeclarations.size() == oNode.functionDeclarations.size()) {
-    			for (int i = 0; i < this.functionDeclarations.size(); i++) {
-    				if (!this.functionDeclarations.get(i).equals(oNode.functionDeclarations.get(i))) {
-    					return false;
-    				}
-    			}
-    			return true;
-    		}
+    		return this.functionDeclarations.equals(oNode.functionDeclarations);
     	}
     	return false;
     }
