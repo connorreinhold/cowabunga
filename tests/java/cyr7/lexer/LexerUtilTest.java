@@ -12,15 +12,16 @@ public class LexerUtilTest {
 
     @Test
     void testTypeAttributeDescriptionExist() {
-        for (int i = 0; i < sym.terminalNames.length; i++) {
+        for (int i = 2; i < sym.terminalNames.length; i++) {
             MyLexer lexer = LexerFactory.make("");
             System.out.println("" + i + ", " + sym.terminalNames[i]);
             String description = LexerUtil.fullDescription(new ComplexSymbol(
                     "",
                     i,
                     new ComplexSymbolFactory.Location(1, 1, 1),
-                    new ComplexSymbolFactory.Location(1, 1, 1))
-            );
+                    new ComplexSymbolFactory.Location(1, 1, 1),
+                    ""
+            ));
             assertNotNull(description);
             assertFalse(description.isEmpty());
         }
