@@ -1,10 +1,7 @@
 package cyr7.lexer;
 
-import cyr7.exceptions.LexerException;
-import cyr7.parser.sym;
-import java_cup.runtime.ComplexSymbolFactory;
+import cyr7.parser.xi.sym;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-import java_cup.runtime.Symbol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,8 +18,8 @@ public class LexerUtil {
 	 * @throws IOException if the reader throws an {@code IOException}
 	 */
 	public static void lex(Reader reader, Writer writer) throws IOException {
-		MyLexer lexer = new MyLexer(new BufferedReader(reader), new ComplexSymbolFactory());
-		Symbol token;
+		MyLexer lexer = new MyLexer(new BufferedReader(reader));
+		ComplexSymbol token;
 
 		try {
 			while ((token = lexer.next_token()).sym != sym.EOF) {
@@ -43,9 +40,9 @@ public class LexerUtil {
 	 * @param token the symbol to describe
 	 * @return a description of the token
 	 */
-	static String fullDescription(Symbol token) {
-		int line = ((ComplexSymbol) token).xleft.getLine();
-		int column = ((ComplexSymbol) token).xleft.getColumn();
+	static String fullDescription(ComplexSymbol token) {
+		int line = token.xleft.getLine();
+		int column = token.xleft.getColumn();
 
 		String location = "" + line + ":" + column + " ";
 

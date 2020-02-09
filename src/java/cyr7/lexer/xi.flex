@@ -2,13 +2,17 @@ package cyr7.lexer;
 
 import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-import cyr7.parser.sym;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+import cyr7.parser.xi.sym;
 
 %%
 %public
 %class MyLexer
 %unicode
 %cup
+
+%function next_token
+%type java_cup.runtime.ComplexSymbolFactory.ComplexSymbol
 
 %pack
 %line
@@ -24,43 +28,37 @@ import cyr7.parser.sym;
 %yylexthrow}
 
 // %eofval{
-//   return new java_cup.runtime.Symbol(sym.EOF);
+//   return new symbol(sym.EOF);
 // %eofval}
 // %eofclose
 
 %{
     StringBuffer string = new StringBuffer();
-    ComplexSymbolFactory symbolFactory;
 
-    public MyLexer(java.io.Reader in, ComplexSymbolFactory sf) {
-	    this(in);
-	    symbolFactory = sf;
-    }
-
-    private Symbol symbol(int id) {
+    private ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
-        return symbolFactory.newSymbol(name, id, 
+        return new ComplexSymbol(name, id,
             new Location(yyline+1,yycolumn+1,yychar),
             new Location(yyline+1,yycolumn+yylength(),yychar+yylength()));
     }
     
    
-    private Symbol symbol(int id, Object val) {
+    private ComplexSymbol symbol(int id, Object val) {
     	String name = sym.terminalNames[id];
         Location left = new Location(yyline+1,yycolumn+1,yychar);
         Location right = new Location(yyline+1,
         						      yycolumn+yylength(), 
         							  yychar+yylength());
         							  
-        return symbolFactory.newSymbol(name, id, left, right, val);
+        return new ComplexSymbol(name, id, left, right, val);
     }
     
-    private Symbol symbol(int id, String val, int line, int col) {
+    private ComplexSymbol symbol(int id, String val, int line, int col) {
     	String name = sym.terminalNames[id];
         Location left = new Location(line+1,col+1);
         Location right = new Location(line + 1, col + 1 + val.length());
         							  
-        return symbolFactory.newSymbol(name, id, left, right, val);
+        return new ComplexSymbol(name, id, left, right, val);
     }
 
     public String fromHex(String hex) {
@@ -104,7 +102,7 @@ import cyr7.parser.sym;
 			return columnNumber;
 		}
 		
-		public Symbol generateSymbol(int id) {
+		public ComplexSymbol generateSymbol(int id) {
 			return symbol(id, buffer.toString(), lineNumber, columnNumber);
 		}
 		
@@ -322,7 +320,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     . 	 	  			{stringBuffer.append(yytext()); }
 }
 
-<<EOF>>  { return new java_cup.runtime.Symbol(sym.EOF);}
+<<EOF>>  { return symbol(sym.EOF);}
 [^]
     {
         throw new cyr7.exceptions.InvalidTokenException(

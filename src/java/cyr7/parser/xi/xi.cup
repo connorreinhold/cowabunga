@@ -3,7 +3,7 @@
    parser evaluates constant expressions on the fly
 */
 
-package cyr7.parser;
+package cyr7.parser.xi;
 
 import java_cup.runtime.*;
 import cyr7.lexer.MyLexer;
