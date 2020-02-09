@@ -13,7 +13,6 @@ import cyr7.ast.IxiProgramNode;
 import cyr7.ast.PrimitiveEnum;
 import cyr7.ast.PrimitiveTypeNode;
 import cyr7.ast.TypeNode;
-import java.util.List;
 import java.util.LinkedList;
 
 parser code {:
@@ -73,16 +72,16 @@ terminal ASSIGN,
 
 // Program-wide
 nonterminal IxiProgramNode program;
-nonterminal List<FunctionDeclNode> FunctionDeclList;
+nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode Statement;
 nonterminal FunctionDeclNode FunctionDecl;
 nonterminal StatementEnd;
 
-nonterminal List<FunctionArgNode> Arg;
-nonterminal List<FunctionArgNode> Arglist;
+nonterminal LinkedList<FunctionArgNode> Arg;
+nonterminal LinkedList<FunctionArgNode> Arglist;
 
-nonterminal List<TypeNode> ReturnType;
-nonterminal List<TypeNode> ReturnTypeList;
+nonterminal LinkedList<TypeNode> ReturnType;
+nonterminal LinkedList<TypeNode> ReturnTypeList;
 
 nonterminal TypeNode Type;
 nonterminal PrimitiveTypeNode Primitive;
@@ -91,7 +90,7 @@ start with program;
 
 program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
 FunctionDeclList ::= FunctionDeclList:lst Statement:stmt {: 
-			lst.add(stmt);
+			lst.addLast(stmt);
 			RESULT = lst;
 		:}
 					| {: RESULT = new LinkedList<>(); :}
@@ -108,24 +107,24 @@ StatementEnd ::= SEMICOLON
 				| 
 				;
 Arg ::= ID:id COLON Type:t Arglist:lst {: 
-			lst.add(new FunctionArgNode(id, t));
+			lst.addFirst(new FunctionArgNode(id, t));
 			RESULT = lst;
 		:}
 		| {: RESULT = new LinkedList<>(); :}
 		;
 		
 Arglist ::= COMMA ID:id COLON Type:t Arglist:lst {: 			
-				lst.add(new FunctionArgNode(id, t));
+				lst.addFirst(new FunctionArgNode(id, t));
 				RESULT = lst; 
 			:}
 			| {: RESULT = new LinkedList<>(); :}
 		  	;
 
-ReturnType ::= COLON Type:t ReturnTypeList:lst {: lst.add(t); RESULT = lst; :}
+ReturnType ::= COLON Type:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
 			|	{: RESULT = new LinkedList<>(); :} 
 			;
 
-ReturnTypeList ::= ReturnTypeList:lst COMMA Type:t {: lst.add(t); RESULT = lst; :}
+ReturnTypeList ::= ReturnTypeList:lst COMMA Type:t {: lst.addLast(t); RESULT = lst; :}
 				| {: RESULT = new LinkedList<>(); :}
 				;
 
