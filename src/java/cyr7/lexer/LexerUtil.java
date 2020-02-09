@@ -30,7 +30,6 @@ public class LexerUtil {
 						.append(System.lineSeparator());
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			writer.append(e.getMessage()).append(System.lineSeparator());
 		}
 		writer.flush();
