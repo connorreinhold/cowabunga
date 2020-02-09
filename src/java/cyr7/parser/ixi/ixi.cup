@@ -6,6 +6,7 @@
 package cyr7.parser.ixi;
 
 import java_cup.runtime.*;
+import cyr7.ast.*;
 
 parser code {:
 :};
@@ -33,7 +34,10 @@ terminal TYPE_INT, TYPE_BOOL;
 terminal ID;
 
 // Program-wide
-nonterminal program, FunctionDeclList, Statement, FunctionDecl, StatementEnd;
+nonterminal IxiProgramNode program;
+nonterminal 	FunctionDeclList, Statement;
+nonterminal FunctionDeclNode FunctionDecl;
+nonterminal 	StatementEnd;
 
 nonterminal Arg, Arglist, ReturnType, ReturnTypeList, Type, Primitive, 
 ArrayStruct;
@@ -44,7 +48,7 @@ program ::= FunctionDeclList;
 FunctionDeclList ::= FunctionDeclList Statement
 					| 	// epsilon
 					;		
-Statement ::= FunctionDecl StatementEnd {: System.out.println("Parsed a statement"); :};
+Statement ::= FunctionDecl StatementEnd;
 
 FunctionDecl ::= ID L_PAREN Arg R_PAREN ReturnType;
 

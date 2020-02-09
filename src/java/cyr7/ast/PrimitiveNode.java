@@ -1,6 +1,6 @@
 package cyr7.ast;
 
-public enum Primitive {
+public enum PrimitiveNode {
 	INT,
 	BOOL
 }
