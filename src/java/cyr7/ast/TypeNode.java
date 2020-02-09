@@ -1,6 +1,6 @@
 package cyr7.ast;
 
-public class TypeNode {
-	PrimitiveNode primitive;
-	int arrayDimensions;
+public interface TypeNode {
+        
+    public int getDimensions();
 }

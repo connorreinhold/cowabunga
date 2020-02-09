@@ -18,6 +18,7 @@ public class test_JUNK {
         ScannerBuffer lexer = new ScannerBuffer(new IxiLexer(reader,
                 new ComplexSymbolFactory()));
         IxiParser p = new IxiParser(lexer, new ComplexSymbolFactory());
-        p.parse();
+        Object v = p.parse().value;
+        System.out.println(v);
     }
 }
