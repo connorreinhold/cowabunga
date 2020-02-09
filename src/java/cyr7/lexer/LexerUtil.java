@@ -24,7 +24,6 @@ public class LexerUtil {
 		Symbol token;
 
 		try {
-			System.out.println(lexer);
 			while ((token = lexer.next_token()).sym != sym.EOF) {
 				writer.append(token.toString())
 						.append(System.lineSeparator());
