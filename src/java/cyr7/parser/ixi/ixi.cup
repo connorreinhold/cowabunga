@@ -6,9 +6,21 @@
 package cyr7.parser.ixi;
 
 import java_cup.runtime.*;
+import cyr7.ast.ArrayTypeNode;
+import cyr7.ast.FunctionArgNode;
+import cyr7.ast.FunctionDeclNode;
+import cyr7.ast.IxiProgramNode;
+import cyr7.ast.PrimitiveEnum;
+import cyr7.ast.PrimitiveTypeNode;
+import cyr7.ast.TypeNode;
+import java.util.List;
+import java.util.LinkedList;
 
 parser code {:
 :};
+
+action code {:
+:}
 
 /* define how to connect to the scanner! */
 init with {:
@@ -61,42 +73,66 @@ terminal ASSIGN,
          LOGICAL_OR;
 
 // Program-wide
-nonterminal program, FunctionDeclList, Statement, FunctionDecl, StatementEnd;
+nonterminal IxiProgramNode program;
+nonterminal List<FunctionDeclNode> FunctionDeclList;
+nonterminal FunctionDeclNode Statement;
+nonterminal FunctionDeclNode FunctionDecl;
+nonterminal StatementEnd;
 
-nonterminal Arg, Arglist, ReturnType, ReturnTypeList, Type, Primitive, 
-ArrayStruct;
+nonterminal List<FunctionArgNode> Arg;
+nonterminal List<FunctionArgNode> Arglist;
+
+nonterminal List<TypeNode> ReturnType;
+nonterminal List<TypeNode> ReturnTypeList;
+
+nonterminal TypeNode Type;
+nonterminal PrimitiveTypeNode Primitive;
 
 start with program;
 
-program ::= FunctionDeclList;
-FunctionDeclList ::= FunctionDeclList Statement
-					| 	// epsilon
-					;		
-Statement ::= FunctionDecl StatementEnd {: System.out.println("Parsed a statement"); :};
+program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
+FunctionDeclList ::= FunctionDeclList:lst Statement:stmt {: 
+			lst.add(stmt);
+			RESULT = lst;
+		:}
+					| {: RESULT = new LinkedList<>(); :}
+					;
+Statement ::= FunctionDecl:decl StatementEnd {:
+			RESULT = decl;
+		:};
 
-FunctionDecl ::= ID L_PAREN Arg R_PAREN ReturnType;
+FunctionDecl ::= ID:id L_PAREN Arg:argList R_PAREN ReturnType:returnList {:
+			RESULT = new FunctionDeclNode(id, argList, returnList);
+		:};
 
 StatementEnd ::= SEMICOLON
 				| 
 				;
-Arg ::= ID COLON Type Arglist
-		| 
+Arg ::= ID:id COLON Type:t Arglist:lst {: 
+			lst.add(new FunctionArgNode(id, t));
+			RESULT = lst;
+		:}
+		| {: RESULT = new LinkedList<>(); :}
 		;
-Arglist ::= COMMA ID COLON Type Arglist
-			|
+		
+Arglist ::= COMMA ID:id COLON Type:t Arglist:lst {: 			
+				lst.add(new FunctionArgNode(id, t));
+				RESULT = lst; 
+			:}
+			| {: RESULT = new LinkedList<>(); :}
 		  	;
-ReturnType ::= COLON Type ReturnTypeList
-			|
+
+ReturnType ::= COLON Type:t ReturnTypeList:lst {: lst.add(t); RESULT = lst; :}
+			|	{: RESULT = new LinkedList<>(); :} 
 			;
-ReturnTypeList ::= COMMA Type ReturnTypeList
-				|
-				;
-Type ::= Primitive ArrayStruct;
-Primitive ::= TYPE_INT | TYPE_BOOL;
-ArrayStruct ::= L_SQ_BRKT R_SQ_BRKT ArrayStruct
-				|
+
+ReturnTypeList ::= ReturnTypeList:lst COMMA Type:t {: lst.add(t); RESULT = lst; :}
+				| {: RESULT = new LinkedList<>(); :}
 				;
 
+Type ::= Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
+		| TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :} 
+		| TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :};
 
 /* The grammar rules */
 /*
