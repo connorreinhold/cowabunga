@@ -22,6 +22,9 @@ init with {:
 scan with {: return lexer.next_token(); :};
 
 /* Terminals (tokens returned by the scanner). */
+// File types
+terminal IXI_FILE, XI_FILE;
+
 // Keywords
 terminal IF, ELSE, RETURN, USE, WHILE, LENGTH;
 

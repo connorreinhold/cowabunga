@@ -45,7 +45,7 @@ public class XiParser
   /** Parse-action table. */
   protected static final short[][] _action_table = 
     unpackFromStrings(new String[] {
-    "\000\004\000\006\002\001\052\004\001\002\000\004\002" +
+    "\000\004\000\006\002\001\054\004\001\002\000\004\002" +
     "\uffff\001\002\000\004\002\006\001\002\000\004\002\000" +
     "\001\002" });
 

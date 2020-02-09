@@ -241,17 +241,19 @@ public class CLI {
                     break;
             }
         });
-
         for (String filename : cmd.getArgs()) {
-            if (!filename.endsWith(".xi")) {
-                continue;
+            boolean isInterface = false;
+            if (filename.endsWith(".xi") || filename.endsWith(".ixi")) {
+            	isInterface = filename.endsWith(".ixi");
+            } else {
+            	continue;
             }
 
             if (wantsLexing) {
                 try {
                     Reader input = getReader(filename);
                     Writer output = getWriter(filename, "lexed");
-                    LexerUtil.lex(input, output);
+                    LexerUtil.lex(input, new OutputStreamWriter(System.out), isInterface);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }

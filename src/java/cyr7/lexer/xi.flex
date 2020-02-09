@@ -33,7 +33,12 @@ import cyr7.parser.xi.sym;
 // %eofclose
 
 %{
-    StringBuffer string = new StringBuffer();
+
+	boolean isInterface;
+	public MyLexer(java.io.Reader in, boolean isInterface) {
+		this.zzReader = in;
+		this.isInterface = isInterface;
+	}
 
     private ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
@@ -66,6 +71,15 @@ import cyr7.parser.xi.sym;
      	int hexVal = Integer.parseInt(hex, 16);
      	return ""+(char)hexVal;
      }
+     
+     
+	public int generateFileType() {
+		if(this.isInterface) {
+			return sym.IXI_FILE;
+		} else {
+			return sym.XI_FILE;
+		}
+	}
 
 	public class LexerStringBuffer {
 		private StringBuffer buffer;
@@ -130,6 +144,7 @@ Identifier = {Letter}({Digit}|{Letter}|_|')*
 Integer = "0"|[1-9]{Digit}*
 Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
+%state LEXING
 %state STRING
 %state COMMENT
 %state CHARACTER
@@ -138,6 +153,12 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 %%
 
 <YYINITIAL> {
+
+	.					{yypushback(1); yybegin(LEXING); return symbol(generateFileType());}
+
+}
+
+<LEXING> {
     {Whitespace}        { /* IGNORE */ }
     "//"				{ yybegin(COMMENT); }
     
@@ -260,7 +281,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     /*Invalid escape characters*/
     \\[^]				
     	{
-    		yybegin(YYINITIAL);
+    		yybegin(LEXING);
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     			"'" + charBuffer.toString() + "'", 
     			charBuffer.getLineNumber(), 
@@ -271,13 +292,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 <CHAR_END> {
 	\'					
 		{
-			yybegin(YYINITIAL); 
+			yybegin(LEXING); 
 			return charBuffer.generateSymbol(sym.CHAR_LITERAL); 
 		}
 		
 	[^\']		
 		{
-			yybegin(YYINITIAL); 
+			yybegin(LEXING); 
 			throw new cyr7.exceptions.InvalidCharacterLiteralException(
 				"'" + charBuffer.toString() + yytext(), 
 				charBuffer.getLineNumber(), 
@@ -288,7 +309,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 <STRING> {
 	{Newline}      		
 		{
-			yybegin(YYINITIAL);
+			yybegin(LEXING);
 			throw new cyr7.exceptions.MultiLineStringException(
 				stringBuffer.getLineNumber(), 
 				stringBuffer.getColumnNumber()); 
@@ -296,7 +317,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 		
     \"                  
     	{
-    		yybegin(YYINITIAL); 
+    		yybegin(LEXING); 
     		return stringBuffer.generateSymbol(sym.STRING_LITERAL); 
     	}
     	

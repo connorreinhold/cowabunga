@@ -35,7 +35,7 @@ public class LexerIntegerTest {
     }
 
     @Test
-    void integerEdgeCases() {
+    void integerEdgeCases() throws Exception {
         String illegalInt = "0010";
         MyLexer lexer = LexerFactory.make(illegalInt);
         assertThrows(LeadingZeroIntegerException.class, lexer::next_token);

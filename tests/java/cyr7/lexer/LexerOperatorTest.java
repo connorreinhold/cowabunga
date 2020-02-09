@@ -214,7 +214,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void integerEdgeCases() {
+    void integerEdgeCases() throws Exception{
         String illegalInt = "0010";
         MyLexer lexer = LexerFactory.make(illegalInt);
         assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
@@ -279,7 +279,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void stringInvalidEscaping() {
+    void stringInvalidEscaping() throws Exception {
         MyLexer lexer = LexerFactory.make("\"\\x\""); // \x
         assertThrows(InvalidStringEscapeCharacterException.class,
                 lexer::next_token);
@@ -347,7 +347,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void characterInvalidEscaping() {
+    void characterInvalidEscaping() throws Exception {
         MyLexer lexer = LexerFactory.make("'\\x'"); // \x
         assertThrows(Exception.class, lexer::next_token);
         lexer = LexerFactory.make("'\\g'"); // \g
@@ -365,7 +365,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void characterInvalidFormat() {
+    void characterInvalidFormat() throws Exception {
         // empty character literal
         MyLexer lexer = LexerFactory.make("''");
         assertThrows(InvalidCharacterLiteralException.class, lexer::next_token);

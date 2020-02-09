@@ -1,12 +1,15 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.InvalidCharacterLiteralException;
+import cyr7.exceptions.LexerException;
 import cyr7.parser.xi.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.io.IOException;
 
 public class LexerCharacterTest {
 
@@ -77,7 +80,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterInvalidEscaping() {
+    void characterInvalidEscaping() throws Exception {
         MyLexer lexer = LexerFactory.make("'\\x'"); // \x
         assertThrows(Exception.class, lexer::next_token);
         lexer = LexerFactory.make("'\\g'"); // \g
@@ -95,7 +98,7 @@ public class LexerCharacterTest {
     }
 
     @Test
-    void characterInvalidFormat() {
+    void characterInvalidFormat() throws Exception {
         // empty character literal
         MyLexer lexer = LexerFactory.make("''");
         assertThrows(InvalidCharacterLiteralException.class, lexer::next_token);

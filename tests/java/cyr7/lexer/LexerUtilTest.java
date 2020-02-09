@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.*;
 public class LexerUtilTest {
 
     @Test
-    void testTypeAttributeDescriptionExist() {
+    void testTypeAttributeDescriptionExist() throws Exception {
         for (int i = 2; i < sym.terminalNames.length; i++) {
             MyLexer lexer = LexerFactory.make("");
             System.out.println("" + i + ", " + sym.terminalNames[i]);
@@ -28,7 +28,7 @@ public class LexerUtilTest {
     }
 
     @Test
-    void testBooleanLiteralDescription() {
+    void testBooleanLiteralDescription() throws Exception {
         MyLexer lexer = LexerFactory.make("");
         ComplexSymbol token = new ComplexSymbol(
                 "",

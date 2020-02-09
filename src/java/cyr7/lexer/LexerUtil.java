@@ -17,13 +17,14 @@ public class LexerUtil {
 	 * @param writer the place to write
 	 * @throws IOException if the reader throws an {@code IOException}
 	 */
-	public static void lex(Reader reader, Writer writer) throws IOException {
-		MyLexer lexer = new MyLexer(new BufferedReader(reader));
+	public static void lex(Reader reader, Writer writer, boolean isInterface) throws IOException {
+		MyLexer lexer = new MyLexer(new BufferedReader(reader), isInterface);
 		ComplexSymbol token;
 
 		try {
 			while ((token = lexer.next_token()).sym != sym.EOF) {
-				writer.append(fullDescription(token))
+				if (token.sym != sym.XI_FILE && token.sym != sym.IXI_FILE)
+					writer.append(fullDescription(token))
 						.append(System.lineSeparator());
 			}
 		} catch (Exception e) {
@@ -47,6 +48,10 @@ public class LexerUtil {
 		String location = "" + line + ":" + column + " ";
 
 		switch (token.sym) {
+			case sym.IXI_FILE:
+				return "Ixi File";
+			case sym.XI_FILE:
+				return "Xi File";
 			case sym.USE:
 				return location + "use";
 			case sym.IF:
