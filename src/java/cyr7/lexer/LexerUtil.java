@@ -136,6 +136,13 @@ public class LexerUtil {
 			case sym.LOGICAL_OR:
 				return location + "|";
 
+			case sym.EOF:
+				return location + "EOF";
+
+			case sym.error:
+				throw new RuntimeException(
+						"Lexer should not output the parser error symbol: " + token.value);
+
 			default:
 				throw new RuntimeException(
 						"Token " + token.sym + " is missing a description.");

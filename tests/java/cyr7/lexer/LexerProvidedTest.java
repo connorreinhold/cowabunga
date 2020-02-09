@@ -1,8 +1,8 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LexerException;
-import java_cup.runtime.ComplexSymbolFactory;
-import java_cup.runtime.Symbol;
+import cyr7.parser.xi.sym;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
@@ -20,8 +20,7 @@ public class LexerProvidedTest {
                            getClass().getClassLoader()
                                      .getResource(
                                              "lexer/pa1/"+ filename+ ".xi")
-                                     .getFile()),
-                new ComplexSymbolFactory());
+                                     .getFile()));
 
         Scanner solution = new Scanner(new InputStreamReader(
                             getClass().getClassLoader()
@@ -34,7 +33,7 @@ public class LexerProvidedTest {
             String line = solution.nextLine();
             System.out.print(line);
 
-            Symbol token;
+            ComplexSymbol token;
             try {
                 token = lexer.next_token();
                 assertEquals(line, LexerUtil.fullDescription(token));
@@ -62,7 +61,7 @@ public class LexerProvidedTest {
             System.out.println(" (pass)");
         }
 
-        assertNull(lexer.next_token());
+        assertEquals(sym.EOF, lexer.next_token().sym);
         assertFalse(solution.hasNextLine());
         solution.close();
     }

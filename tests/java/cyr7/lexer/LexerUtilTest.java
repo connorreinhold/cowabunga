@@ -2,6 +2,7 @@ package cyr7.lexer;
 
 import cyr7.parser.xi.sym;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +14,13 @@ public class LexerUtilTest {
     void testTypeAttributeDescriptionExist() {
         for (int i = 0; i < sym.terminalNames.length; i++) {
             MyLexer lexer = LexerFactory.make("");
-            String description = LexerUtil.typeAttributeDescription(lexer.symbolFactory.newSymbol("", i));
+            System.out.println("" + i + ", " + sym.terminalNames[i]);
+            String description = LexerUtil.fullDescription(new ComplexSymbol(
+                    "",
+                    i,
+                    new ComplexSymbolFactory.Location(1, 1, 1),
+                    new ComplexSymbolFactory.Location(1, 1, 1))
+            );
             assertNotNull(description);
             assertFalse(description.isEmpty());
         }
@@ -22,7 +29,7 @@ public class LexerUtilTest {
     @Test
     void testBooleanLiteralDescription() {
         MyLexer lexer = LexerFactory.make("");
-        Symbol token = lexer.symbolFactory.newSymbol(
+        ComplexSymbol token = new ComplexSymbol(
                 "",
                 sym.BOOL_LITERAL,
                 new ComplexSymbolFactory.Location(1, 1),
@@ -30,7 +37,7 @@ public class LexerUtilTest {
                 true);
         assertEquals("1:1 true", LexerUtil.fullDescription(token));
 
-        token = lexer.symbolFactory.newSymbol(
+        token = new ComplexSymbol(
                 "",
                 sym.BOOL_LITERAL,
                 new ComplexSymbolFactory.Location(1, 1),
@@ -43,7 +50,7 @@ public class LexerUtilTest {
     void testEscapedNewlineIsUnescaped() throws Exception {
         MyLexer lexer = LexerFactory.make(
                 "\"Hello, Worl\\x64!\\n\"");
-        Symbol token = lexer.next_token();
+        ComplexSymbol token = lexer.next_token();
         assertEquals("1:1 string Hello, World!\\n",
                 LexerUtil.fullDescription(token));
 
@@ -74,7 +81,7 @@ public class LexerUtilTest {
     void testEscapedVisiblesAreEscaped() throws Exception {
         // "\t''\""
         MyLexer lexer = LexerFactory.make("\"\\t\\''\\\"\"");
-        Symbol token = lexer.next_token();
+        ComplexSymbol token = lexer.next_token();
         assertEquals("1:1 string \\t''\"", LexerUtil.fullDescription(token));
 
         lexer = LexerFactory.make("'\\''");

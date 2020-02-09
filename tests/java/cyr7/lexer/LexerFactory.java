@@ -7,7 +7,7 @@ import java.io.StringReader;
 public class LexerFactory {
 
     static public MyLexer make(String contents) {
-        return new MyLexer(new StringReader(contents), new ComplexSymbolFactory());
+        return new MyLexer(new StringReader(contents));
     }
 
     private LexerFactory() { }
