@@ -1,12 +1,13 @@
 package cyr7.lexer;
 
-import cyr7.parser.xi.sym;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+
+import cyr7.parser.sym;
 
 public class LexerUtil {
 

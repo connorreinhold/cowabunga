@@ -1,10 +1,11 @@
 package cyr7.lexer;
 
-import cyr7.parser.xi.sym;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
+
+import cyr7.parser.sym;
 
 import static org.junit.jupiter.api.Assertions.*;
 

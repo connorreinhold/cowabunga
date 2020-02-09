@@ -17,7 +17,7 @@ import cyr7.ast.PrimitiveEnum;
 import cyr7.ast.PrimitiveTypeNode;
 import cyr7.ast.TypeNode;
 import cyr7.lexer.MyLexer;
-import cyr7.parser.ixi.IxiParser;
+import cyr7.parser.XiParser;
 import java_cup.runtime.ComplexSymbolFactory;
 
 class TestInterfaceFiles {
@@ -26,7 +26,7 @@ class TestInterfaceFiles {
     void testEmptyProgram() throws Exception {
         IxiProgramNode expected = new IxiProgramNode(new LinkedList<>());
         StringReader prgm = new StringReader("");
-        IxiParser parser = new IxiParser(new MyLexer(prgm),
+        XiParser parser = new XiParser(new MyLexer(prgm, true),
                 new ComplexSymbolFactory());
         Object tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -40,7 +40,7 @@ class TestInterfaceFiles {
         LinkedList<FunctionDeclNode> functions;
         IxiProgramNode expected;
         StringReader prgm;
-        IxiParser parser;
+        XiParser parser;
         Object tree;
 
         args = new LinkedList<>();
@@ -50,7 +50,7 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(functions);
         prgm = new StringReader("\nmain()\n");
-        parser = new IxiParser(new MyLexer(prgm), new ComplexSymbolFactory());
+        parser = new XiParser(new MyLexer(prgm, true), new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
 
@@ -67,7 +67,8 @@ class TestInterfaceFiles {
         expected = new IxiProgramNode(functions);
         prgm = new StringReader("\nmain()\ntrial()\nrun()\n"
                 + "halt()stop()terminate()kill()");
-        parser = new IxiParser(new MyLexer(prgm), new ComplexSymbolFactory());
+        parser = new XiParser(new MyLexer(prgm, true), 
+                new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
     }
@@ -80,7 +81,7 @@ class TestInterfaceFiles {
         LinkedList<FunctionDeclNode> functions;
         IxiProgramNode expected;
         StringReader prgm;
-        IxiParser parser;
+        XiParser parser;
         Object tree;
         FunctionDeclNode function;
         
@@ -93,7 +94,8 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(functions);
         prgm = new StringReader("\nmain(): int\n");
-        parser = new IxiParser(new MyLexer(prgm),
+        MyLexer lex = new MyLexer(prgm, true);
+        parser = new XiParser(new MyLexer(prgm, true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -118,7 +120,7 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(functions);
         prgm = new StringReader("\nmain(): int, bool, int, bool, bool, bool\n");
-        parser = new IxiParser(new MyLexer(prgm),
+        parser = new XiParser(new MyLexer(prgm, true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -156,7 +158,7 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(functions);
         prgm = new StringReader(prgmString.toString());
-        parser = new IxiParser(new MyLexer(prgm),
+        parser = new XiParser(new MyLexer(prgm, true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);

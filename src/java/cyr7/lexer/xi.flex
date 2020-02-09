@@ -3,7 +3,7 @@ package cyr7.lexer;
 import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-import cyr7.parser.xi.sym;
+import cyr7.parser.sym;
 
 %%
 %public
@@ -34,10 +34,12 @@ import cyr7.parser.xi.sym;
 
 %{
 
+	boolean displayFileType = false;
 	boolean isInterface;
 	public MyLexer(java.io.Reader in, boolean isInterface) {
 		this.zzReader = in;
 		this.isInterface = isInterface;
+		this.displayFileType = true;
 	}
 
     private ComplexSymbol symbol(int id) {
@@ -154,7 +156,19 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 <YYINITIAL> {
 
-	.					{yypushback(1); yybegin(LEXING); return symbol(generateFileType());}
+	[^]					{
+							yypushback(1); 
+							yybegin(LEXING); 
+							if(this.displayFileType) {
+								return symbol(generateFileType());
+							}
+						}
+	<<EOF>>				{
+							yybegin(LEXING);
+							if(this.displayFileType) {
+								return symbol(generateFileType());
+							}
+						}
 
 }
 
@@ -239,7 +253,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <COMMENT> {
-	{LineEnd}			{ yybegin(YYINITIAL); }
+	{LineEnd}			{ yybegin(LEXING); }
 	.					{ /* IGNORE */ }
 }
 
@@ -247,7 +261,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     /* No characters */
     {Newline}			
     	{
-    		yybegin(YYINITIAL);
     		throw new cyr7.exceptions.MultiLineCharacterException(
     				charBuffer.getLineNumber(), 
     				charBuffer.getColumnNumber()); 
@@ -255,7 +268,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     	
     \'					
     	{
-    		yybegin(YYINITIAL);
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     				"''", 
     				charBuffer.getLineNumber(), 
@@ -281,7 +293,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     /*Invalid escape characters*/
     \\[^]				
     	{
-    		yybegin(LEXING);
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     			"'" + charBuffer.toString() + "'", 
     			charBuffer.getLineNumber(), 

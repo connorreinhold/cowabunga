@@ -3,16 +3,10 @@
    parser evaluates constant expressions on the fly
 */
 
-package cyr7.parser.ixi;
+package cyr7.parser;
 
 import java_cup.runtime.*;
-import cyr7.ast.ArrayTypeNode;
-import cyr7.ast.FunctionArgNode;
-import cyr7.ast.FunctionDeclNode;
-import cyr7.ast.IxiProgramNode;
-import cyr7.ast.PrimitiveEnum;
-import cyr7.ast.PrimitiveTypeNode;
-import cyr7.ast.TypeNode;
+import cyr7.ast.*;
 import java.util.LinkedList;
 
 parser code {:
@@ -33,6 +27,7 @@ scan with {:
 /* Terminals (tokens returned by the scanner). */
 
 
+terminal IXI_FILE, XI_FILE;
 // Punctuation
 terminal IF, ELSE, RETURN, USE, WHILE, LENGTH;
 
@@ -71,7 +66,8 @@ terminal ASSIGN,
          LOGICAL_OR;
 
 // Program-wide
-nonterminal IxiProgramNode program;
+nonterminal ProgramNode program;
+nonterminal IxiProgramNode ixi_program;
 nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode Statement;
 nonterminal FunctionDeclNode FunctionDecl;
@@ -88,7 +84,8 @@ nonterminal PrimitiveTypeNode Primitive;
 
 start with program;
 
-program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
+program ::= IXI_FILE ixi_program:ixi {: RESULT = ixi; :}; 
+ixi_program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
 FunctionDeclList ::= FunctionDeclList:lst Statement:stmt {: 
 			lst.addLast(stmt);
 			RESULT = lst;

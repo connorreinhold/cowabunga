@@ -1,4 +1,4 @@
-package cyr7.parser.xi;
+package cyr7.parser;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -11,7 +11,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 import cyr7.ast.IxiProgramNode;
 import cyr7.ast.NodeInterface;
-import cyr7.parser.ixi.IxiParser;
+import cyr7.parser.XiParser;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 
 public class test_JUNK {
@@ -20,7 +20,7 @@ public class test_JUNK {
                 new FileInputStream(
                         "./tests/resources/parser/ixi/collection.ixi")));
         ScannerBuffer lexer = new ScannerBuffer(new MyLexer(reader, true));
-        IxiParser p = new IxiParser(lexer, new ComplexSymbolFactory());
+        XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
         Object v = p.parse().value;
         IxiProgramNode b = (IxiProgramNode) v;
         CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(
