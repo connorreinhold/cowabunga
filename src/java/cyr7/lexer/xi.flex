@@ -10,6 +10,7 @@ import cyr7.parser.sym;
 %unicode
 %cup
 
+%pack
 %line
 %column
 
