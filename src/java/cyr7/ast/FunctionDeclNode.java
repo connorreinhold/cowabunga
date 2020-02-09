@@ -1,5 +1,6 @@
 package cyr7.ast;
 
+import java.util.Iterator;
 import java.util.List;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
@@ -40,20 +41,9 @@ public class FunctionDeclNode implements NodeInterface {
     public boolean equals(Object o) {
     	if (o instanceof FunctionDeclNode) {
     		FunctionDeclNode oNode = (FunctionDeclNode) o;
-    		if (this.identifier.equals(oNode.identifier) && this.args.size() == oNode.args.size() &&
-    				this.returnTypes.size() == oNode.returnTypes.size()) {
-    			for (int i = 0; i < this.args.size(); i++) {
-    				if (!this.args.get(i).equals(oNode.args.get(i))) {
-    					return false;
-    				}
-    			}
-    			for (int i = 0; i < this.returnTypes.size(); i++) {
-    				if (!this.returnTypes.get(i).equals(oNode.returnTypes.get(i))) {
-    					return false;
-    				}
-    			}
-    			return true;
-    		}
+    		return this.identifier.contentEquals(oNode.identifier) &&
+    				this.args.equals(oNode.args) &&
+    				this.returnTypes.equals(oNode.returnTypes);
     	}
         return false;
     }
