@@ -1,7 +1,9 @@
 package cyr7.ast;
 
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+
 public class PrimitiveTypeNode implements TypeNode {
-    PrimitiveEnum type;    
+    final PrimitiveEnum type;    
     
     public PrimitiveTypeNode(PrimitiveEnum type) {
         this.type = type;
@@ -10,5 +12,10 @@ public class PrimitiveTypeNode implements TypeNode {
     @Override
     public int getDimensions() {
         return 0;
+    }
+
+    @Override
+    public void prettyPrint(SExpPrinter printer) {
+        printer.printAtom(this.type.toString().toLowerCase());
     }
 }
