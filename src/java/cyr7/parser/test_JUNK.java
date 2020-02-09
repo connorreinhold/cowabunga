@@ -7,8 +7,10 @@ import java.io.Reader;
 
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
+import polyglot.util.OptimalCodeWriter;
 import cyr7.lexer.ixi.IxiLexer;
 import cyr7.parser.ixi.IxiParser;
+import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 
 public class test_JUNK {
     public static void main(String args[]) throws Exception {
@@ -19,6 +21,7 @@ public class test_JUNK {
                 new ComplexSymbolFactory()));
         IxiParser p = new IxiParser(lexer, new ComplexSymbolFactory());
         Object v = p.parse().value;
-        System.out.println(v);
+        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(
+                new OptimalCodeWriter(System.out, 0));
     }
 }
