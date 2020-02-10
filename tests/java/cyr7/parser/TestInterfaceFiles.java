@@ -11,14 +11,13 @@ import cyr7.lexer.MultiFileLexer;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ast.ArrayTypeNode;
-import cyr7.ast.FunctionArgNode;
+import cyr7.ast.FunctionArgDeclNode;
 import cyr7.ast.FunctionDeclNode;
 import cyr7.ast.IxiProgramNode;
 import cyr7.ast.PrimitiveEnum;
 import cyr7.ast.PrimitiveTypeNode;
 import cyr7.ast.TypeNode;
 import cyr7.lexer.MyLexer;
-import cyr7.parser.XiParser;
 import java_cup.runtime.ComplexSymbolFactory;
 
 class TestInterfaceFiles {
@@ -35,7 +34,7 @@ class TestInterfaceFiles {
 
     @Test
     void testNoArgsProcess() throws Exception {
-        LinkedList<FunctionArgNode> args;
+        LinkedList<FunctionArgDeclNode> args;
         LinkedList<TypeNode> returnTypes;
         FunctionDeclNode function;
         LinkedList<FunctionDeclNode> functions;
@@ -77,7 +76,7 @@ class TestInterfaceFiles {
     @Test
     void testNoArgsFunction() throws Exception {
         
-        LinkedList<FunctionArgNode> args;
+        LinkedList<FunctionArgDeclNode> args;
         LinkedList<TypeNode> returnTypes;
         LinkedList<FunctionDeclNode> functions;
         IxiProgramNode expected;

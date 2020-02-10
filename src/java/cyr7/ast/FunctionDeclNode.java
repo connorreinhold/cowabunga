@@ -6,10 +6,10 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class FunctionDeclNode implements NodeInterface {
 	final String identifier;
-	final LinkedList<FunctionArgNode> args;
+	final LinkedList<FunctionArgDeclNode> args;
 	final LinkedList<TypeNode> returnTypes;
 
-	public FunctionDeclNode(String id, LinkedList<FunctionArgNode> args, 
+	public FunctionDeclNode(String id, LinkedList<FunctionArgDeclNode> args,
 	        LinkedList<TypeNode> returnTypes) {
 		this.identifier = id;
 		this.args = args;
@@ -19,7 +19,6 @@ public class FunctionDeclNode implements NodeInterface {
 	@Override
 	public void prettyPrint(SExpPrinter printer) {
 		printer.startUnifiedList();
-		;
 
 		printer.printAtom(this.identifier);
 

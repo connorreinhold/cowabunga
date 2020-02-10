@@ -1,0 +1,1 @@
+fibonacci(3, "whatever", 'a')

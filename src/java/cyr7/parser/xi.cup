@@ -7,6 +7,7 @@ package cyr7.parser;
 
 import java_cup.runtime.*;
 import cyr7.ast.*;
+import java.util.List;
 import java.util.LinkedList;
 
 parser code {:
@@ -67,14 +68,17 @@ terminal ASSIGN,
 
 // Program-wide
 nonterminal ProgramNode program;
+
+// Ixi program
+
 nonterminal IxiProgramNode ixi_program;
 nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode Statement;
 nonterminal FunctionDeclNode FunctionDecl;
 nonterminal StatementEnd;
 
-nonterminal LinkedList<FunctionArgNode> Arg;
-nonterminal LinkedList<FunctionArgNode> Arglist;
+nonterminal LinkedList<FunctionArgDeclNode> ArgDecl;
+nonterminal LinkedList<FunctionArgDeclNode> ArgDeclList;
 
 nonterminal LinkedList<TypeNode> ReturnType;
 nonterminal LinkedList<TypeNode> ReturnTypeList;
@@ -82,9 +86,21 @@ nonterminal LinkedList<TypeNode> ReturnTypeList;
 nonterminal TypeNode Type;
 nonterminal PrimitiveTypeNode Primitive;
 
+// Xi program
+
+nonterminal ExprNode Expr;
+nonterminal FunctionCallNode FunctionCall;
+nonterminal LinkedList<ExprNode> ArgParamList;
+nonterminal ExprNode LiteralExpr;
+
+// Grammar
+
 start with program;
 
-program ::= IXI_FILE ixi_program:ixi {: RESULT = ixi; :}; 
+program ::= IXI_FILE ixi_program:ixi {: RESULT = ixi; :};
+
+// Ixi Grammar
+
 ixi_program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
 FunctionDeclList ::= FunctionDeclList:lst Statement:stmt {: 
 			lst.addLast(stmt);
@@ -96,22 +112,22 @@ Statement ::= FunctionDecl:decl StatementEnd {:
 			RESULT = decl;
 		:};
 
-FunctionDecl ::= ID:id L_PAREN Arg:argList R_PAREN ReturnType:returnList {:
+FunctionDecl ::= ID:id L_PAREN ArgDecl:argList R_PAREN ReturnType:returnList {:
 			RESULT = new FunctionDeclNode(id, argList, returnList);
 		:};
 
 StatementEnd ::= SEMICOLON
 				| 
 				;
-Arg ::= ID:id COLON Type:t Arglist:lst {: 
-			lst.addFirst(new FunctionArgNode(id, t));
+ArgDecl ::= ID:id COLON Type:t ArgDeclList:lst {:
+			lst.addFirst(new FunctionArgDeclNode(id, t));
 			RESULT = lst;
 		:}
 		| {: RESULT = new LinkedList<>(); :}
 		;
 		
-Arglist ::= COMMA ID:id COLON Type:t Arglist:lst {: 			
-				lst.addFirst(new FunctionArgNode(id, t));
+ArgDeclList ::= COMMA ID:id COLON Type:t ArgDeclList:lst {:
+				lst.addFirst(new FunctionArgDeclNode(id, t));
 				RESULT = lst; 
 			:}
 			| {: RESULT = new LinkedList<>(); :}
@@ -129,18 +145,13 @@ Type ::= Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
 		| TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :} 
 		| TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :};
 
-/* The grammar rules */
-/*
-expr_list ::= expr_list expr:e SEMI         {: System.out.println(e); :}
-            | expr:e SEMI                   {: System.out.println(e); :}
-            ;
-            
-expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = e1+e2;        :}
-             | expr:e1 MINUS expr:e2        {: RESULT = e1-e2;        :}
-             | expr:e1 TIMES expr:e2        {: RESULT = e1*e2;        :}
-             | MINUS expr:e                 {: RESULT = -e;           :}
-             %prec UMINUS
-             | LPAREN expr:e RPAREN	         {: RESULT = e;           :}
-             | NUMBER:n	                     {: RESULT = n;           :}
-             ;
-*/
+// Xi Grammar
+
+Expr ::= FunctionCall;
+
+FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: new FunctionCallNode(id, l); :};
+
+ArgParamList ::= Expr:e COMMA ArgParamList:l {: l.addLast(e); RESULT = l; :}
+    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;

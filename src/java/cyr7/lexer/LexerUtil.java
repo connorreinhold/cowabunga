@@ -1,5 +1,6 @@
 package cyr7.lexer;
 
+import cyr7.util.Util;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 
 import java.io.BufferedReader;
@@ -76,9 +77,9 @@ public class LexerUtil {
 			case sym.INT_LITERAL:
 				return location + "integer " + token.value;
 			case sym.CHAR_LITERAL:
-				return location + "character " + unescapeString((String) token.value);
+				return location + "character " + Util.unescapeString((String) token.value);
 			case sym.STRING_LITERAL:
-				return location + "string " + unescapeString((String) token.value);
+				return location + "string " + Util.unescapeString((String) token.value);
 
 			case sym.ID:
 				return location + "id " + token.value;
@@ -154,29 +155,6 @@ public class LexerUtil {
 						"Token " + token.sym + " is missing a description.");
 		}
 
-	}
-
-	/**
-	 * Replace whitespace characters that were escaped by the lexer back into
-	 * their escaped form.
-	 *
-	 * For example: {@code unescapeString("\t")`} is a literal backslash and character
-	 * 't'
-	 *
-	 * @param s The string to unescape
-	 * @return The escaped string
-	 */
-	public static String unescapeString(String s){
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < s.length(); i++)
-			switch (s.charAt(i)){
-				case '\n': sb.append("\\n"); break;
-				case '\t': sb.append("\\t"); break;
-				case '\r': sb.append("\\r"); break;
-				case '\f': sb.append("\\f"); break;
-				default: sb.append(s.charAt(i));
-			}
-		return sb.toString();
 	}
 
     private LexerUtil() {
