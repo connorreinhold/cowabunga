@@ -7,7 +7,7 @@ public class LiteralStringExprNode extends ExprNode {
 
     final String contents;
 
-    LiteralStringExprNode(String contents) {
+    public LiteralStringExprNode(String contents) {
         this.contents = contents;
     }
 

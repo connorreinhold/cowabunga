@@ -23,5 +23,7 @@ public class FunctionCallNode extends ExprNode {
         for (ExprNode node : parameters) {
             node.prettyPrint(printer);
         }
+
+        printer.endList();
     }
 }

@@ -6,7 +6,7 @@ public class LiteralIntExprNode extends ExprNode {
 
     final String contents;
 
-    LiteralIntExprNode(String contents) {
+    public LiteralIntExprNode(String contents) {
         this.contents = contents;
     }
 

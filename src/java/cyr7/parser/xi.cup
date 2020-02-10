@@ -39,9 +39,9 @@ terminal String ID;
 terminal String TYPE_INT, TYPE_BOOL;
 
 // Values
-terminal Long INT_LITERAL;
+terminal String INT_LITERAL;
 terminal String STRING_LITERAL;
-terminal Character CHAR_LITERAL;
+terminal String CHAR_LITERAL;
 terminal Boolean BOOL_LITERAL;
 
 // Punctuation
@@ -88,6 +88,8 @@ nonterminal PrimitiveTypeNode Primitive;
 
 // Xi program
 
+nonterminal ExprNode XiProgram;
+
 nonterminal ExprNode Expr;
 nonterminal FunctionCallNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
@@ -95,7 +97,7 @@ nonterminal ExprNode LiteralExpr;
 
 // Grammar
 
-start with program;
+start with XiProgram;
 
 program ::= IXI_FILE ixi_program:ixi {: RESULT = ixi; :};
 
@@ -147,11 +149,21 @@ Type ::= Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
 
 // Xi Grammar
 
-Expr ::= FunctionCall;
+XiProgram ::= XI_FILE Expr:e {: RESULT = e; :}
+    ;
 
-FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: new FunctionCallNode(id, l); :};
+Expr ::= FunctionCall:e {: RESULT = e; :}
+    | LiteralExpr:e  {: RESULT = e; :}
+    ;
+
+FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: RESULT = new FunctionCallNode(id, l); :};
 
 ArgParamList ::= Expr:e COMMA ArgParamList:l {: l.addLast(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
     | {: RESULT = new LinkedList<>(); :}
+    ;
+
+LiteralExpr ::= INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
+    | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}
+    | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
     ;
