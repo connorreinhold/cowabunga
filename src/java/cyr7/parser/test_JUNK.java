@@ -19,7 +19,7 @@ public class test_JUNK {
         Reader reader = new BufferedReader(new InputStreamReader(
                 new FileInputStream(
                         "./tests/resources/parser/ixi/collection.ixi")));
-        ScannerBuffer lexer = new ScannerBuffer(new MyLexer(reader, true));
+        ScannerBuffer lexer = new ScannerBuffer(new MyLexer(reader));
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
         Object v = p.parse().value;
         IxiProgramNode b = (IxiProgramNode) v;

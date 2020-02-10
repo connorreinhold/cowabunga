@@ -33,16 +33,7 @@ import cyr7.parser.sym;
 // %eofclose
 
 %{
-
-	boolean displayFileType = false;
-	boolean isInterface;
-	public MyLexer(java.io.Reader in, boolean isInterface) {
-		this.zzReader = in;
-		this.isInterface = isInterface;
-		this.displayFileType = true;
-	}
-
-    private ComplexSymbol symbol(int id) {
+    protected ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
         return new ComplexSymbol(name, id,
             new Location(yyline+1,yycolumn+1,yychar),
@@ -50,7 +41,7 @@ import cyr7.parser.sym;
     }
     
    
-    private ComplexSymbol symbol(int id, Object val) {
+    protected ComplexSymbol symbol(int id, Object val) {
     	String name = sym.terminalNames[id];
         Location left = new Location(yyline+1,yycolumn+1,yychar);
         Location right = new Location(yyline+1,
@@ -60,7 +51,7 @@ import cyr7.parser.sym;
         return new ComplexSymbol(name, id, left, right, val);
     }
     
-    private ComplexSymbol symbol(int id, String val, int line, int col) {
+    protected ComplexSymbol symbol(int id, String val, int line, int col) {
     	String name = sym.terminalNames[id];
         Location left = new Location(line+1,col+1);
         Location right = new Location(line + 1, col + 1 + val.length());
@@ -73,15 +64,6 @@ import cyr7.parser.sym;
      	int hexVal = Integer.parseInt(hex, 16);
      	return ""+(char)hexVal;
      }
-     
-     
-	public int generateFileType() {
-		if(this.isInterface) {
-			return sym.IXI_FILE;
-		} else {
-			return sym.XI_FILE;
-		}
-	}
 
 	public class LexerStringBuffer {
 		private StringBuffer buffer;
@@ -146,7 +128,6 @@ Identifier = {Letter}({Digit}|{Letter}|_|')*
 Integer = "0"|[1-9]{Digit}*
 Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
-%state LEXING
 %state STRING
 %state COMMENT
 %state CHARACTER
@@ -155,24 +136,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 %%
 
 <YYINITIAL> {
-
-	[^]					{
-							yypushback(1); 
-							yybegin(LEXING); 
-							if(this.displayFileType) {
-								return symbol(generateFileType());
-							}
-						}
-	<<EOF>>				{
-							yybegin(LEXING);
-							if(this.displayFileType) {
-								return symbol(generateFileType());
-							}
-						}
-
-}
-
-<LEXING> {
     {Whitespace}        { /* IGNORE */ }
     "//"				{ yybegin(COMMENT); }
     
@@ -253,7 +216,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <COMMENT> {
-	{LineEnd}			{ yybegin(LEXING); }
+	{LineEnd}			{ yybegin(YYINITIAL); }
 	.					{ /* IGNORE */ }
 }
 
@@ -261,6 +224,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     /* No characters */
     {Newline}			
     	{
+    		yybegin(YYINITIAL);
     		throw new cyr7.exceptions.MultiLineCharacterException(
     				charBuffer.getLineNumber(), 
     				charBuffer.getColumnNumber()); 
@@ -268,6 +232,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     	
     \'					
     	{
+    		yybegin(YYINITIAL);
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     				"''", 
     				charBuffer.getLineNumber(), 
@@ -293,6 +258,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     /*Invalid escape characters*/
     \\[^]				
     	{
+    		yybegin(YYINITIAL);
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     			"'" + charBuffer.toString() + "'", 
     			charBuffer.getLineNumber(), 
@@ -303,13 +269,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 <CHAR_END> {
 	\'					
 		{
-			yybegin(LEXING); 
+			yybegin(YYINITIAL); 
 			return charBuffer.generateSymbol(sym.CHAR_LITERAL); 
 		}
 		
 	[^\']		
 		{
-			yybegin(LEXING); 
+			yybegin(YYINITIAL); 
 			throw new cyr7.exceptions.InvalidCharacterLiteralException(
 				"'" + charBuffer.toString() + yytext(), 
 				charBuffer.getLineNumber(), 
@@ -320,7 +286,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 <STRING> {
 	{Newline}      		
 		{
-			yybegin(LEXING);
+			yybegin(YYINITIAL);
 			throw new cyr7.exceptions.MultiLineStringException(
 				stringBuffer.getLineNumber(), 
 				stringBuffer.getColumnNumber()); 
@@ -328,7 +294,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 		
     \"                  
     	{
-    		yybegin(LEXING); 
+    		yybegin(YYINITIAL); 
     		return stringBuffer.generateSymbol(sym.STRING_LITERAL); 
     	}
     	

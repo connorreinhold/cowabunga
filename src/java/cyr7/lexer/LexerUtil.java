@@ -19,7 +19,7 @@ public class LexerUtil {
 	 * @throws IOException if the reader throws an {@code IOException}
 	 */
 	public static void lex(Reader reader, Writer writer, boolean isInterface) throws IOException {
-		MyLexer lexer = new MyLexer(new BufferedReader(reader), isInterface);
+		MyLexer lexer = new MyLexer(new BufferedReader(reader));
 		ComplexSymbol token;
 
 		try {
