@@ -7,6 +7,8 @@ package cyr7.parser;
 
 import java_cup.runtime.*;
 import cyr7.ast.*;
+import cyr7.ast.binexpr.*;
+import cyr7.ast.unaryexpr.*;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -62,9 +64,14 @@ terminal ASSIGN,
          GT,
          GTE,
          NEG_BOOL,
+         NEG_INT,
          REMAINDER,
          LOGICAL_AND,
-         LOGICAL_OR;
+         LOGICAL_OR
+         ;
+
+terminal FUNCTION_CALL,
+         ARRAY_ACCESS;
 
 // Program-wide
 nonterminal ProgramNode program;
@@ -88,13 +95,30 @@ nonterminal PrimitiveTypeNode Primitive;
 
 // Xi program
 
-nonterminal ExprNode XiProgram;
+nonterminal LinkedList<ExprNode> XiProgram;
+nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
+
 nonterminal FunctionCallNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
+
 nonterminal ArrayAccessNode ArrayAccess;
+
 nonterminal ExprNode LiteralExpr;
+
+nonterminal ExprNode UnaryExpr;
+
+nonterminal ExprNode IntegerExpr;
+
+nonterminal ExprNode BoolExpr;
+
+// Precedence
+
+precedence left PLUS, MINUS;
+precedence left MULT, HIGH_MULT, DIVIDE, REMAINDER;
+precedence left NEG_INT, NEG_BOOL;
+precedence left FUNCTION_CALL, ARRAY_ACCESS;
 
 // Grammar
 
@@ -150,7 +174,11 @@ Type ::= Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
 
 // Xi Grammar
 
-XiProgram ::= XI_FILE Expr:e {: RESULT = e; :}
+XiProgram ::= XI_FILE ExprList:l {: RESULT = l; :}
+    ;
+
+ExprList ::= Expr:e SEMICOLON ExprList:l {: l.addLast(e); RESULT = l; :}
+    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
     ;
 
 Expr ::= FunctionCall:e {: RESULT = e; :}
@@ -161,7 +189,8 @@ Expr ::= FunctionCall:e {: RESULT = e; :}
     | BoolExpr:e {: RESULT = e; :}
     ;
 
-FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: RESULT = new FunctionCallNode(id, l); :}
+// For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
+FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: RESULT = new FunctionCallNode(id, l); :} %prec FUNCTION_CALL
     ;
 
 ArgParamList ::= Expr:e COMMA ArgParamList:l {: l.addLast(e); RESULT = l; :}
@@ -169,7 +198,7 @@ ArgParamList ::= Expr:e COMMA ArgParamList:l {: l.addLast(e); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
-ArrayAccess ::= ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {: RESULT = new ArrayAccessNode(id, e); :}
+ArrayAccess ::= ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {: RESULT = new ArrayAccessNode(id, e); :} %prec ARRAY_ACCESS
     ;
 
 LiteralExpr ::= INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
@@ -177,8 +206,15 @@ LiteralExpr ::= INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
     | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
     ;
 
-UnaryExpr ::= ;
+UnaryExpr ::= NEG_BOOL Expr:e {: RESULT = new BoolNegExprNode(e); :}
+    | MINUS Expr:e {: RESULT = new IntNegExprNode(e); :} %prec NEG_INT
+    ;
 
-IntegerExpr ::= ;
+IntegerExpr ::= Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1, e2); :}
+    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1, e2); :}
+    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1, e2); :}
+    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1, e2); :}
+    | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1, e2); :}
+    | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1, e2); :}
+    ;
 
-BoolExpr :: = ;

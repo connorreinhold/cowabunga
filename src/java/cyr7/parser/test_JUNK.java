@@ -1,7 +1,9 @@
 package cyr7.parser;
 
 import java.io.*;
+import java.util.LinkedList;
 
+import cyr7.ast.ExprNode;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.lexer.MyLexer;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -21,11 +23,13 @@ public class test_JUNK {
         ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, false));
 
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
-        Object v = p.parse().value;
-        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
-        ((NodeInterface) v).prettyPrint(printer);
-        printer.flush();
-        printer.close();
+        LinkedList<ExprNode> v = (LinkedList<ExprNode>) p.parse().value;
+        for (ExprNode e : v) {
+            CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
+            e.prettyPrint(printer);
+            printer.flush();
+            printer.close();
+        }
 //        IxiProgramNode b = (IxiProgramNode) v;
 //        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(
 //                new PrintWriter(System.out));
