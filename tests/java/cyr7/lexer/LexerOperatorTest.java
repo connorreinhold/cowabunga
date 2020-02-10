@@ -1,6 +1,5 @@
 package cyr7.lexer;
 
-import cyr7.parser.xi.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +9,7 @@ import cyr7.exceptions.InvalidTokenException;
 import cyr7.exceptions.LeadingZeroIntegerException;
 import cyr7.exceptions.MultiLineCharacterException;
 import cyr7.exceptions.MultiLineStringException;
+import cyr7.parser.sym;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -214,7 +214,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void integerEdgeCases() {
+    void integerEdgeCases() throws Exception{
         String illegalInt = "0010";
         MyLexer lexer = LexerFactory.make(illegalInt);
         assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
@@ -279,7 +279,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void stringInvalidEscaping() {
+    void stringInvalidEscaping() throws Exception {
         MyLexer lexer = LexerFactory.make("\"\\x\""); // \x
         assertThrows(InvalidStringEscapeCharacterException.class,
                 lexer::next_token);
@@ -347,7 +347,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void characterInvalidEscaping() {
+    void characterInvalidEscaping() throws Exception {
         MyLexer lexer = LexerFactory.make("'\\x'"); // \x
         assertThrows(Exception.class, lexer::next_token);
         lexer = LexerFactory.make("'\\g'"); // \g
@@ -365,7 +365,7 @@ class LexerOperatorTest {
     }
 
     @Test
-    void characterInvalidFormat() {
+    void characterInvalidFormat() throws Exception {
         // empty character literal
         MyLexer lexer = LexerFactory.make("''");
         assertThrows(InvalidCharacterLiteralException.class, lexer::next_token);

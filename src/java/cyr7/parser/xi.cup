@@ -3,17 +3,10 @@
    parser evaluates constant expressions on the fly
 */
 
-package cyr7.parser.ixi;
+package cyr7.parser;
 
 import java_cup.runtime.*;
-import cyr7.ast.ArrayTypeNode;
-import cyr7.ast.FunctionArgNode;
-import cyr7.ast.FunctionDeclNode;
-import cyr7.ast.IxiProgramNode;
-import cyr7.ast.PrimitiveEnum;
-import cyr7.ast.PrimitiveTypeNode;
-import cyr7.ast.TypeNode;
-import java.util.List;
+import cyr7.ast.*;
 import java.util.LinkedList;
 
 parser code {:
@@ -34,6 +27,7 @@ scan with {:
 /* Terminals (tokens returned by the scanner). */
 
 
+terminal IXI_FILE, XI_FILE;
 // Punctuation
 terminal IF, ELSE, RETURN, USE, WHILE, LENGTH;
 
@@ -72,26 +66,28 @@ terminal ASSIGN,
          LOGICAL_OR;
 
 // Program-wide
-nonterminal IxiProgramNode program;
-nonterminal List<FunctionDeclNode> FunctionDeclList;
+nonterminal ProgramNode program;
+nonterminal IxiProgramNode ixi_program;
+nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode Statement;
 nonterminal FunctionDeclNode FunctionDecl;
 nonterminal StatementEnd;
 
-nonterminal List<FunctionArgNode> Arg;
-nonterminal List<FunctionArgNode> Arglist;
+nonterminal LinkedList<FunctionArgNode> Arg;
+nonterminal LinkedList<FunctionArgNode> Arglist;
 
-nonterminal List<TypeNode> ReturnType;
-nonterminal List<TypeNode> ReturnTypeList;
+nonterminal LinkedList<TypeNode> ReturnType;
+nonterminal LinkedList<TypeNode> ReturnTypeList;
 
 nonterminal TypeNode Type;
 nonterminal PrimitiveTypeNode Primitive;
 
 start with program;
 
-program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
+program ::= IXI_FILE ixi_program:ixi {: RESULT = ixi; :}; 
+ixi_program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
 FunctionDeclList ::= FunctionDeclList:lst Statement:stmt {: 
-			lst.add(stmt);
+			lst.addLast(stmt);
 			RESULT = lst;
 		:}
 					| {: RESULT = new LinkedList<>(); :}
@@ -108,24 +104,24 @@ StatementEnd ::= SEMICOLON
 				| 
 				;
 Arg ::= ID:id COLON Type:t Arglist:lst {: 
-			lst.add(new FunctionArgNode(id, t));
+			lst.addFirst(new FunctionArgNode(id, t));
 			RESULT = lst;
 		:}
 		| {: RESULT = new LinkedList<>(); :}
 		;
 		
 Arglist ::= COMMA ID:id COLON Type:t Arglist:lst {: 			
-				lst.add(new FunctionArgNode(id, t));
+				lst.addFirst(new FunctionArgNode(id, t));
 				RESULT = lst; 
 			:}
 			| {: RESULT = new LinkedList<>(); :}
 		  	;
 
-ReturnType ::= COLON Type:t ReturnTypeList:lst {: lst.add(t); RESULT = lst; :}
+ReturnType ::= COLON Type:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
 			|	{: RESULT = new LinkedList<>(); :} 
 			;
 
-ReturnTypeList ::= ReturnTypeList:lst COMMA Type:t {: lst.add(t); RESULT = lst; :}
+ReturnTypeList ::= ReturnTypeList:lst COMMA Type:t {: lst.addLast(t); RESULT = lst; :}
 				| {: RESULT = new LinkedList<>(); :}
 				;
 

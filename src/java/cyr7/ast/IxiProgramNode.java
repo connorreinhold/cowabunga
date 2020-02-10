@@ -1,14 +1,13 @@
 package cyr7.ast;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedList;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class IxiProgramNode extends ProgramNode implements NodeInterface {
-    final List<FunctionDeclNode> functionDeclarations;
+    final LinkedList<FunctionDeclNode> functionDeclarations;
 
-    public IxiProgramNode(List<FunctionDeclNode> lst) {
+    public IxiProgramNode(LinkedList<FunctionDeclNode> lst) {
         this.functionDeclarations = lst;
     }
 

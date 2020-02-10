@@ -1,7 +1,7 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.InvalidStringEscapeCharacterException;
-import cyr7.parser.xi.sym;
+import cyr7.parser.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
@@ -13,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 public class LexerStringTest {
 
     @Test
-    void stringWithNewlineThrowsError() throws IOException {
+    void stringWithNewlineThrowsError() throws Exception {
 
         // single string with newline
         MyLexer lexer = LexerFactory.make("\"\n\"");
@@ -93,7 +93,7 @@ public class LexerStringTest {
     }
 
     @Test
-    void stringInvalidEscaping() {
+    void stringInvalidEscaping() throws Exception {
         MyLexer lexer = LexerFactory.make("\"\\x\""); // \x
         assertThrows(InvalidStringEscapeCharacterException.class,
                 lexer::next_token);

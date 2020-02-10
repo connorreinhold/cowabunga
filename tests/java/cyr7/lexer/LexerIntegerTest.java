@@ -1,7 +1,7 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LeadingZeroIntegerException;
-import cyr7.parser.xi.sym;
+import cyr7.parser.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
@@ -35,7 +35,7 @@ public class LexerIntegerTest {
     }
 
     @Test
-    void integerEdgeCases() {
+    void integerEdgeCases() throws Exception {
         String illegalInt = "0010";
         MyLexer lexer = LexerFactory.make(illegalInt);
         assertThrows(LeadingZeroIntegerException.class, lexer::next_token);

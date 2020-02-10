@@ -1,17 +1,18 @@
 package cyr7.lexer;
 
-import cyr7.parser.xi.sym;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
+
+import cyr7.parser.sym;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 public class LexerUtilTest {
 
     @Test
-    void testTypeAttributeDescriptionExist() {
+    void testTypeAttributeDescriptionExist() throws Exception {
         for (int i = 2; i < sym.terminalNames.length; i++) {
             MyLexer lexer = LexerFactory.make("");
             System.out.println("" + i + ", " + sym.terminalNames[i]);
@@ -28,7 +29,7 @@ public class LexerUtilTest {
     }
 
     @Test
-    void testBooleanLiteralDescription() {
+    void testBooleanLiteralDescription() throws Exception {
         MyLexer lexer = LexerFactory.make("");
         ComplexSymbol token = new ComplexSymbol(
                 "",

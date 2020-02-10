@@ -1,16 +1,16 @@
 package cyr7.ast;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.LinkedList;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class FunctionDeclNode implements NodeInterface {
 	final String identifier;
-	final List<FunctionArgNode> args;
-	final List<TypeNode> returnTypes;
+	final LinkedList<FunctionArgNode> args;
+	final LinkedList<TypeNode> returnTypes;
 
-	public FunctionDeclNode(String id, List<FunctionArgNode> args, List<TypeNode> returnTypes) {
+	public FunctionDeclNode(String id, LinkedList<FunctionArgNode> args, 
+	        LinkedList<TypeNode> returnTypes) {
 		this.identifier = id;
 		this.args = args;
 		this.returnTypes = returnTypes;
