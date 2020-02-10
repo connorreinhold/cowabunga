@@ -1,1 +1,1 @@
-fibonacci(3, "whatever", 'a')
+a[1]

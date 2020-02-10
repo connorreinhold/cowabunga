@@ -93,6 +93,7 @@ nonterminal ExprNode XiProgram;
 nonterminal ExprNode Expr;
 nonterminal FunctionCallNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
+nonterminal ArrayAccessNode ArrayAccess;
 nonterminal ExprNode LiteralExpr;
 
 // Grammar
@@ -153,17 +154,31 @@ XiProgram ::= XI_FILE Expr:e {: RESULT = e; :}
     ;
 
 Expr ::= FunctionCall:e {: RESULT = e; :}
+    | ArrayAccess:e {: RESULT = e; :}
     | LiteralExpr:e  {: RESULT = e; :}
+    | UnaryExpr:e {: RESULT = e; :}
+    | IntegerExpr:e {: RESULT = e; :}
+    | BoolExpr:e {: RESULT = e; :}
     ;
 
-FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: RESULT = new FunctionCallNode(id, l); :};
+FunctionCall ::= ID:id L_PAREN ArgParamList:l R_PAREN {: RESULT = new FunctionCallNode(id, l); :}
+    ;
 
 ArgParamList ::= Expr:e COMMA ArgParamList:l {: l.addLast(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
+ArrayAccess ::= ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {: RESULT = new ArrayAccessNode(id, e); :}
+    ;
+
 LiteralExpr ::= INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
     | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}
     | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
     ;
+
+UnaryExpr ::= ;
+
+IntegerExpr ::= ;
+
+BoolExpr :: = ;
