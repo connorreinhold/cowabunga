@@ -19,14 +19,13 @@ public class LexerUtil {
 	 * @param writer the place to write
 	 * @throws IOException if the reader throws an {@code IOException}
 	 */
-	public static void lex(Reader reader, Writer writer, boolean isInterface) throws IOException {
+	public static void lex(Reader reader, Writer writer) throws IOException {
 		MyLexer lexer = new MyLexer(new BufferedReader(reader));
 		ComplexSymbol token;
 
 		try {
 			while ((token = lexer.next_token()).sym != sym.EOF) {
-				if (token.sym != sym.XI_FILE && token.sym != sym.IXI_FILE)
-					writer.append(fullDescription(token))
+				writer.append(fullDescription(token))
 						.append(System.lineSeparator());
 			}
 		} catch (Exception e) {

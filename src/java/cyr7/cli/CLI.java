@@ -253,7 +253,7 @@ public class CLI {
                 try {
                     Reader input = getReader(filename);
                     Writer output = getWriter(filename, "lexed");
-                    LexerUtil.lex(input, output, isInterface);
+                    LexerUtil.lex(input, output);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }

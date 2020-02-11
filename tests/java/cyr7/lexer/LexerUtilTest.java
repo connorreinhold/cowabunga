@@ -14,7 +14,10 @@ public class LexerUtilTest {
     @Test
     void testTypeAttributeDescriptionExist() throws Exception {
         for (int i = 2; i < sym.terminalNames.length; i++) {
-            MyLexer lexer = LexerFactory.make("");
+            if (i == sym.FUNCTION_CALL || i == sym.NEG_INT || i == sym.ARRAY_ACCESS) {
+                continue;
+            }
+
             System.out.println("" + i + ", " + sym.terminalNames[i]);
             String description = LexerUtil.fullDescription(new ComplexSymbol(
                     "",
