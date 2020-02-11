@@ -7,8 +7,12 @@ package cyr7.parser;
 
 import java_cup.runtime.*;
 import cyr7.ast.*;
-import cyr7.ast.binexpr.*;
-import cyr7.ast.unaryexpr.*;
+import cyr7.ast.expr.*;
+import cyr7.ast.expr.binexpr.*;
+import cyr7.ast.expr.literalexpr.*;
+import cyr7.ast.expr.unaryexpr.*;
+import cyr7.ast.stmt.*;
+import cyr7.ast.type.*;
 import java.util.List;
 import java.util.LinkedList;
 
@@ -74,15 +78,15 @@ terminal FUNCTION_CALL,
          ARRAY_ACCESS;
 
 // Program-wide
-nonterminal ProgramNode program;
+nonterminal ProgramNode Program;
 
 // Ixi program
 
-nonterminal IxiProgramNode ixi_program;
-nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
-nonterminal FunctionDeclNode Statement;
-nonterminal FunctionDeclNode FunctionDecl;
-nonterminal StatementEnd;
+nonterminal IxiProgramNode IxiProgram;
+nonterminal LinkedList<FunctionHeaderDeclNode> FunctionHeaderDeclList;
+nonterminal FunctionHeaderDeclNode IxiStatement;
+nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
+nonterminal IxiStatementEnd;
 
 nonterminal LinkedList<FunctionArgDeclNode> ArgDecl;
 nonterminal LinkedList<FunctionArgDeclNode> ArgDeclList;
@@ -95,25 +99,29 @@ nonterminal PrimitiveTypeNode Primitive;
 
 // Xi program
 
-nonterminal LinkedList<ExprNode> XiProgram;
+nonterminal XiProgramNode XiProgram;
+nonterminal LinkedList<UseNode> UseList;
+nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
+nonterminal FunctionDeclNode FunctionDecl;
+
+nonterminal StmtNode XiStatement;
+nonterminal BlockStmtNode BlockStatement;
+nonterminal LinkedList<StmtNode> XiStatementList;
+nonterminal ReturnStmtNode ReturnStatement;
+
 nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
-
-nonterminal FunctionCallNode FunctionCall;
+nonterminal FunctionCallExprNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
-
-nonterminal ArrayAccessNode ArrayAccess;
-
+nonterminal ArrayAccessExprNode ArrayAccess;
 nonterminal ExprNode LiteralExpr;
-
 nonterminal ExprNode UnaryExpr;
-
 nonterminal ExprNode IntegerExpr;
-
 nonterminal ExprNode BoolExpr;
 
 // Precedence
+
 precedence left LOGICAL_OR;
 precedence left LOGICAL_AND;
 precedence left EQUALS, NOT_EQUALS;
@@ -125,37 +133,39 @@ precedence left FUNCTION_CALL, ARRAY_ACCESS;
 
 // Grammar
 
-start with XiProgram;
+start with Program;
 
-program ::=
-    IXI_FILE ixi_program:ixi {: RESULT = ixi; :};
+Program ::=
+    IXI_FILE IxiProgram:ixi {: RESULT = ixi; :}
+    | XI_FILE XiProgram:xi {: RESULT = xi; :}
+    ;
 
 // Ixi Grammar
 
-ixi_program ::=
-    FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
+IxiProgram ::=
+    FunctionHeaderDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
 
-FunctionDeclList ::=
-    FunctionDeclList:lst Statement:stmt {:
+FunctionHeaderDeclList ::=
+    FunctionHeaderDeclList:lst IxiStatement:stmt {:
             lst.addLast(stmt);
             RESULT = lst;
         :}
     | {: RESULT = new LinkedList<>(); :}
-;
+    ;
 
-Statement ::=
-    FunctionDecl:decl StatementEnd {:
+IxiStatement ::=
+    FunctionHeaderDecl:decl IxiStatementEnd {:
             RESULT = decl;
         :}
-;
+    ;
 
-FunctionDecl ::=
+FunctionHeaderDecl ::=
     ID:id L_PAREN ArgDecl:argList R_PAREN ReturnType:returnList {:
-            RESULT = new FunctionDeclNode(id, argList, returnList);
+            RESULT = new FunctionHeaderDeclNode(id, argList, returnList);
         :}
-;
+    ;
 
-StatementEnd ::=
+IxiStatementEnd ::=
     SEMICOLON
     |
     ;
@@ -195,36 +205,78 @@ Type ::=
 // Xi Grammar
 
 XiProgram ::=
-    XI_FILE ExprList:l {: RESULT = l; :}
+    UseList:uses FunctionDeclList:functions {: RESULT = new XiProgramNode(uses, functions); :}
+    ;
+
+UseList ::=
+    USE ID:id UseList:l {: l.addFirst(new UseNode(id)); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+XiStatement ::=
+    BlockStatement:s {: RESULT = s; :}
+    | ReturnStatement:s {: RESULT = s; :}
+    ;
+
+FunctionDeclList ::=
+    FunctionDecl:fd FunctionDeclList:l {: l.addFirst(fd); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+FunctionDecl ::=
+    FunctionHeaderDecl:header BlockStatement:block {:
+            RESULT = new FunctionDeclNode(header, block);
+        :}
+    ;
+
+BlockStatement ::=
+    L_BRACE XiStatementList:l R_BRACE {: RESULT = new BlockStmtNode(l); :}
+    ;
+
+XiStatementList ::=
+    XiStatement:s SEMICOLON XiStatementList:l {: l.addFirst(s); RESULT = l; :}
+    | XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+ReturnStatement ::=
+    RETURN ExprList:l {: RESULT = new ReturnStmtNode(l); :}
     ;
 
 ExprList ::=
-    Expr:e SEMICOLON ExprList:l {: l.addLast(e); RESULT = l; :}
+    Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    | {: RESULT = new LinkedList<>(); :}
     ;
 
 Expr ::=
-    FunctionCall:e {: RESULT = e; :}
+    ID:id {: RESULT = new IdExprNode(id); :}
+    | FunctionCall:e {: RESULT = e; :}
     | ArrayAccess:e {: RESULT = e; :}
     | LiteralExpr:e  {: RESULT = e; :}
     | UnaryExpr:e {: RESULT = e; :}
     | IntegerExpr:e {: RESULT = e; :}
     | BoolExpr:e {: RESULT = e; :}
+    | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
     ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
 FunctionCall ::=
-    ID:id L_PAREN ArgParamList:l R_PAREN {: RESULT = new FunctionCallNode(id, l); :} %prec FUNCTION_CALL
+    ID:id L_PAREN ArgParamList:l R_PAREN {:
+            RESULT = new FunctionCallExprNode(id, l);
+        :} %prec FUNCTION_CALL
     ;
 
 ArgParamList ::=
-    Expr:e COMMA ArgParamList:l {: l.addLast(e); RESULT = l; :}
+    Expr:e COMMA ArgParamList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ArrayAccess ::=
-    ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {: RESULT = new ArrayAccessNode(id, e); :} %prec ARRAY_ACCESS
+    ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {:
+            RESULT = new ArrayAccessExprNode(id, e);
+        :} %prec ARRAY_ACCESS
     ;
 
 LiteralExpr ::=

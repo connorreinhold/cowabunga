@@ -1,5 +1,5 @@
 package cyr7.ast;
 
-public class ProgramNode {
+public abstract class ProgramNode implements NodeInterface {
     
 }

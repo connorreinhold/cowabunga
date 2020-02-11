@@ -1,5 +1,6 @@
 package cyr7.ast;
 
+import cyr7.ast.type.TypeNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class FunctionArgDeclNode implements NodeInterface {
