@@ -114,7 +114,10 @@ nonterminal ExprNode IntegerExpr;
 nonterminal ExprNode BoolExpr;
 
 // Precedence
-
+precedence left LOGICAL_OR;
+precedence left LOGICAL_AND;
+precedence left EQUALS, NOT_EQUALS;
+precedence left LT, LTE, GTE, GT;
 precedence left PLUS, MINUS;
 precedence left MULT, HIGH_MULT, DIVIDE, REMAINDER;
 precedence left NEG_INT, NEG_BOOL;
@@ -218,3 +221,12 @@ IntegerExpr ::= Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1, e2); :}
     | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1, e2); :}
     ;
 
+BoolExpr ::= Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1, e2); :}
+    | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1, e2); :}
+    | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1, e2); :}
+    | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1, e2); :}
+    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1, e2); :}
+    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1, e2); :}
+    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1, e2); :}
+    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1, e2); :}
+    ;
