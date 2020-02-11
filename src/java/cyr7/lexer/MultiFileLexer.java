@@ -17,7 +17,7 @@ public class MultiFileLexer extends MyLexer {
     }
 
     @Override
-    public ComplexSymbol next_token() throws IOException, InvalidCharacterLiteralException, InvalidStringEscapeCharacterException, LeadingZeroIntegerException, InvalidTokenException, MultiLineStringException, MultiLineCharacterException {
+    public ComplexSymbol next_token() throws IOException, LexerException {
         if (first) {
             first = false;
             return symbol(isIXI ? sym.IXI_FILE : sym.XI_FILE);

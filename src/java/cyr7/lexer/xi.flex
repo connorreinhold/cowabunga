@@ -19,12 +19,7 @@ import cyr7.parser.sym;
 %column
 
 %yylexthrow{
-	cyr7.exceptions.InvalidCharacterLiteralException, 
-	cyr7.exceptions.InvalidStringEscapeCharacterException,
-	cyr7.exceptions.LeadingZeroIntegerException,
-	cyr7.exceptions.InvalidTokenException,
-	cyr7.exceptions.MultiLineStringException,
-	cyr7.exceptions.MultiLineCharacterException
+	cyr7.exceptions.LexerException
 %yylexthrow}
 
 // %eofval{
