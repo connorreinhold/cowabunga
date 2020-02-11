@@ -4,10 +4,10 @@ import java.util.LinkedList;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class IxiProgramNode extends ProgramNode implements NodeInterface {
-    final LinkedList<FunctionDeclNode> functionDeclarations;
+public class IxiProgramNode extends ProgramNode {
+    final LinkedList<FunctionHeaderDeclNode> functionDeclarations;
 
-    public IxiProgramNode(LinkedList<FunctionDeclNode> lst) {
+    public IxiProgramNode(LinkedList<FunctionHeaderDeclNode> lst) {
         this.functionDeclarations = lst;
     }
 

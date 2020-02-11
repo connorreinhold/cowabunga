@@ -7,6 +7,13 @@ package cyr7.parser;
 
 import java_cup.runtime.*;
 import cyr7.ast.*;
+import cyr7.ast.expr.*;
+import cyr7.ast.expr.binexpr.*;
+import cyr7.ast.expr.literalexpr.*;
+import cyr7.ast.expr.unaryexpr.*;
+import cyr7.ast.stmt.*;
+import cyr7.ast.type.*;
+import java.util.List;
 import java.util.LinkedList;
 
 parser code {:
@@ -20,8 +27,8 @@ init with {:
 :};
 
 scan with {: 
-	Symbol sym = getScanner().next_token();
- 	return (sym != null) ? sym : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym()); 
+    Symbol sym = getScanner().next_token();
+    return (sym != null) ? sym : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
 :};
 
 /* Terminals (tokens returned by the scanner). */
@@ -38,9 +45,9 @@ terminal String ID;
 terminal String TYPE_INT, TYPE_BOOL;
 
 // Values
-terminal Long INT_LITERAL;
+terminal String INT_LITERAL;
 terminal String STRING_LITERAL;
-terminal Character CHAR_LITERAL;
+terminal String CHAR_LITERAL;
 terminal Boolean BOOL_LITERAL;
 
 // Punctuation
@@ -61,20 +68,28 @@ terminal ASSIGN,
          GT,
          GTE,
          NEG_BOOL,
+         NEG_INT,
          REMAINDER,
          LOGICAL_AND,
-         LOGICAL_OR;
+         LOGICAL_OR
+         ;
+
+terminal FUNCTION_CALL,
+         ARRAY_ACCESS;
 
 // Program-wide
-nonterminal ProgramNode program;
-nonterminal IxiProgramNode ixi_program;
-nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
-nonterminal FunctionDeclNode Statement;
-nonterminal FunctionDeclNode FunctionDecl;
-nonterminal StatementEnd;
+nonterminal ProgramNode Program;
 
-nonterminal LinkedList<FunctionArgNode> Arg;
-nonterminal LinkedList<FunctionArgNode> Arglist;
+// Ixi program
+
+nonterminal IxiProgramNode IxiProgram;
+nonterminal LinkedList<FunctionHeaderDeclNode> FunctionHeaderDeclList;
+nonterminal FunctionHeaderDeclNode IxiStatement;
+nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
+nonterminal IxiStatementEnd;
+
+nonterminal LinkedList<FunctionArgDeclNode> ArgDecl;
+nonterminal LinkedList<FunctionArgDeclNode> ArgDeclList;
 
 nonterminal LinkedList<TypeNode> ReturnType;
 nonterminal LinkedList<TypeNode> ReturnTypeList;
@@ -82,65 +97,215 @@ nonterminal LinkedList<TypeNode> ReturnTypeList;
 nonterminal TypeNode Type;
 nonterminal PrimitiveTypeNode Primitive;
 
-start with program;
+// Xi program
 
-program ::= IXI_FILE ixi_program:ixi {: RESULT = ixi; :}; 
-ixi_program ::= FunctionDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
-FunctionDeclList ::= FunctionDeclList:lst Statement:stmt {: 
-			lst.addLast(stmt);
-			RESULT = lst;
-		:}
-					| {: RESULT = new LinkedList<>(); :}
-					;
-Statement ::= FunctionDecl:decl StatementEnd {:
-			RESULT = decl;
-		:};
+nonterminal XiProgramNode XiProgram;
+nonterminal LinkedList<UseNode> UseList;
+nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
+nonterminal FunctionDeclNode FunctionDecl;
 
-FunctionDecl ::= ID:id L_PAREN Arg:argList R_PAREN ReturnType:returnList {:
-			RESULT = new FunctionDeclNode(id, argList, returnList);
-		:};
+nonterminal StmtNode XiStatement;
+nonterminal BlockStmtNode BlockStatement;
+nonterminal LinkedList<StmtNode> XiStatementList;
+nonterminal ReturnStmtNode ReturnStatement;
 
-StatementEnd ::= SEMICOLON
-				| 
-				;
-Arg ::= ID:id COLON Type:t Arglist:lst {: 
-			lst.addFirst(new FunctionArgNode(id, t));
-			RESULT = lst;
-		:}
-		| {: RESULT = new LinkedList<>(); :}
-		;
-		
-Arglist ::= COMMA ID:id COLON Type:t Arglist:lst {: 			
-				lst.addFirst(new FunctionArgNode(id, t));
-				RESULT = lst; 
-			:}
-			| {: RESULT = new LinkedList<>(); :}
-		  	;
+nonterminal LinkedList<ExprNode> ExprList;
 
-ReturnType ::= COLON Type:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
-			|	{: RESULT = new LinkedList<>(); :} 
-			;
+nonterminal ExprNode Expr;
+nonterminal FunctionCallExprNode FunctionCall;
+nonterminal LinkedList<ExprNode> ArgParamList;
+nonterminal ArrayAccessExprNode ArrayAccess;
+nonterminal ExprNode LiteralExpr;
+nonterminal ExprNode UnaryExpr;
+nonterminal ExprNode IntegerExpr;
+nonterminal ExprNode BoolExpr;
 
-ReturnTypeList ::= ReturnTypeList:lst COMMA Type:t {: lst.addLast(t); RESULT = lst; :}
-				| {: RESULT = new LinkedList<>(); :}
-				;
+// Precedence
 
-Type ::= Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
-		| TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :} 
-		| TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :};
+precedence left LOGICAL_OR;
+precedence left LOGICAL_AND;
+precedence left EQUALS, NOT_EQUALS;
+precedence left LT, LTE, GTE, GT;
+precedence left PLUS, MINUS;
+precedence left MULT, HIGH_MULT, DIVIDE, REMAINDER;
+precedence nonassoc NEG_INT, NEG_BOOL;
+precedence left FUNCTION_CALL, ARRAY_ACCESS;
 
-/* The grammar rules */
-/*
-expr_list ::= expr_list expr:e SEMI         {: System.out.println(e); :}
-            | expr:e SEMI                   {: System.out.println(e); :}
-            ;
-            
-expr      ::= expr:e1 PLUS  expr:e2         {: RESULT = e1+e2;        :}
-             | expr:e1 MINUS expr:e2        {: RESULT = e1-e2;        :}
-             | expr:e1 TIMES expr:e2        {: RESULT = e1*e2;        :}
-             | MINUS expr:e                 {: RESULT = -e;           :}
-             %prec UMINUS
-             | LPAREN expr:e RPAREN	         {: RESULT = e;           :}
-             | NUMBER:n	                     {: RESULT = n;           :}
-             ;
-*/
+// Grammar
+
+start with Program;
+
+Program ::=
+    IXI_FILE IxiProgram:ixi {: RESULT = ixi; :}
+    | XI_FILE XiProgram:xi {: RESULT = xi; :}
+    ;
+
+// Ixi Grammar
+
+IxiProgram ::=
+    FunctionHeaderDeclList:lst {: RESULT = new IxiProgramNode(lst); :};
+
+FunctionHeaderDeclList ::=
+    FunctionHeaderDeclList:lst IxiStatement:stmt {:
+            lst.addLast(stmt);
+            RESULT = lst;
+        :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+IxiStatement ::=
+    FunctionHeaderDecl:decl IxiStatementEnd {:
+            RESULT = decl;
+        :}
+    ;
+
+FunctionHeaderDecl ::=
+    ID:id L_PAREN ArgDecl:argList R_PAREN ReturnType:returnList {:
+            RESULT = new FunctionHeaderDeclNode(id, argList, returnList);
+        :}
+    ;
+
+IxiStatementEnd ::=
+    SEMICOLON
+    |
+    ;
+
+ArgDecl ::=
+    ID:id COLON Type:t ArgDeclList:lst {:
+            lst.addFirst(new FunctionArgDeclNode(id, t));
+            RESULT = lst;
+        :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+ArgDeclList ::=
+    COMMA ID:id COLON Type:t ArgDeclList:lst {:
+            lst.addFirst(new FunctionArgDeclNode(id, t));
+            RESULT = lst;
+        :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+ReturnType ::=
+    COLON Type:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+ReturnTypeList ::=
+    ReturnTypeList:lst COMMA Type:t {: lst.addLast(t); RESULT = lst; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+Type ::=
+    Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
+    | TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :}
+    | TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :}
+    ;
+
+// Xi Grammar
+
+XiProgram ::=
+    UseList:uses FunctionDeclList:functions {: RESULT = new XiProgramNode(uses, functions); :}
+    ;
+
+UseList ::=
+    USE ID:id UseList:l {: l.addFirst(new UseNode(id)); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+XiStatement ::=
+    BlockStatement:s {: RESULT = s; :}
+    | ReturnStatement:s {: RESULT = s; :}
+    ;
+
+FunctionDeclList ::=
+    FunctionDecl:fd FunctionDeclList:l {: l.addFirst(fd); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+FunctionDecl ::=
+    FunctionHeaderDecl:header BlockStatement:block {:
+            RESULT = new FunctionDeclNode(header, block);
+        :}
+    ;
+
+BlockStatement ::=
+    L_BRACE XiStatementList:l R_BRACE {: RESULT = new BlockStmtNode(l); :}
+    ;
+
+XiStatementList ::=
+    XiStatement:s SEMICOLON XiStatementList:l {: l.addFirst(s); RESULT = l; :}
+    | XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+ReturnStatement ::=
+    RETURN ExprList:l {: RESULT = new ReturnStmtNode(l); :}
+    ;
+
+ExprList ::=
+    Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
+    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+Expr ::=
+    ID:id {: RESULT = new IdExprNode(id); :}
+    | FunctionCall:e {: RESULT = e; :}
+    | ArrayAccess:e {: RESULT = e; :}
+    | LiteralExpr:e  {: RESULT = e; :}
+    | UnaryExpr:e {: RESULT = e; :}
+    | IntegerExpr:e {: RESULT = e; :}
+    | BoolExpr:e {: RESULT = e; :}
+    | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
+    ;
+
+// For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
+FunctionCall ::=
+    ID:id L_PAREN ArgParamList:l R_PAREN {:
+            RESULT = new FunctionCallExprNode(id, l);
+        :} %prec FUNCTION_CALL
+    ;
+
+ArgParamList ::=
+    Expr:e COMMA ArgParamList:l {: l.addFirst(e); RESULT = l; :}
+    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+ArrayAccess ::=
+    ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {:
+            RESULT = new ArrayAccessExprNode(id, e);
+        :} %prec ARRAY_ACCESS
+    ;
+
+LiteralExpr ::=
+    INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
+    | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}
+    | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
+    ;
+
+UnaryExpr ::=
+    NEG_BOOL Expr:e {: RESULT = new BoolNegExprNode(e); :}
+    | MINUS Expr:e {: RESULT = new IntNegExprNode(e); :} %prec NEG_INT
+    ;
+
+IntegerExpr ::=
+    Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1, e2); :}
+    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1, e2); :}
+    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1, e2); :}
+    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1, e2); :}
+    | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1, e2); :}
+    | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1, e2); :}
+    ;
+
+BoolExpr ::=
+    Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1, e2); :}
+    | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1, e2); :}
+    | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1, e2); :}
+    | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1, e2); :}
+    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1, e2); :}
+    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1, e2); :}
+    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1, e2); :}
+    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1, e2); :}
+    ;
