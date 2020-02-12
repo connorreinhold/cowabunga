@@ -132,6 +132,7 @@ nonterminal LinkedList<ExprNode> ArrayElements;
 
 // Precedence
 
+precedence nonassoc R_BRACE;
 precedence nonassoc L_BRACE;
 precedence nonassoc ELSE;
 precedence nonassoc ID;
@@ -356,12 +357,17 @@ BoolExpr ::=
     ;
     
 ArrayExpr ::=
-	L_BRACE Expr:e ArrayElements:l R_BRACE {: l.addLast(e); RESULT = new ArrayExprNode(l); :}
+	L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(l); :}
 	| L_BRACE R_BRACE {: RESULT = new ArrayExprNode(new LinkedList<>()); :}
 	;
 	
 ArrayElements ::=
-	ArrayElements:l COMMA Expr:e {:l.add(e); RESULT = l;:}
+	Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
+	| Expr:e {: 
+				LinkedList<ExprNode> l = new LinkedList<>();
+				l.add(e);
+				RESULT = l;
+			 :}
 	| {: RESULT = new LinkedList<>(); :}
 	;
 
