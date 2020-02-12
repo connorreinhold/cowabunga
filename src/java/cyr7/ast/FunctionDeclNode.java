@@ -1,10 +1,11 @@
 package cyr7.ast;
 
 import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.type.TypeNode;
+import cyr7.ast.stmt.VarDeclNode;
+import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class FunctionDeclNode implements NodeInterface {
+public class FunctionDeclNode implements INode {
     final FunctionHeaderDeclNode header;
     final BlockStmtNode block;
 
@@ -27,13 +28,13 @@ public class FunctionDeclNode implements NodeInterface {
         printer.printAtom(header.identifier);
 
         printer.startList();
-        for (FunctionArgDeclNode argDecl : header.args) {
+        for (VarDeclNode argDecl : header.args) {
             argDecl.prettyPrint(printer);
         }
         printer.endList();
 
         printer.startList();
-        for (TypeNode typeNode : header.returnTypes) {
+        for (ITypeExprNode typeNode : header.returnTypes) {
             typeNode.prettyPrint(printer);
         }
         printer.endList();
