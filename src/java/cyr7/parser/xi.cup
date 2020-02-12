@@ -121,7 +121,6 @@ nonterminal MultiVarDeclStmtNode MultipleVarDeclStatement;
 nonterminal VarDeclNode VarDeclOrDiscard;
 nonterminal LinkedList<VarDeclNode> VarDeclOrDiscardList;
 nonterminal LinkedList<VarDeclNode> TwoOrMoreVarDeclOrDiscardList;
-nonterminal ArrayVarDeclStmtNode ArrayVarDeclStatement;
 nonterminal LinkedList<ExprNode> SingleVarDimensionList;
 nonterminal LinkedList<ExprNode> SingleVarDimensionlessList;
 
@@ -212,7 +211,11 @@ ReturnTypeList ::=
 
 Type ::=
     Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
-    | TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :}
+    | Primitive:p {: RESULT = p; :}
+    ;
+
+Primitive ::=
+    TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :}
     | TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :}
     ;
 
@@ -289,16 +292,16 @@ VarDeclStatement ::=
     ;
 
 SingleVarDeclStatement ::=
-    ID:id COLON PrimitiveTypeNode:p SingleVarDimensionList:l {:
+    ID:id COLON Primitive:p SingleVarDimensionList:l {:
             RESULT = new SingleVarDeclStmtNode(id, p, l, null);
         :}
-    | ID:id COLON PrimitiveTypeNode:p SingleVarDimensionList:l ASSIGN Expr:e {:
+    | ID:id COLON Primitive:p SingleVarDimensionList:l ASSIGN Expr:e {:
             RESULT = new SingleVarDeclStmtNode(id, p, l, e);
         :}
     ;
 
 SingleVarDimensionList ::=
-    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT SingleVarDimensionlessList:l {: l.addFirst(e); RESULT = l; :}
+    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT SingleVarDimensionList:l {: l.addFirst(e); RESULT = l; :}
     | SingleVarDimensionlessList:l {: RESULT = l; :}
     ;
 
@@ -327,8 +330,8 @@ VarDeclOrDiscardList ::=
     ;
 
 VarDeclOrDiscard ::=
-    VarDecl:v {: RESULT = v; :}
-    | UNDERSCORE {: RESULT = null; :}
+    VarDecl:v {: System.out.println("A"); System.out.flush(); RESULT = v; :}
+    | UNDERSCORE {: System.out.println("A"); System.out.flush(); RESULT = null; :}
     ;
 
 ExprList ::=

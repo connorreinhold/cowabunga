@@ -17,7 +17,7 @@ public class test_JUNK {
         ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, false));
 
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
-        XiProgramNode v = (XiProgramNode) p.parse().value;
+        XiProgramNode v = (XiProgramNode) p.debug_parse().value;
         CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
         v.prettyPrint(printer);
         printer.flush();

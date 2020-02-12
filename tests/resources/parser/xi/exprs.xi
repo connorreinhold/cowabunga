@@ -1,8 +1,5 @@
-main() {
-    a: int[][];
-    a[0] = 5
-    _, i: int = foo()
-    expr: int = 1 - 2
-    * 3 * -4 * 5
+foo() {
+    p:int, q:int = ratadd(2, 5, 1, 3)
+    _, q':int = ratadd(1, 2, 1, 3)
 }
 
