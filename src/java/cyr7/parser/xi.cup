@@ -289,10 +289,10 @@ VarDeclStatement ::=
     ;
 
 SingleVarDeclStatement ::=
-    | ID:id COLON Primitive:p SingleVarDimensionList:l {:
+    ID:id COLON PrimitiveTypeNode:p SingleVarDimensionList:l {:
             RESULT = new SingleVarDeclStmtNode(id, p, l, null);
         :}
-    | ID:id COLON Primitive:n SingleVarDimensionList:l ASSIGN Expr:e {:
+    | ID:id COLON PrimitiveTypeNode:p SingleVarDimensionList:l ASSIGN Expr:e {:
             RESULT = new SingleVarDeclStmtNode(id, p, l, e);
         :}
     ;

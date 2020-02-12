@@ -20,10 +20,10 @@ public class SingleVarDeclStmtNode extends VarDeclStmtNode {
     final ExprNode initializer;
 
     public SingleVarDeclStmtNode(String identifier,
-                                 PrimitiveEnum primitive,
+                                 PrimitiveTypeNode primitive,
                                  List<ExprNode> dimensionList,
                                  ExprNode initializer) {
-        SingleVarInitNode node = new SingleVarPrimitiveNode(new PrimitiveTypeNode(primitive));
+        SingleVarInitNode node = new SingleVarPrimitiveNode(primitive);
         Collections.reverse(dimensionList);
         for (ExprNode e : dimensionList) {
             if (e == null) {
