@@ -3,12 +3,14 @@ package cyr7.ast.stmt;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+import java.util.Optional;
+
 public class IfElseStmtNode extends StmtNode{
 	final ExprNode guard;
     final StmtNode ifBlock;
-    final StmtNode elseBlock;
+    final Optional<StmtNode> elseBlock;
 	
-    public IfElseStmtNode(ExprNode guard, StmtNode ifBlock, StmtNode elseBlock) {
+    public IfElseStmtNode(ExprNode guard, StmtNode ifBlock, Optional<StmtNode> elseBlock) {
     	this.guard = guard;
     	this.ifBlock = ifBlock;
     	this.elseBlock = elseBlock;
@@ -23,11 +25,9 @@ public class IfElseStmtNode extends StmtNode{
 		guard.prettyPrint(printer);
 		
 		ifBlock.prettyPrint(printer);
-		
-		if (elseBlock != null) {
-			elseBlock.prettyPrint(printer);
-		}
+
+		elseBlock.ifPresent(stmtNode -> stmtNode.prettyPrint(printer));
+
 		printer.endList();
-		
 	}
 }

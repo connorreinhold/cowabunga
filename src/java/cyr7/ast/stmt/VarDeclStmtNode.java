@@ -1,42 +1,47 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 import java.util.List;
+import java.util.Optional;
 
 public class VarDeclStmtNode extends StmtNode {
 
-    final List<VarDeclNode> varDecls;
+    final List<Optional<VarDeclNode>> varDecls;
 
-    /// A possibly null initializer
-    final ExprNode initializer;
+    final Optional<ExprNode> initializer;
 
-    public VarDeclStmtNode(List<VarDeclNode> varDecls, ExprNode initializer) {
-        this.varDecls = varDecls;
+    public VarDeclStmtNode(List<Optional<VarDeclNode>> varDecls, Optional<ExprNode> initializer) {
+        this.varDecls = Util.immutableCopy(varDecls);
         this.initializer = initializer;
     }
 
     @Override
     public void prettyPrint(SExpPrinter printer) {
-        if (initializer == null) {
-            for (VarDeclNode n : varDecls) {
-                n.prettyPrint(printer);
-            }
-        } else {
+        if (initializer.isPresent()) {
             printer.startList();
 
-            for (VarDeclNode n : varDecls) {
-                if (n == null) {
-                    printer.printAtom("_");
+            for (Optional<VarDeclNode> n : varDecls) {
+                if (n.isPresent()) {
+                    n.get().prettyPrint(printer);
                 } else {
-                    n.prettyPrint(printer);
+                    printer.printAtom("_");
                 }
             }
 
-            initializer.prettyPrint(printer);
+            initializer.get().prettyPrint(printer);
 
             printer.endList();
+        } else {
+            for (Optional<VarDeclNode> n : varDecls) {
+                if (n.isPresent()) {
+                    n.get().prettyPrint(printer);
+                } else {
+                    printer.printAtom("_");
+                }
+            }
         }
     }
 

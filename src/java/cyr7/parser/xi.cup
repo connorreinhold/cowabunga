@@ -16,6 +16,7 @@ import cyr7.ast.type.*;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Collections;
+import java.util.Optional;
 
 parser code {:
 :};
@@ -85,7 +86,7 @@ nonterminal ProgramNode Program;
 
 nonterminal ITypeExprNode TypeExpr;
 nonterminal PrimitiveEnumNode Primitive;
-nonterminal LinkedList<ExprNode> TypeExprArrayList;
+nonterminal LinkedList<Optional<ExprNode>> TypeExprArrayList;
 
 // Ixi program
 
@@ -116,11 +117,10 @@ nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
 nonterminal AssignAccessNode AssignAccess;
-nonterminal StmtNode ElseBlock;
 
 nonterminal VarDeclStmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
-nonterminal LinkedList<VarDeclNode> VarDeclOrDiscardList;
+nonterminal LinkedList<Optional<VarDeclNode>> VarDeclOrDiscardList;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
@@ -136,12 +136,13 @@ nonterminal ExprNode BoolExpr;
 nonterminal ExprNode ArrayExpr;
 nonterminal LinkedList<ExprNode> ArrayElements;
 
-
 // Precedence
 
-precedence nonassoc R_BRACE;
 precedence nonassoc L_BRACE;
+
+precedence nonassoc IF;
 precedence nonassoc ELSE;
+
 precedence nonassoc ID;
 precedence left LOGICAL_OR;
 precedence left LOGICAL_AND;
@@ -260,12 +261,8 @@ ProcedureStatement ::=
 	;
 
 IfElseStatement ::=
-	IF Expr:e XiStatement:s ElseBlock:b {: RESULT = new IfElseStmtNode(e, s, b); :}
-	;
-
-ElseBlock ::= 
-	ELSE XiStatement:s {: RESULT = s; :}
-	| {: RESULT = null; :}
+	IF Expr:e XiStatement:s {: RESULT = new IfElseStmtNode(e, s, Optional.empty()); :}
+	| IF Expr:e XiStatement:s ELSE XiStatement:b {: RESULT = new IfElseStmtNode(e, s, Optional.of(b)); :}
 	;
 
 WhileStatement ::=
@@ -282,15 +279,15 @@ AssignAccess ::=
 	;
 
 VarDeclStatement ::=
-    VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, null); :}
-    | VarDeclOrDiscardList:l ASSIGN Expr:e {: RESULT = new VarDeclStmtNode(l, e); :}
+    VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, Optional.empty()); :}
+    | VarDeclOrDiscardList:l ASSIGN Expr:e {: RESULT = new VarDeclStmtNode(l, Optional.of(e)); :}
     ;
 
 VarDeclOrDiscardList ::=
-    VarDecl:v COMMA VarDeclOrDiscardList:l {: l.addFirst(v); RESULT = l; :}
-    | VarDecl:v {: RESULT = new LinkedList<>(List.of(v)); :}
-    | UNDERSCORE COMMA VarDeclOrDiscardList:l {: l.addFirst(null); RESULT = l; :}
-    | UNDERSCORE {: RESULT = new LinkedList<>(); RESULT.addFirst(null); :}
+    VarDecl:v COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.of(v)); RESULT = l; :}
+    | VarDecl:v {: RESULT = new LinkedList<>(List.of(Optional.of(v))); :}
+    | UNDERSCORE COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
+    | UNDERSCORE {: RESULT = new LinkedList<>(); RESULT.addFirst(Optional.empty()); :}
     ;
 
 VarDecl ::=
@@ -303,12 +300,12 @@ Primitive ::=
     ;
 
 TypeExpr ::=
-    Primitive:p TypeExprArrayList:l {: RESULT = TypeExprArrayNode.fromDimensionList(p, l); :}
+    Primitive:p TypeExprArrayList:l {: RESULT = ITypeExprNode.fromDimensionList(p, l); :}
     ;
 
 TypeExprArrayList ::=
-    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(e); RESULT = l; :}
-    | L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(null); RESULT = l; :}
+    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.of(e)); RESULT = l; :}
+    | L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -383,7 +380,6 @@ BoolExpr ::=
     
 ArrayExpr ::=
 	L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(l); :}
-	| L_BRACE R_BRACE {: RESULT = new ArrayExprNode(new LinkedList<>()); :}
 	;
 	
 ArrayElements ::=

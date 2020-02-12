@@ -5,25 +5,15 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
-public class TypeExprArrayNode implements ITypeExprNode {
-
-    public static ITypeExprNode fromDimensionList(PrimitiveEnumNode primitive, List<ExprNode> dimensionList) {
-        ITypeExprNode node = primitive;
-        Collections.reverse(dimensionList);
-        for (ExprNode e : dimensionList) {
-            // e may be null
-            node = new TypeExprArrayNode(node, e);
-        }
-        return node;
-    }
+public final class TypeExprArrayNode implements ITypeExprNode {
 
     final ITypeExprNode child;
 
-    /// An optional size
-    final ExprNode size;
+    final Optional<ExprNode> size;
 
-    public TypeExprArrayNode(ITypeExprNode child, ExprNode size) {
+    public TypeExprArrayNode(ITypeExprNode child, Optional<ExprNode> size) {
         this.child = child;
         this.size = size;
     }
@@ -36,9 +26,7 @@ public class TypeExprArrayNode implements ITypeExprNode {
 
         child.prettyPrint(printer);
 
-        if (size != null) {
-            size.prettyPrint(printer);
-        }
+        size.ifPresent(exprNode -> exprNode.prettyPrint(printer));
 
         printer.endList();
     }
