@@ -81,6 +81,12 @@ terminal FUNCTION_CALL,
 // Program-wide
 nonterminal ProgramNode Program;
 
+// Type Expressions
+
+nonterminal ITypeExprNode TypeExpr;
+nonterminal PrimitiveEnumNode Primitive;
+nonterminal LinkedList<ExprNode> TypeExprArrayList;
+
 // Ixi program
 
 nonterminal IxiProgramNode IxiProgram;
@@ -89,14 +95,10 @@ nonterminal FunctionHeaderDeclNode IxiStatement;
 nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
 nonterminal IxiStatementEnd;
 
-nonterminal VarDeclNode VarDecl;
-nonterminal LinkedList<VarDeclNode> VarDeclList;
+nonterminal LinkedList<VarDeclNode> FunctionVarDeclList;
 
-nonterminal LinkedList<TypeNode> ReturnType;
-nonterminal LinkedList<TypeNode> ReturnTypeList;
-
-nonterminal TypeNode Type;
-nonterminal PrimitiveTypeNode Primitive;
+nonterminal LinkedList<ITypeExprNode> ReturnType;
+nonterminal LinkedList<ITypeExprNode> ReturnTypeList;
 
 // Xi program
 
@@ -116,13 +118,8 @@ nonterminal AssignmentStmtNode AssignmentStatement;
 nonterminal AssignAccessNode AssignAccess;
 
 nonterminal VarDeclStmtNode VarDeclStatement;
-nonterminal SingleVarDeclStmtNode SingleVarDeclStatement;
-nonterminal MultiVarDeclStmtNode MultipleVarDeclStatement;
-nonterminal VarDeclNode VarDeclOrDiscard;
+nonterminal VarDeclNode VarDecl;
 nonterminal LinkedList<VarDeclNode> VarDeclOrDiscardList;
-nonterminal LinkedList<VarDeclNode> TwoOrMoreVarDeclOrDiscardList;
-nonterminal LinkedList<ExprNode> SingleVarDimensionList;
-nonterminal LinkedList<ExprNode> SingleVarDimensionlessList;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
@@ -177,7 +174,7 @@ IxiStatement ::=
     ;
 
 FunctionHeaderDecl ::=
-    ID:id L_PAREN VarDeclList:l R_PAREN ReturnType:returnList {:
+    ID:id L_PAREN FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
             RESULT = new FunctionHeaderDeclNode(id, l, returnList);
         :}
     ;
@@ -187,12 +184,8 @@ IxiStatementEnd ::=
     |
     ;
 
-VarDecl ::=
-    ID:id COLON Type:t {: RESULT = new VarDeclNode(id, t); :}
-    ;
-
-VarDeclList ::=
-    VarDecl:v COMMA VarDeclList:l {:
+FunctionVarDeclList ::=
+    VarDecl:v COMMA FunctionVarDeclList:l {:
             l.addFirst(v);
             RESULT = l;
         :}
@@ -200,23 +193,13 @@ VarDeclList ::=
     ;
 
 ReturnType ::=
-    COLON Type:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
+    COLON TypeExpr:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ReturnTypeList ::=
-    ReturnTypeList:lst COMMA Type:t {: lst.addLast(t); RESULT = lst; :}
+    ReturnTypeList:lst COMMA TypeExpr:t {: lst.addLast(t); RESULT = lst; :}
     | {: RESULT = new LinkedList<>(); :}
-    ;
-
-Type ::=
-    Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
-    | Primitive:p {: RESULT = p; :}
-    ;
-
-Primitive ::=
-    TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :}
-    | TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :}
     ;
 
 // Xi Grammar
@@ -287,51 +270,34 @@ AssignAccess ::=
 	;
 
 VarDeclStatement ::=
-    SingleVarDeclStatement:s {: RESULT = s; :}
-    | MultipleVarDeclStatement:s {: RESULT = s; :}
-    ;
-
-SingleVarDeclStatement ::=
-    ID:id COLON Primitive:p SingleVarDimensionList:l {:
-            RESULT = new SingleVarDeclStmtNode(id, p, l, null);
-        :}
-    | ID:id COLON Primitive:p SingleVarDimensionList:l ASSIGN Expr:e {:
-            RESULT = new SingleVarDeclStmtNode(id, p, l, e);
-        :}
-    ;
-
-SingleVarDimensionList ::=
-    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT SingleVarDimensionList:l {: l.addFirst(e); RESULT = l; :}
-    | SingleVarDimensionlessList:l {: RESULT = l; :}
-    ;
-
-SingleVarDimensionlessList ::=
-    L_SQ_BRKT R_SQ_BRKT SingleVarDimensionlessList:l {: l.addFirst(null); RESULT = l; :}
-    | {: RESULT = new LinkedList<>(); :}
-    ;
-
-MultipleVarDeclStatement ::=
-    TwoOrMoreVarDeclOrDiscardList:l ASSIGN FunctionCall:f {: RESULT = new MultiVarDeclStmtNode(l, f); :}
-    ;
-
-TwoOrMoreVarDeclOrDiscardList ::=
-    VarDeclOrDiscard:v COMMA VarDeclOrDiscardList:l {:
-            l.addFirst(v);
-            RESULT = l;
-        :}
+    VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, null); :}
+    | VarDeclOrDiscardList:l ASSIGN Expr:e {: RESULT = new VarDeclStmtNode(l, e); :}
     ;
 
 VarDeclOrDiscardList ::=
-    VarDeclOrDiscard:v COMMA VarDeclOrDiscardList:l {:
-            l.addFirst(v);
-            RESULT = l;
-        :}
-    | VarDeclOrDiscard:v {: RESULT = new LinkedList<>(List.of(v)); :}
+    VarDecl:v COMMA VarDeclOrDiscardList:l {: l.addFirst(v); RESULT = l; :}
+    | VarDecl:v {: RESULT = new LinkedList<>(List.of(v)); :}
+    | UNDERSCORE COMMA VarDeclOrDiscardList:l {: l.addFirst(null); RESULT = l; :}
+    | UNDERSCORE {: RESULT = new LinkedList<>(); RESULT.addFirst(null); :}
     ;
 
-VarDeclOrDiscard ::=
-    VarDecl:v {: System.out.println("A"); System.out.flush(); RESULT = v; :}
-    | UNDERSCORE {: System.out.println("A"); System.out.flush(); RESULT = null; :}
+VarDecl ::=
+    ID:id COLON TypeExpr:te {: RESULT = new VarDeclNode(id, te); :}
+    ;
+
+Primitive ::=
+    TYPE_INT {: RESULT = PrimitiveEnumNode.INT; :}
+    | TYPE_BOOL {: RESULT = PrimitiveEnumNode.BOOL; :}
+    ;
+
+TypeExpr ::=
+    Primitive:p TypeExprArrayList:l {: RESULT = TypeExprArrayNode.fromDimensionList(p, l); :}
+    ;
+
+TypeExprArrayList ::=
+    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(e); RESULT = l; :}
+    | L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(null); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
     ;
 
 ExprList ::=

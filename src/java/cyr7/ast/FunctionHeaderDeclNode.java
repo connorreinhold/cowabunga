@@ -2,16 +2,17 @@ package cyr7.ast;
 
 import java.util.LinkedList;
 
-import cyr7.ast.type.TypeNode;
+import cyr7.ast.stmt.VarDeclNode;
+import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class FunctionHeaderDeclNode implements NodeInterface {
+public class FunctionHeaderDeclNode implements INode {
 	final String identifier;
 	final LinkedList<VarDeclNode> args;
-	final LinkedList<TypeNode> returnTypes;
+	final LinkedList<ITypeExprNode> returnTypes;
 
 	public FunctionHeaderDeclNode(String id, LinkedList<VarDeclNode> args,
-								  LinkedList<TypeNode> returnTypes) {
+								  LinkedList<ITypeExprNode> returnTypes) {
 		this.identifier = id;
 		this.args = args;
 		this.returnTypes = returnTypes;
