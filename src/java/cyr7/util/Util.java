@@ -1,5 +1,10 @@
 package cyr7.util;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+
 public final class Util {
 
     /**
@@ -23,6 +28,10 @@ public final class Util {
                 default: sb.append(s.charAt(i));
             }
         return sb.toString();
+    }
+
+    public static <T> List<T> immutableCopy(List<T> list) {
+        return Collections.unmodifiableList(new ArrayList<>(list));
     }
 
     private Util() { }

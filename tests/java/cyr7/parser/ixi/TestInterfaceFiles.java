@@ -33,7 +33,7 @@ class TestInterfaceFiles {
 
     @Test
     void testNoArgsProcess() throws Exception {
-        LinkedList<FunctionArgDeclNode> args;
+        LinkedList<VarDeclNode> args;
         LinkedList<TypeNode> returnTypes;
         FunctionHeaderDeclNode function;
         LinkedList<FunctionHeaderDeclNode> functions;
@@ -75,7 +75,7 @@ class TestInterfaceFiles {
     @Test
     void testNoArgsFunction() throws Exception {
         
-        LinkedList<FunctionArgDeclNode> args;
+        LinkedList<VarDeclNode> args;
         LinkedList<TypeNode> returnTypes;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;

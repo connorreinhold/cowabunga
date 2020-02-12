@@ -3,12 +3,12 @@ package cyr7.ast;
 import cyr7.ast.type.TypeNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class FunctionArgDeclNode implements NodeInterface {
+public class VarDeclNode implements NodeInterface {
 
     final String identifier;
     final TypeNode type;
 
-    public FunctionArgDeclNode(String id, TypeNode type) {
+    public VarDeclNode(String id, TypeNode type) {
         this.identifier = id;
         this.type = type;
     }
@@ -23,9 +23,9 @@ public class FunctionArgDeclNode implements NodeInterface {
     
     @Override
     public boolean equals(Object o) {
-    	if (o instanceof FunctionArgDeclNode) {
-    		return this.identifier.equals(((FunctionArgDeclNode) o).identifier) &&
-    				this.type.equals(((FunctionArgDeclNode) o).type);
+    	if (o instanceof VarDeclNode) {
+    		return this.identifier.equals(((VarDeclNode) o).identifier) &&
+    				this.type.equals(((VarDeclNode) o).type);
     	}
     	return false;
     }

@@ -15,6 +15,7 @@ import cyr7.ast.stmt.*;
 import cyr7.ast.type.*;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Collections;
 
 parser code {:
 :};
@@ -88,8 +89,8 @@ nonterminal FunctionHeaderDeclNode IxiStatement;
 nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
 nonterminal IxiStatementEnd;
 
-nonterminal LinkedList<FunctionArgDeclNode> ArgDecl;
-nonterminal LinkedList<FunctionArgDeclNode> ArgDeclList;
+nonterminal VarDeclNode VarDecl;
+nonterminal LinkedList<VarDeclNode> VarDeclList;
 
 nonterminal LinkedList<TypeNode> ReturnType;
 nonterminal LinkedList<TypeNode> ReturnTypeList;
@@ -113,6 +114,18 @@ nonterminal IfStmtNode IfStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
 nonterminal AssignAccessNode AssignAccess;
+
+nonterminal VarDeclStmtNode VarDeclStatement;
+nonterminal SingleVarDeclStmtNode SingleVarDeclStatement;
+nonterminal MultiVarDeclStmtNode MultipleVarDeclStatement;
+nonterminal VarDeclNode VarDeclOrDiscard;
+nonterminal LinkedList<VarDeclNode> VarDeclOrDiscardList;
+nonterminal LinkedList<VarDeclNode> TwoOrMoreVarDeclOrDiscardList;
+nonterminal ArrayVarDeclStmtNode ArrayVarDeclStatement;
+nonterminal LinkedList<ExprNode> ArrayInitDimensionListOneOrMore;
+nonterminal LinkedList<ExprNode> ArrayInitDimensionList;
+nonterminal LinkedList<ExprNode> ArrayInitDimensionlessListOneOrMore;
+nonterminal LinkedList<ExprNode> ArrayInitDimensionlessList;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
@@ -167,8 +180,8 @@ IxiStatement ::=
     ;
 
 FunctionHeaderDecl ::=
-    ID:id L_PAREN ArgDecl:argList R_PAREN ReturnType:returnList {:
-            RESULT = new FunctionHeaderDeclNode(id, argList, returnList);
+    ID:id L_PAREN VarDeclList:l R_PAREN ReturnType:returnList {:
+            RESULT = new FunctionHeaderDeclNode(id, l, returnList);
         :}
     ;
 
@@ -177,18 +190,14 @@ IxiStatementEnd ::=
     |
     ;
 
-ArgDecl ::=
-    ID:id COLON Type:t ArgDeclList:lst {:
-            lst.addFirst(new FunctionArgDeclNode(id, t));
-            RESULT = lst;
-        :}
-    | {: RESULT = new LinkedList<>(); :}
+VarDecl ::=
+    ID:id COLON Type:t {: RESULT = new VarDeclNode(id, t); :}
     ;
 
-ArgDeclList ::=
-    COMMA ID:id COLON Type:t ArgDeclList:lst {:
-            lst.addFirst(new FunctionArgDeclNode(id, t));
-            RESULT = lst;
+VarDeclList ::=
+    VarDecl:v COMMA VarDeclList:l {:
+            l.addFirst(v);
+            RESULT = l;
         :}
     | {: RESULT = new LinkedList<>(); :}
     ;
@@ -227,6 +236,7 @@ XiStatement ::=
     | IfStatement:s {: RESULT = s; :}
     | WhileStatement:s {: RESULT = s; :}
     | AssignmentStatement:s {: RESULT = s; :}
+    | VarDeclStatement:s {: RESULT = s; :}
     ;
 
 FunctionDeclList ::=
@@ -253,8 +263,8 @@ XiStatementList ::=
 ReturnStatement ::=
     RETURN ExprList:l {: RESULT = new ReturnStmtNode(l); :}
     ;
-    
-ProcedureStatement ::= 
+
+ProcedureStatement ::=
 	FunctionCall:c {: RESULT = new ProcedureStmtNode(c); :}
 	;
 
@@ -265,16 +275,80 @@ IfStatement ::=
 WhileStatement ::=
 	WHILE Expr:e BlockStatement:s {: RESULT = new WhileStmtNode(e,s); :}
 	;
-	
+
 AssignmentStatement ::=
 	AssignAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(a, e); :}
 	;
-	
+
 AssignAccess ::=
 	AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAssignAccessNode(a, e); :}
 	| ID: id {: RESULT = new VariableAssignAccessNode(id); :}
 	;
-	
+
+VarDeclStatement ::=
+    SingleVarDeclStatement:s {: RESULT = s; :}
+    | MultipleVarDeclStatement:s {: RESULT = s; :}
+    | ArrayVarDeclStatement:s {: RESULT = s; :}
+    ;
+
+SingleVarDeclStatement ::=
+    VarDecl:v {: RESULT = new SingleVarDeclStmtNode(v); :}
+    | VarDecl:v ASSIGN Expr:e {: RESULT = new SingleVarDeclStmtNode(v, e); :}
+    ;
+
+MultipleVarDeclStatement ::=
+    TwoOrMoreVarDeclOrDiscardList:l ASSIGN FunctionCall:f {: RESULT = new MultiVarDeclStmtNode(l, f); :}
+    ;
+
+TwoOrMoreVarDeclOrDiscardList ::=
+    VarDeclOrDiscard:v COMMA VarDeclOrDiscardList:l {:
+            l.addFirst(v);
+            RESULT = l;
+        :}
+    ;
+
+VarDeclOrDiscardList ::=
+    VarDeclOrDiscard:v COMMA VarDeclOrDiscardList:l {:
+            l.addFirst(v);
+            RESULT = l;
+        :}
+    | VarDeclOrDiscard:v {: RESULT = new LinkedList<>(List.of(v)); :}
+    ;
+
+VarDeclOrDiscard ::=
+    VarDecl:v {: RESULT = v; :}
+    | UNDERSCORE {: RESULT = null; :}
+    ;
+
+ArrayVarDeclStatement ::=
+    ID:id COLON Primitive:n ArrayInitDimensionListOneOrMore:l {:
+            RESULT = new ArrayVarDeclStmtNode(id, n, l);
+        :}
+    | ID:id COLON Primitive:n ArrayInitDimensionListOneOrMore:l ASSIGN Expr:e {:
+            RESULT = new ArrayVarDeclStmtNode(id, n, l, e);
+        :}
+    ;
+
+ArrayInitDimensionListOneOrMore ::=
+    L_SQ_BRKT Expr:e R_SQ_BRKT ArrayInitDimensionList:l {: l.addFirst(e); RESULT = l; :}
+//    | ArrayInitDimensionlessListOneOrMore
+    ;
+
+ArrayInitDimensionList ::=
+    L_SQ_BRKT Expr:e R_SQ_BRKT ArrayInitDimensionList:l {: l.addFirst(e); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+//    | ArrayInitDimensionlessList:l {: RESULT = l; :}
+    ;
+
+//ArrayInitDimensionlessListOneOrMore ::=
+//    L_SQ_BRKT R_SQ_BRKT ArrayInitDimensionlessList:l {: l.addFirst(null); RESULT = l; :}
+//    ;
+//
+//ArrayInitDimensionlessList ::=
+//    L_SQ_BRKT R_SQ_BRKT ArrayInitDimensionlessList:l {: l.addFirst(null); RESULT = l; :}
+//    | {: RESULT = new LinkedList<>(); :}
+//    ;
+
 ExprList ::=
     Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}

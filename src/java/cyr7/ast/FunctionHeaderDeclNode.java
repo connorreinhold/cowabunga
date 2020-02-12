@@ -7,10 +7,10 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class FunctionHeaderDeclNode implements NodeInterface {
 	final String identifier;
-	final LinkedList<FunctionArgDeclNode> args;
+	final LinkedList<VarDeclNode> args;
 	final LinkedList<TypeNode> returnTypes;
 
-	public FunctionHeaderDeclNode(String id, LinkedList<FunctionArgDeclNode> args,
+	public FunctionHeaderDeclNode(String id, LinkedList<VarDeclNode> args,
 								  LinkedList<TypeNode> returnTypes) {
 		this.identifier = id;
 		this.args = args;

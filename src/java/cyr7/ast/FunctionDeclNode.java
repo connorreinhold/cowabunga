@@ -27,7 +27,7 @@ public class FunctionDeclNode implements NodeInterface {
         printer.printAtom(header.identifier);
 
         printer.startList();
-        for (FunctionArgDeclNode argDecl : header.args) {
+        for (VarDeclNode argDecl : header.args) {
             argDecl.prettyPrint(printer);
         }
         printer.endList();
