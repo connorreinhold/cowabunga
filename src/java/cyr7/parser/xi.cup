@@ -108,13 +108,19 @@ nonterminal StmtNode XiStatement;
 nonterminal BlockStmtNode BlockStatement;
 nonterminal LinkedList<StmtNode> XiStatementList;
 nonterminal ReturnStmtNode ReturnStatement;
+nonterminal ProcedureStmtNode ProcedureStatement;
+nonterminal IfStmtNode IfStatement;
+nonterminal WhileStmtNode WhileStatement;
+nonterminal AssignmentStmtNode AssignmentStatement;
+nonterminal AssignAccessNode AssignAccess;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
 nonterminal FunctionCallExprNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
-nonterminal ArrayAccessExprNode ArrayAccess;
+
+nonterminal ExprAccessNode Access;
 nonterminal ExprNode LiteralExpr;
 nonterminal ExprNode UnaryExpr;
 nonterminal ExprNode IntegerExpr;
@@ -122,6 +128,7 @@ nonterminal ExprNode BoolExpr;
 
 // Precedence
 
+precedence nonassoc ID;
 precedence left LOGICAL_OR;
 precedence left LOGICAL_AND;
 precedence left EQUALS, NOT_EQUALS;
@@ -216,6 +223,10 @@ UseList ::=
 XiStatement ::=
     BlockStatement:s {: RESULT = s; :}
     | ReturnStatement:s {: RESULT = s; :}
+    | ProcedureStatement:s {: RESULT = s; :}
+    | IfStatement:s {: RESULT = s; :}
+    | WhileStatement:s {: RESULT = s; :}
+    | AssignmentStatement:s {: RESULT = s; :}
     ;
 
 FunctionDeclList ::=
@@ -242,7 +253,28 @@ XiStatementList ::=
 ReturnStatement ::=
     RETURN ExprList:l {: RESULT = new ReturnStmtNode(l); :}
     ;
+    
+ProcedureStatement ::= 
+	FunctionCall:c {: RESULT = new ProcedureStmtNode(c); :}
+	;
 
+IfStatement ::=
+	IF Expr:e BlockStatement:s {: RESULT = new IfStmtNode(e, s); :}
+	;
+
+WhileStatement ::=
+	WHILE Expr:e BlockStatement:s {: RESULT = new WhileStmtNode(e,s); :}
+	;
+	
+AssignmentStatement ::=
+	AssignAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(a, e); :}
+	;
+	
+AssignAccess ::=
+	AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAssignAccessNode(a, e); :}
+	| ID: id {: RESULT = new VariableAssignAccessNode(id); :}
+	;
+	
 ExprList ::=
     Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
@@ -250,9 +282,8 @@ ExprList ::=
     ;
 
 Expr ::=
-    ID:id {: RESULT = new IdExprNode(id); :}
-    | FunctionCall:e {: RESULT = e; :}
-    | ArrayAccess:e {: RESULT = e; :}
+	FunctionCall:e {: RESULT = e; :}
+    | Access:e {: RESULT = e; :}
     | LiteralExpr:e  {: RESULT = e; :}
     | UnaryExpr:e {: RESULT = e; :}
     | IntegerExpr:e {: RESULT = e; :}
@@ -270,15 +301,16 @@ FunctionCall ::=
 ArgParamList ::=
     Expr:e COMMA ArgParamList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
-    | {: RESULT = new LinkedList<>(); :}
+    | {: RESULT = new LinkedList<>();:}
     ;
 
-ArrayAccess ::=
-    ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {:
-            RESULT = new ArrayAccessExprNode(id, e);
-        :} %prec ARRAY_ACCESS
-    ;
-
+Access::=
+	Access:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
+			RESULT = new ArrayAccessExprNode(a, e);
+		:} 	%prec ARRAY_ACCESS
+	| ID:id {: RESULT = new VariableAccessExprNode(id); :}
+	;
+	
 LiteralExpr ::=
     INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
     | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}

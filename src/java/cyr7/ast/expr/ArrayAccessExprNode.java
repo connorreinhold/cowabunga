@@ -3,13 +3,13 @@ package cyr7.ast.expr;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class ArrayAccessExprNode extends ExprNode {
+public class ArrayAccessExprNode extends ExprAccessNode {
 
-    final String identifier;
+    final ExprAccessNode accessNode;
     final ExprNode index;
 
-    public ArrayAccessExprNode(String id, ExprNode index){
-        this.identifier = id;
+    public ArrayAccessExprNode(ExprAccessNode accessNode, ExprNode index){
+        this.accessNode = accessNode;
         this.index = index;
     }
 
@@ -18,7 +18,7 @@ public class ArrayAccessExprNode extends ExprNode {
         printer.startList();
 
         printer.printAtom("[]");
-        printer.printAtom(identifier);
+        accessNode.prettyPrint(printer);
         index.prettyPrint(printer);
 
         printer.endList();

@@ -3,13 +3,12 @@ package cyr7.ast.expr;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class IdExprNode extends ExprNode {
+public class VariableAccessExprNode extends ExprAccessNode {
 
     final String identifier;
 
-    public IdExprNode(String id) {
+    public VariableAccessExprNode(String id) {
         assert id != null;
-
         this.identifier = id;
     }
 
