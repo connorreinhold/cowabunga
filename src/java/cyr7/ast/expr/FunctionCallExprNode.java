@@ -17,14 +17,14 @@ public class FunctionCallExprNode extends ExprNode {
 
     @Override
     public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
+    	printer.startList();
 
         printer.printAtom(identifier);
 
         for (ExprNode node : parameters) {
             node.prettyPrint(printer);
         }
-
+        
         printer.endList();
     }
 }

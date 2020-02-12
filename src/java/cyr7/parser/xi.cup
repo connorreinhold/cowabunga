@@ -109,10 +109,11 @@ nonterminal BlockStmtNode BlockStatement;
 nonterminal LinkedList<StmtNode> XiStatementList;
 nonterminal ReturnStmtNode ReturnStatement;
 nonterminal ProcedureStmtNode ProcedureStatement;
-nonterminal IfStmtNode IfStatement;
+nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
 nonterminal AssignAccessNode AssignAccess;
+nonterminal StmtNode ElseBlock;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
@@ -125,9 +126,14 @@ nonterminal ExprNode LiteralExpr;
 nonterminal ExprNode UnaryExpr;
 nonterminal ExprNode IntegerExpr;
 nonterminal ExprNode BoolExpr;
+nonterminal ExprNode ArrayExpr;
+nonterminal LinkedList<ExprNode> ArrayElements;
+
 
 // Precedence
 
+precedence nonassoc L_BRACE;
+precedence nonassoc ELSE;
 precedence nonassoc ID;
 precedence left LOGICAL_OR;
 precedence left LOGICAL_AND;
@@ -224,7 +230,7 @@ XiStatement ::=
     BlockStatement:s {: RESULT = s; :}
     | ReturnStatement:s {: RESULT = s; :}
     | ProcedureStatement:s {: RESULT = s; :}
-    | IfStatement:s {: RESULT = s; :}
+    | IfElseStatement:s {: RESULT = s; :}
     | WhileStatement:s {: RESULT = s; :}
     | AssignmentStatement:s {: RESULT = s; :}
     ;
@@ -258,8 +264,13 @@ ProcedureStatement ::=
 	FunctionCall:c {: RESULT = new ProcedureStmtNode(c); :}
 	;
 
-IfStatement ::=
-	IF Expr:e BlockStatement:s {: RESULT = new IfStmtNode(e, s); :}
+IfElseStatement ::=
+	IF Expr:e XiStatement:s ElseBlock:b {: RESULT = new IfElseStmtNode(e, s, b); :}
+	;
+
+ElseBlock ::= 
+	ELSE XiStatement:s {: RESULT = s; :}
+	| {: RESULT = null; :}
 	;
 
 WhileStatement ::=
@@ -289,6 +300,7 @@ Expr ::=
     | IntegerExpr:e {: RESULT = e; :}
     | BoolExpr:e {: RESULT = e; :}
     | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
+    | ArrayExpr:e {: RESULT = e; :}
     ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
@@ -315,6 +327,7 @@ LiteralExpr ::=
     INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
     | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}
     | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
+    | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(l); :}
     ;
 
 UnaryExpr ::=
@@ -341,3 +354,14 @@ BoolExpr ::=
     | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1, e2); :}
     | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1, e2); :}
     ;
+    
+ArrayExpr ::=
+	L_BRACE Expr:e ArrayElements:l R_BRACE {: l.addLast(e); RESULT = new ArrayExprNode(l); :}
+	| L_BRACE R_BRACE {: RESULT = new ArrayExprNode(new LinkedList<>()); :}
+	;
+	
+ArrayElements ::=
+	ArrayElements:l COMMA Expr:e {:l.add(e); RESULT = l;:}
+	| {: RESULT = new LinkedList<>(); :}
+	;
+
