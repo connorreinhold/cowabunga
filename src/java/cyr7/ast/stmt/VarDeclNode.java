@@ -15,25 +15,6 @@ public class VarDeclNode implements INode {
         this.typeExpr = typeExpr;
     }
 
-//    public VarDecl(String identifier,
-//                   PrimitiveTypeNode primitive,
-//                   List<ExprNode> dimensionList,
-//                   ExprNode initializer) {
-//        TypeExprNode node = new TypeExprPrimitiveNode(primitive);
-//        Collections.reverse(dimensionList);
-//        for (ExprNode e : dimensionList) {
-//            if (e == null) {
-//                node = new SingleVarArrayDimensionlessNode(node);
-//            } else {
-//                node = new TypeExprArrayNode(node, e);
-//            }
-//        }
-//
-//        this.identifier = identifier;
-//        this.typeInitializer = node;
-//        this.initializer = initializer;
-//    }
-
     @Override
     public void prettyPrint(SExpPrinter printer) {
         printer.startList();
