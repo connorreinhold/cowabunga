@@ -122,10 +122,8 @@ nonterminal VarDeclNode VarDeclOrDiscard;
 nonterminal LinkedList<VarDeclNode> VarDeclOrDiscardList;
 nonterminal LinkedList<VarDeclNode> TwoOrMoreVarDeclOrDiscardList;
 nonterminal ArrayVarDeclStmtNode ArrayVarDeclStatement;
-nonterminal LinkedList<ExprNode> ArrayInitDimensionListOneOrMore;
-nonterminal LinkedList<ExprNode> ArrayInitDimensionList;
-nonterminal LinkedList<ExprNode> ArrayInitDimensionlessListOneOrMore;
-nonterminal LinkedList<ExprNode> ArrayInitDimensionlessList;
+nonterminal LinkedList<ExprNode> SingleVarDimensionList;
+nonterminal LinkedList<ExprNode> SingleVarDimensionlessList;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
@@ -288,12 +286,25 @@ AssignAccess ::=
 VarDeclStatement ::=
     SingleVarDeclStatement:s {: RESULT = s; :}
     | MultipleVarDeclStatement:s {: RESULT = s; :}
-    | ArrayVarDeclStatement:s {: RESULT = s; :}
     ;
 
 SingleVarDeclStatement ::=
-    VarDecl:v {: RESULT = new SingleVarDeclStmtNode(v); :}
-    | VarDecl:v ASSIGN Expr:e {: RESULT = new SingleVarDeclStmtNode(v, e); :}
+    | ID:id COLON Primitive:p SingleVarDimensionList:l {:
+            RESULT = new SingleVarDeclStmtNode(id, p, l, null);
+        :}
+    | ID:id COLON Primitive:n SingleVarDimensionList:l ASSIGN Expr:e {:
+            RESULT = new SingleVarDeclStmtNode(id, p, l, e);
+        :}
+    ;
+
+SingleVarDimensionList ::=
+    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT SingleVarDimensionlessList:l {: l.addFirst(e); RESULT = l; :}
+    | SingleVarDimensionlessList:l {: RESULT = l; :}
+    ;
+
+SingleVarDimensionlessList ::=
+    L_SQ_BRKT R_SQ_BRKT SingleVarDimensionlessList:l {: l.addFirst(null); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
     ;
 
 MultipleVarDeclStatement ::=
@@ -319,35 +330,6 @@ VarDeclOrDiscard ::=
     VarDecl:v {: RESULT = v; :}
     | UNDERSCORE {: RESULT = null; :}
     ;
-
-ArrayVarDeclStatement ::=
-    ID:id COLON Primitive:n ArrayInitDimensionListOneOrMore:l {:
-            RESULT = new ArrayVarDeclStmtNode(id, n, l);
-        :}
-    | ID:id COLON Primitive:n ArrayInitDimensionListOneOrMore:l ASSIGN Expr:e {:
-            RESULT = new ArrayVarDeclStmtNode(id, n, l, e);
-        :}
-    ;
-
-ArrayInitDimensionListOneOrMore ::=
-    L_SQ_BRKT Expr:e R_SQ_BRKT ArrayInitDimensionList:l {: l.addFirst(e); RESULT = l; :}
-//    | ArrayInitDimensionlessListOneOrMore
-    ;
-
-ArrayInitDimensionList ::=
-    L_SQ_BRKT Expr:e R_SQ_BRKT ArrayInitDimensionList:l {: l.addFirst(e); RESULT = l; :}
-    | {: RESULT = new LinkedList<>(); :}
-//    | ArrayInitDimensionlessList:l {: RESULT = l; :}
-    ;
-
-//ArrayInitDimensionlessListOneOrMore ::=
-//    L_SQ_BRKT R_SQ_BRKT ArrayInitDimensionlessList:l {: l.addFirst(null); RESULT = l; :}
-//    ;
-//
-//ArrayInitDimensionlessList ::=
-//    L_SQ_BRKT R_SQ_BRKT ArrayInitDimensionlessList:l {: l.addFirst(null); RESULT = l; :}
-//    | {: RESULT = new LinkedList<>(); :}
-//    ;
 
 ExprList ::=
     Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}

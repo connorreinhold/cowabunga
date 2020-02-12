@@ -1,16 +1,13 @@
 package cyr7.ast.stmt;
 
-import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
-public class ArrayInitDimensionNode extends ArrayInitNode {
+public class SingleVarArrayDimensionlessNode extends SingleVarInitNode {
 
-    final ArrayInitNode child;
-    final ExprNode size;
+    final SingleVarInitNode child;
 
-    public ArrayInitDimensionNode(ArrayInitNode child, ExprNode size) {
+    public SingleVarArrayDimensionlessNode(SingleVarInitNode child) {
         this.child = child;
-        this.size = size;
     }
 
     @Override
@@ -21,9 +18,6 @@ public class ArrayInitDimensionNode extends ArrayInitNode {
 
         child.prettyPrint(printer);
 
-        size.prettyPrint(printer);
-
         printer.endList();
     }
-
 }
