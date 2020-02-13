@@ -306,6 +306,10 @@ VarDeclStatement ::=
 			l.addFirst(Optional.of(v));
 			RESULT = new VarDeclStmtNode(l, Optional.of(e));
 		:}
+	| UNDERSCORE COMMA MultiVarDecl:l ASSIGN FunctionCall:e {:
+			l.addFirst(Optional.empty());
+			RESULT = new VarDeclStmtNode(l, Optional.of(e));
+		:}
     ;
 
 MultiVarDecl ::= 

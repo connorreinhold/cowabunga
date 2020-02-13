@@ -5,5 +5,6 @@ foo() {
 	a = {1,2}
 	b: int[][], f:int = k()
 	f = true 
+	a: int, _ , _ = l()
     return { }
 }
