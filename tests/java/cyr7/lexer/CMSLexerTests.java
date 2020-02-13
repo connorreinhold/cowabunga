@@ -56,7 +56,7 @@ class CMSLexerTests {
         
         String string09 = "\"abcdedf";
         lexer = LexerFactory.make(string09);
-        testErrorOutput("1:2 error", lexer);
+        testErrorOutput("1:1 error", lexer);
         
     }
     

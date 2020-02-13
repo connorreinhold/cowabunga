@@ -297,15 +297,24 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\\"				{stringBuffer.append("\"");}
     \\\\				{stringBuffer.append("\\");}
     
+            // Invalid Escape Characters
     \\[^]				
     	{
     		throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
     			yytext(), 
-    			stringBuffer.getLineNumber(), 
-    			stringBuffer.getColumnNumber()); 
+    			yyline, 
+    			yycolumn);
     	}
-    	
-    . 	 	  			{stringBuffer.append(yytext()); }
+    	    
+    <<EOF>> 
+        {
+            throw new cyr7.exceptions.NonTerminatingStringException(
+                stringBuffer.toString(),
+                stringBuffer.getLineNumber(),
+                stringBuffer.getColumnNumber());
+        }
+        
+    .    {stringBuffer.append(yytext()); }
 }
 
 <<EOF>>  { return symbol(sym.EOF);}
