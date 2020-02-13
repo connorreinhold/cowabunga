@@ -22,11 +22,6 @@ import cyr7.parser.sym;
 	cyr7.exceptions.LexerException
 %yylexthrow}
 
-// %eofval{
-//   return new symbol(sym.EOF);
-// %eofval}
-// %eofclose
-
 %{
     protected ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
