@@ -271,6 +271,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 				charBuffer.getLineNumber(), 
 				charBuffer.getColumnNumber());
 		}
+	<<EOF>>
+	   {
+            throw new cyr7.exceptions.NonTerminatingCharacterException(
+                charBuffer.toString(),
+                charBuffer.getLineNumber(),
+                charBuffer.getColumnNumber());
+	   }
 }
 
 <STRING> {
@@ -295,7 +302,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     {Hex}				{stringBuffer.append(fromHex(yytext())); }
     \\'					{stringBuffer.append("'");}
     \\\"				{stringBuffer.append("\"");}
-    \\\\				{stringBuffer.append("\\");}
+    \\\\	 	       	{stringBuffer.append("\\");}
     
             // Invalid Escape Characters
     \\[^]				

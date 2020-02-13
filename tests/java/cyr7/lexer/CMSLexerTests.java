@@ -103,7 +103,7 @@ class CMSLexerTests {
     
     
     @Test
-    void invalidCharacterFormat() throws Exception {
+    void nonTerminatingCharacterFormat() throws Exception {
         String char06 = "'a";
         lexer = LexerFactory.make(char06);
         testErrorOutput("1:1 error", lexer);
