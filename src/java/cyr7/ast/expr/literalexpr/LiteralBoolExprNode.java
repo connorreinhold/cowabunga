@@ -2,12 +2,14 @@ package cyr7.ast.expr.literalexpr;
 
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
-public class LiteralBoolExprNode extends ExprNode{
+public final class LiteralBoolExprNode extends ExprNode{
 
 	final boolean contents;
 	
-	public LiteralBoolExprNode(boolean contents) {
+	public LiteralBoolExprNode(ComplexSymbolFactory.Location location, boolean contents) {
+		super(location);
 		this.contents = contents;
 	}
 	

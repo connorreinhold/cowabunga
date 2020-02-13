@@ -2,12 +2,14 @@ package cyr7.ast.expr;
 
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
-public class VariableAccessExprNode extends ExprAccessNode {
+public final class VariableAccessExprNode extends ExprAccessNode {
 
     final String identifier;
 
-    public VariableAccessExprNode(String id) {
+    public VariableAccessExprNode(ComplexSymbolFactory.Location location, String id) {
+        super(location);
         assert id != null;
         this.identifier = id;
     }
