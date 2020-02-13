@@ -95,7 +95,7 @@ public class LexerUtilTest {
 
         lexer = LexerFactory.make("'\\\"'");
         token = lexer.next_token();
-        assertEquals("1:1 character \\\"", LexerUtil.fullDescription(token));
+        assertEquals("1:1 character \"", LexerUtil.fullDescription(token));
     }
 
 }

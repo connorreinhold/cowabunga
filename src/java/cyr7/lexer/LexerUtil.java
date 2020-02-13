@@ -87,7 +87,8 @@ public class LexerUtil {
 			case sym.INT_LITERAL:
 				return "integer " + value.toString();
 			case sym.CHAR_LITERAL:
-				return "character " + Util.unescapeString(value.toString());
+				return "character " 
+				            + Util.unescapeCharacterString(value.toString());
 			case sym.STRING_LITERAL:
 				return "string " + Util.unescapeString(value.toString());
 
