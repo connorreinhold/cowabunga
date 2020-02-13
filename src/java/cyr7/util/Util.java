@@ -25,6 +25,8 @@ public final class Util {
                 case '\t': sb.append("\\t"); break;
                 case '\r': sb.append("\\r"); break;
                 case '\f': sb.append("\\f"); break;
+                case '\\':  sb.append("\\\\"); break;
+                case '"':  sb.append("\\\""); break;
                 default: sb.append(s.charAt(i));
             }
         return sb.toString();

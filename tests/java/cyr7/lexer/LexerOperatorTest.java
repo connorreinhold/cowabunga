@@ -7,6 +7,7 @@ import cyr7.exceptions.InvalidCharacterLiteralException;
 import cyr7.exceptions.InvalidStringEscapeCharacterException;
 import cyr7.exceptions.InvalidTokenException;
 import cyr7.exceptions.LeadingZeroIntegerException;
+import cyr7.exceptions.LexerIntegerOverflowException;
 import cyr7.exceptions.MultiLineCharacterException;
 import cyr7.exceptions.MultiLineStringException;
 import cyr7.parser.sym;
@@ -194,10 +195,7 @@ class LexerOperatorTest {
         String veryBigNumber = "99999999999999999999999";
         MyLexer lexer = LexerFactory.make(veryBigNumber);
         Symbol token;
-
-        token = lexer.next_token();
-        assertEquals(sym.INT_LITERAL, token.sym);
-        assertEquals(veryBigNumber, token.value);
+        assertThrows(LexerIntegerOverflowException.class, lexer::next_token);
 
         lexer = LexerFactory.make("" + Integer.MAX_VALUE);
         token = lexer.next_token();
@@ -220,7 +218,8 @@ class LexerOperatorTest {
         assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
 
         lexer = LexerFactory.make("00");
-        assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
+        assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
+        assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
     }
 
     @Test
