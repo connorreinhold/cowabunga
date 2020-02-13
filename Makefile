@@ -6,6 +6,8 @@ myparser:
 
 cowabunga: myparser mylexer
 
+xth: xth.lexer xth.parser
+
 xth.lexer: xth.lexer.instr xth.lexer.cowa
 
 xth.lexer.instr:
