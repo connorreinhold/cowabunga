@@ -3,11 +3,14 @@ package cyr7.ast;
 import java.util.LinkedList;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
-public class IxiProgramNode extends ProgramNode {
+public final class IxiProgramNode extends AbstractNode implements IProgramNode {
     final LinkedList<FunctionHeaderDeclNode> functionDeclarations;
 
-    public IxiProgramNode(LinkedList<FunctionHeaderDeclNode> lst) {
+    public IxiProgramNode(ComplexSymbolFactory.Location location, LinkedList<FunctionHeaderDeclNode> lst) {
+        super(location);
+
         this.functionDeclarations = lst;
     }
 

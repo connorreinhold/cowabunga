@@ -2,6 +2,7 @@ package cyr7.ast.expr;
 
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
 
@@ -10,7 +11,8 @@ public class FunctionCallExprNode extends ExprNode {
     final String identifier;
     final LinkedList<ExprNode> parameters;
 
-    public FunctionCallExprNode(String id, LinkedList<ExprNode> parameters) {
+    public FunctionCallExprNode(ComplexSymbolFactory.Location location, String id, LinkedList<ExprNode> parameters) {
+        super(location);
         this.identifier = id;
         this.parameters = parameters;
     }

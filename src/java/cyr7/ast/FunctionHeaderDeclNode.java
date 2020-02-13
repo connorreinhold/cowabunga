@@ -5,14 +5,19 @@ import java.util.LinkedList;
 import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
-public class FunctionHeaderDeclNode implements INode {
+public final class FunctionHeaderDeclNode extends AbstractNode {
 	final String identifier;
 	final LinkedList<VarDeclNode> args;
 	final LinkedList<ITypeExprNode> returnTypes;
 
-	public FunctionHeaderDeclNode(String id, LinkedList<VarDeclNode> args,
+	public FunctionHeaderDeclNode(ComplexSymbolFactory.Location location,
+								  String id,
+								  LinkedList<VarDeclNode> args,
 								  LinkedList<ITypeExprNode> returnTypes) {
+	    super(location);
+
 		this.identifier = id;
 		this.args = args;
 		this.returnTypes = returnTypes;

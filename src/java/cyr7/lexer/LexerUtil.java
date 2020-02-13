@@ -48,112 +48,115 @@ public class LexerUtil {
 
 		String location = "" + line + ":" + column + " ";
 
-		switch (token.sym) {
+		return location + symbolDescription(token.sym, token.value);
+	}
+
+	public static String symbolDescription(int symId, Object value) {
+		switch (symId) {
 			case sym.IXI_FILE:
 				return "Ixi File";
 			case sym.XI_FILE:
 				return "Xi File";
 			case sym.USE:
-				return location + "use";
+				return "use";
 			case sym.IF:
-				return location + "if";
+				return "if";
 			case sym.WHILE:
-				return location + "while";
+				return "while";
 			case sym.ELSE:
-				return location + "else";
+				return "else";
 			case sym.RETURN:
-				return location + "return";
+				return "return";
 			case sym.LENGTH:
-				return location + "length";
+				return "length";
 
 			case sym.TYPE_INT:
-				return location + "int";
+				return "int";
 			case sym.TYPE_BOOL:
-				return location + "bool";
+				return "bool";
 
 			case sym.BOOL_LITERAL:
-				return location + token.value;
+				return value.toString();
 			case sym.INT_LITERAL:
-				return location + "integer " + token.value;
+				return "integer " + value.toString();
 			case sym.CHAR_LITERAL:
-				return location + "character " + Util.unescapeString((String) token.value);
+				return "character " + Util.unescapeString(value.toString());
 			case sym.STRING_LITERAL:
-				return location + "string " + Util.unescapeString((String) token.value);
+				return "string " + Util.unescapeString(value.toString());
 
 			case sym.ID:
-				return location + "id " + token.value;
+				return "id " + value;
 
 			case sym.L_PAREN:
-				return location + "(";
+				return "(";
 			case sym.R_PAREN:
-				return location + ")";
+				return ")";
 			case sym.L_SQ_BRKT:
-				return location + "[";
+				return "[";
 			case sym.R_SQ_BRKT:
-				return location + "]";
+				return "]";
 			case sym.L_BRACE:
-				return location + "{";
+				return "{";
 			case sym.R_BRACE:
-				return location + "}";
+				return "}";
 			case sym.COLON:
-				return location + ":";
+				return ":";
 			case sym.SEMICOLON:
-				return location + ";";
+				return ";";
 			case sym.COMMA:
-				return location + ",";
+				return ",";
 			case sym.UNDERSCORE:
-				return location + "_";
+				return "_";
 
 			case sym.ASSIGN:
-				return location + "=";
+				return "=";
 
 			case sym.PLUS:
-				return location + "+";
+				return "+";
 			case sym.MINUS:
-				return location + "-";
+				return "-";
 			case sym.MULT:
-				return location + "*";
+				return "*";
 			case sym.HIGH_MULT:
-				return location + "*>>";
+				return "*>>";
 			case sym.DIVIDE:
-				return location + "/";
+				return "/";
 			case sym.REMAINDER:
-				return location + "%";
+				return "%";
 
 			case sym.NEG_BOOL:
-				return location + "!";
+				return "!";
 
 			case sym.LT:
-				return location + "<";
+				return "<";
 			case sym.LTE:
-				return location + "<=";
+				return "<=";
 			case sym.GT:
-				return location + ">";
+				return ">";
 			case sym.GTE:
-				return location + ">=";
+				return ">=";
 
 			case sym.EQUALS:
-				return location + "==";
+				return "==";
 			case sym.NOT_EQUALS:
-				return location + "!=";
+				return "!=";
 
 			case sym.LOGICAL_AND:
-				return location + "&";
+				return "&";
 			case sym.LOGICAL_OR:
-				return location + "|";
+				return "|";
 
 			case sym.EOF:
-				return location + "EOF";
+				return "EOF";
 
 			case sym.error:
 				throw new RuntimeException(
-						"Lexer should not output the parser error symbol: " + token.value);
+						"Lexer should not output the parser error symbol: " + value);
 
 			default:
 				throw new RuntimeException(
-						"Token " + token.sym + " is missing a description.");
+						"Token " + symId + " is missing a description.");
 		}
-
 	}
 
     private LexerUtil() {

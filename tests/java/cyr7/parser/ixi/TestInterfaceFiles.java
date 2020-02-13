@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 import cyr7.ast.*;
 import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
-import cyr7.ast.type.PrimitiveEnumNode;
+import cyr7.ast.type.PrimitiveEnum;
+import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
@@ -115,7 +116,7 @@ class TestInterfaceFiles {
         for (ITypeExprNode t: types) {
             returnTypes.add(t);
         }
-        function = new FunctionHeaderDeclNode("main", args, returnTypes);
+        function = new FunctionHeaderDeclNode(null, "main", args, returnTypes);
         functions = new LinkedList<>();
         functions.add(function);
         expected = new IxiProgramNode(functions);
@@ -136,9 +137,9 @@ class TestInterfaceFiles {
         };
 
         for (int d: arrayDimensions) {
-            ITypeExprNode type = PrimitiveEnumNode.INT;
+            ITypeExprNode type = new PrimitiveTypeNode(null, PrimitiveEnum.INT);
             for (int i = 0; i < d; i++) {
-                type = new TypeExprArrayNode(type, Optional.empty());
+                type = new TypeExprArrayNode(null, type, Optional.empty());
             }
             returnTypes.add(type);
         }
@@ -153,10 +154,10 @@ class TestInterfaceFiles {
                 return typeString.toString();
             }).collect(Collectors.joining(", ")));
         
-        function = new FunctionHeaderDeclNode("main", args, returnTypes);
+        function = new FunctionHeaderDeclNode(null, "main", args, returnTypes);
         functions = new LinkedList<>();
         functions.add(function);
-        expected = new IxiProgramNode(functions);
+        expected = new IxiProgramNode(null, functions);
         prgm = new StringReader(prgmString.toString());
         parser = new XiParser(new MultiFileLexer(prgm, true),
                 new ComplexSymbolFactory());

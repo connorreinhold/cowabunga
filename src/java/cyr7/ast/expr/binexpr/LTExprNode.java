@@ -2,11 +2,12 @@ package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
-public class LTExprNode extends BinExprNode {
+public final class LTExprNode extends BinExprNode {
 
-    public LTExprNode(ExprNode left, ExprNode right) {
-        super(left, right);
+    public LTExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
+        super(location, left, right);
     }
 
     @Override
