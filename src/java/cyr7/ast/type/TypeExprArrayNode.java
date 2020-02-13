@@ -1,6 +1,7 @@
 package cyr7.ast.type;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.FunctionHeaderDeclNode;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -37,6 +38,17 @@ public final class TypeExprArrayNode extends AbstractNode implements ITypeExprNo
         size.ifPresent(exprNode -> exprNode.prettyPrint(printer));
 
         printer.endList();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof TypeExprArrayNode) {
+            TypeExprArrayNode oNode = (TypeExprArrayNode) o;
+            return this.child.equals(oNode.child) 
+                    && this.size.equals(oNode.size);
+        }
+        return false;
+
     }
 
 }

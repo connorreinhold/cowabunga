@@ -18,6 +18,15 @@ public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
 		this.value = value;
 	}
 	
+    public boolean equals(Object o) {
+        if (o instanceof AssignmentStmtNode) {
+            AssignmentStmtNode oNode = (AssignmentStmtNode) o;
+            return this.node.equals(oNode.node)
+                    && this.value.equals(oNode.value);
+        }
+        return false;
+    }
+	
 	@Override
 	public void prettyPrint(SExpPrinter printer) {
 		printer.startList();

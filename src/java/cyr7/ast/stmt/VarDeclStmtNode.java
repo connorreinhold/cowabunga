@@ -30,6 +30,16 @@ public class VarDeclStmtNode extends AbstractNode implements StmtNode {
         this.varDecls = Util.immutableCopy(varDecls);
         this.initializer = initializer;
     }
+    
+    public boolean equals(Object o) {
+        if (o instanceof VarDeclStmtNode) {
+            VarDeclStmtNode oNode = (VarDeclStmtNode)o;
+            return this.varDecls.equals(oNode.varDecls)
+                    && this.initializer.equals(oNode.initializer);
+        }
+        return false;
+    }
+    
 
     @Override
     public void prettyPrint(SExpPrinter printer) {

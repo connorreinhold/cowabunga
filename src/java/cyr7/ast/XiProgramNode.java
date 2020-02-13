@@ -38,4 +38,16 @@ public class XiProgramNode extends AbstractNode implements IProgramNode {
         printer.endList();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof XiProgramNode) {
+            XiProgramNode oNode = (XiProgramNode) o;
+            return this.functions.equals(oNode.functions)
+                    && this.uses.equals(oNode.uses);
+        }
+        return false;
+    }
+    
+    
+
 }

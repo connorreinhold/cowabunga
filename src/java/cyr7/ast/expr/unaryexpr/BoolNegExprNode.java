@@ -23,5 +23,12 @@ public class BoolNegExprNode extends UnaryExprNode {
 
         printer.endList();
     }
+    
+    public boolean equals(Object o) {
+        if (o instanceof BoolNegExprNode) {
+            return super.equals(o);
+        }
+        return false;
+    }
 
 }

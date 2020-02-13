@@ -23,4 +23,16 @@ public class RemExprNode extends BinExprNode {
         printer.endList();
     }
 
+    
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof RemExprNode) {
+            RemExprNode oNode = (RemExprNode) o;
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
+        }
+        return false;    
+    }
+    
 }

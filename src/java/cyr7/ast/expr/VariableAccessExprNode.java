@@ -22,4 +22,14 @@ public class VariableAccessExprNode extends ExprAccessNode {
         printer.printAtom(identifier);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof VariableAccessExprNode) {
+            VariableAccessExprNode oNode = (VariableAccessExprNode) o;
+            return this.identifier.equals(oNode.identifier);
+        }
+        return false;
+    }
+    
+
 }

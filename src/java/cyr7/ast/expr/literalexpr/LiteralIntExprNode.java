@@ -20,4 +20,15 @@ public class LiteralIntExprNode extends ExprNode {
     public void prettyPrint(SExpPrinter printer) {
         printer.printAtom(contents);
     }
+    
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof LiteralIntExprNode) {
+            LiteralIntExprNode oNode = (LiteralIntExprNode) o;
+            return this.contents.equals(oNode.contents);
+        }
+        return false;    
+    }
+    
 }
