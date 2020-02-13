@@ -6,6 +6,7 @@
 package cyr7.parser;
 
 import java_cup.runtime.*;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import cyr7.ast.*;
 import cyr7.ast.expr.*;
 import cyr7.ast.expr.binexpr.*;
@@ -13,12 +14,26 @@ import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.*;
 import cyr7.ast.stmt.*;
 import cyr7.ast.type.*;
+import cyr7.exceptions.*;
+import cyr7.lexer.LexerUtil;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Collections;
 import java.util.Optional;
 
 parser code {:
+
+@Override
+public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
+    if (cur_token instanceof ComplexSymbol) {
+        ComplexSymbol sym = (ComplexSymbol) cur_token;
+        throw new UnexpectedTokenException(sym);
+    } else {
+        throw new ParserException("Unexpected token: " + LexerUtil.symbolDescription(cur_token.sym, cur_token.value),
+                                  cur_token.left, cur_token.right);
+    }
+}
+
 :};
 
 action code {:
@@ -157,6 +172,7 @@ precedence left PLUS, MINUS;
 precedence left MULT, HIGH_MULT, DIVIDE, REMAINDER;
 precedence nonassoc NEG_INT, NEG_BOOL;
 precedence left FUNCTION_CALL, ARRAY_ACCESS;
+precedence nonassoc LENGTH;
 
 // Grammar
 
@@ -363,8 +379,8 @@ VarDecl ::=
     ;
 
 Primitive ::=
-    TYPE_INT:i {: RESULT = new PrimitiveTypeNode(ixleft, PrimitiveTypeNode.Type.INT); :}
-    | TYPE_BOOL:b {: RESULT = new PrimitiveTypeNode(bxleft, PrimitiveTypeNode.Type.BOOL); :}
+    TYPE_INT:i {: RESULT = new PrimitiveTypeNode(ixleft, PrimitiveEnum.INT); :}
+    | TYPE_BOOL:b {: RESULT = new PrimitiveTypeNode(bxleft, PrimitiveEnum.BOOL); :}
     ;
 
 TypeExpr ::=
@@ -400,6 +416,9 @@ Expr ::=
 FunctionCall ::=
     ID:id L_PAREN ArgParamList:l R_PAREN {:
             RESULT = new FunctionCallExprNode(idxleft, id, l);
+        :} %prec FUNCTION_CALL
+    | LENGTH:len L_PAREN ArgParamList:l R_PAREN {:
+            RESULT = new LengthCallExprNode(lenxleft, l);
         :} %prec FUNCTION_CALL
     ;
 

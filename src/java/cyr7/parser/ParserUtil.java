@@ -1,6 +1,7 @@
 package cyr7.parser;
 
 import cyr7.ast.INode;
+import cyr7.exceptions.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -13,7 +14,7 @@ import java.io.Writer;
 
 public class ParserUtil {
 
-    public static void parse(Reader reader, Writer writer, boolean isIXI) {
+    public static void parse(Reader reader, Writer writer, boolean isIXI) throws Exception {
         ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, isIXI));
 
         try {
@@ -23,12 +24,10 @@ public class ParserUtil {
             node.prettyPrint(printer);
             printer.flush();
             printer.close();
-        } catch (Exception e) {
-            try {
-                writer.write(e.getMessage());
-            } catch (IOException io) {
-                System.out.println(io.getMessage());
-            }
+        } catch (ParserException e) {
+            writer.append(e.getMessage()).append(System.lineSeparator());
+            writer.flush();
+            writer.close();
         }
     }
 

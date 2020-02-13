@@ -6,7 +6,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
 
-public final class FunctionCallExprNode extends ExprNode {
+public class FunctionCallExprNode extends ExprNode {
 
     final String identifier;
     final LinkedList<ExprNode> parameters;

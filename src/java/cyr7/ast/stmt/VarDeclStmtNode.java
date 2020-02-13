@@ -30,6 +30,10 @@ public class VarDeclStmtNode extends AbstractNode implements StmtNode {
 
             printer.printAtom("=");
 
+            if (varDecls.size() != 1) {
+                printer.startList();
+            }
+
             for (Optional<VarDeclNode> n : varDecls) {
                 if (n.isPresent()) {
                     n.get().prettyPrint(printer);
@@ -38,16 +42,28 @@ public class VarDeclStmtNode extends AbstractNode implements StmtNode {
                 }
             }
 
+            if (varDecls.size() != 1) {
+                printer.endList();
+            }
+
             initializer.get().prettyPrint(printer);
 
             printer.endList();
         } else {
+            if (varDecls.size() != 1) {
+                printer.startList();
+            }
+
             for (Optional<VarDeclNode> n : varDecls) {
                 if (n.isPresent()) {
                     n.get().prettyPrint(printer);
                 } else {
                     printer.printAtom("_");
                 }
+            }
+
+            if (varDecls.size() != 1) {
+                printer.endList();
             }
         }
     }

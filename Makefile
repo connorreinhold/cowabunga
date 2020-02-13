@@ -4,9 +4,6 @@ mylexer:
 myparser:
 	java -jar dependencies/java_cup.jar -locations -parser "XiParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/xi.cup
 
-myparser.oc:
-	java -jar dependencies/java-cup-11b.jar -nowarn -parser "XiParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/xi.cup
-
 cowabunga: myparser mylexer
 
 xth.lexer:
