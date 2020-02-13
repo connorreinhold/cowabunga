@@ -6,7 +6,10 @@ import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class FunctionDeclNode extends AbstractNode {
+/** 
+ * Represents a Function object in XI files with a [header] and function body [block]
+ */
+public class FunctionDeclNode extends AbstractNode {
     final FunctionHeaderDeclNode header;
     final BlockStmtNode block;
 
@@ -20,6 +23,10 @@ public final class FunctionDeclNode extends AbstractNode {
         this.block = block;
     }
 
+    /**
+     * 
+     * @return true if the function does not return a value, false otherwise
+     */
     public boolean isProcedure() {
         return header.returnTypes.isEmpty();
     }

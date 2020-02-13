@@ -4,7 +4,10 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class NotEqualsExprNode extends BinExprNode {
+/**
+ * Node that represents the expression [ExprNode left] != [ExprNode right]
+ */
+public class NotEqualsExprNode extends BinExprNode {
 
     public NotEqualsExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
         super(location, left, right);

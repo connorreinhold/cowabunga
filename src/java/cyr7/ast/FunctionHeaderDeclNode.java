@@ -7,7 +7,11 @@ import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class FunctionHeaderDeclNode extends AbstractNode {
+/** 
+ * Represents an IXI function declaration with an identifier, a list of function arguments,
+ * and a list representing the type(s) the function returns
+ */
+public class FunctionHeaderDeclNode extends AbstractNode {
 	final String identifier;
 	final LinkedList<VarDeclNode> args;
 	final LinkedList<ITypeExprNode> returnTypes;

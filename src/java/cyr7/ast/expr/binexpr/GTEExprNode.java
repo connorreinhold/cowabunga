@@ -4,6 +4,9 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
+/**
+ * Node that represents the expression: [ExprNode left] >= [ExprNode right]
+ */
 public class GTEExprNode extends BinExprNode{
 
     public GTEExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {

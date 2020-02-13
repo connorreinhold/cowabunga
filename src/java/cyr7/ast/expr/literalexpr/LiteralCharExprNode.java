@@ -3,9 +3,11 @@ package cyr7.ast.expr.literalexpr;
 import cyr7.ast.expr.ExprNode;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
 
-public final class LiteralCharExprNode extends ExprNode {
+/**
+ * Represents a character literal, Ex: [contents] ='r'
+ */
+public class LiteralCharExprNode extends ExprNode {
 
     final String contents;
 

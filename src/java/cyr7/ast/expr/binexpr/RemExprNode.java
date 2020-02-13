@@ -4,7 +4,11 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class RemExprNode extends BinExprNode {
+/**
+ * Node that represents the expression [ExprNode left] % [ExprNode right], or the remainder 
+ * when [ExprNode left] is divided by [ExprNode right]
+ */
+public class RemExprNode extends BinExprNode {
 
     public RemExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
         super(location, left, right);

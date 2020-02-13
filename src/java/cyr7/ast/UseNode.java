@@ -3,6 +3,10 @@ package cyr7.ast;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
+/**
+ * Represents a single [use] statement at the top of XI files. Contains the name of the interface 
+ * that the XI file references
+ */
 public class UseNode extends AbstractNode {
     final String interfaceName;
 
