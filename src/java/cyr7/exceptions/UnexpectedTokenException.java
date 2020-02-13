@@ -9,8 +9,15 @@ public class UnexpectedTokenException extends ParserException {
         super(String.format("%d:%d error:%s",
                 symbol.xleft.getLine(),
                 symbol.xleft.getColumn(),
-                "Unexpected token " + LexerUtil.symbolDescription(symbol.sym, symbol.value))
-        , symbol.xleft.getLine(), symbol.xleft.getColumn());
+                "Unexpected token " + LexerUtil.symbolDescription(symbol.sym, symbol.value)));
+    }
+
+    public UnexpectedTokenException(int sym, Object value, int line, int column) {
+        super(String.format("%d:%d error:%s",
+                line,
+                column,
+                "Unexpected token " + LexerUtil.symbolDescription(sym, value)));
+
     }
 
 }
