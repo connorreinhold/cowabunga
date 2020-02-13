@@ -183,6 +183,8 @@ IxiStatement ::=
 
 FunctionHeaderDecl ::=
     ID:id L_PAREN FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
+            System.out.println(idxleft.xleft);
+            System.out.flush();
             RESULT = new FunctionHeaderDeclNode(id, l, returnList);
         :}
     ;

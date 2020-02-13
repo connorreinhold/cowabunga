@@ -4,12 +4,15 @@ import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory;
 
-public class FunctionDeclNode implements INode {
+public final class FunctionDeclNode extends AbstractNode {
     final FunctionHeaderDeclNode header;
     final BlockStmtNode block;
 
-    public FunctionDeclNode(FunctionHeaderDeclNode header, BlockStmtNode block) {
+    public FunctionDeclNode(ComplexSymbolFactory.Location location, FunctionHeaderDeclNode header, BlockStmtNode block) {
+        super(location);
+
         assert header != null;
         assert block != null;
 

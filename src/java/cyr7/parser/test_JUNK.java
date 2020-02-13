@@ -2,6 +2,7 @@ package cyr7.parser;
 
 import java.io.*;
 
+import cyr7.ast.INode;
 import cyr7.ast.XiProgramNode;
 import cyr7.lexer.MultiFileLexer;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -12,12 +13,12 @@ public class test_JUNK {
     public static void main(String args[]) throws Exception {
         Reader reader = new BufferedReader(new InputStreamReader(
                 new FileInputStream(
-                        "./tests/resources/parser/xi/exprs.xi")));
+                        "./tests/resources/parser/ixi/collection.ixi")));
 
-        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, false));
+        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, true));
 
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
-        XiProgramNode v = (XiProgramNode) p.parse().value;
+        INode v = (INode) p.parse().value;
         CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
         v.prettyPrint(printer);
         printer.flush();
