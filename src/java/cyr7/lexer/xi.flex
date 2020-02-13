@@ -4,6 +4,7 @@ import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import cyr7.parser.sym;
+import java.math.BigInteger;
 
 %%
 %public
@@ -23,6 +24,12 @@ import cyr7.parser.sym;
 %yylexthrow}
 
 %{
+    final BigInteger maxInteger = new BigInteger("9223372036854775808"); // 2^63
+    
+    protected boolean overflows(String n) {
+        return new BigInteger(n).compareTo(maxInteger) > 0;
+    }
+    
     protected ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
         return new ComplexSymbol(name, id,
@@ -141,14 +148,25 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "true"              { return symbol(sym.BOOL_LITERAL, true); }
     "false"             { return symbol(sym.BOOL_LITERAL, false); }
-    {Integer}           { return symbol(sym.INT_LITERAL, yytext()); }
-    0{Integer}+	 
+    
+    0+[1-9]{Digit}*
     	{ 
     		throw new cyr7.exceptions.LeadingZeroIntegerException(
     			yytext(), 
 				yyline, 
 				yycolumn); 
 		}
+		
+    {Integer}   
+        {
+            String num = yytext();
+            if (overflows(num)) {
+                throw new cyr7.exceptions.LexerIntegerOverflowException(
+                    num, yyline, yycolumn);
+            } else {
+                return symbol(sym.INT_LITERAL, num);
+            } 
+        }
     
     \'	
     	{ 

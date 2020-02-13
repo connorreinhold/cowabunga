@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.exceptions.LeadingZeroIntegerException;
 import cyr7.exceptions.LexerException;
 import cyr7.parser.sym;
 import cyr7.util.Util;
@@ -129,13 +130,7 @@ class CMSLexerTests {
         assertEquals(sym.INT_LITERAL, token.sym);
         assertEquals("0", token.value.toString());
 
-        token = lexer.next_token();
-        assertEquals(sym.INT_LITERAL, token.sym);
-        assertEquals("0", token.value.toString());
-        
-        token = lexer.next_token();
-        assertEquals(sym.INT_LITERAL, token.sym);
-        assertEquals("1", token.value.toString());
+        assertThrows(LeadingZeroIntegerException.class, lexer::next_token);        
     }
     
     @Test

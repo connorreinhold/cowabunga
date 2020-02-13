@@ -1,6 +1,7 @@
 package cyr7.lexer;
 
 import cyr7.exceptions.LeadingZeroIntegerException;
+import cyr7.exceptions.LexerIntegerOverflowException;
 import cyr7.parser.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
@@ -15,10 +16,7 @@ public class LexerIntegerTest {
         String veryBigNumber = "99999999999999999999999";
         MyLexer lexer = LexerFactory.make(veryBigNumber);
         Symbol token;
-
-        token = lexer.next_token();
-        assertEquals(sym.INT_LITERAL, token.sym);
-        assertEquals(veryBigNumber, token.value);
+        assertThrows(LexerIntegerOverflowException.class, lexer::next_token);
 
         lexer = LexerFactory.make("" + Integer.MAX_VALUE);
         token = lexer.next_token();
@@ -41,7 +39,8 @@ public class LexerIntegerTest {
         assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
 
         lexer = LexerFactory.make("00");
-        assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
+        assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
+        assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
     }
 
     @Test
