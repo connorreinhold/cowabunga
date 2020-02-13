@@ -401,7 +401,7 @@ Expr ::=
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
 FunctionCall ::=
     ID:id L_PAREN ArgParamList:l R_PAREN {:
-            RESULT = new FunctionCallExprNode(id, l);
+            RESULT = new FunctionCallExprNode(idxleft, id, l);
         :} %prec FUNCTION_CALL
     ;
 
@@ -413,45 +413,45 @@ ArgParamList ::=
 
 Access::=
     Access:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
-            RESULT = new ArrayAccessExprNode(a, e);
+            RESULT = new ArrayAccessExprNode(axleft, a, e);
         :} 	%prec ARRAY_ACCESS
-    | ID:id {: RESULT = new VariableAccessExprNode(id); :}
+    | ID:id {: RESULT = new VariableAccessExprNode(idxleft, id); :}
     ;
 
 LiteralExpr ::=
-    INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
-    | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}
-    | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
-    | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(l); :}
+    INT_LITERAL:l {: RESULT = new LiteralIntExprNode(lxleft, l); :}
+    | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(lxleft, l); :}
+    | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(lxleft, l); :}
+    | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(lxleft, l); :}
     ;
 
 UnaryExpr ::=
-    NEG_BOOL Expr:e {: RESULT = new BoolNegExprNode(e); :}
-    | MINUS Expr:e {: RESULT = new IntNegExprNode(e); :} %prec NEG_INT
+    NEG_BOOL Expr:e {: RESULT = new BoolNegExprNode(exleft, e); :}
+    | MINUS Expr:e {: RESULT = new IntNegExprNode(exleft, e); :} %prec NEG_INT
     ;
 
 IntegerExpr ::=
-    Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1, e2); :}
-    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1, e2); :}
-    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1, e2); :}
-    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1, e2); :}
-    | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1, e2); :}
-    | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1, e2); :}
+    Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1xleft, e1, e2); :}
     ;
 
 BoolExpr ::=
-    Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1, e2); :}
-    | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1, e2); :}
-    | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1, e2); :}
-    | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1, e2); :}
-    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1, e2); :}
-    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1, e2); :}
-    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1, e2); :}
-    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1, e2); :}
+    Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1xleft, e1, e2); :}
     ;
 
 ArrayExpr ::=
-    L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(l); :}
+    L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(lxleft, l); :}
     ;
 
 ArrayElements ::=
