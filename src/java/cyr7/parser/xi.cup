@@ -120,7 +120,6 @@ nonterminal AssignAccessNode AssignAccess;
 
 nonterminal VarDeclStmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
-nonterminal LinkedList<Optional<VarDeclNode>> VarDeclOrDiscardList;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
@@ -140,7 +139,7 @@ nonterminal VarDeclNode VarDeclArrayInit;
 nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionedBracket;
 nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionlessBracket;
 
-nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDecl;
+nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
 
 // Precedence
 
@@ -285,8 +284,7 @@ AssignAccess ::=
     ;
 
 VarDeclStatement ::=
-    VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, Optional.empty()); :}
-    | VarDeclArrayInit:arr {:
+    VarDeclArrayInit:arr {:
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.of(arr));
             RESULT = new VarDeclStmtNode(l, Optional.empty());
@@ -301,22 +299,25 @@ VarDeclStatement ::=
             l.addFirst(Optional.of(v));
             RESULT = new VarDeclStmtNode(l, Optional.of(e));
         :}
-    | VarDecl:v COMMA MultiVarDecl:l ASSIGN FunctionCall:e {:
+    | MultiVarDeclList:l {:
+            RESULT = new VarDeclStmtNode(l, Optional.empty());
+        :}
+    | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.of(v));
             RESULT = new VarDeclStmtNode(l, Optional.of(e));
         :}
-    | UNDERSCORE COMMA MultiVarDecl:l ASSIGN FunctionCall:e {:
+    | UNDERSCORE COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.empty());
             RESULT = new VarDeclStmtNode(l, Optional.of(e));
         :}
     ;
 
-MultiVarDecl ::= 
-    VarDecl:v COMMA MultiVarDecl:l {:
+MultiVarDeclList ::=
+    VarDecl:v COMMA MultiVarDeclList:l {:
             l.addFirst(Optional.of(v));
             RESULT = l;
         :}
-    | UNDERSCORE COMMA MultiVarDecl:l {:
+    | UNDERSCORE COMMA MultiVarDeclList:l {:
             l.addFirst(Optional.empty());
             RESULT = l;
         :}
@@ -354,14 +355,6 @@ VarDeclDimensionlessBracket ::=
             RESULT = l;
         :}
     | {: RESULT = new LinkedList<>(); :}
-    ;
-
-
-VarDeclOrDiscardList ::=
-    VarDecl:v COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.of(v)); RESULT = l; :}
-    | VarDecl:v {: RESULT = new LinkedList<>(List.of(Optional.of(v))); :}
-    | UNDERSCORE COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
-    | UNDERSCORE {: RESULT = new LinkedList<>(); RESULT.addFirst(Optional.empty()); :}
     ;
 
 VarDecl ::=
