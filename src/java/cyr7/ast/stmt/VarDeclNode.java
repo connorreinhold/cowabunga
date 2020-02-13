@@ -6,7 +6,11 @@ import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class VarDeclNode extends AbstractNode {
+/**
+ * Represents a Variable Declaration, with a String [identifier] and a type [typeExpr] of the initialized
+ * variable
+ */
+public class VarDeclNode extends AbstractNode {
 
     final String identifier;
 

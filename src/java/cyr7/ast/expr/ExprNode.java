@@ -4,6 +4,9 @@ import cyr7.ast.AbstractNode;
 import cyr7.ast.INode;
 import java_cup.runtime.ComplexSymbolFactory;
 
+/**
+ * Represents a generic expression: Ex: 1+1, true, arr[2][3]
+ */
 public abstract class ExprNode extends AbstractNode {
 
     public ExprNode(ComplexSymbolFactory.Location location) {

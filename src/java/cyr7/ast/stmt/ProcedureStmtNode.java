@@ -5,8 +5,11 @@ import cyr7.ast.expr.FunctionCallExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class ProcedureStmtNode extends AbstractNode implements StmtNode{
-
+/**
+ * Represents a call to a procedure [procedureCall], which is a FunctionCallExprNode with
+ * no return types
+ */
+public class ProcedureStmtNode extends AbstractNode implements StmtNode {
 	final FunctionCallExprNode procedureCall;
 
 	public ProcedureStmtNode(ComplexSymbolFactory.Location location,

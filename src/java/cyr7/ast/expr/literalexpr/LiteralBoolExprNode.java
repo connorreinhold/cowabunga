@@ -4,7 +4,10 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class LiteralBoolExprNode extends ExprNode{
+/**
+ * Represents a boolean literal of either true or false
+ */
+public class LiteralBoolExprNode extends ExprNode{
 
 	final boolean contents;
 	

@@ -5,7 +5,10 @@ import java.util.LinkedList;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class ArrayExprNode extends ExprNode {
+/**
+ * Represents an Array Expression: i.e. {1,2,3,} with a list of ExprNode for values
+ */
+public class ArrayExprNode extends ExprNode {
 	final LinkedList<ExprNode> arrayVals;
 	public ArrayExprNode(ComplexSymbolFactory.Location location, LinkedList<ExprNode> arrayVals) {
 		super(location);

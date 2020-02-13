@@ -4,7 +4,12 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class EqualsExprNode extends BinExprNode {
+
+/**
+ * Node that represents taking the equality operator on [ExprNode left] & [ExprNode right]. Evaluates
+ * to true or false
+ */
+public class EqualsExprNode extends BinExprNode {
 
     public EqualsExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
         super(location, left, right);

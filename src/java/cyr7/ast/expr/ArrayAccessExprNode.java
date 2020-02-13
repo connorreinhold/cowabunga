@@ -4,7 +4,12 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class ArrayAccessExprNode extends ExprAccessNode {
+/**
+ * Represents a single access to an Array at Expr value [index], and a child object [accessNode] 
+ * potentially representing 'nearer' array accesses. 
+ * Ex: ArrayAccessExprNode(ArrayAccessExprNode(VarAccessExprNode("arr"), 3), 4) = arr[3][4]
+ */
+public class ArrayAccessExprNode extends ExprAccessNode {
 
     final ExprAccessNode accessNode;
     final ExprNode index;

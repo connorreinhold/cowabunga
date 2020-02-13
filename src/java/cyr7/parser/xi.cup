@@ -293,7 +293,7 @@ IfElseStatement ::=
     ;
 
 WhileStatement ::=
-    WHILE:w Expr:e BlockStatement:s {: RESULT = new WhileStmtNode(wxleft, e, s); :}
+    WHILE:w Expr:e XiStatement:s {: RESULT = new WhileStmtNode(wxleft, e, s); :}
     ;
 
 AssignmentStatement ::=

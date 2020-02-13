@@ -6,7 +6,10 @@ import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
 
-public final class BlockStmtNode extends AbstractNode implements StmtNode {
+/**
+ * Represents a block of statements (denoted by { ... } in code)
+ */
+public class BlockStmtNode extends AbstractNode implements StmtNode {
     final LinkedList<StmtNode> statements;
 
     public BlockStmtNode(ComplexSymbolFactory.Location location, LinkedList<StmtNode> statements) {

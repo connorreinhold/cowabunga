@@ -14,7 +14,6 @@ public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
 
 	public AssignmentStmtNode(ComplexSymbolFactory.Location location, AssignAccessNode node, ExprNode value) {
 		super(location);
-
 		this.node = node;
 		this.value = value;
 	}
