@@ -287,10 +287,10 @@ AssignAccess ::=
 VarDeclStatement ::=
     VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, Optional.empty()); :}
     | VarDeclArrayInit:arr {:
-        LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-        l.addFirst(Optional.of(arr));
-        RESULT = new VarDeclStmtNode(l, Optional.empty());
-    :}
+            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
+            l.addFirst(Optional.of(arr));
+            RESULT = new VarDeclStmtNode(l, Optional.empty());
+        :}
     | UNDERSCORE ASSIGN FunctionCall:e {:
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.empty());
