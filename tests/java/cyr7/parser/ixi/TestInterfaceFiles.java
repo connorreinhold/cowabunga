@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 import cyr7.ast.*;
 import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
-import cyr7.ast.type.PrimitiveEnumNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
