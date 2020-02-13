@@ -7,7 +7,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 /**
  * Represents a generic expression: Ex: 1+1, true, arr[2][3]
  */
-public abstract class ExprNode implements INode {
+public abstract class ExprNode extends AbstractNode {
 
     public ExprNode(ComplexSymbolFactory.Location location) {
         super(location);

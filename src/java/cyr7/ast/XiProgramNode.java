@@ -8,7 +8,7 @@ import java.util.LinkedList;
 /**
  * Represents an XI program, contianing a list of use statements and a list of functions
  */
-public class XiProgramNode extends extends AbstractNode implements IProgramNode {
+public class XiProgramNode extends AbstractNode implements IProgramNode {
     final LinkedList<UseNode> uses;
     final LinkedList<FunctionDeclNode> functions;
 

@@ -51,6 +51,13 @@ public class LexerUtil {
 		return location + symbolDescription(token.sym, token.value);
 	}
 
+	/**
+	 * A readable description for tokens based on their Symbol ID.
+	 *
+	 * @param symId the ID of the symbol
+	 * @param value the value of a given symbol
+	 * @return a string containing a description of the symbol
+	 */
 	public static String symbolDescription(int symId, Object value) {
 		switch (symId) {
 			case sym.IXI_FILE:
