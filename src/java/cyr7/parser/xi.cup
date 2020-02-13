@@ -136,6 +136,10 @@ nonterminal ExprNode BoolExpr;
 nonterminal ExprNode ArrayExpr;
 nonterminal LinkedList<ExprNode> ArrayElements;
 
+nonterminal VarDeclNode VarDeclArrayInit;
+nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionedBracket;
+nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionlessBracket;
+
 // Precedence
 
 precedence nonassoc L_BRACE;
@@ -275,13 +279,33 @@ AssignmentStatement ::=
 
 AssignAccess ::=
 	AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAssignAccessNode(a, e); :}
-	| ID: id {: RESULT = new VariableAssignAccessNode(id); :}
+	| ID:id {: RESULT = new VariableAssignAccessNode(id); :}
 	;
 
 VarDeclStatement ::=
     VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, Optional.empty()); :}
     | VarDeclOrDiscardList:l ASSIGN Expr:e {: RESULT = new VarDeclStmtNode(l, Optional.of(e)); :}
+    | VarDeclArrayInit
     ;
+
+VarDeclArrayInit ::=
+	ID:id COLON Primitive L_SQ_BRKT Expr R_SQ_BRKT VarDeclDimensionedBracket;
+	
+VarDeclDimensionedBracket ::=
+	L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
+		l.addFirst(Optional.of());
+		RESULT = l;
+	:}
+	| VarDeclDimensionlessBracket {: RESULT = new LinkedList<>(); :}
+	;
+
+VarDeclDimensionlessBracket ::= 
+	L_SQ_BRKT R_SQ_BRKT VarDeclDimensionlessBracket:l {:
+		l.addFirst(Optional.empty()); RESULT = l;
+	:}
+	| {: RESULT = new LinkedList<>(); :}
+	;
+
 
 VarDeclOrDiscardList ::=
     VarDecl:v COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.of(v)); RESULT = l; :}
@@ -300,14 +324,13 @@ Primitive ::=
     ;
 
 TypeExpr ::=
-    Primitive:p TypeExprArrayList:l {: RESULT = ITypeExprNode.fromDimensionList(p, l); :}
+	Primitive:p L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: RESULT = ITypeExprNode.fromDimensionList(p, l); :}
+    | Primitive:p {: RESULT = p; :}
     ;
 
 TypeExprArrayList ::=
-    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.of(e)); RESULT = l; :}
-    | L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
-    | {: RESULT = new LinkedList<>(); :}
-    ;
+	L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
+    | ;
 
 ExprList ::=
     Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
