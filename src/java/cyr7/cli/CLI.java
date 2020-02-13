@@ -20,6 +20,7 @@ public class CLI {
     final static private Options options = createOptions();
     final static private CommandLineParser parser = new DefaultParser();
 
+    static boolean debugPrintingEnabled = false;
     static boolean wantsLexing = false;
     static boolean wantsParsing = false;
     static File sourceRoot = new File(".");
@@ -94,12 +95,22 @@ public class CLI {
                 .required(false)
                 .build();
 
+        Option debugPrinting = Option
+                .builder("debug")
+                .desc("Print debugging information")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
                 .addOption(source)
                 .addOption(destination)
-                .addOption(version);
+                .addOption(version)
+                .addOption(debugPrinting);
     }
 
     /**
@@ -235,6 +246,11 @@ public class CLI {
                 case "v":
                     printVersionMessage();
                     break;
+
+                case "debug":
+                    debugPrintingEnabled = true;
+                    break;
+
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -250,6 +266,8 @@ public class CLI {
             }
 
             if (wantsLexing) {
+                debugPrint("Lexing file: " + filename);
+
                 try {
                     Reader input = getReader(filename);
                     Writer output = getWriter(filename, "lexed");
@@ -260,6 +278,7 @@ public class CLI {
             }
 
             if (wantsParsing) {
+                debugPrint("Parsing file: " + filename);
                 try {
                     Reader input = getReader(filename);
                     Writer output = getWriter(filename, "parsed");
@@ -276,18 +295,27 @@ public class CLI {
 
     private static Reader getReader(String filename) throws IOException {
         Path sourcePath = Paths.get(sourceRoot.getAbsolutePath(), filename);
+        debugPrint("Opening reader to: " + sourcePath);
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
 
     private static Writer getWriter(String relativePath, String fileExtension) throws IOException {
-        Path relativeSourcePath = Path.of(sourceRoot.getPath(), relativePath);
-        Path destPath = Paths.get(destinationRoot.getAbsolutePath(), relativeSourcePath.toString()).getParent();
+        Path destPath = Paths.get(destinationRoot.getAbsolutePath(), relativePath).getParent();
         File dest = new File(destPath.toFile(), String.format("%s." + fileExtension, getMainFilename(Path.of(relativePath))));
         if (!dest.exists()) {
             // Create directories if they don't exist
             dest.getParentFile().mkdirs();
         }
+
+        debugPrint("Opening writer to: " + dest);
+
         return new BufferedWriter(new FileWriter(dest));
+    }
+
+    private static void debugPrint(Object v) {
+        if (debugPrintingEnabled) {
+            System.err.println("DEBUG: " + v);
+        }
     }
 
 }

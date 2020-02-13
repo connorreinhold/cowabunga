@@ -19,13 +19,13 @@ public class LexerProvidedTest {
         MyLexer lexer = new MyLexer(new FileReader(
                            getClass().getClassLoader()
                                      .getResource(
-                                             "lexer/pa1/"+ filename+ ".xi")
+                                             "lexer/"+ filename+ ".xi")
                                      .getFile()));
 
         Scanner solution = new Scanner(new InputStreamReader(
                             getClass().getClassLoader()
                                       .getResourceAsStream(
-                                              "lexer/pa1/"
+                                              "lexer/"
                                               + filename
                                               + ".lexedsol")));
 
@@ -67,73 +67,23 @@ public class LexerProvidedTest {
     }
 
     @Test
-    void testAdd() throws Exception {
-        testFile("add");
+    void testFactorial() throws Exception {
+        testFile("factorial");
     }
 
     @Test
-    void testArrayInit() throws Exception {
-        testFile("arrayinit");
+    void testFibonacci() throws Exception {
+        testFile("fibonacci");
     }
 
     @Test
-    void testArrayInit2() throws Exception {
-        testFile("arrayinit2");
+    void testUnescapingChar() throws Exception {
+        testFile("unescapingChar");
     }
 
     @Test
-    void testBeauty() throws Exception {
-        testFile("beauty");
-    }
-
-    @Test
-    void testEx1() throws Exception {
-        testFile("ex1");
-    }
-
-    @Test
-    void testEx2() throws Exception {
-        testFile("ex2");
-    }
-
-    @Test
-    void testGcd() throws Exception {
-        testFile("gcd");
-    }
-
-    @Test
-    void testInsertionSort() throws Exception {
-        testFile("insertionSort");
-    }
-
-    @Test
-    void testMdarrays() throws Exception {
-        testFile("mdarrays");
-    }
-
-    @Test
-    void testRatAdd() throws Exception {
-        testFile("ratadd");
-    }
-
-    @Test
-    void testRatAddUse() throws Exception {
-        testFile("ratAddUse");
-    }
-
-    @Test
-    void testSpec1() throws Exception {
-        testFile("spec1");
-    }
-
-    @Test
-    void testSpec2() throws Exception {
-        testFile("spec2");
-    }
-
-    @Test
-    void testSpec3() throws Exception {
-        testFile("spec3");
+    void testUnescapingString() throws Exception {
+        testFile("unescapingstring");
     }
 
 }

@@ -2,4 +2,4 @@
 2:1 string \n
 3:2 string \f
 4:2 string \t\t\t\t\t\t\t\t\t\t\n\n\n\r\r\r\f\f\f
-6:2 error: asdflakjsdfalksjdfalskdjfalsdkjfStrings cannot span multiple lines.
+6:2 error: Strings cannot span multiple lines.

@@ -21,11 +21,13 @@ import org.junit.jupiter.api.Test;
 import cyr7.lexer.MyLexer;
 import java_cup.runtime.ComplexSymbolFactory;
 
+import javax.lang.model.type.PrimitiveType;
+
 class TestInterfaceFiles {
 
     @Test
     void testEmptyProgram() throws Exception {
-        IxiProgramNode expected = new IxiProgramNode(new LinkedList<>());
+        IxiProgramNode expected = new IxiProgramNode(null, new LinkedList<>());
         StringReader prgm = new StringReader("");
         XiParser parser = new XiParser(new MultiFileLexer(prgm, true),
                 new ComplexSymbolFactory());
@@ -46,26 +48,26 @@ class TestInterfaceFiles {
 
         args = new LinkedList<>();
         returnTypes = new LinkedList<>();
-        function = new FunctionHeaderDeclNode("main", args, returnTypes);
+        function = new FunctionHeaderDeclNode(null, "main", args, returnTypes);
         functions = new LinkedList<>();
         functions.add(function);
-        expected = new IxiProgramNode(functions);
+        expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain()\n");
         parser = new XiParser(new MultiFileLexer(prgm, true), new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
 
-        function = new FunctionHeaderDeclNode("main", new LinkedList<>(),
+        function = new FunctionHeaderDeclNode(null, "main", new LinkedList<>(),
                 new LinkedList<>());
 
         String[] expectedNames = new String[]
             { "main", "trial", "run", "halt", "stop", "terminate", "kill" };
         functions = new LinkedList<>();
         for (String n : expectedNames) {
-            functions.add(new FunctionHeaderDeclNode(n, new LinkedList<>(),
+            functions.add(new FunctionHeaderDeclNode(null, n, new LinkedList<>(),
                     new LinkedList<>()));
         }
-        expected = new IxiProgramNode(functions);
+        expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain()\ntrial()\nrun()\n"
                 + "halt()stop()terminate()kill()");
         parser = new XiParser(new MultiFileLexer(prgm, true),
@@ -88,12 +90,11 @@ class TestInterfaceFiles {
         
         args = new LinkedList<>();
         returnTypes = new LinkedList<>();
-        returnTypes.add(PrimitiveEnumNode.INT);
-        function = new FunctionHeaderDeclNode(
-                "main", args, returnTypes);  
+        returnTypes.add(new PrimitiveTypeNode(null, PrimitiveEnum.INT));
+        function = new FunctionHeaderDeclNode(null, "main", args, returnTypes);
         functions = new LinkedList<>();
         functions.add(function);
-        expected = new IxiProgramNode(functions);
+        expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain(): int\n");
         MyLexer lex = new MultiFileLexer(prgm, true);
         parser = new XiParser(new MultiFileLexer(prgm, true),
@@ -106,20 +107,18 @@ class TestInterfaceFiles {
         args.clear();
         returnTypes.clear();
         ITypeExprNode[] types = new ITypeExprNode[]{
-            PrimitiveEnumNode.INT,
-            PrimitiveEnumNode.BOOL,
-            PrimitiveEnumNode.INT,
-            PrimitiveEnumNode.BOOL,
-            PrimitiveEnumNode.BOOL,
-            PrimitiveEnumNode.BOOL,
+                new PrimitiveTypeNode(null, PrimitiveEnum.INT),
+                new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
+                new PrimitiveTypeNode(null, PrimitiveEnum.INT),
+                new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
+                new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
+                new PrimitiveTypeNode(null, PrimitiveEnum.BOOL)
         };
-        for (ITypeExprNode t: types) {
-            returnTypes.add(t);
-        }
+        returnTypes.addAll(Arrays.asList(types));
         function = new FunctionHeaderDeclNode(null, "main", args, returnTypes);
         functions = new LinkedList<>();
         functions.add(function);
-        expected = new IxiProgramNode(functions);
+        expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain(): int, bool, int, bool, bool, bool\n");
         parser = new XiParser(new MultiFileLexer(prgm, true),
                 new ComplexSymbolFactory());

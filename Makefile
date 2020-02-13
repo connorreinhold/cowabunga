@@ -6,16 +6,21 @@ myparser:
 
 cowabunga: myparser mylexer
 
-xth.lexer:
-	xth --testpath ~/xth/tests/pa1 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa1/xthScript
-	xth --testpath ~/shared/cowabunga/tests/resources/lexer/custom/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/custom/xthScript
-	xth --testpath ~/shared/cowabunga/tests/resources/lexer/pa1/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/pa1/xthScript
+xth.lexer: xth.lexer.instr xth.lexer.cowa
 
-xth.parser:
+xth.lexer.instr:
+	xth --testpath ~/xth/tests/pa1 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa1/xthScript
+
+xth.lexer.cowa:
+	xth --testpath ~/shared/cowabunga/tests/resources/lexer/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/xthScript
+
+xth.parser: xth.parser.instr
+
+xth.parser.instr:
 	xth --testpath ~/xth/tests/pa2 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa2/xthScript
 
 zip:
 	rm cowabunga.zip
 	zip -r cowabunga.zip \
 		README.md dependencies src tests xic-build build.gradle Makefile settings.gradle \
-		-x *.DS_Store* -x *MyLexer.java*
+		-x *.DS_Store* -x *MyLexer.java* *XiParser.java* *sym.java*
