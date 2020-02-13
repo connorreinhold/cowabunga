@@ -8,10 +8,7 @@ import java.util.LinkedList;
 import java.util.stream.Collectors;
 
 import cyr7.ast.*;
-import cyr7.ast.type.ArrayTypeNode;
-import cyr7.ast.type.PrimitiveEnum;
-import cyr7.ast.type.PrimitiveTypeNode;
-import cyr7.ast.type.TypeNode;
+import cyr7.ast.type.PrimitiveEnumNode;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
 import org.junit.jupiter.api.Test;
@@ -33,7 +30,7 @@ class TestInterfaceFiles {
 
     @Test
     void testNoArgsProcess() throws Exception {
-        LinkedList<FunctionArgDeclNode> args;
+        LinkedList<VarDeclNode> args;
         LinkedList<TypeNode> returnTypes;
         FunctionHeaderDeclNode function;
         LinkedList<FunctionHeaderDeclNode> functions;
@@ -75,7 +72,7 @@ class TestInterfaceFiles {
     @Test
     void testNoArgsFunction() throws Exception {
         
-        LinkedList<FunctionArgDeclNode> args;
+        LinkedList<VarDeclNode> args;
         LinkedList<TypeNode> returnTypes;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
@@ -86,7 +83,7 @@ class TestInterfaceFiles {
         
         args = new LinkedList<>();
         returnTypes = new LinkedList<>();
-        returnTypes.add(new PrimitiveTypeNode(PrimitiveEnum.INT));
+        returnTypes.add(new PrimitiveTypeNode(PrimitiveEnumNode.INT));
         function = new FunctionHeaderDeclNode(
                 "main", args, returnTypes);  
         functions = new LinkedList<>();
@@ -104,12 +101,12 @@ class TestInterfaceFiles {
         args.clear();
         returnTypes.clear();
         TypeNode[] types = new TypeNode[]{
-            new PrimitiveTypeNode(PrimitiveEnum.INT), 
-            new PrimitiveTypeNode(PrimitiveEnum.BOOL), 
-            new PrimitiveTypeNode(PrimitiveEnum.INT),
-            new PrimitiveTypeNode(PrimitiveEnum.BOOL),
-            new PrimitiveTypeNode(PrimitiveEnum.BOOL),
-            new PrimitiveTypeNode(PrimitiveEnum.BOOL),
+            new PrimitiveTypeNode(PrimitiveEnumNode.INT),
+            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
+            new PrimitiveTypeNode(PrimitiveEnumNode.INT),
+            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
+            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
+            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
         };
         for (TypeNode t: types) {
             returnTypes.add(t);
@@ -135,7 +132,7 @@ class TestInterfaceFiles {
         };
 
         for (int d: arrayDimensions) {
-            TypeNode type = new PrimitiveTypeNode(PrimitiveEnum.INT);
+            TypeNode type = new PrimitiveTypeNode(PrimitiveEnumNode.INT);
             for (int i = 0; i < d; i++) {
                 type = new ArrayTypeNode(type);
             }

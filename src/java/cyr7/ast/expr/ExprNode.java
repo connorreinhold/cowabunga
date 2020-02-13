@@ -1,8 +1,7 @@
 package cyr7.ast.expr;
 
-import cyr7.ast.NodeInterface;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import cyr7.ast.INode;
 
-public abstract class ExprNode implements NodeInterface {
+public abstract class ExprNode implements INode {
 
 }

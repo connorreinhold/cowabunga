@@ -15,6 +15,8 @@ import cyr7.ast.stmt.*;
 import cyr7.ast.type.*;
 import java.util.List;
 import java.util.LinkedList;
+import java.util.Collections;
+import java.util.Optional;
 
 parser code {:
 :};
@@ -80,6 +82,12 @@ terminal FUNCTION_CALL,
 // Program-wide
 nonterminal ProgramNode Program;
 
+// Type Expressions
+
+nonterminal ITypeExprNode TypeExpr;
+nonterminal PrimitiveEnumNode Primitive;
+nonterminal LinkedList<Optional<ExprNode>> TypeExprArrayList;
+
 // Ixi program
 
 nonterminal IxiProgramNode IxiProgram;
@@ -88,14 +96,10 @@ nonterminal FunctionHeaderDeclNode IxiStatement;
 nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
 nonterminal IxiStatementEnd;
 
-nonterminal LinkedList<FunctionArgDeclNode> ArgDecl;
-nonterminal LinkedList<FunctionArgDeclNode> ArgDeclList;
+nonterminal LinkedList<VarDeclNode> FunctionVarDeclList;
 
-nonterminal LinkedList<TypeNode> ReturnType;
-nonterminal LinkedList<TypeNode> ReturnTypeList;
-
-nonterminal TypeNode Type;
-nonterminal PrimitiveTypeNode Primitive;
+nonterminal LinkedList<ITypeExprNode> ReturnType;
+nonterminal LinkedList<ITypeExprNode> ReturnTypeList;
 
 // Xi program
 
@@ -108,20 +112,38 @@ nonterminal StmtNode XiStatement;
 nonterminal BlockStmtNode BlockStatement;
 nonterminal LinkedList<StmtNode> XiStatementList;
 nonterminal ReturnStmtNode ReturnStatement;
+nonterminal ProcedureStmtNode ProcedureStatement;
+nonterminal IfElseStmtNode IfElseStatement;
+nonterminal WhileStmtNode WhileStatement;
+nonterminal AssignmentStmtNode AssignmentStatement;
+nonterminal AssignAccessNode AssignAccess;
+
+nonterminal VarDeclStmtNode VarDeclStatement;
+nonterminal VarDeclNode VarDecl;
+nonterminal LinkedList<Optional<VarDeclNode>> VarDeclOrDiscardList;
 
 nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
 nonterminal FunctionCallExprNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
-nonterminal ArrayAccessExprNode ArrayAccess;
+
+nonterminal ExprAccessNode Access;
 nonterminal ExprNode LiteralExpr;
 nonterminal ExprNode UnaryExpr;
 nonterminal ExprNode IntegerExpr;
 nonterminal ExprNode BoolExpr;
+nonterminal ExprNode ArrayExpr;
+nonterminal LinkedList<ExprNode> ArrayElements;
 
 // Precedence
 
+precedence nonassoc L_BRACE;
+
+precedence nonassoc IF;
+precedence nonassoc ELSE;
+
+precedence nonassoc ID;
 precedence left LOGICAL_OR;
 precedence left LOGICAL_AND;
 precedence left EQUALS, NOT_EQUALS;
@@ -160,8 +182,8 @@ IxiStatement ::=
     ;
 
 FunctionHeaderDecl ::=
-    ID:id L_PAREN ArgDecl:argList R_PAREN ReturnType:returnList {:
-            RESULT = new FunctionHeaderDeclNode(id, argList, returnList);
+    ID:id L_PAREN FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
+            RESULT = new FunctionHeaderDeclNode(id, l, returnList);
         :}
     ;
 
@@ -170,36 +192,22 @@ IxiStatementEnd ::=
     |
     ;
 
-ArgDecl ::=
-    ID:id COLON Type:t ArgDeclList:lst {:
-            lst.addFirst(new FunctionArgDeclNode(id, t));
-            RESULT = lst;
-        :}
-    | {: RESULT = new LinkedList<>(); :}
-    ;
-
-ArgDeclList ::=
-    COMMA ID:id COLON Type:t ArgDeclList:lst {:
-            lst.addFirst(new FunctionArgDeclNode(id, t));
-            RESULT = lst;
+FunctionVarDeclList ::=
+    VarDecl:v COMMA FunctionVarDeclList:l {:
+            l.addFirst(v);
+            RESULT = l;
         :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ReturnType ::=
-    COLON Type:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
+    COLON TypeExpr:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ReturnTypeList ::=
-    ReturnTypeList:lst COMMA Type:t {: lst.addLast(t); RESULT = lst; :}
+    ReturnTypeList:lst COMMA TypeExpr:t {: lst.addLast(t); RESULT = lst; :}
     | {: RESULT = new LinkedList<>(); :}
-    ;
-
-Type ::=
-    Type:t L_SQ_BRKT R_SQ_BRKT {: RESULT = new ArrayTypeNode(t); :}
-    | TYPE_INT {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.INT); :}
-    | TYPE_BOOL {: RESULT = new PrimitiveTypeNode(PrimitiveEnum.BOOL); :}
     ;
 
 // Xi Grammar
@@ -216,6 +224,11 @@ UseList ::=
 XiStatement ::=
     BlockStatement:s {: RESULT = s; :}
     | ReturnStatement:s {: RESULT = s; :}
+    | ProcedureStatement:s {: RESULT = s; :}
+    | IfElseStatement:s {: RESULT = s; :}
+    | WhileStatement:s {: RESULT = s; :}
+    | AssignmentStatement:s {: RESULT = s; :}
+    | VarDeclStatement:s {: RESULT = s; :}
     ;
 
 FunctionDeclList ::=
@@ -243,6 +256,59 @@ ReturnStatement ::=
     RETURN ExprList:l {: RESULT = new ReturnStmtNode(l); :}
     ;
 
+ProcedureStatement ::=
+	FunctionCall:c {: RESULT = new ProcedureStmtNode(c); :}
+	;
+
+IfElseStatement ::=
+	IF Expr:e XiStatement:s {: RESULT = new IfElseStmtNode(e, s, Optional.empty()); :}
+	| IF Expr:e XiStatement:s ELSE XiStatement:b {: RESULT = new IfElseStmtNode(e, s, Optional.of(b)); :}
+	;
+
+WhileStatement ::=
+	WHILE Expr:e BlockStatement:s {: RESULT = new WhileStmtNode(e,s); :}
+	;
+
+AssignmentStatement ::=
+	AssignAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(a, e); :}
+	;
+
+AssignAccess ::=
+	AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAssignAccessNode(a, e); :}
+	| ID: id {: RESULT = new VariableAssignAccessNode(id); :}
+	;
+
+VarDeclStatement ::=
+    VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, Optional.empty()); :}
+    | VarDeclOrDiscardList:l ASSIGN Expr:e {: RESULT = new VarDeclStmtNode(l, Optional.of(e)); :}
+    ;
+
+VarDeclOrDiscardList ::=
+    VarDecl:v COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.of(v)); RESULT = l; :}
+    | VarDecl:v {: RESULT = new LinkedList<>(List.of(Optional.of(v))); :}
+    | UNDERSCORE COMMA VarDeclOrDiscardList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
+    | UNDERSCORE {: RESULT = new LinkedList<>(); RESULT.addFirst(Optional.empty()); :}
+    ;
+
+VarDecl ::=
+    ID:id COLON TypeExpr:te {: RESULT = new VarDeclNode(id, te); :}
+    ;
+
+Primitive ::=
+    TYPE_INT {: RESULT = PrimitiveEnumNode.INT; :}
+    | TYPE_BOOL {: RESULT = PrimitiveEnumNode.BOOL; :}
+    ;
+
+TypeExpr ::=
+    Primitive:p TypeExprArrayList:l {: RESULT = ITypeExprNode.fromDimensionList(p, l); :}
+    ;
+
+TypeExprArrayList ::=
+    L_SQ_BRKT LiteralExpr:e R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.of(e)); RESULT = l; :}
+    | L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
 ExprList ::=
     Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
@@ -250,14 +316,14 @@ ExprList ::=
     ;
 
 Expr ::=
-    ID:id {: RESULT = new IdExprNode(id); :}
-    | FunctionCall:e {: RESULT = e; :}
-    | ArrayAccess:e {: RESULT = e; :}
+	FunctionCall:e {: RESULT = e; :}
+    | Access:e {: RESULT = e; :}
     | LiteralExpr:e  {: RESULT = e; :}
     | UnaryExpr:e {: RESULT = e; :}
     | IntegerExpr:e {: RESULT = e; :}
     | BoolExpr:e {: RESULT = e; :}
     | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
+    | ArrayExpr:e {: RESULT = e; :}
     ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
@@ -270,19 +336,21 @@ FunctionCall ::=
 ArgParamList ::=
     Expr:e COMMA ArgParamList:l {: l.addFirst(e); RESULT = l; :}
     | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
-    | {: RESULT = new LinkedList<>(); :}
+    | {: RESULT = new LinkedList<>();:}
     ;
 
-ArrayAccess ::=
-    ID:id L_SQ_BRKT Expr:e R_SQ_BRKT {:
-            RESULT = new ArrayAccessExprNode(id, e);
-        :} %prec ARRAY_ACCESS
-    ;
-
+Access::=
+	Access:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
+			RESULT = new ArrayAccessExprNode(a, e);
+		:} 	%prec ARRAY_ACCESS
+	| ID:id {: RESULT = new VariableAccessExprNode(id); :}
+	;
+	
 LiteralExpr ::=
     INT_LITERAL:l {: RESULT = new LiteralIntExprNode(l); :}
     | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(l); :}
     | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(l); :}
+    | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(l); :}
     ;
 
 UnaryExpr ::=
@@ -309,3 +377,18 @@ BoolExpr ::=
     | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1, e2); :}
     | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1, e2); :}
     ;
+    
+ArrayExpr ::=
+	L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(l); :}
+	;
+	
+ArrayElements ::=
+	Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
+	| Expr:e {: 
+				LinkedList<ExprNode> l = new LinkedList<>();
+				l.add(e);
+				RESULT = l;
+			 :}
+	| {: RESULT = new LinkedList<>(); :}
+	;
+
