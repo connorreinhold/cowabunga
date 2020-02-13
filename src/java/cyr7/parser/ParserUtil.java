@@ -1,13 +1,15 @@
 package cyr7.parser;
 
 import cyr7.ast.INode;
-import cyr7.ast.XiProgramNode;
 import cyr7.lexer.MultiFileLexer;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 
 public class ParserUtil {
 
@@ -28,6 +30,13 @@ public class ParserUtil {
                 System.out.println(io.getMessage());
             }
         }
+    }
+
+    public static void printSExpr(INode node) {
+        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
+        node.prettyPrint(printer);
+        printer.flush();
+        printer.close();
     }
 
 }

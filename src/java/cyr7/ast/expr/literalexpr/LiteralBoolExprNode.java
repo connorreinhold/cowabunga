@@ -15,8 +15,6 @@ public final class LiteralBoolExprNode extends ExprNode{
 	
 	@Override
 	public void prettyPrint(SExpPrinter printer) {
-		printer.startList();
-		printer.printAtom(""+contents);
-		printer.endList();
+		printer.printAtom(String.valueOf(contents));
 	}
 }
