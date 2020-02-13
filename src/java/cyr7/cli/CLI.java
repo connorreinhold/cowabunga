@@ -242,9 +242,9 @@ public class CLI {
             }
         });
         for (String filename : cmd.getArgs()) {
-            boolean isInterface = false;
+            boolean isIXI;
             if (filename.endsWith(".xi") || filename.endsWith(".ixi")) {
-            	isInterface = filename.endsWith(".ixi");
+            	isIXI = filename.endsWith(".ixi");
             } else {
             	continue;
             }
@@ -263,7 +263,7 @@ public class CLI {
                 try {
                     Reader input = getReader(filename);
                     Writer output = getWriter(filename, "parsed");
-                    ParserUtil.parse(input, output);
+                    ParserUtil.parse(input, output, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }

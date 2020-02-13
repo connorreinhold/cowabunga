@@ -197,6 +197,7 @@ FunctionVarDeclList ::=
             l.addFirst(v);
             RESULT = l;
         :}
+    | VarDecl:v {: RESULT = new LinkedList<>(List.of(v)); :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 

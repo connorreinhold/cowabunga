@@ -16,13 +16,18 @@ public class XiProgramNode extends ProgramNode {
     @Override
     public void prettyPrint(SExpPrinter printer) {
         printer.startList();
+
+        printer.startUnifiedList();
         for (UseNode use : uses) {
             use.prettyPrint(printer);
         }
+        printer.endList();
 
+        printer.startUnifiedList();
         for (FunctionDeclNode functionDeclNode : functions) {
             functionDeclNode.prettyPrint(printer);
         }
+        printer.endList();
 
         printer.endList();
     }

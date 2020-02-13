@@ -12,7 +12,7 @@ public class DivExprNode extends BinExprNode {
     @Override
     public void prettyPrint(SExpPrinter printer) {
         printer.startList();
-        printer.printAtom("//");
+        printer.printAtom("/");
         left.prettyPrint(printer);
         right.prettyPrint(printer);
         printer.endList();

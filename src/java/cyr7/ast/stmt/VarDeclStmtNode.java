@@ -23,6 +23,8 @@ public class VarDeclStmtNode extends StmtNode {
         if (initializer.isPresent()) {
             printer.startList();
 
+            printer.printAtom("=");
+
             for (Optional<VarDeclNode> n : varDecls) {
                 if (n.isPresent()) {
                     n.get().prettyPrint(printer);

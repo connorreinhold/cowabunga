@@ -14,6 +14,9 @@ xth.lexer:
 	xth --testpath ~/shared/cowabunga/tests/resources/lexer/custom/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/custom/xthScript
 	xth --testpath ~/shared/cowabunga/tests/resources/lexer/pa1/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/pa1/xthScript
 
+xth.parser:
+	xth --testpath ~/xth/tests/pa2 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa2/xthScript
+
 zip:
 	rm cowabunga.zip
 	zip -r cowabunga.zip \
