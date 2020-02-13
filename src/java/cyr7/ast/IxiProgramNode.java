@@ -4,6 +4,9 @@ import java.util.LinkedList;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+/**
+ * Represents an IXI file, containing only a list of function header declarations
+ */
 public class IxiProgramNode extends ProgramNode {
     final LinkedList<FunctionHeaderDeclNode> functionDeclarations;
 

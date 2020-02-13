@@ -3,7 +3,9 @@ package cyr7.ast.expr.literalexpr;
 import cyr7.ast.expr.ExprNode;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-
+/**
+ * Represents a character literal, Ex: [contents] ='r'
+ */
 public class LiteralCharExprNode extends ExprNode {
 
     final String contents;

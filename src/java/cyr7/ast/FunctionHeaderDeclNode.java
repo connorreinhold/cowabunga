@@ -6,6 +6,10 @@ import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+/** 
+ * Represents an IXI function declaration with an identifier, a list of function arguments,
+ * and a list representing the type(s) the function returns
+ */
 public class FunctionHeaderDeclNode implements INode {
 	final String identifier;
 	final LinkedList<VarDeclNode> args;

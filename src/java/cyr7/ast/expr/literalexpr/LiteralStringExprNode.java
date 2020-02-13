@@ -4,6 +4,9 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+/**
+ * Represents a String literal, Ex: [contents] = "hello"
+ */
 public class LiteralStringExprNode extends ExprNode {
 
     final String contents;

@@ -3,6 +3,9 @@ package cyr7.ast.expr.binexpr;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+/**
+ * Node that represents the expression [ExprNode left] || [ExprNode right]
+ */
 public class OrExprNode extends BinExprNode {
 
     public OrExprNode(ExprNode left, ExprNode right) {

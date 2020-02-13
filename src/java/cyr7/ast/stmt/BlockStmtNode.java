@@ -4,6 +4,9 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 import java.util.LinkedList;
 
+/**
+ * Represents a block of statements (denoted by { ... } in code)
+ */
 public class BlockStmtNode extends StmtNode {
     final LinkedList<StmtNode> statements;
 

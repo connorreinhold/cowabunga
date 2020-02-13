@@ -3,6 +3,9 @@ package cyr7.ast.expr.unaryexpr;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+/**
+ * Represents the logical negation expression: ![ExprNode expr]
+ */
 public class BoolNegExprNode extends UnaryExprNode {
 
     public BoolNegExprNode(ExprNode expr) {

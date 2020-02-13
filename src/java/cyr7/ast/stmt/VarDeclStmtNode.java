@@ -7,6 +7,14 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Represents a variable declaration statement with an optional assignment [initializer]. Contains a list 
+ * [varDecls] of Optional<VarDeclNodes> to initialize in the statement. An Optional.empty() represents an _,
+ * discarding the value of an initialization.
+ * 
+ * Invariant: Cannot have multiple VarDeclNodes in [varDecls] or an Optional.empty() in [varDecls] without
+ * the initializer being a FunctionCallExprNode
+ */
 public class VarDeclStmtNode extends StmtNode {
 
     final List<Optional<VarDeclNode>> varDecls;

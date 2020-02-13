@@ -5,6 +5,9 @@ import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+/** 
+ * Represents a Function object in XI files with a [header] and function body [block]
+ */
 public class FunctionDeclNode implements INode {
     final FunctionHeaderDeclNode header;
     final BlockStmtNode block;
@@ -17,6 +20,10 @@ public class FunctionDeclNode implements INode {
         this.block = block;
     }
 
+    /**
+     * 
+     * @return true if the function does not return a value, false otherwise
+     */
     public boolean isProcedure() {
         return header.returnTypes.isEmpty();
     }
