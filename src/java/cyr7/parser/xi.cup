@@ -80,7 +80,7 @@ terminal FUNCTION_CALL,
          ARRAY_ACCESS;
 
 // Program-wide
-nonterminal ProgramNode Program;
+nonterminal IProgramNode Program;
 
 // Type Expressions
 
@@ -259,7 +259,7 @@ XiStatementList ::=
     ;
 
 ReturnStatement ::=
-    RETURN:r ExprList:l {: RESULT = new ReturnStmtNode(r, l); :}
+    RETURN:r ExprList:l {: RESULT = new ReturnStmtNode(rxleft, l); :}
     ;
 
 ProcedureStatement ::=

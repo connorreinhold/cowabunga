@@ -5,7 +5,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
 
-public class XiProgramNode extends AbstractNode {
+public class XiProgramNode extends AbstractNode implements IProgramNode {
     final LinkedList<UseNode> uses;
     final LinkedList<FunctionDeclNode> functions;
 

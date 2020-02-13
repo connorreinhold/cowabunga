@@ -14,7 +14,7 @@ public class test_JUNK {
     public static void main(String args[]) throws Exception {
         Reader reader = new BufferedReader(new InputStreamReader(
                 new FileInputStream(
-                        "./tests/resources/parser/ixi/collection.ixi")));
+                        "./tests/resources/parser/xi/exprs.xi")));
 
         ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, true));
 

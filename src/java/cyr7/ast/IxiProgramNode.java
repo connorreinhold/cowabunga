@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class IxiProgramNode extends AbstractNode {
+public final class IxiProgramNode extends AbstractNode implements IProgramNode {
     final LinkedList<FunctionHeaderDeclNode> functionDeclarations;
 
     public IxiProgramNode(ComplexSymbolFactory.Location location, LinkedList<FunctionHeaderDeclNode> lst) {

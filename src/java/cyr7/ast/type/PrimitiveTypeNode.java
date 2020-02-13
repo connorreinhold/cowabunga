@@ -6,7 +6,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 
 public class PrimitiveTypeNode extends AbstractNode implements ITypeExprNode {
 
-    enum Type {
+    public enum Type {
         INT, BOOL;
     }
 
@@ -20,6 +20,6 @@ public class PrimitiveTypeNode extends AbstractNode implements ITypeExprNode {
 
     @Override
     public void prettyPrint(SExpPrinter printer) {
-        printer.printAtom(toString().toLowerCase());
+        printer.printAtom(type.toString().toLowerCase());
     }
 }
