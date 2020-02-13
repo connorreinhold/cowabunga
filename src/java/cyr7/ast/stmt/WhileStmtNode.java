@@ -8,6 +8,7 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 public final class WhileStmtNode extends AbstractNode {
+
 	final ExprNode guard;
     final BlockStmtNode block;
 	
@@ -25,6 +26,6 @@ public final class WhileStmtNode extends AbstractNode {
 		guard.prettyPrint(printer);
 		block.prettyPrint(printer);
 		printer.endList();
-		
 	}
+
 }
