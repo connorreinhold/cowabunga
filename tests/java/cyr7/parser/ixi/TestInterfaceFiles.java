@@ -5,10 +5,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.io.StringReader;
 import java.util.Arrays;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import cyr7.ast.*;
+import cyr7.ast.stmt.VarDeclNode;
+import cyr7.ast.type.ITypeExprNode;
 import cyr7.ast.type.PrimitiveEnumNode;
+import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
 import org.junit.jupiter.api.Test;
@@ -31,7 +35,7 @@ class TestInterfaceFiles {
     @Test
     void testNoArgsProcess() throws Exception {
         LinkedList<VarDeclNode> args;
-        LinkedList<TypeNode> returnTypes;
+        LinkedList<ITypeExprNode> returnTypes;
         FunctionHeaderDeclNode function;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
@@ -73,7 +77,7 @@ class TestInterfaceFiles {
     void testNoArgsFunction() throws Exception {
         
         LinkedList<VarDeclNode> args;
-        LinkedList<TypeNode> returnTypes;
+        LinkedList<ITypeExprNode> returnTypes;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
         StringReader prgm;
@@ -83,7 +87,7 @@ class TestInterfaceFiles {
         
         args = new LinkedList<>();
         returnTypes = new LinkedList<>();
-        returnTypes.add(new PrimitiveTypeNode(PrimitiveEnumNode.INT));
+        returnTypes.add(PrimitiveEnumNode.INT);
         function = new FunctionHeaderDeclNode(
                 "main", args, returnTypes);  
         functions = new LinkedList<>();
@@ -100,15 +104,15 @@ class TestInterfaceFiles {
         
         args.clear();
         returnTypes.clear();
-        TypeNode[] types = new TypeNode[]{
-            new PrimitiveTypeNode(PrimitiveEnumNode.INT),
-            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
-            new PrimitiveTypeNode(PrimitiveEnumNode.INT),
-            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
-            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
-            new PrimitiveTypeNode(PrimitiveEnumNode.BOOL),
+        ITypeExprNode[] types = new ITypeExprNode[]{
+            PrimitiveEnumNode.INT,
+            PrimitiveEnumNode.BOOL,
+            PrimitiveEnumNode.INT,
+            PrimitiveEnumNode.BOOL,
+            PrimitiveEnumNode.BOOL,
+            PrimitiveEnumNode.BOOL,
         };
-        for (TypeNode t: types) {
+        for (ITypeExprNode t: types) {
             returnTypes.add(t);
         }
         function = new FunctionHeaderDeclNode("main", args, returnTypes);
@@ -132,9 +136,9 @@ class TestInterfaceFiles {
         };
 
         for (int d: arrayDimensions) {
-            TypeNode type = new PrimitiveTypeNode(PrimitiveEnumNode.INT);
+            ITypeExprNode type = PrimitiveEnumNode.INT;
             for (int i = 0; i < d; i++) {
-                type = new ArrayTypeNode(type);
+                type = new TypeExprArrayNode(type, Optional.empty());
             }
             returnTypes.add(type);
         }

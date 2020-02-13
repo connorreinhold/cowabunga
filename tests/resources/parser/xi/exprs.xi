@@ -1,3 +1,10 @@
 foo() {
+	a: int[3][]
+	b: int[][]
+	b = {1,2,3,4}
+	a = {1,2}
+	b: int[][], f:int = k()
+	f = true 
+	a: int, _ , _ = l()
     return { }
 }
