@@ -285,23 +285,34 @@ AssignAccess ::=
 VarDeclStatement ::=
     VarDeclOrDiscardList:l {: RESULT = new VarDeclStmtNode(l, Optional.empty()); :}
     | VarDeclOrDiscardList:l ASSIGN Expr:e {: RESULT = new VarDeclStmtNode(l, Optional.of(e)); :}
-    | VarDeclArrayInit
+    | VarDeclArrayInit:arr {:
+		LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
+		l.addFirst(Optional.of(arr));
+		RESULT = new VarDeclStmtNode(l, Optional.empty());
+	:}
     ;
 
 VarDeclArrayInit ::=
-	ID:id COLON Primitive L_SQ_BRKT Expr R_SQ_BRKT VarDeclDimensionedBracket;
+	ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l
+	{:
+		l.addFirst(Optional.of(v));
+		ITypeExprNode t = ITypeExprNode.fromDimensionList(p, l);
+		RESULT = new VarDeclNode(id, t);
+	:}
+	;
 	
 VarDeclDimensionedBracket ::=
 	L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
-		l.addFirst(Optional.of());
+		l.addFirst(Optional.of(v));
 		RESULT = l;
 	:}
-	| VarDeclDimensionlessBracket {: RESULT = new LinkedList<>(); :}
+	| VarDeclDimensionlessBracket:l {: RESULT = l; :}
 	;
 
 VarDeclDimensionlessBracket ::= 
 	L_SQ_BRKT R_SQ_BRKT VarDeclDimensionlessBracket:l {:
-		l.addFirst(Optional.empty()); RESULT = l;
+		l.addFirst(Optional.empty()); 
+		RESULT = l;
 	:}
 	| {: RESULT = new LinkedList<>(); :}
 	;
@@ -324,13 +335,16 @@ Primitive ::=
     ;
 
 TypeExpr ::=
-	Primitive:p L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: RESULT = ITypeExprNode.fromDimensionList(p, l); :}
+	Primitive:p L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {:
+		l.addFirst(Optional.empty()); 
+		RESULT = ITypeExprNode.fromDimensionList(p, l); 
+	:}
     | Primitive:p {: RESULT = p; :}
     ;
 
 TypeExprArrayList ::=
 	L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
-    | ;
+    | {: RESULT = new LinkedList<>(); :} ;
 
 ExprList ::=
     Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
