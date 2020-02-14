@@ -23,4 +23,12 @@ public class VariableAssignAccessNode extends AbstractNode implements AssignAcce
 		printer.printAtom(identifier);
 	}
 
+    public boolean equals(Object o) {
+        if (o instanceof VariableAssignAccessNode) {
+            VariableAssignAccessNode oNode = (VariableAssignAccessNode)o;
+            return this.identifier.equals(oNode.identifier);
+        }
+        return false;
+    }
+	
 }

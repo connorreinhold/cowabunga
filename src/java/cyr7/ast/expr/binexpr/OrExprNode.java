@@ -21,4 +21,15 @@ public class OrExprNode extends BinExprNode {
         right.prettyPrint(printer);
         printer.endList();
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof OrExprNode) {
+            OrExprNode oNode = (OrExprNode) o;
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
+        }
+        return false;    
+    }
+    
 }

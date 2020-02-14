@@ -33,4 +33,14 @@ public class FunctionCallExprNode extends ExprNode {
         
         printer.endList();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof FunctionCallExprNode) {
+            FunctionCallExprNode oNode = (FunctionCallExprNode) o;
+            return this.identifier.equals(oNode.identifier)
+                    && this.parameters.equals(oNode.parameters);
+        }
+        return false;
+    }
 }

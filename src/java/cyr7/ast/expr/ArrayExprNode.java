@@ -26,4 +26,13 @@ public class ArrayExprNode extends ExprNode {
 		printer.endList();
 		
 	}
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ArrayExprNode) {
+            ArrayExprNode oNode = (ArrayExprNode) o;
+            return this.arrayVals.equals(oNode.arrayVals);
+        }
+        return false;
+    }
 }

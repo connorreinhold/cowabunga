@@ -1,6 +1,7 @@
 package cyr7.ast.expr.unaryexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
@@ -12,6 +13,14 @@ public abstract class UnaryExprNode extends ExprNode {
     public UnaryExprNode(ComplexSymbolFactory.Location location, ExprNode expr) {
         super(location);
         this.expr = expr;
+    }
+    
+    public boolean equals(Object o) {
+        if (o instanceof UnaryExprNode) {
+            UnaryExprNode oNode = (UnaryExprNode) o;
+            return this.expr.equals(oNode.expr);
+        }
+        return false;
     }
 
 }

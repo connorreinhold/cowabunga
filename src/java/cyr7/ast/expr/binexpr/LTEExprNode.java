@@ -21,4 +21,16 @@ public class LTEExprNode extends BinExprNode {
         right.prettyPrint(printer);
         printer.endList();
     }
+    
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof LTEExprNode) {
+            LTEExprNode oNode = (LTEExprNode) o;
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
+        }
+        return false;    
+    }
+    
 }

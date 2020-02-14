@@ -14,5 +14,5 @@ public interface INode {
 	 * @param [printer] - the printer object to output s-expressions to
 	 */
     void prettyPrint(SExpPrinter printer);
-
+    
 }

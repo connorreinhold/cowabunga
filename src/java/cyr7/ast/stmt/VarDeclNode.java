@@ -22,6 +22,16 @@ public class VarDeclNode extends AbstractNode {
         this.identifier = identifier;
         this.typeExpr = typeExpr;
     }
+    
+    
+    public boolean equals(Object o) {
+        if (o instanceof VarDeclNode) {
+            VarDeclNode oNode = (VarDeclNode)o;
+            return this.identifier.equals(oNode.identifier)
+                    && this.typeExpr.equals(oNode.typeExpr);
+        }
+        return false;
+    }
 
     @Override
     public void prettyPrint(SExpPrinter printer) {

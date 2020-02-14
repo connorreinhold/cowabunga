@@ -4,6 +4,7 @@ import java.util.LinkedList;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.ast.type.PrimitiveTypeNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -29,5 +30,14 @@ public final class WhileStmtNode extends AbstractNode implements StmtNode {
 		block.prettyPrint(printer);
 		printer.endList();
 	}
+	
+    public boolean equals(Object o) {
+        if (o instanceof WhileStmtNode) {
+            WhileStmtNode oNode = (WhileStmtNode)o;
+            return this.guard.equals(oNode.guard)
+                    && this.block.equals(oNode.block);
+        }
+        return false;
+    }
 
 }

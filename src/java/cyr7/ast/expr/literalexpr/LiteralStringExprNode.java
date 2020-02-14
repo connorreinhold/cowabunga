@@ -21,5 +21,14 @@ public class LiteralStringExprNode extends ExprNode {
     public void prettyPrint(SExpPrinter printer) {
         printer.printAtom("\"" + Util.unescapeString(contents) + "\"");
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof LiteralStringExprNode) {
+            LiteralStringExprNode oNode = (LiteralStringExprNode) o;
+            return this.contents.equals(oNode.contents);
+        }
+        return false;    
+    }
 
 }
