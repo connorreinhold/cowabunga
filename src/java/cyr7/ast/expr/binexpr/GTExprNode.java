@@ -21,4 +21,14 @@ public class GTExprNode extends BinExprNode {
         right.prettyPrint(printer);
         printer.endList();
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof GTExprNode) {
+            GTExprNode oNode = (GTExprNode) o;
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
+        }
+        return false;    
+    }
 }

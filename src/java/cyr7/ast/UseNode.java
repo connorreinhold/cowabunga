@@ -22,4 +22,14 @@ public class UseNode extends AbstractNode {
         printer.printAtom(interfaceName);
         printer.endList();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof UseNode) {
+            UseNode oNode = (UseNode) o;
+            return this.interfaceName.equals(oNode.interfaceName);
+        }
+        return false;
+    }
+    
 }

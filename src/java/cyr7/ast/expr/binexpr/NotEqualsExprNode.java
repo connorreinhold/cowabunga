@@ -21,4 +21,15 @@ public class NotEqualsExprNode extends BinExprNode {
         right.prettyPrint(printer);
         printer.endList();
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof NotEqualsExprNode) {
+            NotEqualsExprNode oNode = (NotEqualsExprNode) o;
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
+        }
+        return false;    
+    }
+    
 }

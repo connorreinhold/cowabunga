@@ -30,5 +30,13 @@ public final class ReturnStmtNode extends AbstractNode implements StmtNode {
         }
         printer.endList();
     }
+    
+    public boolean equals(Object o) {
+        if (o instanceof ReturnStmtNode) {
+            ReturnStmtNode oNode = (ReturnStmtNode)o;
+            return this.exprs.equals(oNode.exprs);
+        }
+        return false;
+    }
 
 }

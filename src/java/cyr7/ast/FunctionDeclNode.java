@@ -53,4 +53,13 @@ public class FunctionDeclNode extends AbstractNode {
 
         printer.endList();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof FunctionDeclNode) {
+            FunctionDeclNode oNode = (FunctionDeclNode) o;
+            return this.header.equals(oNode.header)
+                    && this.block.equals(oNode.block);
+        }
+        return false;    }
 }

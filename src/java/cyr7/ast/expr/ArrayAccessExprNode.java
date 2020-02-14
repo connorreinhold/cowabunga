@@ -1,5 +1,6 @@
 package cyr7.ast.expr;
 
+import cyr7.ast.XiProgramNode;
 import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -29,5 +30,15 @@ public class ArrayAccessExprNode extends ExprAccessNode {
         index.prettyPrint(printer);
 
         printer.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ArrayAccessExprNode) {
+            ArrayAccessExprNode oNode = (ArrayAccessExprNode) o;
+            return this.accessNode.equals(oNode.accessNode)
+                    && this.index.equals(oNode.index);
+        }
+        return false;
     }
 }

@@ -23,5 +23,14 @@ public class ProcedureStmtNode extends AbstractNode implements StmtNode {
 	public void prettyPrint(SExpPrinter printer) {
 		this.procedureCall.prettyPrint(printer);
 	}
+	
+    public boolean equals(Object o) {
+        if (o instanceof ProcedureStmtNode) {
+            ProcedureStmtNode oNode = (ProcedureStmtNode)o;
+            return this.procedureCall.equals(oNode.procedureCall);
+        }
+        return false;
+    }
+
 
 }

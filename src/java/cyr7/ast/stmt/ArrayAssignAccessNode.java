@@ -18,6 +18,16 @@ public class ArrayAssignAccessNode extends AbstractNode implements AssignAccessN
 		this.node = node;
 		this.index = index;
 	}
+	
+    public boolean equals(Object o) {
+        if (o instanceof ArrayAssignAccessNode) {
+            ArrayAssignAccessNode oNode = (ArrayAssignAccessNode) o;
+            return this.node.equals(oNode.node)
+                    && this.index.equals(oNode.index)
+                    && this.node.equals(oNode.node);
+        }
+        return false;
+    }
 
 	@Override
 	public void prettyPrint(SExpPrinter printer) {

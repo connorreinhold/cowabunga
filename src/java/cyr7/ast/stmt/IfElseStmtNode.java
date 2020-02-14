@@ -22,6 +22,16 @@ public class IfElseStmtNode extends AbstractNode implements StmtNode {
     	this.ifBlock = ifBlock;
     	this.elseBlock = elseBlock;
     }
+    
+    public boolean equals(Object o) {
+        if (o instanceof IfElseStmtNode) {
+            IfElseStmtNode oNode = (IfElseStmtNode)o;
+            return this.guard.equals(oNode.guard)
+                    && this.ifBlock.equals(oNode.ifBlock)
+                    && this.elseBlock.equals(oNode.elseBlock);
+        }
+        return false;
+    }
 
 	@Override
 	public void prettyPrint(SExpPrinter printer) {

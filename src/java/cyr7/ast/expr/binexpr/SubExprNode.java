@@ -21,4 +21,16 @@ public class SubExprNode extends BinExprNode {
         right.prettyPrint(printer);
         printer.endList();
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof SubExprNode) {
+            SubExprNode oNode = (SubExprNode) o;
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
+        }
+        return false;    
+    }
+    
+    
 }

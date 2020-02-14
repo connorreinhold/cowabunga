@@ -13,5 +13,7 @@ public abstract class AbstractNode implements INode {
     public Location getLocation() {
         return location;
     }
+    
+    public abstract boolean equals(Object o);
 
 }
