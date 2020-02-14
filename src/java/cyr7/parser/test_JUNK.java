@@ -31,8 +31,4 @@ public class test_JUNK {
         }
     }
 
-    public static int asdf(){
-        return 5;
-    }
-
 }
