@@ -24,8 +24,6 @@ import org.junit.jupiter.api.Test;
 import cyr7.lexer.MyLexer;
 import java_cup.runtime.ComplexSymbolFactory;
 
-import javax.lang.model.type.PrimitiveType;
-
 class TestInterfaceFiles {
 
     LinkedList<Optional<ExprNode>> generateEmptyList(int size) {
