@@ -34,7 +34,7 @@ public class ParserFactory {
         String program = "f() { i: int = " + expr + " }";
         XiParser parser = ParserFactory.make(program, false);
         XiProgramNode node = (XiProgramNode) parser.parse().value;
-        return ((VarDeclStmtNode) node.functions.get(0).block.statements).initializer.get();
+        return ((VarDeclStmtNode) node.functions.get(0).block.statements.get(0)).initializer.get();
     }
 
     private ParserFactory() { }

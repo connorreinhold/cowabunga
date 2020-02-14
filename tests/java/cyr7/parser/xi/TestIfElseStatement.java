@@ -1,17 +1,14 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.XiProgramNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.ReturnStmtNode;
 import cyr7.ast.stmt.StmtNode;
 import cyr7.exceptions.UnexpectedTokenException;
-import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
-import javax.swing.text.html.parser.Parser;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
@@ -29,59 +26,60 @@ public class TestIfElseStatement {
         statement =
                 ParserFactory.parseStatement("if false return false else return true").get(0);
         assertEquals(statement, new IfElseStmtNode(
+            null,
+            new LiteralBoolExprNode(
                 null,
-                new LiteralBoolExprNode(
+                false),
+            new ReturnStmtNode(
+                null,
+                List.of(
+                    new LiteralBoolExprNode(
                         null,
-                        false),
-                new ReturnStmtNode(
-                        null,
-                        List.of(
-                                new LiteralBoolExprNode(
-                                        null,
-                                        false
-                                )
-                        )
-                ),
-                Optional.of(
-                        new ReturnStmtNode(
-                                null,
-                                List.of(
-                                        new LiteralBoolExprNode(
-                                                null,
-                                                true
-                                        )
-                                )
-                        )
+                        false
+                    )
                 )
+            ),
+            Optional.of(
+                new ReturnStmtNode(
+                    null,
+                    List.of(
+                        new LiteralBoolExprNode(
+                            null,
+                            true
+                        )
+                    )
+                )
+            )
         ));
 
-        List<StmtNode> statements = ParserFactory.parseStatement("if false return false " +
+        List<StmtNode> statements = ParserFactory.parseStatement("if false " +
+            "return false " +
                 "return true");
         assertEquals(statements.get(0), new IfElseStmtNode(
                 null,
-                new LiteralBoolExprNode(
-                        null,
-                        false
-                ),
-                new ReturnStmtNode(
-                        null,
-                        List.of(
-                                new LiteralBoolExprNode(
-                                        null,
-                                        false
-                                )
-                        )
-                ),
-                Optional.empty()
-        ));
-        assertEquals(statements.get(1), new ReturnStmtNode(
+            new LiteralBoolExprNode(
+                null,
+                false
+            ),
+            new ReturnStmtNode(
                 null,
                 List.of(
-                        new LiteralBoolExprNode(
-                                null,
-                                true
-                        )
+                    new LiteralBoolExprNode(
+                        null,
+                        false
+                    )
                 )
+            ),
+            Optional.empty()
+        ));
+        assertEquals(statements.get(1), new ReturnStmtNode(
+            null,
+            List.of(
+                new LiteralBoolExprNode(
+                    null,
+                    true
+                )
+            )
         ));
 
         assertThrows(UnexpectedTokenException.class, () ->
@@ -92,18 +90,18 @@ public class TestIfElseStatement {
     void testIfElseAndSemicolonInteraction() throws Exception {
         StmtNode statement = ParserFactory.parseStatement("if (true) { return; };").get(0);
         assertEquals(statement, new IfElseStmtNode(
+            null,
+            new LiteralBoolExprNode(null, true),
+            new BlockStmtNode(
                 null,
-                new LiteralBoolExprNode(null, true),
-                new BlockStmtNode(
+                List.of(
+                    new ReturnStmtNode(
                         null,
-                        List.of(
-                                new ReturnStmtNode(
-                                        null,
-                                        List.of()
-                                )
-                        )
-                ),
-                Optional.empty()
+                        List.of()
+                    )
+                )
+            ),
+            Optional.empty()
         ));
     }
 
