@@ -1,16 +1,7 @@
 package cyr7.parser.xi;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.LinkedList;
-
-import org.junit.jupiter.api.Test;
-
 import cyr7.ast.FunctionDeclNode;
 import cyr7.ast.FunctionHeaderDeclNode;
-import cyr7.ast.UseNode;
 import cyr7.ast.XiProgramNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
@@ -23,6 +14,13 @@ import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
+import org.junit.jupiter.api.Test;
+
+import java.io.StringReader;
+import java.util.Collections;
+import java.util.LinkedList;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestFunctionDeclarations {
 

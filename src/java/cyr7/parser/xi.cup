@@ -16,6 +16,7 @@ import cyr7.ast.stmt.*;
 import cyr7.ast.type.*;
 import cyr7.exceptions.*;
 import cyr7.lexer.LexerUtil;
+import cyr7.lexer.MyLexer;
 import java.util.List;
 import java.util.LinkedList;
 import java.util.Collections;
@@ -67,7 +68,8 @@ terminal String ID;
 terminal String TYPE_INT, TYPE_BOOL;
 
 // Values
-terminal String INT_LITERAL;
+terminal String INT_LITERAL; // n < 2^63
+terminal INT_MAX; // n == 2^63
 terminal String STRING_LITERAL;
 terminal String CHAR_LITERAL;
 terminal Boolean BOOL_LITERAL;
@@ -465,8 +467,17 @@ LiteralExpr ::=
     ;
 
 UnaryExpr ::=
-    NEG_BOOL Expr:e {: RESULT = new BoolNegExprNode(exleft, e); :}
-    | MINUS Expr:e {: RESULT = new IntNegExprNode(exleft, e); :} %prec NEG_INT
+    NEG_BOOL:n Expr:e {: RESULT = new BoolNegExprNode(nxleft, e); :}
+    | MINUS:m Expr:e {:
+            RESULT = new IntNegExprNode(mxleft, e);
+        :} %prec NEG_INT
+    | MINUS:m INT_MAX:i {:
+            ExprNode e = new LiteralIntExprNode(ixleft, MyLexer.maxIntegerString);
+            RESULT = new IntNegExprNode(mxleft, e);
+        :} %prec NEG_INT
+    | INT_MAX:i {:
+            throw new ParserIntegerOverflowException(ixleft.getLine(), ixleft.getColumn());
+        :}
     ;
 
 IntegerExpr ::=

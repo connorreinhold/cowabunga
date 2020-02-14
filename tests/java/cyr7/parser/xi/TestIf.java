@@ -1,25 +1,10 @@
 package cyr7.parser.xi;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.LinkedList;
-
+import cyr7.parser.XiParser;
+import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
-import cyr7.ast.FunctionHeaderDeclNode;
-import cyr7.ast.UseNode;
-import cyr7.ast.XiProgramNode;
-import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
-import cyr7.ast.stmt.IfElseStmtNode;
-import cyr7.ast.stmt.ReturnStmtNode;
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
-import cyr7.ast.type.PrimitiveEnum;
-import cyr7.parser.XiParser;
-import cyr7.parser.util.GenerateEmptyTree;
-import cyr7.parser.util.ParserFactory;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 class TestIf {
 

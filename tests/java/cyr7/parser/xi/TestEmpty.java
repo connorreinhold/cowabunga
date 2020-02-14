@@ -1,19 +1,17 @@
 package cyr7.parser.xi;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import java.io.StringReader;
-import java.util.Collections;
-import java.util.LinkedList;
-
-import org.junit.jupiter.api.Test;
-
 import cyr7.ast.FunctionHeaderDeclNode;
 import cyr7.ast.XiProgramNode;
 import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
+import org.junit.jupiter.api.Test;
+
+import java.io.StringReader;
+import java.util.LinkedList;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestEmpty {
     

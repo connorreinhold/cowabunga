@@ -24,11 +24,8 @@ import java.math.BigInteger;
 %yylexthrow}
 
 %{
-    final BigInteger maxInteger = new BigInteger("9223372036854775808"); // 2^63
-    
-    protected boolean overflows(String n) {
-        return new BigInteger(n).compareTo(maxInteger) > 0;
-    }
+    public final static String maxIntegerString = "9223372036854775808";
+    public final static BigInteger maxInteger = new BigInteger(maxIntegerString); // 2^63
     
     protected ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
@@ -36,8 +33,7 @@ import java.math.BigInteger;
             new Location(yyline+1,yycolumn+1,yychar),
             new Location(yyline+1,yycolumn+yylength(),yychar+yylength()));
     }
-    
-   
+
     protected ComplexSymbol symbol(int id, Object val) {
     	String name = sym.terminalNames[id];
         Location left = new Location(yyline+1,yycolumn+1,yychar);
@@ -160,12 +156,22 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     {Integer}   
         {
             String num = yytext();
-            if (overflows(num)) {
-                throw new cyr7.exceptions.LexerIntegerOverflowException(
-                    num, yyline, yycolumn);
-            } else {
+            BigInteger n;
+            try {
+                n = new BigInteger(num);
+            } catch (Exception e) {
+                return symbol(sym.INT_LITERAL, 0);
+            }
+
+            int result = n.compareTo(maxInteger);
+            if (result < 0) { // n < maxInteger
                 return symbol(sym.INT_LITERAL, num);
-            } 
+            } else if (result == 0) { // n == maxInteger
+                return symbol(sym.INT_MAX);
+            } else { // n > maxInteger
+                throw new cyr7.exceptions.LexerIntegerOverflowException(
+                                    num, yyline, yycolumn);
+            }
         }
     
     \'	
