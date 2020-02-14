@@ -16,10 +16,18 @@ xth.lexer.instr:
 xth.lexer.cowa:
 	xth --testpath ~/shared/cowabunga/tests/resources/lexer/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/lexer/xthScript
 
-xth.parser: xth.parser.instr
+xth.parser: xth.parser.instr xth.parser.cowa.xi xth.parser.cowa.ixi
 
 xth.parser.instr:
 	xth --testpath ~/xth/tests/pa2 --compilerpath ~/shared/cowabunga/ ~/xth/tests/pa2/xthScript
+
+xth.parser.cowa: xth.parser.cowa.xi xth.parser.cowa.ixi
+
+xth.parser.cowa.xi: 
+	xth --testpath ~/shared/cowabunga/tests/resources/parser/xi/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/parser/xi/xthScript
+
+xth.parser.cowa.ixi: 
+	xth --testpath ~/shared/cowabunga/tests/resources/parser/ixi/ --compilerpath ~/shared/cowabunga/ ~/shared/cowabunga/tests/resources/parser/ixi/xthScript
 
 zip:
 	rm cowabunga.zip
