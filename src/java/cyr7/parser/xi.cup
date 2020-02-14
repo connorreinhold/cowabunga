@@ -27,8 +27,13 @@ parser code {:
 @Override
 public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
     if (cur_token instanceof ComplexSymbol) {
-        ComplexSymbol sym = (ComplexSymbol) cur_token;
-        throw new UnexpectedTokenException(sym);
+        ComplexSymbol token = (ComplexSymbol) cur_token;
+
+        if (token.sym == sym.INT_MAX) {
+            throw new ParserIntegerOverflowException(token.xleft.getLine(), token.xleft.getColumn());
+        } else {
+            throw new UnexpectedTokenException(token);
+        }
     } else {
         // We don't know the line or column
         throw new UnexpectedTokenException(cur_token.sym, cur_token.value, 1, 1);
@@ -462,9 +467,6 @@ UnaryExpr ::=
             ExprNode e = new LiteralIntExprNode(ixleft, MyLexer.maxIntegerString);
             RESULT = new IntNegExprNode(mxleft, e);
         :} %prec NEG_INT
-    | INT_MAX:i {:
-            throw new ParserIntegerOverflowException(ixleft.getLine(), ixleft.getColumn());
-        :}
     ;
 
 IntegerExpr ::=

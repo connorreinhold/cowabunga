@@ -46,20 +46,13 @@ class TestIntegerOverflow {
         parser = ParserFactory.make(program, false);
         assertDoesNotThrow(parser::parse);
 
-        // Cancel min int
-        program = "main() { a: int = --9223372036854775808 }";
+        program = "main() { a: int = 9223372036854775808 }";
         parser = ParserFactory.make(program, false);
         assertThrows(ParserIntegerOverflowException.class, parser::parse);
 
-        // Double Cancel min int
-        program = "main() { a: int = ---9223372036854775808 }";
+        program = "main() { a: int = 9223372036854775807 }";
         parser = ParserFactory.make(program, false);
         assertDoesNotThrow(parser::parse);
-
-        program = "main() { a: int = -(9223372036854775808) }";
-        parser = ParserFactory.make(program, false);
-        assertThrows(ParserIntegerOverflowException.class, parser::parse);
-
     }
 
     @Test
