@@ -461,6 +461,9 @@ UnaryExpr ::=
             ExprNode e = new LiteralIntExprNode(ixleft, MyLexer.maxIntegerString);
             RESULT = new IntNegExprNode(mxleft, e);
         :} %prec NEG_INT
+    | INT_MAX:i {:
+            throw new ParserIntegerOverflowException(ixleft.getLine(), ixleft.getColumn());
+        :}
     ;
 
 IntegerExpr ::=
