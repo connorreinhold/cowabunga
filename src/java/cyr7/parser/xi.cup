@@ -533,7 +533,8 @@ LiteralExpr ::=
     ;
 
 UnaryExpr ::=
-    NEG_BOOL Expr:e {: 
+    NEG_BOOL Expr:e {:
+        checkSafety(e);
         RESULT = new BoolNegExprNode(exleft, e); 
     :}
     | MINUS Expr:e {: 
