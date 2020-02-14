@@ -40,6 +40,14 @@ public void syntax_error(Symbol cur_token) {
     // Do nothing
 }
 
+public void checkSafety(ExprNode e) throws ParserIntegerOverflowException {
+    if (!e.isASafeValue()) {
+        Location loc = e.getLocation();
+        throw new ParserIntegerOverflowException(
+            loc.getLine(), loc.getColumn());
+    }  
+}
+
 :};
 
 action code {:
@@ -294,10 +302,12 @@ BlockStatement ::=
         RESULT = new BlockStmtNode(bxleft, l); 
     :}
     | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: 
-        l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); 
+        l.addLast(r); 
+        RESULT = new BlockStmtNode(bxleft, l); 
     :}
     | L_BRACE:b XiStatementList:l ReturnStatement:r SEMICOLON R_BRACE {: 
-        l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); 
+        l.addLast(r); 
+        RESULT = new BlockStmtNode(bxleft, l);
     :}
     ;
 
@@ -314,28 +324,33 @@ ProcedureStatement ::=
     ;
 
 IfElseStatement ::=
-    IF:i Expr:e SingleXiStatement:s {: 
+    IF:i Expr:e SingleXiStatement:s {:
+        checkSafety(e); 
         RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); 
     :}
     | IF:i Expr:e SingleXiStatement:s ELSE SingleXiStatement:b {:
-            RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b));
+        checkSafety(e);
+        RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b));
     :}
     ;
 
 WhileStatement ::=
     WHILE:w Expr:e XiStatement:s {: 
+        checkSafety(e);
         RESULT = new WhileStmtNode(wxleft, e, s); 
     :}
     ;
 
 AssignmentStatement ::=
-    AssignAccess:a ASSIGN Expr:e {: 
+    AssignAccess:a ASSIGN Expr:e {:
+        checkSafety(e); 
         RESULT = new AssignmentStmtNode(axleft, a, e); 
     :}
     ;
 
 AssignAccess ::=
-    AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: 
+    AssignAccess:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
+        checkSafety(e); 
         RESULT = new ArrayAssignAccessNode(axleft, a, e); 
     :}
     | ID:id {: 
@@ -345,30 +360,32 @@ AssignAccess ::=
 
 VarDeclStatement ::=
     VarDeclArrayInit:arr {:
-            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-            l.addFirst(Optional.of(arr));
-            RESULT = new VarDeclStmtNode(arrxleft, l, Optional.empty());
+        LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
+        l.addFirst(Optional.of(arr));
+        RESULT = new VarDeclStmtNode(arrxleft, l, Optional.empty());
     :}
-    | UNDERSCORE:u ASSIGN FunctionCall:e {:
-            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-            l.addFirst(Optional.empty());
-            RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(e));
+    | UNDERSCORE:u ASSIGN FunctionCall:f {:
+        LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
+        l.addFirst(Optional.empty());
+        RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(f));
     :}
     | VarDecl:v ASSIGN Expr:e {:
-            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-            l.addFirst(Optional.of(v));
-            RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
+        checkSafety(e);
+        LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
+        l.addFirst(Optional.of(v));
+        RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
     :}
     | MultiVarDeclList:l {:
-            RESULT = new VarDeclStmtNode(lxleft, l, Optional.empty());
+        RESULT = new VarDeclStmtNode(lxleft, l, Optional.empty());
     :}
     | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
-            l.addFirst(Optional.of(v));
-            RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
+        checkSafety(e);
+        l.addFirst(Optional.of(v));
+        RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
     :}
-    | UNDERSCORE:u COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
-            l.addFirst(Optional.empty());
-            RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(e));
+    | UNDERSCORE:u COMMA MultiVarDeclList:l ASSIGN FunctionCall:f {:
+        l.addFirst(Optional.empty());
+        RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(f));
     :}
     ;
 
@@ -394,28 +411,30 @@ MultiVarDeclList ::=
     ;
 
 VarDeclArrayInit ::=
-    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT 
+    ID:id COLON Primitive:p L_SQ_BRKT Expr:e R_SQ_BRKT 
         VarDeclDimensionedBracket:l {:
-            l.addFirst(Optional.of(v));
-            ITypeExprNode t = ITypeExprNode.fromDimensionList(p, l);
-            RESULT = new VarDeclNode(idxleft, id, t);
+        checkSafety(e);
+        l.addFirst(Optional.of(e));
+        ITypeExprNode t = ITypeExprNode.fromDimensionList(p, l);
+        RESULT = new VarDeclNode(idxleft, id, t);
     :}
     ;
 
 VarDeclDimensionedBracket ::=
-    L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
-            l.addFirst(Optional.of(v));
-            RESULT = l;
+    L_SQ_BRKT Expr:e R_SQ_BRKT VarDeclDimensionedBracket:l {:
+        checkSafety(e);
+        l.addFirst(Optional.of(e));
+        RESULT = l;
     :}
     | VarDeclDimensionlessBracket:l {: 
-            RESULT = l; 
+        RESULT = l; 
     :}
     ;
 
 VarDeclDimensionlessBracket ::= 
     L_SQ_BRKT R_SQ_BRKT VarDeclDimensionlessBracket:l {:
-            l.addFirst(Optional.empty());
-            RESULT = l;
+        l.addFirst(Optional.empty());
+        RESULT = l;
     :}
     | {: RESULT = new LinkedList<>(); :}
     ;
@@ -437,8 +456,8 @@ Primitive ::=
 
 TypeExpr ::=
     Primitive:p L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {:
-            l.addFirst(Optional.empty());
-            RESULT = ITypeExprNode.fromDimensionList(p, l);
+        l.addFirst(Optional.empty());
+        RESULT = ITypeExprNode.fromDimensionList(p, l);
     :}
     | Primitive:p {: RESULT = p; :}
     ;
@@ -450,8 +469,14 @@ TypeExprArrayList ::=
     | {: RESULT = new LinkedList<>(); :} ;
 
 ExprList ::=
-    Expr:e COMMA ExprList:l {: l.addFirst(e); RESULT = l; :}
-    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    Expr:e COMMA ExprList:l {: 
+        checkSafety(e);
+        l.addFirst(e); RESULT = l; 
+    :}
+    | Expr:e {:
+        checkSafety(e); 
+        RESULT = new LinkedList<>(List.of(e)); 
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -462,7 +487,10 @@ Expr ::=
     | UnaryExpr:e {: RESULT = e; :}
     | IntegerExpr:e {: RESULT = e; :}
     | BoolExpr:e {: RESULT = e; :}
-    | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
+    | L_PAREN Expr:e R_PAREN {:
+        checkSafety(e); 
+        RESULT = e; 
+    :}
     | ArrayExpr:e {: RESULT = e; :}
     ;
 
@@ -478,15 +506,22 @@ FunctionCall ::=
     ;
 
 ArgParamList ::=
-    Expr:e COMMA ArgParamList:l {: l.addFirst(e); RESULT = l; :}
-    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    Expr:e COMMA ArgParamList:l {: 
+        checkSafety(e);
+        l.addFirst(e); RESULT = l; 
+    :}
+    | Expr:e {:
+        checkSafety(e);
+        RESULT = new LinkedList<>(List.of(e)); 
+    :}
     | {: RESULT = new LinkedList<>();:}
     ;
 
 Access::=
     Access:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
-            RESULT = new ArrayAccessExprNode(axleft, a, e);
-        :} 	%prec ARRAY_ACCESS
+        checkSafety(e);
+        RESULT = new ArrayAccessExprNode(axleft, a, e);
+    :} 	%prec ARRAY_ACCESS
     | ID:id {: RESULT = new VariableAccessExprNode(idxleft, id); :}
     ;
 
@@ -498,8 +533,12 @@ LiteralExpr ::=
     ;
 
 UnaryExpr ::=
-    NEG_BOOL Expr:e {: RESULT = new BoolNegExprNode(exleft, e); :}
-    | MINUS Expr:e {: RESULT = new IntNegExprNode(exleft, e); :} %prec NEG_INT
+    NEG_BOOL Expr:e {: 
+        RESULT = new BoolNegExprNode(exleft, e); 
+    :}
+    | MINUS Expr:e {: 
+        RESULT = new IntNegExprNode(exleft, e); 
+    :} %prec NEG_INT
     ;
 
 IntegerExpr ::=
@@ -543,10 +582,11 @@ ArrayExpr ::=
 ArrayElements ::=
     Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
     | Expr:e {:
-            LinkedList<ExprNode> l = new LinkedList<>();
-            l.add(e);
-            RESULT = l;
-         :}
+        checkSafety(e);
+        LinkedList<ExprNode> l = new LinkedList<>();
+        l.add(e);
+        RESULT = l;
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 

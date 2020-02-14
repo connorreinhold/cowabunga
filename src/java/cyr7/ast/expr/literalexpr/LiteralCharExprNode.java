@@ -12,10 +12,12 @@ public class LiteralCharExprNode extends ExprNode {
 
     final String contents;
 
-    public LiteralCharExprNode(ComplexSymbolFactory.Location location, String contents) {
+    public LiteralCharExprNode(ComplexSymbolFactory.Location location, 
+            String contents) {
         super(location);
         this.contents = contents;
     }
+
     @Override
     public void prettyPrint(SExpPrinter printer) {
         printer.printAtom("'" + Util.unescapeString(contents) + "'");

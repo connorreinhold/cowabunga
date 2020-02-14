@@ -1,15 +1,18 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.ParserIntegerOverflowException;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
- * Node that represents taking [ExprNode] and dividing (integer division) by [ExprNode right]
+ * Node that represents taking [ExprNode] and dividing (integer division) by
+ * [ExprNode right]
  */
 public class DivExprNode extends BinExprNode {
 
-    public DivExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
+    public DivExprNode(ComplexSymbolFactory.Location location, ExprNode left,
+            ExprNode right) throws ParserIntegerOverflowException {
         super(location, left, right);
     }
 
@@ -26,8 +29,8 @@ public class DivExprNode extends BinExprNode {
     public boolean equals(Object o) {
         if (o instanceof DivExprNode) {
             DivExprNode oNode = (DivExprNode) o;
-            return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+            return this.left.equals(oNode.left) && this.right.equals(
+                    oNode.right);
         }
         return false;
     }

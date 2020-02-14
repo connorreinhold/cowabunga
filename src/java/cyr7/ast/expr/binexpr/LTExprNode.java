@@ -1,6 +1,7 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.ParserIntegerOverflowException;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -9,7 +10,8 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class LTExprNode extends BinExprNode {
 
-    public LTExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
+    public LTExprNode(ComplexSymbolFactory.Location location, ExprNode left,
+            ExprNode right) throws ParserIntegerOverflowException {
         super(location, left, right);
     }
 
@@ -21,7 +23,7 @@ public class LTExprNode extends BinExprNode {
         right.prettyPrint(printer);
         printer.endList();
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof LTExprNode) {
@@ -29,8 +31,7 @@ public class LTExprNode extends BinExprNode {
             return this.left.equals(oNode.left) && this.right.equals(
                     oNode.right);
         }
-        return false;    
+        return false;
     }
-    
-    
+
 }

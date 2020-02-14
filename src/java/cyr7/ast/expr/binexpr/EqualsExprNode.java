@@ -1,6 +1,7 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.ParserIntegerOverflowException;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -11,7 +12,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 public class EqualsExprNode extends BinExprNode {
 
     public EqualsExprNode(ComplexSymbolFactory.Location location, ExprNode left,
-            ExprNode right) {
+            ExprNode right) throws ParserIntegerOverflowException {
         super(location, left, right);
     }
 
