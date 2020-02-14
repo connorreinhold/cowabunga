@@ -2,4 +2,8 @@ build
 
 xic ("Test --parse") "--parse" {
     multipleSemicolons.ixi;
+    apply.ixi;
+    collection.ixi;
+    dictionary.ixi;
+    noTypeFail.ixi;
 }
