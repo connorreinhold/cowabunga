@@ -230,7 +230,8 @@ ReturnTypeList ::=
 // Xi Grammar
 
 XiProgram ::=
-    UseList:uses FunctionDeclList:functions {: RESULT = new XiProgramNode(usesxleft, uses, functions); :}
+    UseList:uses FunctionDeclList:functions 
+    {: RESULT = new XiProgramNode(usesxleft, uses, functions); :}
     ;
 
 UseList ::=

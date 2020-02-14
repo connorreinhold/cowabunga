@@ -12,7 +12,8 @@ public class XiProgramNode extends AbstractNode implements IProgramNode {
     final LinkedList<UseNode> uses;
     final LinkedList<FunctionDeclNode> functions;
 
-    public XiProgramNode(ComplexSymbolFactory.Location location, LinkedList<UseNode> uses, LinkedList<FunctionDeclNode> functions) {
+    public XiProgramNode(ComplexSymbolFactory.Location location, 
+            LinkedList<UseNode> uses, LinkedList<FunctionDeclNode> functions) {
         super(location);
 
         this.uses = uses;
