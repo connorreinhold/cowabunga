@@ -3,7 +3,7 @@ package cyr7.parser.xi;
 import static org.junit.jupiter.api.Assertions.*;
 
 import cyr7.exceptions.ParserIntegerOverflowException;
-import cyr7.parser.ParserFactory;
+import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
 import cyr7.exceptions.LexerIntegerOverflowException;

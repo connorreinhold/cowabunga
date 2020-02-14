@@ -12,8 +12,8 @@ import cyr7.ast.stmt.VarDeclNode;
 import cyr7.ast.type.ITypeExprNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
-import cyr7.parser.ParserFactory;
 import cyr7.parser.XiParser;
+import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
 import java.io.StringReader;
@@ -33,7 +33,7 @@ class TestFunctionDeclarations {
     XiParser parser;
     Object tree;
     String program;
-
+    
     @Test
     void test() throws Exception {
         program = "main(): int { return 0; }";
@@ -45,11 +45,11 @@ class TestFunctionDeclarations {
         LinkedList<StmtNode> stmts = new LinkedList<>();
         stmts.add(stmt);
         BlockStmtNode block = new BlockStmtNode(null, stmts);
-        Collections.addAll(retTypes,
+        Collections.addAll(retTypes, 
                 new ITypeExprNode[] {
-                        new PrimitiveTypeNode(null, PrimitiveEnum.INT)
+                    new PrimitiveTypeNode(null, PrimitiveEnum.INT)
                 });
-
+        
         Collections.addAll(
                 funcs, new FunctionDeclNode[]{
                         new FunctionDeclNode(null,
@@ -57,11 +57,11 @@ class TestFunctionDeclarations {
                                         new LinkedList<>(),
                                         retTypes),
                                 block)
-                });
+        });
         expected = new XiProgramNode(null, new LinkedList<>(), funcs);
         parser = ParserFactory.make(program, false);
         tree = parser.parse().value;
-        assertEquals(expected, tree);
+        assertEquals(expected, tree);    
     }
-
+    
 }

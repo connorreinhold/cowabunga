@@ -13,7 +13,8 @@ public class FunctionDeclNode extends AbstractNode {
     final FunctionHeaderDeclNode header;
     final BlockStmtNode block;
 
-    public FunctionDeclNode(ComplexSymbolFactory.Location location, FunctionHeaderDeclNode header, BlockStmtNode block) {
+    public FunctionDeclNode(ComplexSymbolFactory.Location location, 
+            FunctionHeaderDeclNode header, BlockStmtNode block) {
         super(location);
 
         assert header != null;
