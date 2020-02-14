@@ -86,6 +86,8 @@ public class LexerUtil {
 				return value.toString();
 			case sym.INT_LITERAL:
 				return "integer " + value.toString();
+			case sym.INT_MAX:
+				return "integer " + MyLexer.maxIntegerString;
 			case sym.CHAR_LITERAL:
 				return "character " 
 				            + Util.unescapeCharacterString(value.toString());
