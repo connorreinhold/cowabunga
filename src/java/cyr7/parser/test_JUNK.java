@@ -16,7 +16,7 @@ public class test_JUNK {
         try {
             Reader reader = new BufferedReader(new InputStreamReader(
                     new FileInputStream(
-                            "./tests/resources/parser/xi/exprs.xi")));
+                            "./tests/resources/parser/testjunk.xi")));
 
             ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, false));
 
@@ -29,6 +29,10 @@ public class test_JUNK {
         } catch (ParserException e) {
             System.out.println(e.getMessage());
         }
+    }
+
+    public static int asdf(){
+        return 5;
     }
 
 }

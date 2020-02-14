@@ -1,0 +1,11 @@
+(
+ ((init () ())
+  (add ((key int) (value ([] int))) (bool))
+  (get ((key int)) (([] int)))
+  (size () (int))
+  (clear () (bool))
+  (getAll () (([] ([] int))))
+  (getKeys () (([] int)))
+  (getPair () (int ([] int))))
+ )
+

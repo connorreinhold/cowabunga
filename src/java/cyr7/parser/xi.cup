@@ -112,9 +112,7 @@ nonterminal LinkedList<Optional<ExprNode>> TypeExprArrayList;
 
 nonterminal IxiProgramNode IxiProgram;
 nonterminal LinkedList<FunctionHeaderDeclNode> FunctionHeaderDeclList;
-nonterminal FunctionHeaderDeclNode IxiStatement;
 nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
-nonterminal IxiStatementEnd;
 
 nonterminal LinkedList<VarDeclNode> FunctionVarDeclList;
 
@@ -129,12 +127,10 @@ nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode FunctionDecl;
 
 nonterminal StmtNode XiStatement;
-nonterminal StmtNode XiStatementNoSemicolon;
-nonterminal StmtNode XiStatementOrReturn;
-nonterminal SemicolonList;
+nonterminal LinkedList<StmtNode> XiStatementList;
+nonterminal StmtNode SingleXiStatement;
 nonterminal ReturnStmtNode ReturnStatement;
 nonterminal BlockStmtNode BlockStatement;
-nonterminal LinkedList<StmtNode> XiStatementList;
 nonterminal ProcedureStmtNode ProcedureStatement;
 nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
@@ -198,28 +194,18 @@ IxiProgram ::=
     FunctionHeaderDeclList:lst {: RESULT = new IxiProgramNode(lstxleft, lst); :};
 
 FunctionHeaderDeclList ::=
-    FunctionHeaderDeclList:lst IxiStatement:stmt {:
-            lst.addLast(stmt);
+    FunctionHeaderDeclList:lst FunctionHeaderDecl:decl {:
+            lst.addLast(decl);
             RESULT = lst;
         :}
+    | FunctionHeaderDeclList:lst SEMICOLON {: RESULT = lst; :}
     | {: RESULT = new LinkedList<>(); :}
-    ;
-
-IxiStatement ::=
-    FunctionHeaderDecl:decl IxiStatementEnd {:
-            RESULT = decl;
-        :}
     ;
 
 FunctionHeaderDecl ::=
     ID:id L_PAREN FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
             RESULT = new FunctionHeaderDeclNode(idxleft, id, l, returnList);
         :}
-    ;
-
-IxiStatementEnd ::=
-    SEMICOLON
-    |
     ;
 
 FunctionVarDeclList ::=
@@ -252,19 +238,8 @@ UseList ::=
     | {: RESULT = new LinkedList<>(); :}
     ;
 
-SemicolonList ::=
-    SEMICOLON SemicolonList
-    | SEMICOLON
-    ;
-
-// Xi statements excluding return
-XiStatement ::=
-    XiStatementNoSemicolon:s SemicolonList {: RESULT = s; :}
-    | XiStatementNoSemicolon:s {: RESULT = s; :}
-    ;
-
 // Xi statements with no semicolon excluding return
-XiStatementNoSemicolon ::=
+XiStatement ::=
     BlockStatement:s {: RESULT = s; :}
     | ProcedureStatement:s {: RESULT = s; :}
     | IfElseStatement:s {: RESULT = s; :}
@@ -273,9 +248,19 @@ XiStatementNoSemicolon ::=
     | VarDeclStatement:s {: RESULT = s; :}
     ;
 
-XiStatementOrReturn ::=
+// Xi statement list excluding return
+XiStatementList ::=
+    XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
+    | SEMICOLON XiStatementList:l {: RESULT = l; :}
+    | {: RESULT = new LinkedList<>(); :}
+    ;
+
+// Xi statement with or without a semicolon including return
+SingleXiStatement ::=
     XiStatement:s {: RESULT = s; :}
+    | XiStatement:s SEMICOLON {: RESULT = s; :}
     | ReturnStatement:s {: RESULT = s; :}
+    | ReturnStatement:s SEMICOLON {: RESULT = s; :}
     ;
 
 FunctionDeclList ::=
@@ -292,16 +277,11 @@ FunctionDecl ::=
 BlockStatement ::=
     L_BRACE:b XiStatementList:l R_BRACE {: RESULT = new BlockStmtNode(bxleft, l); :}
     | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
-    ;
-
-XiStatementList ::=
-    XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
-    | {: RESULT = new LinkedList<>(); :}
+    | L_BRACE:b XiStatementList:l ReturnStatement:r SEMICOLON R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
     ;
 
 ReturnStatement ::=
     RETURN:r ExprList:l {: RESULT = new ReturnStmtNode(rxleft, l); :}
-    | RETURN:r ExprList:l SemicolonList {: RESULT = new ReturnStmtNode(rxleft, l); :}
     ;
 
 ProcedureStatement ::=
@@ -309,8 +289,8 @@ ProcedureStatement ::=
     ;
 
 IfElseStatement ::=
-    IF:i Expr:e XiStatementOrReturn:s {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); :}
-    | IF:i Expr:e XiStatementOrReturn:s ELSE XiStatementOrReturn:b {:
+    IF:i Expr:e SingleXiStatement:s {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); :}
+    | IF:i Expr:e SingleXiStatement:s ELSE SingleXiStatement:b {:
             RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b));
         :}
     ;

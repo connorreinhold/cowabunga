@@ -1,11 +1,1 @@
-(()
- ((main
-   ()
-   ()
-   ((if true
-     (return false) ((return true)))
-    (if false ((= (i int) 0) (length i)))
-    (if true (= i (+ i 1)))
-    (if false (= j (+ j 1)) (= j (- j 1)))
-    (if true (= i (- i 1)) (= j (- j 1)))))))
-
+17:9 error:Unexpected token else

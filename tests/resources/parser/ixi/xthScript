@@ -1,0 +1,3 @@
+xic ("Test --parse") "--parse" {
+    ifelse.xi;
+}
