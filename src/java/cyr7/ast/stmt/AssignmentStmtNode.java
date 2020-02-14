@@ -9,11 +9,15 @@ import java_cup.runtime.ComplexSymbolFactory;
 public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
 
 	// Assign [node] to [value]
-	final AssignAccessNode node;
-	final ExprNode value;
+	public final AssignAccessNode node;
+	public final ExprNode value;
 
 	public AssignmentStmtNode(ComplexSymbolFactory.Location location, AssignAccessNode node, ExprNode value) {
 		super(location);
+
+		assert node != null;
+		assert value != null;
+
 		this.node = node;
 		this.value = value;
 	}

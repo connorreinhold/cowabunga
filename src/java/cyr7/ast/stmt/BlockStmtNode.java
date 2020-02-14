@@ -1,23 +1,27 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents a block of statements (denoted by { ... } in code)
  */
 public class BlockStmtNode extends AbstractNode implements StmtNode {
-    final LinkedList<StmtNode> statements;
+
+    public final List<StmtNode> statements;
 
     public BlockStmtNode(ComplexSymbolFactory.Location location,
-            LinkedList<StmtNode> statements) {
+            List<StmtNode> statements) {
         super(location);
+
         assert statements != null;
 
-        this.statements = statements;
+        this.statements = Util.immutableCopy(statements);
     }
 
     public boolean equals(Object o) {

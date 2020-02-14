@@ -19,14 +19,18 @@ import java.util.Optional;
  */
 public class VarDeclStmtNode extends AbstractNode implements StmtNode {
 
-    final List<Optional<VarDeclNode>> varDecls;
+    public final List<Optional<VarDeclNode>> varDecls;
 
-    final Optional<ExprNode> initializer;
+    public final Optional<ExprNode> initializer;
 
     public VarDeclStmtNode(ComplexSymbolFactory.Location location,
                            List<Optional<VarDeclNode>> varDecls,
                            Optional<ExprNode> initializer) {
         super(location);
+
+        assert varDecls != null;
+        assert initializer != null;
+
         this.varDecls = Util.immutableCopy(varDecls);
         this.initializer = initializer;
     }
@@ -39,7 +43,6 @@ public class VarDeclStmtNode extends AbstractNode implements StmtNode {
         }
         return false;
     }
-    
 
     @Override
     public void prettyPrint(SExpPrinter printer) {
@@ -48,41 +51,31 @@ public class VarDeclStmtNode extends AbstractNode implements StmtNode {
 
             printer.printAtom("=");
 
-            if (varDecls.size() != 1) {
-                printer.startList();
-            }
-
-            for (Optional<VarDeclNode> n : varDecls) {
-                if (n.isPresent()) {
-                    n.get().prettyPrint(printer);
-                } else {
-                    printer.printAtom("_");
-                }
-            }
-
-            if (varDecls.size() != 1) {
-                printer.endList();
-            }
+            printVarDecls(printer);
 
             initializer.get().prettyPrint(printer);
 
             printer.endList();
         } else {
-            if (varDecls.size() != 1) {
-                printer.startList();
-            }
+            printVarDecls(printer);
+        }
+    }
 
-            for (Optional<VarDeclNode> n : varDecls) {
-                if (n.isPresent()) {
-                    n.get().prettyPrint(printer);
-                } else {
-                    printer.printAtom("_");
-                }
-            }
+    private void printVarDecls(SExpPrinter printer) {
+        if (varDecls.size() != 1) {
+            printer.startList();
+        }
 
-            if (varDecls.size() != 1) {
-                printer.endList();
+        for (Optional<VarDeclNode> n : varDecls) {
+            if (n.isPresent()) {
+                n.get().prettyPrint(printer);
+            } else {
+                printer.printAtom("_");
             }
+        }
+
+        if (varDecls.size() != 1) {
+            printer.endList();
         }
     }
 

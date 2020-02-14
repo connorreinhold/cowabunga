@@ -12,6 +12,10 @@ public abstract class BinExprNode extends ExprNode {
 
     public BinExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
         super(location);
+
+        assert left != null;
+        assert right != null;
+
         this.left = left;
         this.right = right;
     }

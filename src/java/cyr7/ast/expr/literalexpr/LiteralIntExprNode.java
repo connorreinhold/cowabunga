@@ -13,6 +13,9 @@ public class LiteralIntExprNode extends ExprNode {
 
     public LiteralIntExprNode(ComplexSymbolFactory.Location location, String contents) {
         super(location);
+
+        assert contents != null;
+
         this.contents = contents;
     }
 

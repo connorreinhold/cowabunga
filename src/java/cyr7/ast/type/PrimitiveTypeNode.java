@@ -7,7 +7,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 
 public class PrimitiveTypeNode extends AbstractNode implements ITypeExprNode {
 
-    final PrimitiveEnum type;
+    public final PrimitiveEnum type;
 
     public PrimitiveTypeNode(ComplexSymbolFactory.Location location, PrimitiveEnum type) {
         super(location);

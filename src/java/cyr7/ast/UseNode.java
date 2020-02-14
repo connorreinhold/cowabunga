@@ -8,10 +8,14 @@ import java_cup.runtime.ComplexSymbolFactory;
  * that the XI file references
  */
 public class UseNode extends AbstractNode {
-    final String interfaceName;
+
+    public final String interfaceName;
 
     public UseNode(ComplexSymbolFactory.Location location, String interfaceName) {
         super(location);
+
+        assert interfaceName != null;
+
         this.interfaceName = interfaceName;
     }
 

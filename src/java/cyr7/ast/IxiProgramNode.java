@@ -1,17 +1,22 @@
 package cyr7.ast;
 
 import java.util.LinkedList;
+import java.util.List;
 
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 public final class IxiProgramNode extends AbstractNode implements IProgramNode {
-    final LinkedList<FunctionHeaderDeclNode> functionDeclarations;
 
-    public IxiProgramNode(ComplexSymbolFactory.Location location, LinkedList<FunctionHeaderDeclNode> lst) {
+    public final List<FunctionHeaderDeclNode> functionDeclarations;
+
+    public IxiProgramNode(ComplexSymbolFactory.Location location, List<FunctionHeaderDeclNode> lst) {
         super(location);
 
-        this.functionDeclarations = lst;
+        assert lst != null;
+
+        this.functionDeclarations = Util.immutableCopy(lst);
     }
 
     public void prettyPrint(SExpPrinter printer) {

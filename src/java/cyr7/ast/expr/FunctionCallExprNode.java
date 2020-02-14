@@ -1,10 +1,12 @@
 package cyr7.ast.expr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents a call to a function (which is still an expression). Contains the identifier of the
@@ -12,13 +14,17 @@ import java.util.LinkedList;
  */
 public class FunctionCallExprNode extends ExprNode {
 
-    final String identifier;
-    final LinkedList<ExprNode> parameters;
+    public final String identifier;
+    public final List<ExprNode> parameters;
 
-    public FunctionCallExprNode(ComplexSymbolFactory.Location location, String id, LinkedList<ExprNode> parameters) {
+    public FunctionCallExprNode(ComplexSymbolFactory.Location location, String id, List<ExprNode> parameters) {
         super(location);
+
+        assert id != null;
+        assert parameters != null;
+
         this.identifier = id;
-        this.parameters = parameters;
+        this.parameters = Util.immutableCopy(parameters);
     }
 
     @Override

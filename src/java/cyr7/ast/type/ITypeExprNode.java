@@ -25,7 +25,7 @@ public interface ITypeExprNode extends INode {
         ITypeExprNode node = primitive;
         Collections.reverse(dimensionList);
         for (Optional<ExprNode> e : dimensionList) {
-            node = new TypeExprArrayNode(primitive.getLocation(), node, e);
+            node = new TypeExprArrayNode(primitive.getLocation().orElse(null), node, e);
         }
         return node;
     }

@@ -10,8 +10,9 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents a Function object in XI files with a [header] and function body [block]
  */
 public class FunctionDeclNode extends AbstractNode {
-    final FunctionHeaderDeclNode header;
-    final BlockStmtNode block;
+
+    public final FunctionHeaderDeclNode header;
+    public final BlockStmtNode block;
 
     public FunctionDeclNode(ComplexSymbolFactory.Location location, 
             FunctionHeaderDeclNode header, BlockStmtNode block) {

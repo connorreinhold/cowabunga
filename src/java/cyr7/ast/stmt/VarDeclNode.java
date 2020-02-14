@@ -12,9 +12,9 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class VarDeclNode extends AbstractNode {
 
-    final String identifier;
+    public final String identifier;
 
-    final ITypeExprNode typeExpr;
+    public final ITypeExprNode typeExpr;
 
     public VarDeclNode(ComplexSymbolFactory.Location location, String identifier, ITypeExprNode typeExpr) {
         super(location);
@@ -22,7 +22,6 @@ public class VarDeclNode extends AbstractNode {
         this.identifier = identifier;
         this.typeExpr = typeExpr;
     }
-    
     
     public boolean equals(Object o) {
         if (o instanceof VarDeclNode) {

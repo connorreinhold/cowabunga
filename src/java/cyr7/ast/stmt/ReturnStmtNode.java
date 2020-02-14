@@ -2,23 +2,25 @@ package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents a return statement in a block, containing a potentially empty list [exprs] of ExprNodes
  */
 public final class ReturnStmtNode extends AbstractNode implements StmtNode {
 
-    final LinkedList<ExprNode> exprs;
+    public final List<ExprNode> exprs;
 
-    public ReturnStmtNode(ComplexSymbolFactory.Location location, LinkedList<ExprNode> exprs) {
+    public ReturnStmtNode(ComplexSymbolFactory.Location location, List<ExprNode> exprs) {
         super(location);
         assert exprs != null;
 
-        this.exprs = exprs;
+        this.exprs = Util.immutableCopy(exprs);
     }
 
     @Override

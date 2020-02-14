@@ -18,6 +18,10 @@ public class IfElseStmtNode extends AbstractNode implements StmtNode {
     public IfElseStmtNode(ComplexSymbolFactory.Location location, ExprNode guard, StmtNode ifBlock, Optional<StmtNode> elseBlock) {
     	super(location);
 
+    	assert guard != null;
+    	assert ifBlock != null;
+    	assert elseBlock != null;
+
     	this.guard = guard;
     	this.ifBlock = ifBlock;
     	this.elseBlock = elseBlock;

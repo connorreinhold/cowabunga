@@ -13,11 +13,16 @@ import java_cup.runtime.ComplexSymbolFactory;
  * loop
  */
 public final class WhileStmtNode extends AbstractNode implements StmtNode {
-	final ExprNode guard;
-    final StmtNode block;
+
+	public final ExprNode guard;
+    public final StmtNode block;
 	
     public WhileStmtNode(ComplexSymbolFactory.Location location, ExprNode guard, StmtNode block) {
     	super(location);
+
+    	assert guard != null;
+    	assert block != null;
+
     	this.guard = guard;
     	this.block = block;
     }

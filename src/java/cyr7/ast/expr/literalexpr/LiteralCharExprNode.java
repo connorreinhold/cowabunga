@@ -14,6 +14,9 @@ public class LiteralCharExprNode extends ExprNode {
 
     public LiteralCharExprNode(ComplexSymbolFactory.Location location, String contents) {
         super(location);
+
+        assert contents != null;
+
         this.contents = contents;
     }
     @Override

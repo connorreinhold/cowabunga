@@ -10,10 +10,13 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class LiteralStringExprNode extends ExprNode {
 
-    final String contents;
+    public final String contents;
 
     public LiteralStringExprNode(ComplexSymbolFactory.Location location, String contents) {
         super(location);
+
+        assert contents != null;
+
         this.contents = contents;
     }
 

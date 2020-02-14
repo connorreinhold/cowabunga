@@ -9,11 +9,13 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class VariableAccessExprNode extends ExprAccessNode {
 
-    final String identifier;
+    public final String identifier;
 
     public VariableAccessExprNode(ComplexSymbolFactory.Location location, String id) {
         super(location);
+
         assert id != null;
+
         this.identifier = id;
     }
 

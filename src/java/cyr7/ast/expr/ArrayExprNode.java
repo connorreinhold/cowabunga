@@ -1,7 +1,9 @@
 package cyr7.ast.expr;
 
 import java.util.LinkedList;
+import java.util.List;
 
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -9,10 +11,15 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents an Array Expression: i.e. {1,2,3,} with a list of ExprNode for values
  */
 public class ArrayExprNode extends ExprNode {
-	final LinkedList<ExprNode> arrayVals;
-	public ArrayExprNode(ComplexSymbolFactory.Location location, LinkedList<ExprNode> arrayVals) {
+
+	public final List<ExprNode> arrayVals;
+
+	public ArrayExprNode(ComplexSymbolFactory.Location location, List<ExprNode> arrayVals) {
 		super(location);
-		this.arrayVals = arrayVals;
+
+		assert arrayVals != null;
+
+		this.arrayVals = Util.immutableCopy(arrayVals);
 	}
 
 	@Override

@@ -12,6 +12,9 @@ public abstract class UnaryExprNode extends ExprNode {
 
     public UnaryExprNode(ComplexSymbolFactory.Location location, ExprNode expr) {
         super(location);
+
+        assert expr != null;
+
         this.expr = expr;
     }
     

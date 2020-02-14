@@ -10,12 +10,14 @@ import java_cup.runtime.ComplexSymbolFactory;
  * no return types
  */
 public class ProcedureStmtNode extends AbstractNode implements StmtNode {
-	final FunctionCallExprNode procedureCall;
+	public final FunctionCallExprNode procedureCall;
 
 	public ProcedureStmtNode(ComplexSymbolFactory.Location location,
 							 FunctionCallExprNode procedureCall) {
 		super(location);
+
 		assert procedureCall != null;
+
 		this.procedureCall = procedureCall;
 	}
 

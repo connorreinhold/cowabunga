@@ -1,23 +1,29 @@
 package cyr7.ast;
 
+import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.LinkedList;
+import java.util.List;
 
 /**
- * Represents an XI program, contianing a list of use statements and a list of functions
+ * Represents an XI program, containing a list of use statements and a list
+ * of functions
  */
 public class XiProgramNode extends AbstractNode implements IProgramNode {
-    final LinkedList<UseNode> uses;
-    final LinkedList<FunctionDeclNode> functions;
+    public final List<UseNode> uses;
+    public final List<FunctionDeclNode> functions;
 
-    public XiProgramNode(ComplexSymbolFactory.Location location, 
-            LinkedList<UseNode> uses, LinkedList<FunctionDeclNode> functions) {
+    public XiProgramNode(ComplexSymbolFactory.Location location,
+                         List<UseNode> uses, List<FunctionDeclNode> functions) {
         super(location);
 
-        this.uses = uses;
-        this.functions = functions;
+        assert uses != null;
+        assert functions != null;
+
+        this.uses = Util.immutableCopy(uses);
+        this.functions = Util.immutableCopy(functions);
     }
 
     @Override
@@ -48,7 +54,6 @@ public class XiProgramNode extends AbstractNode implements IProgramNode {
         }
         return false;
     }
-    
-    
+
 
 }

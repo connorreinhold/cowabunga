@@ -17,6 +17,10 @@ public class ArrayAccessExprNode extends ExprAccessNode {
 
     public ArrayAccessExprNode(ComplexSymbolFactory.Location location, ExprAccessNode accessNode, ExprNode index){
         super(location);
+
+        assert accessNode != null;
+        assert index != null;
+
         this.accessNode = accessNode;
         this.index = index;
     }

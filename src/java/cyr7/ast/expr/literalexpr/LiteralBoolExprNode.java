@@ -10,10 +10,11 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class LiteralBoolExprNode extends ExprNode {
 
-	final boolean contents;
+	public final boolean contents;
 	
 	public LiteralBoolExprNode(ComplexSymbolFactory.Location location, boolean contents) {
 		super(location);
+
 		this.contents = contents;
 	}
 	
