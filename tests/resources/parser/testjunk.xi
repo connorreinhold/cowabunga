@@ -1,3 +1,4 @@
+
 foo(): bool, int {
   expr: int = 1 - 2 * 3 * -4 *
   5pred: bool = true & true | false;
@@ -8,7 +9,7 @@ foo(): bool, int {
 }
 
 bar() {
-  _, i: int = foo()
-  b: int[i][]
-  b[0] = {1, 0}
+	_ = f()
+	_, a: int[] = f()
+	a:int[]
 }
