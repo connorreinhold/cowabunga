@@ -30,7 +30,8 @@ public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
         throw new UnexpectedTokenException(sym);
     } else {
         // We don't know the line or column
-        throw new UnexpectedTokenException(cur_token.sym, cur_token.value, 1, 1);
+        throw new UnexpectedTokenException(
+                    cur_token.sym, cur_token.value, 1, 1);
     }
 }
 
@@ -50,7 +51,9 @@ init with {:
 
 scan with {: 
     Symbol sym = getScanner().next_token();
-    return (sym != null) ? sym : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
+    return (sym != null) ? 
+            sym 
+            : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
 :};
 
 /* Terminals (tokens returned by the scanner). */
@@ -191,13 +194,15 @@ Program ::=
 // Ixi Grammar
 
 IxiProgram ::=
-    FunctionHeaderDeclList:lst {: RESULT = new IxiProgramNode(lstxleft, lst); :};
+    FunctionHeaderDeclList:lst {: 
+        RESULT = new IxiProgramNode(lstxleft, lst); 
+    :};
 
 FunctionHeaderDeclList ::=
     FunctionHeaderDeclList:lst FunctionHeaderDecl:decl {:
             lst.addLast(decl);
             RESULT = lst;
-        :}
+    :}
     | FunctionHeaderDeclList:lst SEMICOLON {: RESULT = lst; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
@@ -205,25 +210,31 @@ FunctionHeaderDeclList ::=
 FunctionHeaderDecl ::=
     ID:id L_PAREN FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
             RESULT = new FunctionHeaderDeclNode(idxleft, id, l, returnList);
-        :}
+    :}
     ;
 
 FunctionVarDeclList ::=
     VarDecl:v COMMA FunctionVarDeclList:l {:
             l.addFirst(v);
             RESULT = l;
-        :}
+    :}
     | VarDecl:v {: RESULT = new LinkedList<>(List.of(v)); :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ReturnType ::=
-    COLON TypeExpr:t ReturnTypeList:lst {: lst.addFirst(t); RESULT = lst; :}
+    COLON TypeExpr:t ReturnTypeList:lst {: 
+        lst.addFirst(t); 
+        RESULT = lst; 
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ReturnTypeList ::=
-    ReturnTypeList:lst COMMA TypeExpr:t {: lst.addLast(t); RESULT = lst; :}
+    ReturnTypeList:lst COMMA TypeExpr:t {: 
+        lst.addLast(t); 
+        RESULT = lst; 
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -235,7 +246,10 @@ XiProgram ::=
     ;
 
 UseList ::=
-    USE:u ID:id UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
+    USE:u ID:id UseList:l {: 
+        l.addFirst(new UseNode(uxleft, id)); 
+        RESULT = l; 
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -276,37 +290,57 @@ FunctionDecl ::=
     ;
 
 BlockStatement ::=
-    L_BRACE:b XiStatementList:l R_BRACE {: RESULT = new BlockStmtNode(bxleft, l); :}
-    | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
-    | L_BRACE:b XiStatementList:l ReturnStatement:r SEMICOLON R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
+    L_BRACE:b XiStatementList:l R_BRACE {: 
+        RESULT = new BlockStmtNode(bxleft, l); 
+    :}
+    | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: 
+        l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); 
+    :}
+    | L_BRACE:b XiStatementList:l ReturnStatement:r SEMICOLON R_BRACE {: 
+        l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); 
+    :}
     ;
 
 ReturnStatement ::=
-    RETURN:r ExprList:l {: RESULT = new ReturnStmtNode(rxleft, l); :}
+    RETURN:r ExprList:l {: 
+        RESULT = new ReturnStmtNode(rxleft, l); 
+    :}
     ;
 
 ProcedureStatement ::=
-    FunctionCall:c {: RESULT = new ProcedureStmtNode(cxleft, c); :}
+    FunctionCall:c {: 
+        RESULT = new ProcedureStmtNode(cxleft, c); 
+    :}
     ;
 
 IfElseStatement ::=
-    IF:i Expr:e SingleXiStatement:s {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); :}
+    IF:i Expr:e SingleXiStatement:s {: 
+        RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); 
+    :}
     | IF:i Expr:e SingleXiStatement:s ELSE SingleXiStatement:b {:
             RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b));
-        :}
+    :}
     ;
 
 WhileStatement ::=
-    WHILE:w Expr:e XiStatement:s {: RESULT = new WhileStmtNode(wxleft, e, s); :}
+    WHILE:w Expr:e XiStatement:s {: 
+        RESULT = new WhileStmtNode(wxleft, e, s); 
+    :}
     ;
 
 AssignmentStatement ::=
-    AssignAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(axleft, a, e); :}
+    AssignAccess:a ASSIGN Expr:e {: 
+        RESULT = new AssignmentStmtNode(axleft, a, e); 
+    :}
     ;
 
 AssignAccess ::=
-    AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAssignAccessNode(axleft, a, e); :}
-    | ID:id {: RESULT = new VariableAssignAccessNode(idxleft, id); :}
+    AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: 
+        RESULT = new ArrayAssignAccessNode(axleft, a, e); 
+    :}
+    | ID:id {: 
+        RESULT = new VariableAssignAccessNode(idxleft, id); 
+    :}
     ;
 
 VarDeclStatement ::=
@@ -314,94 +348,105 @@ VarDeclStatement ::=
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.of(arr));
             RESULT = new VarDeclStmtNode(arrxleft, l, Optional.empty());
-        :}
+    :}
     | UNDERSCORE:u ASSIGN FunctionCall:e {:
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.empty());
             RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(e));
-        :}
+    :}
     | VarDecl:v ASSIGN Expr:e {:
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.of(v));
             RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
-        :}
+    :}
     | MultiVarDeclList:l {:
             RESULT = new VarDeclStmtNode(lxleft, l, Optional.empty());
-        :}
+    :}
     | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.of(v));
             RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
-        :}
+    :}
     | UNDERSCORE:u COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.empty());
             RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(e));
-        :}
+    :}
     ;
 
 MultiVarDeclList ::=
     VarDecl:v COMMA MultiVarDeclList:l {:
             l.addFirst(Optional.of(v));
             RESULT = l;
-        :}
+    :}
     | UNDERSCORE COMMA MultiVarDeclList:l {:
             l.addFirst(Optional.empty());
             RESULT = l;
-        :}
+    :}
     | VarDecl:v  {:
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.of(v));
             RESULT = l;
-        :}
+    :}
     | UNDERSCORE {:
             LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
             l.addFirst(Optional.empty());
             RESULT = l;
-        :}
+    :}
     ;
 
 VarDeclArrayInit ::=
-    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
+    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT 
+        VarDeclDimensionedBracket:l {:
             l.addFirst(Optional.of(v));
             ITypeExprNode t = ITypeExprNode.fromDimensionList(p, l);
             RESULT = new VarDeclNode(idxleft, id, t);
-        :}
+    :}
     ;
 
 VarDeclDimensionedBracket ::=
     L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
             l.addFirst(Optional.of(v));
             RESULT = l;
-        :}
-    | VarDeclDimensionlessBracket:l {: RESULT = l; :}
+    :}
+    | VarDeclDimensionlessBracket:l {: 
+            RESULT = l; 
+    :}
     ;
 
 VarDeclDimensionlessBracket ::= 
     L_SQ_BRKT R_SQ_BRKT VarDeclDimensionlessBracket:l {:
             l.addFirst(Optional.empty());
             RESULT = l;
-        :}
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 VarDecl ::=
-    ID:id COLON TypeExpr:te {: RESULT = new VarDeclNode(idxleft, id, te); :}
+    ID:id COLON TypeExpr:te {: 
+        RESULT = new VarDeclNode(idxleft, id, te); 
+    :}
     ;
 
 Primitive ::=
-    TYPE_INT:i {: RESULT = new PrimitiveTypeNode(ixleft, PrimitiveEnum.INT); :}
-    | TYPE_BOOL:b {: RESULT = new PrimitiveTypeNode(bxleft, PrimitiveEnum.BOOL); :}
+    TYPE_INT:i {: 
+        RESULT = new PrimitiveTypeNode(ixleft, PrimitiveEnum.INT); 
+    :}
+    | TYPE_BOOL:b {: 
+        RESULT = new PrimitiveTypeNode(bxleft, PrimitiveEnum.BOOL); 
+    :}
     ;
 
 TypeExpr ::=
     Primitive:p L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {:
             l.addFirst(Optional.empty());
             RESULT = ITypeExprNode.fromDimensionList(p, l);
-        :}
+    :}
     | Primitive:p {: RESULT = p; :}
     ;
 
 TypeExprArrayList ::=
-    L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
+    L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: 
+        l.addFirst(Optional.empty()); RESULT = l; 
+    :}
     | {: RESULT = new LinkedList<>(); :} ;
 
 ExprList ::=
@@ -421,7 +466,8 @@ Expr ::=
     | ArrayExpr:e {: RESULT = e; :}
     ;
 
-// For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
+// For an explanation of %prec at
+// https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
 FunctionCall ::=
     ID:id L_PAREN ArgParamList:l R_PAREN {:
             RESULT = new FunctionCallExprNode(idxleft, id, l);
@@ -458,9 +504,13 @@ UnaryExpr ::=
 
 IntegerExpr ::=
     Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 HIGH_MULT Expr:e2 {: 
+        RESULT = new HighMultExprNode(e1xleft, e1, e2); 
+    :}
     | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 REMAINDER Expr:e2 {: 
+        RESULT = new RemExprNode(e1xleft, e1, e2); 
+    :}
     | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1xleft, e1, e2); :}
     | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1xleft, e1, e2); :}
     ;
@@ -470,14 +520,24 @@ BoolExpr ::=
     | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1xleft, e1, e2); :}
     | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1xleft, e1, e2); :}
     | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 EQUALS Expr:e2 {: 
+        RESULT = new EqualsExprNode(e1xleft, e1, e2); 
+    :}
+    | Expr:e1 NOT_EQUALS Expr:e2 {: 
+        RESULT = new NotEqualsExprNode(e1xleft, e1, e2); 
+    :}
+    | Expr:e1 LOGICAL_AND Expr:e2 {: 
+        RESULT = new AndExprNode(e1xleft, e1, e2); 
+    :}
+    | Expr:e1 LOGICAL_OR Expr:e2 {: 
+        RESULT = new OrExprNode(e1xleft, e1, e2); 
+    :}
     ;
 
 ArrayExpr ::=
-    L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(lxleft, l); :}
+    L_BRACE ArrayElements:l R_BRACE {: 
+        RESULT = new ArrayExprNode(lxleft, l); 
+    :}
     ;
 
 ArrayElements ::=
