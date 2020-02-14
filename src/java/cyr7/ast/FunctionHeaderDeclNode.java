@@ -1,6 +1,5 @@
 package cyr7.ast;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import cyr7.ast.stmt.VarDeclNode;

@@ -1,0 +1,5 @@
+add(val): bool
+remove(val: int): bool
+clear(): bool
+size(): int
+getAll(): int[]

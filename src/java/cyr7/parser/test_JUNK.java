@@ -16,9 +16,9 @@ public class test_JUNK {
         try {
             Reader reader = new BufferedReader(new InputStreamReader(
                     new FileInputStream(
-                            "./tests/resources/parser/testjunk.xi")));
+                            "./tests/resources/parser/testjunk.ixi")));
 
-            ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, false));
+            ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, true));
 
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
             INode v = (INode) p.parse().value;
