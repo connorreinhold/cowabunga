@@ -1,0 +1,5 @@
+build
+
+xic ("Test --parse") "--parse" {
+    multipleSemicolons.ixi;
+}

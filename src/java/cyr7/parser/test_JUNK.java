@@ -16,7 +16,7 @@ public class test_JUNK {
         try {
             Reader reader = new BufferedReader(new InputStreamReader(
                     new FileInputStream(
-                            "./tests/resources/parser/xi/exprs.xi")));
+                            "./tests/resources/parser/testjunk.xi")));
 
             ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, false));
 
