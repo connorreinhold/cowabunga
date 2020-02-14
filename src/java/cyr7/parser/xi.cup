@@ -129,9 +129,12 @@ nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode FunctionDecl;
 
 nonterminal StmtNode XiStatement;
+nonterminal StmtNode XiStatementNoSemicolon;
+nonterminal StmtNode XiStatementOrReturn;
+nonterminal SemicolonList;
+nonterminal ReturnStmtNode ReturnStatement;
 nonterminal BlockStmtNode BlockStatement;
 nonterminal LinkedList<StmtNode> XiStatementList;
-nonterminal ReturnStmtNode ReturnStatement;
 nonterminal ProcedureStmtNode ProcedureStatement;
 nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
@@ -163,6 +166,7 @@ nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
 
 // Precedence
 
+precedence nonassoc SEMICOLON;
 precedence nonassoc L_BRACE;
 
 precedence nonassoc IF;
@@ -177,7 +181,7 @@ precedence left PLUS, MINUS;
 precedence left MULT, HIGH_MULT, DIVIDE, REMAINDER;
 precedence nonassoc NEG_INT, NEG_BOOL;
 precedence left FUNCTION_CALL, ARRAY_ACCESS;
-precedence nonassoc LENGTH;
+precedence left LENGTH;
 
 // Grammar
 
@@ -248,14 +252,30 @@ UseList ::=
     | {: RESULT = new LinkedList<>(); :}
     ;
 
+SemicolonList ::=
+    SEMICOLON SemicolonList
+    | SEMICOLON
+    ;
+
+// Xi statements excluding return
 XiStatement ::=
+    XiStatementNoSemicolon:s SemicolonList {: RESULT = s; :}
+    | XiStatementNoSemicolon:s {: RESULT = s; :}
+    ;
+
+// Xi statements with no semicolon excluding return
+XiStatementNoSemicolon ::=
     BlockStatement:s {: RESULT = s; :}
-    | ReturnStatement:s {: RESULT = s; :}
     | ProcedureStatement:s {: RESULT = s; :}
     | IfElseStatement:s {: RESULT = s; :}
     | WhileStatement:s {: RESULT = s; :}
     | AssignmentStatement:s {: RESULT = s; :}
     | VarDeclStatement:s {: RESULT = s; :}
+    ;
+
+XiStatementOrReturn ::=
+    XiStatement:s {: RESULT = s; :}
+    | ReturnStatement:s {: RESULT = s; :}
     ;
 
 FunctionDeclList ::=
@@ -271,16 +291,17 @@ FunctionDecl ::=
 
 BlockStatement ::=
     L_BRACE:b XiStatementList:l R_BRACE {: RESULT = new BlockStmtNode(bxleft, l); :}
+    | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
     ;
 
 XiStatementList ::=
-    XiStatement:s SEMICOLON XiStatementList:l {: l.addFirst(s); RESULT = l; :}
-    | XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
+    XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
 ReturnStatement ::=
     RETURN:r ExprList:l {: RESULT = new ReturnStmtNode(rxleft, l); :}
+    | RETURN:r ExprList:l SemicolonList {: RESULT = new ReturnStmtNode(rxleft, l); :}
     ;
 
 ProcedureStatement ::=
@@ -288,8 +309,10 @@ ProcedureStatement ::=
     ;
 
 IfElseStatement ::=
-    IF:i Expr:e XiStatement:s {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); :}
-    | IF:i Expr:e XiStatement:s ELSE XiStatement:b {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b)); :}
+    IF:i Expr:e XiStatementOrReturn:s {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); :}
+    | IF:i Expr:e XiStatementOrReturn:s ELSE XiStatementOrReturn:b {:
+            RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b));
+        :}
     ;
 
 WhileStatement ::=
