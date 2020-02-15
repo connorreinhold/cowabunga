@@ -6,11 +6,9 @@ import cyr7.lexer.MultiFileLexer;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
+import polyglot.util.CodeWriter;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 
 public class ParserUtil {
 
@@ -36,6 +34,15 @@ public class ParserUtil {
         node.prettyPrint(printer);
         printer.flush();
         printer.close();
+    }
+
+    public static String toSExpr(INode node) {
+        StringWriter writer = new StringWriter();
+        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
+        node.prettyPrint(printer);
+        printer.flush();
+        printer.close();
+        return writer.toString().trim();
     }
 
 }

@@ -1,6 +1,6 @@
 package cyr7.exceptions;
 
-public class ParserIntegerOverflowException extends LexerException {
+public class ParserIntegerOverflowException extends ParserException  {
 
     /**
      *
@@ -8,7 +8,7 @@ public class ParserIntegerOverflowException extends LexerException {
     private static final long serialVersionUID = 8308364919649807668L;
 
     public ParserIntegerOverflowException(int line, int col) {
-        super("Integer overflow.", line, col);
+        super(String.format("%d:%d error:%s", line + 1, col + 1, "Integer overflow."));
     }
 
 }

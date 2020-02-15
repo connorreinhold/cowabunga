@@ -1,7 +1,7 @@
 main() {
-    if (true)
+    if (true) {
         return false
-    else {
+    } else {
         return true
     }
 

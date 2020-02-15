@@ -24,7 +24,7 @@ public class ParserFactory {
     }
 
     public static List<StmtNode> parseStatement(String stmt) throws Exception {
-        String program = "f() { " + stmt + " }";
+        String program = "f() {\n" + stmt + "\n}";
         XiParser parser = ParserFactory.make(program, false);
         XiProgramNode node = (XiProgramNode) parser.parse().value;
         return node.functions.get(0).block.statements;

@@ -264,12 +264,9 @@ XiStatementList ::=
     | {: RESULT = new LinkedList<>(); :}
     ;
 
-// Xi statement with or without a semicolon including return
 SingleXiStatement ::=
     XiStatement:s {: RESULT = s; :}
     | XiStatement:s SEMICOLON {: RESULT = s; :}
-    | ReturnStatement:s {: RESULT = s; :}
-    | ReturnStatement:s SEMICOLON {: RESULT = s; :}
     ;
 
 FunctionDeclList ::=
