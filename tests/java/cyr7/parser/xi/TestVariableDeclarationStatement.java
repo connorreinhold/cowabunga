@@ -1,5 +1,6 @@
 package cyr7.parser.xi;
 
+import cyr7.ast.expr.ArrayAccessExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
@@ -12,11 +13,9 @@ import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.exceptions.ParserException;
 import cyr7.exceptions.UnexpectedTokenException;
-import cyr7.parser.ParserUtil;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
-import javax.lang.model.type.PrimitiveType;
 import java.util.List;
 import java.util.Optional;
 
@@ -102,6 +101,37 @@ public class TestVariableDeclarationStatement {
             ),
             Optional.empty()
         ), statement);
+
+        statement = ParserFactory.parseStatement("i: int = c[3];").get(0);
+        assertEquals(statement, new VarDeclStmtNode(
+            null,
+            List.of(
+                Optional.of(
+                    new VarDeclNode(
+                        null,
+                        "i",
+                        new PrimitiveTypeNode(
+                            null,
+                            PrimitiveEnum.INT
+                        )
+                    )
+                )
+            ),
+            Optional.of(
+                new ArrayAccessExprNode(
+                    null,
+                    new VariableAccessExprNode(
+                        null,
+                        "c"
+                    ),
+                    new LiteralIntExprNode(
+                        null,
+                        "3"
+                    )
+                )
+            )
+            )
+        );
     }
 
     @Test
@@ -340,6 +370,12 @@ public class TestVariableDeclarationStatement {
 
         assertThrows(ParserException.class,
             () -> ParserFactory.parseStatement("a: [x][][5]"));
+
+        assertThrows(ParserException.class,
+            () -> ParserFactory.parseStatement("a: [x][][] = j"));
+
+        assertThrows(ParserException.class,
+            () -> ParserFactory.parseStatement("a: [x][][5] = j"));
     }
 
 }

@@ -26,17 +26,17 @@ class TestUse {
     StringReader prgm;
     XiParser parser;
     Object tree;
-    
+
     @Test
     void test() throws Exception {
         String program = "use io\nuse math\nuse nothing";
-        LinkedList<UseNode> uses = new LinkedList<>();  
+        LinkedList<UseNode> uses = new LinkedList<>();
         Collections.addAll(
-                uses, new UseNode[]{
-                new UseNode(null, "io"),
-                new UseNode(null, "math"),
-                new UseNode(null, "nothing")
-        });
+            uses,
+            new UseNode(null, "io"),
+            new UseNode(null, "math"),
+            new UseNode(null, "nothing")
+        );
         expected = new XiProgramNode(null, uses, new LinkedList<>());
         parser = ParserFactory.make(program, false);
         tree = parser.parse().value;
