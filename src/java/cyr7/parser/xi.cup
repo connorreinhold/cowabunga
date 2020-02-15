@@ -166,7 +166,6 @@ nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionedBracket;
 nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionlessBracket;
 
 nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
-nonterminal LinkedList<Optional<VarDeclNode>> MultiVarNonInitDeclList;
 
 // Precedence
 
@@ -330,9 +329,11 @@ VarDeclStatement ::=
             l.addFirst(Optional.of(v));
             RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
         :}
-    | MultiVarNonInitDeclList:l {:
-            RESULT = new VarDeclStmtNode(lxleft, l, Optional.empty());
-        :}
+	| VarDecl:v {:
+			LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
+			l.addFirst(Optional.of(v));
+			RESULT = new VarDeclStmtNode(vxleft, l, Optional.empty());
+	    :}
     | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.of(v));
             RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
@@ -343,18 +344,6 @@ VarDeclStatement ::=
         :}
     ;
 
-MultiVarNonInitDeclList ::=
-	VarDecl: v COMMA MultiVarNonInitDeclList:l {:
-			l.addFirst(Optional.of(v));
-			RESULT = l;
-	:}
-	| VarDecl:v {:
-			LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-			l.addFirst(Optional.of(v));
-			RESULT = l;
-	:}
-	;
-	
 MultiVarDeclList ::=
     VarDecl:v COMMA MultiVarDeclList:l {:
             l.addFirst(Optional.of(v));

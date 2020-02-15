@@ -120,7 +120,7 @@ public class TestVariableDeclarationStatement {
     @Test
     void testMultiVarDeclarations() throws Exception {
         StmtNode statement =
-            ParserFactory.parseStatement("a: int, b: bool").get(0);
+            ParserFactory.parseStatement("a: int, b: bool = function()").get(0);
         assertEquals(statement, new VarDeclStmtNode(
             null,
             List.of(
@@ -145,7 +145,13 @@ public class TestVariableDeclarationStatement {
                     )
                 )
             ),
-            Optional.empty()
+            Optional.of(
+                new FunctionCallExprNode(
+                    null,
+                    "function",
+                    List.of()
+                )
+            )
         ));
 
         statement =
