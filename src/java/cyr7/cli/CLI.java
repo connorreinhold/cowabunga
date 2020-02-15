@@ -67,7 +67,6 @@ public class CLI {
 
         Option source = Option
                 .builder("sourcepath")
-                .longOpt("sourcepath")
                 .desc("Specify where to find generated diagnostic files")
                 .hasArg(true)
                 .argName("path")

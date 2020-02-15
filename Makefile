@@ -33,4 +33,4 @@ zip:
 	rm cowabunga.zip
 	zip -r cowabunga.zip \
 		README.md dependencies src tests xic-build build.gradle Makefile settings.gradle \
-		-x *.DS_Store* -x *MyLexer.java* *XiParser.java* *sym.java*
+		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi
