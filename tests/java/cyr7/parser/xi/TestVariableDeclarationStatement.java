@@ -48,6 +48,22 @@ public class TestVariableDeclarationStatement {
         ), statement);
 
         statement =
+            ParserFactory.parseStatement("z: int").get(0);
+        assertEquals(new VarDeclStmtNode(
+            null,
+            List.of(
+                Optional.of(new VarDeclNode(
+                    null,
+                    "z",
+                    new PrimitiveTypeNode(
+                        null,
+                        PrimitiveEnum.INT)
+                ))
+            ),
+            Optional.empty()
+        ), statement);
+
+        statement =
             ParserFactory.parseStatement("b: int[][] = x").get(0);
         assertEquals(new VarDeclStmtNode(
             null,
