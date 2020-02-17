@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public class ArrayType implements Type {
+public class ArrayType implements OrdinaryType {
 
     public final Type child;
 

@@ -15,7 +15,7 @@ public interface Context {
      * @param id An identifier
      * @param t A type to associate with {@code id}
      */
-    void add(String id, Type t);
+    void add(String id, ContextType t);
 
     /**
      * Gets the type of an identifier in this context
@@ -24,7 +24,7 @@ public interface Context {
      * @return The type of id, or {@code Optional.empty()} if id is not in this
      * context
      */
-    Optional<Type> get(String id);
+    Optional<ContextType> get(String id);
 
     /**
      * Push a new commit onto the context.
