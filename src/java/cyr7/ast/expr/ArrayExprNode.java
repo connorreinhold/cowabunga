@@ -3,6 +3,10 @@ package cyr7.ast.expr;
 import java.util.LinkedList;
 import java.util.List;
 
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.ArrayType;
+import cyr7.semantics.Context;
+import cyr7.semantics.Type;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;

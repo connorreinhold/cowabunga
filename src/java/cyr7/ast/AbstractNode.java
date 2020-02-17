@@ -1,5 +1,7 @@
 package cyr7.ast;
 
+import cyr7.semantics.Context;
+import cyr7.semantics.Type;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Optional;

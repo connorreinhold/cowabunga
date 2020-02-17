@@ -1,6 +1,9 @@
 package cyr7.ast.expr.literalexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.semantics.Context;
+import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.Type;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -32,5 +35,9 @@ public class LiteralCharExprNode extends ExprNode {
         }
         return false;    
     }
-    
+
+    @Override
+    public Type typeCheck(Context c) {
+        return PrimitiveType.INT;
+    }
 }

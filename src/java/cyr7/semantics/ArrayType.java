@@ -4,7 +4,7 @@ public class ArrayType implements Type {
 
     public final Type child;
 
-    ArrayType(Type child) {
+    public ArrayType(Type child) {
         this.child = child;
     }
     

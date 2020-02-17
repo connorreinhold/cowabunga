@@ -1,6 +1,10 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.Type;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -32,5 +36,13 @@ public class EqualsExprNode extends BinExprNode {
                     oNode.right);
         }
         return false;
+    }
+
+    @Override
+    public Type typeCheck(Context c) throws SemanticException {
+        if (left.typeCheck(c).equals(right.typeCheck(c))) {
+            return PrimitiveType.BOOL;
+        }
+        throw new SemanticException("Failed type check at EQUALS");
     }
 }
