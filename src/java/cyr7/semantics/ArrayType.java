@@ -7,5 +7,13 @@ public class ArrayType implements Type {
     ArrayType(Type child) {
         this.child = child;
     }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ArrayType) {
+            return this.child.equals(((ArrayType)o).child);
+        }
+        return false;
+    }
 
 }
