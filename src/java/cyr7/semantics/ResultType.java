@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public enum ResultOutcome {
+public enum ResultType {
 	VOID,
 	UNIT
 }
