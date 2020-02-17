@@ -18,7 +18,7 @@ import java.util.Optional;
  * <p>
  * Example: the type int[4][] would be represented as:
  * TypeExprArrayNode(TypeExprArrayNode(PrimitiveEnumNode(int), Optional
- * .em`pty()), Optional.of(4))
+ * .empty()), Optional.of(4))
  */
 public final class TypeExprArrayNode extends AbstractNode implements ITypeExprNode {
 
