@@ -6,6 +6,7 @@ import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ResultType;
+import cyr7.semantics.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -50,7 +51,7 @@ public final class WhileStmtNode extends StmtNode {
     public ResultType typeCheck(Context c) throws SemanticException,
             UnbalancedPushPopException {
         var guardType = guard.typeCheck(c);
-        if (!guardType.equals(PrimitiveType.BOOL)) {
+        if (!TypeCheckUtil.checkTypeEquality(guardType, PrimitiveType.BOOL)) {
             throw new SemanticException("Guard expression does "
                     + "not evaluate to bool");
         }

@@ -4,6 +4,7 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.Context;
 import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.ExpandedType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -13,7 +14,8 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class BoolNegExprNode extends UnaryExprNode {
 
-    public BoolNegExprNode(ComplexSymbolFactory.Location location, ExprNode expr) {
+    public BoolNegExprNode(ComplexSymbolFactory.Location location,
+            ExprNode expr) {
         super(location, expr);
     }
 
@@ -27,7 +29,7 @@ public class BoolNegExprNode extends UnaryExprNode {
 
         printer.endList();
     }
-    
+
     public boolean equals(Object o) {
         if (o instanceof BoolNegExprNode) {
             return super.equals(o);
@@ -37,7 +39,9 @@ public class BoolNegExprNode extends UnaryExprNode {
 
     @Override
     public ExpandedType typeCheck(Context c) throws SemanticException {
-        if (expr.typeCheck(c) == PrimitiveType.BOOL) return PrimitiveType.BOOL;
+        if (TypeCheckUtil.checkTypeEquality(expr.typeCheck(c),
+                PrimitiveType.BOOL))
+            return PrimitiveType.BOOL;
         throw new SemanticException("Failed at BOOL NEG");
     }
 }

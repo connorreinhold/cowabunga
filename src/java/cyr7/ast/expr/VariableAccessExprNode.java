@@ -10,18 +10,17 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
- * Represents accessing a specific variable as an expresion. Ex: a:int = b + 2
- * b in this case would be a VariableAccessExprNode
+ * Represents accessing a specific variable as an expresion. Ex: a:int = b + 2 b
+ * in this case would be a VariableAccessExprNode
  */
 public class VariableAccessExprNode extends ExprAccessNode {
 
     public final String identifier;
 
-    public VariableAccessExprNode(ComplexSymbolFactory.Location location, String id) {
+    public VariableAccessExprNode(ComplexSymbolFactory.Location location,
+            String id) {
         super(location);
-
         assert id != null;
-
         this.identifier = id;
     }
 
@@ -45,8 +44,7 @@ public class VariableAccessExprNode extends ExprAccessNode {
         if (optionalVar.isPresent()) {
             return optionalVar.get();
         }
-        throw new SemanticException("Variable DNE");
+        throw new SemanticException("Variable does not exist in context");
     }
-    
 
 }
