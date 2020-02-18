@@ -2,6 +2,9 @@ package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.Type;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -11,6 +14,7 @@ import java.util.Optional;
  * Represents an if/else statement. Contains [ExprNode guard], a body [ifBlock], and an optional [elseBlock]
  */
 public class IfElseStmtNode extends AbstractNode implements StmtNode {
+
 	final ExprNode guard;
     final StmtNode ifBlock;
     final Optional<StmtNode> elseBlock;
@@ -50,5 +54,10 @@ public class IfElseStmtNode extends AbstractNode implements StmtNode {
 		elseBlock.ifPresent(stmtNode -> stmtNode.prettyPrint(printer));
 
 		printer.endList();
+	}
+
+	@Override
+	public Type typeCheck(Context c) throws SemanticException {
+		return null;
 	}
 }
