@@ -17,5 +17,5 @@ public abstract class ExprNode extends AbstractNode {
     }
 
     public abstract ExpandedType typeCheck(Context c) throws SemanticException;
-    
+
 }

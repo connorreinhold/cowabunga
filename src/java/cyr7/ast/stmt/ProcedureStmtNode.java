@@ -6,6 +6,7 @@ import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.ResultType;
+import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.UnitType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -43,7 +44,7 @@ public class ProcedureStmtNode extends StmtNode {
     public ResultType typeCheck(Context c) throws SemanticException,
             UnbalancedPushPopException {
         ExpandedType type = procedureCall.typeCheck(c);
-        if (type.equals(UnitType.UNIT)) {
+        if (TypeCheckUtil.checkTypeEquality(type, UnitType.UNIT)) {
             return ResultType.UNIT;
         } else {
             throw new SemanticException("Expected a procedure but found a "

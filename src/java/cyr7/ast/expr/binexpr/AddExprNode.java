@@ -1,12 +1,12 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
-import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.OrdinaryType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -16,7 +16,8 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public class AddExprNode extends BinExprNode {
 
-    public AddExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
+    public AddExprNode(ComplexSymbolFactory.Location location, ExprNode left,
+            ExprNode right) {
         super(location, left, right);
     }
 
@@ -44,12 +45,15 @@ public class AddExprNode extends BinExprNode {
         ExpandedType leftType = left.typeCheck(c);
         ExpandedType rightType = right.typeCheck(c);
 
-        if (leftType instanceof OrdinaryType && rightType instanceof OrdinaryType) {
-            if (leftType != PrimitiveType.BOOL &&  rightType != PrimitiveType.BOOL) {
-                if (leftType.equals(rightType)){
-                    return leftType;
-                }
-            }
+        if (TypeCheckUtil.checkTypeEquality(leftType, PrimitiveType.INT)
+                && TypeCheckUtil.checkTypeEquality(rightType,
+                        PrimitiveType.INT)) {
+            // Adding two integers
+            return PrimitiveType.INT;
+        } else if (leftType instanceof ArrayType && TypeCheckUtil
+                .checkTypeEquality(leftType, rightType)) {
+            // Adding two arrays of the same type
+            return leftType;
         }
         throw new SemanticException("Failed type check at ADD");
     }

@@ -7,6 +7,7 @@ import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.ResultType;
 import cyr7.semantics.TupleType;
+import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.UnitType;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
@@ -73,7 +74,7 @@ public final class ReturnStmtNode extends StmtNode {
                 mappedType.add(e.typeCheck(c));
             }
             exprType = new TupleType(mappedType);
-            if (exprType.equals(expected)) {
+            if (TypeCheckUtil.checkTypeEquality(exprType, expected)) {
                 return ResultType.VOID;
             }
             break;

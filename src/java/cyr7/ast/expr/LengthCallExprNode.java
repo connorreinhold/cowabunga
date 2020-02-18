@@ -6,7 +6,8 @@ import java.util.LinkedList;
 
 public class LengthCallExprNode extends FunctionCallExprNode {
 
-    public LengthCallExprNode(ComplexSymbolFactory.Location location, LinkedList<ExprNode> parameters) {
+    public LengthCallExprNode(ComplexSymbolFactory.Location location,
+            LinkedList<ExprNode> parameters) {
         super(location, "length", parameters);
     }
 }

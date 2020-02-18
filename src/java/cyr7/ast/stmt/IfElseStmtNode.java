@@ -7,6 +7,7 @@ import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ResultType;
+import cyr7.semantics.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -38,8 +39,9 @@ public class IfElseStmtNode extends StmtNode {
     public boolean equals(Object o) {
         if (o instanceof IfElseStmtNode) {
             IfElseStmtNode oNode = (IfElseStmtNode) o;
-            return this.guard.equals(oNode.guard) && this.ifBlock.equals(
-                    oNode.ifBlock) && this.elseBlock.equals(oNode.elseBlock);
+            return this.guard.equals(oNode.guard)
+                    && this.ifBlock.equals(oNode.ifBlock)
+                    && this.elseBlock.equals(oNode.elseBlock);
         }
         return false;
     }
@@ -60,12 +62,13 @@ public class IfElseStmtNode extends StmtNode {
     }
 
     @Override
-    public ResultType typeCheck(Context c) throws SemanticException,
-            UnbalancedPushPopException {
+    public ResultType typeCheck(Context c)
+            throws SemanticException, UnbalancedPushPopException {
         c.push();
         ExpandedType guardType = guard.typeCheck(c);
         c.pop();
-        if (!guardType.equals(PrimitiveType.BOOL)) {
+        if (!TypeCheckUtil.checkTypeEquality(guardType,
+                PrimitiveType.BOOL)) {
             throw new SemanticException(
                     "Guard expression does not evaluate to bool");
         } else {
@@ -75,8 +78,7 @@ public class IfElseStmtNode extends StmtNode {
 
             if (elseBlock.isPresent()) {
                 c.push();
-                ResultType elseType = elseBlock.get()
-                                               .typeCheck(c);
+                ResultType elseType = elseBlock.get().typeCheck(c);
                 c.pop();
                 return ResultType.leastUpperBound(ifType, elseType);
             } else {
