@@ -1,10 +1,12 @@
 package cyr7.ast.type;
 
-import cyr7.ast.AbstractNode;
-import cyr7.ast.FunctionHeaderDeclNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.ArrayType;
+import cyr7.semantics.Context;
+import cyr7.semantics.OrdinaryType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Optional;
 
@@ -16,14 +18,14 @@ import java.util.Optional;
  * <p>
  * Example: the type int[4][] would be represented as:
  * TypeExprArrayNode(TypeExprArrayNode(PrimitiveEnumNode(int), Optional
- * .em`pty()), Optional.of(4))
+ * .empty()), Optional.of(4))
  */
-public final class TypeExprArrayNode extends AbstractNode implements ITypeExprNode {
+public final class TypeExprArrayNode extends ITypeExprNode {
 
     public final ITypeExprNode child;
     public final Optional<ExprNode> size;
 
-    public TypeExprArrayNode(ComplexSymbolFactory.Location location,
+    public TypeExprArrayNode(Location location,
                              ITypeExprNode child, Optional<ExprNode> size) {
         super(location);
 
@@ -53,6 +55,12 @@ public final class TypeExprArrayNode extends AbstractNode implements ITypeExprNo
         }
         return false;
 
+    }
+
+    @Override
+    public OrdinaryType typeCheck(Context c) throws SemanticException {
+        OrdinaryType type = this.child.typeCheck(c);
+        return new ArrayType(type);
     }
 
 }

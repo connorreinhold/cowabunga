@@ -1,11 +1,19 @@
 package cyr7.semantics;
 
-public class ArrayType implements Type {
+public class ArrayType implements OrdinaryType {
 
-    public final Type child;
+    public final OrdinaryType child;
 
-    ArrayType(Type child) {
+    public ArrayType(OrdinaryType child) {
         this.child = child;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof ArrayType) {
+            return this.child.equals(((ArrayType)o).child);
+        }
+        return false;
     }
 
 }

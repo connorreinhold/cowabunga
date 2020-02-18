@@ -1,14 +1,18 @@
 package cyr7.ast.stmt;
 
-import cyr7.ast.AbstractNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.OrdinaryType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
+
+import java.util.Optional;
 
 /**
  * Represents the [identifier] in a Variable Assignment, i.e. moo = 3 would have
  * moo represented by a VariableAssignAccessNode
  */
-public class VariableAssignAccessNode extends AbstractNode implements AssignAccessNode {
+public class VariableAssignAccessNode extends AssignAccessNode {
 
 	public final String identifier;
 	
@@ -32,6 +36,16 @@ public class VariableAssignAccessNode extends AbstractNode implements AssignAcce
             return this.identifier.equals(oNode.identifier);
         }
         return false;
+    }
+
+    @Override
+    public OrdinaryType typeCheck(Context c) throws SemanticException {
+        Optional<OrdinaryType> maybeType = c.getVar(identifier);
+        if (maybeType.isPresent()) {
+            return maybeType.get();
+        } else {
+            throw new SemanticException("Unbound variable " + identifier);
+        }
     }
 	
 }

@@ -1,6 +1,10 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.ExpandedType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -30,5 +34,14 @@ public class DivExprNode extends BinExprNode {
                     && this.right.equals(oNode.right);
         }
         return false;
+    }
+
+
+    @Override
+    public ExpandedType typeCheck(Context c) throws SemanticException{
+        if (left.typeCheck(c) == PrimitiveType.INT && right.typeCheck(c) == PrimitiveType.INT) {
+            return PrimitiveType.INT;
+        }
+        throw new SemanticException("Failed type check at Div");
     }
 }

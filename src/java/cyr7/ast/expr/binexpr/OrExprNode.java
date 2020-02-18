@@ -1,6 +1,10 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.ExpandedType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -31,5 +35,12 @@ public class OrExprNode extends BinExprNode {
         }
         return false;    
     }
-    
+
+    @Override
+    public ExpandedType typeCheck(Context c) throws SemanticException {
+        if (left.typeCheck(c) == PrimitiveType.BOOL && right.typeCheck(c) == PrimitiveType.BOOL) {
+            return PrimitiveType.BOOL;
+        }
+        throw new SemanticException("Failed type check at OR");
+    }
 }

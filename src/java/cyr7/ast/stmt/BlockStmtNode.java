@@ -1,20 +1,23 @@
 package cyr7.ast.stmt;
 
-import cyr7.ast.AbstractNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.exceptions.UnbalancedPushPopException;
+import cyr7.semantics.Context;
+import cyr7.semantics.ResultType;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-import java.util.LinkedList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * Represents a block of statements (denoted by { ... } in code)
  */
-public class BlockStmtNode extends AbstractNode implements StmtNode {
+public class BlockStmtNode extends StmtNode {
 
     public final List<StmtNode> statements;
-
+    
     public BlockStmtNode(ComplexSymbolFactory.Location location,
             List<StmtNode> statements) {
         super(location);
@@ -41,5 +44,23 @@ public class BlockStmtNode extends AbstractNode implements StmtNode {
         }
 
         printer.endList();
+    }
+
+    @Override
+    public ResultType typeCheck(Context c) throws UnbalancedPushPopException, SemanticException {        
+        c.push();
+        Iterator<StmtNode> stmtIterator = statements.iterator();
+        while (stmtIterator.hasNext()) {
+            StmtNode stmt = stmtIterator.next();
+            ResultType type = stmt.typeCheck(c);
+            if (stmtIterator.hasNext() && type == ResultType.VOID) {
+                throw new SemanticException("Early void statement");
+            } else {
+                c.pop();
+                return type;
+            }
+        }
+        c.pop();
+        return ResultType.UNIT;
     }
 }
