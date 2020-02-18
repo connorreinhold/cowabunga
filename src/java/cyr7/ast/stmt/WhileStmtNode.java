@@ -5,6 +5,10 @@ import java.util.LinkedList;
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.type.PrimitiveTypeNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.exceptions.UnbalancedPushPopException;
+import cyr7.semantics.Context;
+import cyr7.semantics.ResultType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -43,6 +47,13 @@ public final class WhileStmtNode extends StmtNode {
                     && this.block.equals(oNode.block);
         }
         return false;
+    }
+
+    @Override
+    public ResultType typeCheck(Context c) throws SemanticException,
+            UnbalancedPushPopException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
 }

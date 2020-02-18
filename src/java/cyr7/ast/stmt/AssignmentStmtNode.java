@@ -1,8 +1,11 @@
 package cyr7.ast.stmt;
 
-
-import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.exceptions.UnbalancedPushPopException;
+import cyr7.semantics.Context;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.ResultType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -12,7 +15,8 @@ public final class AssignmentStmtNode extends StmtNode {
 	public final AssignAccessNode node;
 	public final ExprNode value;
 
-	public AssignmentStmtNode(ComplexSymbolFactory.Location location, AssignAccessNode node, ExprNode value) {
+	public AssignmentStmtNode(ComplexSymbolFactory.Location location, 
+	        AssignAccessNode node, ExprNode value) {
 		super(location);
 
 		assert node != null;
@@ -40,4 +44,11 @@ public final class AssignmentStmtNode extends StmtNode {
 		printer.endList();
 		
 	}
+
+    @Override
+    public ResultType typeCheck(Context c) throws SemanticException,
+            UnbalancedPushPopException {
+        return null;
+    }
+
 }

@@ -1,7 +1,10 @@
 package cyr7.ast.stmt;
 
-import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.exceptions.UnbalancedPushPopException;
+import cyr7.semantics.Context;
+import cyr7.semantics.ResultType;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -77,6 +80,20 @@ public class VarDeclStmtNode extends StmtNode {
         if (varDecls.size() != 1) {
             printer.endList();
         }
+    }
+
+    @Override
+    public ResultType typeCheck(Context c) throws SemanticException,
+            UnbalancedPushPopException {
+        if (initializer.isEmpty()) {
+            // VarDecl or ArrayDecl
+            assert(varDecls.size() == 1);
+            VarDeclNode declNode = varDecls.get(0).get();
+            
+        } else {
+            // VarInit or ExprStmt or MultiAssign
+        }
+        return null;
     }
 
 }

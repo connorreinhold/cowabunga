@@ -3,9 +3,9 @@ package cyr7.ast.stmt;
 import cyr7.ast.AbstractNode;
 import cyr7.ast.INode;
 import cyr7.exceptions.SemanticException;
+import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
-import cyr7.semantics.Result;
-import cyr7.semantics.Type;
+import cyr7.semantics.ResultType;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
@@ -17,6 +17,7 @@ public abstract class StmtNode extends AbstractNode {
         super(location);
     }
 
-    public abstract Result typeCheck(Context c) throws SemanticException;
+    public abstract ResultType typeCheck(Context c) 
+            throws SemanticException, UnbalancedPushPopException;
 
 }
