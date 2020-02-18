@@ -4,7 +4,6 @@ import cyr7.ast.AbstractNode;
 import cyr7.ast.FunctionHeaderDeclNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.semantics.Context;
-import cyr7.semantics.Type;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -55,11 +54,6 @@ public final class TypeExprArrayNode extends AbstractNode implements ITypeExprNo
         }
         return false;
 
-    }
-
-    @Override
-    public Type typeCheck(Context c) {
-        return null;
     }
 
 }

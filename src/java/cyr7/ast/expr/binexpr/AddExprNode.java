@@ -5,8 +5,9 @@ import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
+import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.Type;
+import cyr7.semantics.OrdinaryType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -39,14 +40,16 @@ public class AddExprNode extends BinExprNode {
     }
 
     @Override
-    public Type typeCheck(Context c) throws SemanticException {
-        Type leftType = left.typeCheck(c);
-        Type rightType = right.typeCheck(c);
+    public ExpandedType typeCheck(Context c) throws SemanticException {
+        ExpandedType leftType = left.typeCheck(c);
+        ExpandedType rightType = right.typeCheck(c);
 
-        if (leftType != PrimitiveType.BOOL &&  rightType != PrimitiveType.BOOL) {
-            if (leftType.equals(rightType)){
-                return leftType;
-            }
+        if (leftType instanceof OrdinaryType && rightType instanceof OrdinaryType) {
+	        if (leftType != PrimitiveType.BOOL &&  rightType != PrimitiveType.BOOL) {
+	            if (leftType.equals(rightType)){
+	                return leftType;
+	            }
+	        }
         }
         throw new SemanticException("Failed type check at ADD");
     }

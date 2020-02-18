@@ -1,5 +1,12 @@
 package cyr7.ast.expr;
 
+import java.util.Optional;
+
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.ContextType;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.VariableType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -32,6 +39,15 @@ public class VariableAccessExprNode extends ExprAccessNode {
         }
         return false;
     }
+
+	@Override
+	public ExpandedType typeCheck(Context c) throws SemanticException {
+		Optional<VariableType> optionalVar = c.getVar(this.identifier);
+		if (optionalVar.isPresent()) {
+			return optionalVar.get().type;
+		}
+		return null;
+	}
     
 
 }

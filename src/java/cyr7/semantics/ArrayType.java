@@ -2,9 +2,9 @@ package cyr7.semantics;
 
 public class ArrayType implements OrdinaryType {
 
-    public final Type child;
+    public final OrdinaryType child;
 
-    public ArrayType(Type child) {
+    public ArrayType(OrdinaryType child) {
         this.child = child;
     }
     
