@@ -3,6 +3,7 @@ package cyr7.ast.expr.binexpr;
 import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.Context;
+import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ExpandedType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
@@ -38,7 +39,13 @@ public class NotEqualsExprNode extends BinExprNode {
 
     @Override
     public ExpandedType typeCheck(Context c) throws SemanticException {
-        if (!left.typeCheck(c).equals(right.typeCheck(c))) {
+        ExpandedType leftType = left.typeCheck(c);
+        ExpandedType rightType = right.typeCheck(c);
+        if (
+            leftType instanceof OrdinaryType
+                && rightType instanceof OrdinaryType
+                && leftType.equals(rightType)
+        ) {
             return PrimitiveType.BOOL;
         }
         throw new SemanticException("Failed type check at NOT EQUALS");

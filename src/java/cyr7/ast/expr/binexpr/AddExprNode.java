@@ -45,11 +45,11 @@ public class AddExprNode extends BinExprNode {
         ExpandedType rightType = right.typeCheck(c);
 
         if (leftType instanceof OrdinaryType && rightType instanceof OrdinaryType) {
-	        if (leftType != PrimitiveType.BOOL &&  rightType != PrimitiveType.BOOL) {
-	            if (leftType.equals(rightType)){
-	                return leftType;
-	            }
-	        }
+            if (leftType != PrimitiveType.BOOL &&  rightType != PrimitiveType.BOOL) {
+                if (leftType.equals(rightType)){
+                    return leftType;
+                }
+            }
         }
         throw new SemanticException("Failed type check at ADD");
     }

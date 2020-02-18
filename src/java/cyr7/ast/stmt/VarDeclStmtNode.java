@@ -31,8 +31,8 @@ public class VarDeclStmtNode extends StmtNode {
                            Optional<ExprNode> initializer) {
         super(location);
 
-        assert(varDecls != null);
-        assert(initializer != null);
+        assert varDecls != null;
+        assert initializer != null;
 
         this.varDecls = Util.immutableCopy(varDecls);
         this.initializer = initializer;

@@ -16,27 +16,27 @@ import java.util.List;
  */
 public class ArrayExprNode extends ExprNode {
 
-	public final List<ExprNode> arrayVals;
+    public final List<ExprNode> arrayVals;
 
-	public ArrayExprNode(ComplexSymbolFactory.Location location, List<ExprNode> arrayVals) {
-		super(location);
+    public ArrayExprNode(ComplexSymbolFactory.Location location, List<ExprNode> arrayVals) {
+        super(location);
 
-		assert arrayVals != null;
+        assert arrayVals != null;
 
-		this.arrayVals = Util.immutableCopy(arrayVals);
-	}
+        this.arrayVals = Util.immutableCopy(arrayVals);
+    }
 
-	@Override
-	public void prettyPrint(SExpPrinter printer) {
-		printer.startList();
-		
-		for (ExprNode e: this.arrayVals) {
-			e.prettyPrint(printer);
-		}
-		
-		printer.endList();
-		
-	}
+    @Override
+    public void prettyPrint(SExpPrinter printer) {
+        printer.startList();
+
+        for (ExprNode e: this.arrayVals) {
+            e.prettyPrint(printer);
+        }
+
+        printer.endList();
+
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -47,21 +47,21 @@ public class ArrayExprNode extends ExprNode {
         return false;
     }
 
-	@Override
-	public ExpandedType typeCheck(Context c) throws SemanticException {
-		if (arrayVals.size() == 0) {
-			throw new SemanticException("We should do this later, sorry");
-		}
+    @Override
+    public ExpandedType typeCheck(Context c) throws SemanticException {
+        if (arrayVals.size() == 0) {
+            throw new SemanticException("We should do this later, sorry");
+        }
 
-		ExpandedType firstType = arrayVals.get(0).typeCheck(c);
-		if (firstType instanceof OrdinaryType) {
-			for (ExprNode value : arrayVals) {
-				if (!value.typeCheck(c).equals(firstType))
-					throw new SemanticException("Invalid array element");
-			}
-			return new ArrayType((OrdinaryType) firstType);
-		}
+        ExpandedType firstType = arrayVals.get(0).typeCheck(c);
+        if (firstType instanceof OrdinaryType) {
+            for (ExprNode value : arrayVals) {
+                if (!value.typeCheck(c).equals(firstType))
+                    throw new SemanticException("Invalid array element");
+            }
+            return new ArrayType((OrdinaryType) firstType);
+        }
 
-		throw new SemanticException("Invalid array element");
-	}
+        throw new SemanticException("Invalid array element");
+    }
 }
