@@ -2,8 +2,13 @@ package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.ArrayType;
+import cyr7.semantics.Context;
+import cyr7.semantics.OrdinaryType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Represents assigning an array index to a value. Ex: the LHS of arr[3][4] = 3 
@@ -15,7 +20,8 @@ public class ArrayAssignAccessNode extends AssignAccessNode {
 	public final AssignAccessNode node;
 	public final ExprNode index;
 	
-	public ArrayAssignAccessNode(ComplexSymbolFactory.Location location, AssignAccessNode node, ExprNode index) {
+	public ArrayAssignAccessNode(Location location, AssignAccessNode node, 
+	        ExprNode index) {
 		super(location);
 
 		assert node != null;
@@ -43,5 +49,11 @@ public class ArrayAssignAccessNode extends AssignAccessNode {
 		index.prettyPrint(printer);
 		printer.endList();
 	}
+
+    @Override
+    public OrdinaryType typeCheck(Context c) throws SemanticException {
+        OrdinaryType type = this.node.typeCheck(c);
+        return new ArrayType(type);
+    }
 
 }

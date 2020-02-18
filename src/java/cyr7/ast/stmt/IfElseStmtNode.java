@@ -67,7 +67,7 @@ public class IfElseStmtNode extends StmtNode {
         c.pop();
         if (!guardType.equals(PrimitiveType.BOOL)) {
             throw new SemanticException(
-                    "Guard statement does not evaluate to bool.");
+                    "Guard expression does not evaluate to bool");
         } else {
             c.push();
             ResultType ifType = ifBlock.typeCheck(c);

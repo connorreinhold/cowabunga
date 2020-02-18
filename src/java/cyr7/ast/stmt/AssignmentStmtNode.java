@@ -5,6 +5,7 @@ import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
+import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -48,7 +49,13 @@ public final class AssignmentStmtNode extends StmtNode {
     @Override
     public ResultType typeCheck(Context c) throws SemanticException,
             UnbalancedPushPopException {
-        return null;
+        OrdinaryType lhsType = node.typeCheck(c);
+        ExpandedType rhsType = value.typeCheck(c);
+        if (lhsType.equals(rhsType)) {
+            return ResultType.UNIT;
+        } else {
+            throw new SemanticException("Inequivalent type assignment");
+        }
     }
 
 }

@@ -1,11 +1,11 @@
 package cyr7.ast.stmt;
 
-import cyr7.ast.AbstractNode;
-import cyr7.ast.INode;
 import cyr7.ast.type.ITypeExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -47,8 +47,12 @@ public class VarDeclNode extends StmtNode {
     @Override
     public ResultType typeCheck(Context c) throws SemanticException,
             UnbalancedPushPopException {
-        // TODO Auto-generated method stub
-        return null;
+        if (c.contains(identifier)) {
+            throw new SemanticException("Duplicate variable " + identifier);
+        }
+        OrdinaryType type = typeExpr.typeCheck(c);
+        c.addVar(identifier, type);
+        return ResultType.UNIT;
     }
 
 }

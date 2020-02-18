@@ -4,13 +4,18 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.List;
 import java.util.Optional;
+
+import org.graalvm.compiler.word.ObjectAccess;
 
 /**
  * Represents a variable declaration statement with an optional assignment [initializer]. Contains a list 
@@ -26,13 +31,13 @@ public class VarDeclStmtNode extends StmtNode {
 
     public final Optional<ExprNode> initializer;
 
-    public VarDeclStmtNode(ComplexSymbolFactory.Location location,
+    public VarDeclStmtNode(Location location,
                            List<Optional<VarDeclNode>> varDecls,
                            Optional<ExprNode> initializer) {
         super(location);
 
-        assert varDecls != null;
-        assert initializer != null;
+        assert(varDecls != null);
+        assert(initializer != null);
 
         this.varDecls = Util.immutableCopy(varDecls);
         this.initializer = initializer;
@@ -89,7 +94,7 @@ public class VarDeclStmtNode extends StmtNode {
             // VarDecl or ArrayDecl
             assert(varDecls.size() == 1);
             VarDeclNode declNode = varDecls.get(0).get();
-            
+//            ResultType lhsType = declNode.typeCheck(c);
         } else {
             // VarInit or ExprStmt or MultiAssign
         }

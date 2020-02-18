@@ -1,6 +1,11 @@
 package cyr7.ast.stmt;
 
+import java.util.Optional;
+
 import cyr7.ast.AbstractNode;
+import cyr7.exceptions.SemanticException;
+import cyr7.semantics.Context;
+import cyr7.semantics.OrdinaryType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -32,6 +37,16 @@ public class VariableAssignAccessNode extends AssignAccessNode {
             return this.identifier.equals(oNode.identifier);
         }
         return false;
+    }
+
+    @Override
+    public OrdinaryType typeCheck(Context c) throws SemanticException {
+        Optional<OrdinaryType> maybeType = c.getVar(identifier);
+        if (maybeType.isPresent()) {
+            return maybeType.get();
+        } else {
+            throw new SemanticException("Unbound variable " + identifier);
+        }
     }
 	
 }
