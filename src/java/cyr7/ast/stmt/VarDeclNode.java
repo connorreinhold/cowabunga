@@ -4,7 +4,6 @@ import cyr7.ast.type.ITypeExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
-import cyr7.semantics.ExpandedType;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;

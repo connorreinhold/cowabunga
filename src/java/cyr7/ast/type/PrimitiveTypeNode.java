@@ -1,14 +1,10 @@
 package cyr7.ast.type;
 
-import cyr7.ast.AbstractNode;
-import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.Context;
-import cyr7.semantics.ExpandedType;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class PrimitiveTypeNode extends ITypeExprNode {

@@ -4,18 +4,13 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
-import cyr7.semantics.ExpandedType;
-import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.List;
 import java.util.Optional;
-
-import org.graalvm.compiler.word.ObjectAccess;
 
 /**
  * Represents a variable declaration statement with an optional assignment [initializer]. Contains a list 

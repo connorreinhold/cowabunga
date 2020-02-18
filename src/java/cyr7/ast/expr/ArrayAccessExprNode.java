@@ -1,7 +1,5 @@
 package cyr7.ast.expr;
 
-import cyr7.ast.XiProgramNode;
-import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;

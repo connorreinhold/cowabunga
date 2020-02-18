@@ -30,7 +30,7 @@ public abstract class ITypeExprNode extends AbstractNode {
 	 * the type for int[4][3][], we pass in: {Optional.of(4), Optional.of(3), Optional.empty()}
 	 * @return [node] - an ITypeExprNode representing a recursive definition of the type of the object
 	 */
-    static ITypeExprNode fromDimensionList(PrimitiveTypeNode primitive, 
+    public static ITypeExprNode fromDimensionList(PrimitiveTypeNode primitive,
             List<Optional<ExprNode>> dimensionList) {
         ITypeExprNode node = primitive;
         Collections.reverse(dimensionList);

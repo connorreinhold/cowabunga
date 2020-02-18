@@ -1,10 +1,6 @@
 package cyr7.ast.stmt;
 
-import java.util.LinkedList;
-
-import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
-import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
