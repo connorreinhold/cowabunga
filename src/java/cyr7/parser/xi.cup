@@ -119,6 +119,7 @@ nonterminal LinkedList<Optional<ExprNode>> TypeExprArrayList;
 
 nonterminal IxiProgramNode IxiProgram;
 nonterminal LinkedList<FunctionHeaderDeclNode> FunctionHeaderDeclList;
+nonterminal ZeroOrMoreSemicolons;
 nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
 
 nonterminal LinkedList<VarDeclNode> FunctionVarDeclList;
@@ -198,15 +199,20 @@ Program ::=
 // Ixi Grammar
 
 IxiProgram ::=
-    FunctionHeaderDeclList:lst {: RESULT = new IxiProgramNode(lstxleft, lst); :};
+    FunctionHeaderDeclList:lst {: RESULT = new IxiProgramNode(lstxleft, lst); :}
+    ;
 
 FunctionHeaderDeclList ::=
-    FunctionHeaderDeclList:lst FunctionHeaderDecl:decl {:
+    FunctionHeaderDeclList:lst FunctionHeaderDecl:decl ZeroOrMoreSemicolons {:
             lst.addLast(decl);
             RESULT = lst;
         :}
-    | FunctionHeaderDeclList:lst SEMICOLON {: RESULT = lst; :}
-    | {: RESULT = new LinkedList<>(); :}
+    | FunctionHeaderDecl:decl ZeroOrMoreSemicolons {: RESULT = new LinkedList<>(List.of(decl)); :}
+    ;
+
+ZeroOrMoreSemicolons ::=
+    SEMICOLON ZeroOrMoreSemicolons
+    |
     ;
 
 FunctionHeaderDecl ::=
@@ -237,12 +243,11 @@ ReturnTypeList ::=
 // Xi Grammar
 
 XiProgram ::=
-    UseList:uses FunctionDeclList:functions 
-    {: RESULT = new XiProgramNode(usesxleft, uses, functions); :}
+    UseList:uses FunctionDeclList:functions {: RESULT = new XiProgramNode(usesxleft, uses, functions); :}
     ;
 
 UseList ::=
-    USE:u ID:id UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
+    USE:u ID:id ZeroOrMoreSemicolons UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 

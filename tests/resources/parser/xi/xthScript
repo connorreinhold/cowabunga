@@ -11,4 +11,5 @@ xic ("Test --parse") "--parse" {
     arrayDeclSizingFail.xi;
     underscoreDeclFail.xi;
     underscoreDeclFail2.xi;
+    useStatements.xi;
 }
