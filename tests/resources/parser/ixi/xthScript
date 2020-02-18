@@ -6,4 +6,5 @@ xic ("Test --parse") "--parse" {
     collection.ixi;
     dictionary.ixi;
     noTypeFail.ixi;
+    empty.ixi;
 }

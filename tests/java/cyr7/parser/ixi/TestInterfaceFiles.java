@@ -17,8 +17,10 @@ import cyr7.ast.type.ITypeExprNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.exceptions.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
+import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
 import cyr7.lexer.MyLexer;
@@ -36,12 +38,19 @@ class TestInterfaceFiles {
     
     @Test
     void testEmptyProgram() throws Exception {
-        IxiProgramNode expected = new IxiProgramNode(null, new LinkedList<>());
-        StringReader prgm = new StringReader("");
-        XiParser parser = new XiParser(new MultiFileLexer(prgm, true),
-                new ComplexSymbolFactory());
-        Object tree = parser.parse().value;
-        assertEquals(tree, expected);
+        // Section 8 of Xi Spec:
+        // Interface files contain a _nonempty_ set of procedure and function...
+        assertThrows(ParserException.class, () ->
+            ParserFactory.make("", true).parse()
+        );
+
+        assertThrows(ParserException.class, () ->
+            ParserFactory.make(";", true).parse()
+        );
+
+        assertThrows(ParserException.class, () ->
+            ParserFactory.make(";;;;", true).parse()
+        );
     }
 
     @Test

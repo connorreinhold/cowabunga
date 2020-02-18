@@ -29,7 +29,7 @@ class TestUse {
 
     @Test
     void test() throws Exception {
-        String program = "use io\nuse math\nuse nothing";
+        String program = "use io\nuse math;\nuse nothing";
         LinkedList<UseNode> uses = new LinkedList<>();
         Collections.addAll(
             uses,
