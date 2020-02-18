@@ -33,9 +33,9 @@ public abstract class TestContext {
         MockType type3 = new MockType("type3");
 
         Context context = createEmptyContext();
-        context.add("var1", type1);
-        context.add("var2", type2);
-        context.add("var3", type3);
+        context.add("x", new VariableType(PrimitiveType.INT));
+        context.add("y", new VariableType(PrimitiveType.BOOL));
+        context.add("z", new VariableType(new ArrayType(PrimitiveType.INT)));
 
         assertEquals(type1, context.get("var1").get());
         assertEquals(type2, context.get("var2").get());

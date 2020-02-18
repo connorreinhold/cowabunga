@@ -9,17 +9,17 @@ import java.util.Optional;
  */
 public interface Context {
 
-    void add(String id, VariableType t);
+    void addVar(String id, OrdinaryType t);
 
-    void add(String id, FunctionType t);
+    void addFn(String id, FunctionType t);
 
-    void add(ReturnType t);
+    void addRet(ExpandedType t);
 
-    Optional<VariableType> getVar(String id);
+    Optional<OrdinaryType> getVar(String id);
 
     Optional<FunctionType> getFn(String id);
 
-    Optional<ReturnType> getRet();
+    Optional<ExpandedType> getRet();
 
     /**
      * Push a new commit onto the context.

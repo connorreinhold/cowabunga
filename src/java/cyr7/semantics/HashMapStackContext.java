@@ -14,7 +14,7 @@ public final class HashMapStackContext implements Context {
     // Read more here: https://docs.oracle.com/javase/7/docs/api/java/util/Deque.html
 
     // Why use Deque instead of Stack? Deque is preferred by Java implementers
-    private final Deque<Map<String, ContextType>> stack;
+    private final Deque<Map<Optional<String>, ContextType>> stack;
 
     /**
      * Instantiate an empty context
@@ -24,32 +24,38 @@ public final class HashMapStackContext implements Context {
         stack.add(new HashMap<>());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void add(String id, ContextType t) {
-        assert id != null;
-        assert t != null;
-
-        stack.peek().put(id, t);
+    private void add(Optional<String> id, ContextType type) {
+        stack.peek().put(id, type);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public Optional<ContextType> get(String id) {
-        assert id != null;
+    public void addVar(String id, OrdinaryType t) {
 
-        // iterate over the stack from top to bottom
-        for (Map<String, ContextType> level : stack) {
-            ContextType result = level.get(id);
-            if (result != null) {
-                return Optional.of(result);
-            }
-        }
+    }
 
+    @Override
+    public void addFn(String id, FunctionType t) {
+
+    }
+
+    @Override
+    public void addRet(ExpandedType t) {
+
+    }
+
+    @Override
+    public Optional<OrdinaryType> getVar(String id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<FunctionType> getFn(String id) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<ExpandedType> getRet() {
         return Optional.empty();
     }
 
