@@ -36,9 +36,9 @@ public abstract class TestContext {
     @Test
     void testAddGetInteraction() {
         Context context = createEmptyContext();
-        context.addVar("x", INT.get());
-        context.addVar("y", BOOL.get());
-        context.addVar("z", INT_ARRAY.get());
+        context.addVar("var1", INT.get());
+        context.addVar("var2", BOOL.get());
+        context.addVar("var3", INT_ARRAY.get());
 
         assertEquals(INT, context.getVar("var1"));
         assertEquals(BOOL, context.getVar("var2"));
