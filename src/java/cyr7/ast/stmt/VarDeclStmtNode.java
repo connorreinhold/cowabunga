@@ -91,7 +91,7 @@ public class VarDeclStmtNode extends StmtNode {
             VarDeclNode declNode = varDecls.get(0).get();
 //            ResultType lhsType = declNode.typeCheck(c);
         } else {
-            // VarInit or ExprStmt or MultiAssign
+            // TODO: VarInit or ExprStmt or MultiAssign
         }
         return null;
     }
