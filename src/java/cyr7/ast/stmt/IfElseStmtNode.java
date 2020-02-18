@@ -1,6 +1,5 @@
 package cyr7.ast.stmt;
 
-import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
@@ -79,7 +78,6 @@ public class IfElseStmtNode extends StmtNode {
                 ResultType elseType = elseBlock.get()
                                                .typeCheck(c);
                 c.pop();
-                
                 return ResultType.leastUpperBound(ifType, elseType);
             } else {
                 return ifType;
