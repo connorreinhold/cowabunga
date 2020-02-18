@@ -7,15 +7,12 @@ public final class TupleType implements ExpandedType{
 	public final List<ExpandedType> elements;
 	
 	public TupleType(List<ExpandedType> elements) {
+	    assert(elements.size() >= 2);
 		this.elements = Collections.unmodifiableList(elements);
 	}
 
 	@Override
 	public boolean equals(Object o) {
-	    if (o instanceof OrdinaryType && elements.size() == 1) {
-	        OrdinaryType type = (OrdinaryType) o;
-            return type.equals(elements.get(0));
-	    }
 	    if (o instanceof TupleType) {
 	        TupleType tupleType = (TupleType) o;
 	        return elements.equals(tupleType.elements);
