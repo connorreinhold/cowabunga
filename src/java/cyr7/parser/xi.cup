@@ -247,8 +247,7 @@ XiProgram ::=
     ;
 
 UseList ::=
-    USE:u ID:id UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
-    | USE:u ID:id SEMICOLON UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
+    USE:u ID:id ZeroOrMoreSemicolons UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
