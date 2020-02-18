@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public class FunctionType implements ContextType {
+public class FunctionType {
 	public final ExpandedType input;
 	public final ExpandedType output;
 	
