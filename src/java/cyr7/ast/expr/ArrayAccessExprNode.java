@@ -3,8 +3,10 @@ package cyr7.ast.expr;
 import cyr7.ast.XiProgramNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
+import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
-import cyr7.semantics.Type;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.PrimitiveType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -47,5 +49,17 @@ public class ArrayAccessExprNode extends ExprAccessNode {
                     && this.index.equals(oNode.index);
         }
         return false;
+    }
+
+    @Override
+    public ExpandedType typeCheck(Context c) throws SemanticException {
+        if (index.typeCheck(c) == PrimitiveType.INT) {
+            ExpandedType accessNodeType = accessNode.typeCheck(c);
+            if (accessNodeType instanceof ArrayType) {
+                return ((ArrayType) accessNodeType).child;
+            }
+            throw new SemanticException("invalid access");
+        }
+        throw new SemanticException("index not an int");
     }
 }

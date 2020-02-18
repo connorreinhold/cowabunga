@@ -21,6 +21,8 @@ public interface Context {
 
     Optional<ExpandedType> getRet();
 
+    boolean contains(String id);
+
     /**
      * Push a new commit onto the context.
      *

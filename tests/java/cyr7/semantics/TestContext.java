@@ -3,9 +3,16 @@ package cyr7.semantics;
 import cyr7.exceptions.UnbalancedPushPopException;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class TestContext {
+
+    private final Optional<OrdinaryType> INT = Optional.of(PrimitiveType.INT);
+    private final Optional<OrdinaryType> BOOL = Optional.of(PrimitiveType.BOOL);
+    private final Optional<OrdinaryType> INT_ARRAY = Optional.of(new ArrayType(PrimitiveType.INT));
+    private final Optional<OrdinaryType> BOOL_ARRAY = Optional.of(new ArrayType(PrimitiveType.BOOL));
 
     abstract Context createEmptyContext();
 
@@ -28,76 +35,68 @@ public abstract class TestContext {
 
     @Test
     void testAddGetInteraction() {
-        MockType type1 = new MockType("type1");
-        MockType type2 = new MockType("type2");
-        MockType type3 = new MockType("type3");
-
         Context context = createEmptyContext();
-        context.add("x", new VariableType(PrimitiveType.INT));
-        context.add("y", new VariableType(PrimitiveType.BOOL));
-        context.add("z", new VariableType(new ArrayType(PrimitiveType.INT)));
+        context.addVar("x", INT.get());
+        context.addVar("y", BOOL.get());
+        context.addVar("z", INT_ARRAY.get());
 
-        assertEquals(type1, context.get("var1").get());
-        assertEquals(type2, context.get("var2").get());
-        assertEquals(type3, context.get("var3").get());
+        assertEquals(INT, context.getVar("var1"));
+        assertEquals(BOOL, context.getVar("var2"));
+        assertEquals(INT_ARRAY, context.getVar("var3"));
 
-        assertEquals(type3, context.get("var3").get());
-        assertEquals(type1, context.get("var1").get());
-        assertEquals(type2, context.get("var2").get());
+        assertEquals(INT_ARRAY, context.getVar("var3"));
+        assertEquals(INT, context.getVar("var1"));
+        assertEquals(BOOL, context.getVar("var2"));
 
-        assertTrue(context.get("var4").isEmpty());
-        context.add("var4", type1);
-        assertEquals(type1, context.get("var4").get());
+        assertTrue(context.getVar("var4").isEmpty());
+        context.addVar("var4", BOOL_ARRAY.get());
+        assertEquals(BOOL_ARRAY, context.getVar("var4"));
 
-        assertEquals(type1, context.get("var1").get());
-        assertEquals(type2, context.get("var2").get());
-        assertEquals(type3, context.get("var3").get());
+        assertEquals(INT, context.getVar("var1"));
+        assertEquals(BOOL, context.getVar("var2"));
+        assertEquals(INT_ARRAY, context.getVar("var3"));
 
-        assertTrue(context.get("whatever").isEmpty());
+        assertTrue(context.getVar("whatever").isEmpty());
     }
 
     @Test
     void testContext1() throws UnbalancedPushPopException {
-        MockType type1 = new MockType("type1");
-        MockType type2 = new MockType("type2");
-        MockType type3 = new MockType("type3");
-
         Context context = createEmptyContext();
 
-        context.add("level1", type1);
-        assertEquals(type1, context.get("level1").get());
-        assertTrue(context.get("level2").isEmpty());
-        assertTrue(context.get("level3").isEmpty());
+        context.addVar("level1", INT.get());
+        assertEquals(INT, context.getVar("level1"));
+        assertTrue(context.getVar("level2").isEmpty());
+        assertTrue(context.getVar("level3").isEmpty());
 
         context.push();
-        assertEquals(type1, context.get("level1").get());
-        assertTrue(context.get("level2").isEmpty());
-        assertTrue(context.get("level3").isEmpty());
+        assertEquals(INT, context.getVar("level1"));
+        assertTrue(context.getVar("level2").isEmpty());
+        assertTrue(context.getVar("level3").isEmpty());
 
-        context.add("level2", type2);
-        assertEquals(type1, context.get("level1").get());
-        assertEquals(type2, context.get("level2").get());
-        assertTrue(context.get("level3").isEmpty());
+        context.addVar("level2", BOOL.get());
+        assertEquals(INT, context.getVar("level1"));
+        assertEquals(BOOL, context.getVar("level2"));
+        assertTrue(context.getVar("level3").isEmpty());
 
         context.push();
-        assertEquals(type1, context.get("level1").get());
-        assertEquals(type2, context.get("level2").get());
-        assertTrue(context.get("level3").isEmpty());
+        assertEquals(INT, context.getVar("level1"));
+        assertEquals(BOOL, context.getVar("level2"));
+        assertTrue(context.getVar("level3").isEmpty());
 
-        context.add("level3", type3);
-        assertEquals(type1, context.get("level1").get());
-        assertEquals(type2, context.get("level2").get());
-        assertEquals(type3, context.get("level3").get());
-
-        context.pop();
-        assertEquals(type1, context.get("level1").get());
-        assertEquals(type2, context.get("level2").get());
-        assertTrue(context.get("level3").isEmpty());
+        context.addVar("level3", INT_ARRAY.get());
+        assertEquals(INT, context.getVar("level1"));
+        assertEquals(BOOL, context.getVar("level2"));
+        assertEquals(INT_ARRAY, context.getVar("level3"));
 
         context.pop();
-        assertEquals(type1, context.get("level1").get());
-        assertTrue(context.get("level2").isEmpty());
-        assertTrue(context.get("level3").isEmpty());
+        assertEquals(INT, context.getVar("level1"));
+        assertEquals(BOOL, context.getVar("level2"));
+        assertTrue(context.getVar("level3").isEmpty());
+
+        context.pop();
+        assertEquals(INT, context.getVar("level1"));
+        assertTrue(context.getVar("level2").isEmpty());
+        assertTrue(context.getVar("level3").isEmpty());
 
         assertThrows(UnbalancedPushPopException.class, context::pop);
     }
