@@ -14,7 +14,7 @@ public final class HashMapStackContext implements Context {
     // Read more here: https://docs.oracle.com/javase/7/docs/api/java/util/Deque.html
 
     // Why use Deque instead of Stack? Deque is preferred by Java implementers
-    private final Deque<Map<String, Type>> stack;
+    private final Deque<Map<String, ContextType>> stack;
 
     /**
      * Instantiate an empty context
@@ -28,7 +28,7 @@ public final class HashMapStackContext implements Context {
      * {@inheritDoc}
      */
     @Override
-    public void add(String id, Type t) {
+    public void add(String id, ContextType t) {
         assert id != null;
         assert t != null;
 
@@ -39,12 +39,12 @@ public final class HashMapStackContext implements Context {
      * {@inheritDoc}
      */
     @Override
-    public Optional<Type> get(String id) {
+    public Optional<ContextType> get(String id) {
         assert id != null;
 
         // iterate over the stack from top to bottom
-        for (Map<String, Type> level : stack) {
-            Type result = level.get(id);
+        for (Map<String, ContextType> level : stack) {
+            ContextType result = level.get(id);
             if (result != null) {
                 return Optional.of(result);
             }

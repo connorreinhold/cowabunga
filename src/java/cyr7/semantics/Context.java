@@ -9,22 +9,17 @@ import java.util.Optional;
  */
 public interface Context {
 
-    /**
-     * Associates an identifier to a type in this context
-     *
-     * @param id An identifier
-     * @param t A type to associate with {@code id}
-     */
-    void add(String id, ContextType t);
+    void add(String id, VariableType t);
 
-    /**
-     * Gets the type of an identifier in this context
-     *
-     * @param id An id
-     * @return The type of id, or {@code Optional.empty()} if id is not in this
-     * context
-     */
-    Optional<ContextType> get(String id);
+    void add(String id, FunctionType t);
+
+    void add(ReturnType t);
+
+    Optional<VariableType> getVar(String id);
+
+    Optional<FunctionType> getFn(String id);
+
+    Optional<ReturnType> getRet();
 
     /**
      * Push a new commit onto the context.
