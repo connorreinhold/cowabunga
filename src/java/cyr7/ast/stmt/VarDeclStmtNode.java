@@ -17,7 +17,7 @@ import java.util.Optional;
  * Invariant: Cannot have multiple VarDeclNodes in [varDecls] or an Optional.empty() in [varDecls] without
  * the initializer being a FunctionCallExprNode
  */
-public class VarDeclStmtNode extends AbstractNode implements StmtNode {
+public class VarDeclStmtNode extends StmtNode {
 
     public final List<Optional<VarDeclNode>> varDecls;
 

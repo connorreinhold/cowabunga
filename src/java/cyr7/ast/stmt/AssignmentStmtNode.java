@@ -6,7 +6,7 @@ import cyr7.ast.expr.ExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
+public final class AssignmentStmtNode extends StmtNode {
 
 	// Assign [node] to [value]
 	public final AssignAccessNode node;

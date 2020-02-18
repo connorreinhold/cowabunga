@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * Represents an if/else statement. Contains [ExprNode guard], a body [ifBlock], and an optional [elseBlock]
  */
-public class IfElseStmtNode extends AbstractNode implements StmtNode {
+public class IfElseStmtNode extends StmtNode {
 
 	final ExprNode guard;
     final StmtNode ifBlock;

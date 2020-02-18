@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Represents a block of statements (denoted by { ... } in code)
  */
-public class BlockStmtNode extends AbstractNode implements StmtNode {
+public class BlockStmtNode extends StmtNode {
 
     public final List<StmtNode> statements;
 

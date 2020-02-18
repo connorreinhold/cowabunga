@@ -8,7 +8,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents the [identifier] in a Variable Assignment, i.e. moo = 3 would have
  * moo represented by a VariableAssignAccessNode
  */
-public class VariableAssignAccessNode extends AbstractNode implements AssignAccessNode {
+public class VariableAssignAccessNode extends AbstractNode {
 
 	public final String identifier;
 	

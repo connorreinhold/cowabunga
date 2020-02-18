@@ -6,10 +6,12 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
- * Represents assigning an array index to a value. Ex: the LHS of arr[3][4] = 3 would be represented by
- * ArrayAssignAccessNode(ArrayAssignAccessNode(VariableAssignAccessNode("arr"), 3), 4)
+ * Represents assigning an array index to a value. Ex: the LHS of arr[3][4] = 3 
+ * would be represented by 
+ * ArrayAssignAccessNode(
+ *      ArrayAssignAccessNode(VariableAssignAccessNode("arr"), 3), 4)
  */
-public class ArrayAssignAccessNode extends AbstractNode implements AssignAccessNode {
+public class ArrayAssignAccessNode extends AssignAccessNode {
 	public final AssignAccessNode node;
 	public final ExprNode index;
 	

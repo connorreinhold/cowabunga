@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Represents a return statement in a block, containing a potentially empty list [exprs] of ExprNodes
  */
-public final class ReturnStmtNode extends AbstractNode implements StmtNode {
+public final class ReturnStmtNode extends StmtNode {
 
     public final List<ExprNode> exprs;
 

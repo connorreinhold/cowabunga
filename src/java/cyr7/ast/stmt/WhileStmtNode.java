@@ -12,7 +12,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents a while statement, with [ExprNode guard] and a [block] representing the body of the while 
  * loop
  */
-public final class WhileStmtNode extends AbstractNode implements StmtNode {
+public final class WhileStmtNode extends StmtNode {
 
 	public final ExprNode guard;
     public final StmtNode block;

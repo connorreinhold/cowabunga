@@ -10,7 +10,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents a Variable Declaration, with a String [identifier] and a type [typeExpr] of the initialized
  * variable
  */
-public class VarDeclNode extends AbstractNode {
+public class VarDeclNode extends StmtNode {
 
     public final String identifier;
 
