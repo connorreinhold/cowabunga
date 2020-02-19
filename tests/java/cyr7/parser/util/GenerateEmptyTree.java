@@ -2,31 +2,18 @@ package cyr7.parser.util;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.io.StringReader;
-import java.util.Collections;
 import java.util.LinkedList;
 
-import org.junit.jupiter.api.Test;
-
-import cyr7.ast.FunctionDeclNode;
-import cyr7.ast.FunctionHeaderDeclNode;
-import cyr7.ast.UseNode;
-import cyr7.ast.XiProgramNode;
-import cyr7.ast.expr.ExprNode;
-import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
+import cyr7.ast.*;
 import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.ReturnStmtNode;
 import cyr7.ast.stmt.StmtNode;
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
-import cyr7.ast.type.PrimitiveEnum;
-import cyr7.ast.type.PrimitiveTypeNode;
-import cyr7.parser.XiParser;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.type.TypeExprNode;
 
 public class GenerateEmptyTree {
     LinkedList<VarDeclNode> args;
     LinkedList<UseNode> uses;
-    LinkedList<ITypeExprNode> returnTypes;
+    LinkedList<TypeExprNode> returnTypes;
     FunctionHeaderDeclNode functionHeader;
     LinkedList<StmtNode> statements;
     BlockStmtNode block;
@@ -52,7 +39,7 @@ public class GenerateEmptyTree {
         return tree;
     }
     
-    public XiProgramNode addReturnType(ITypeExprNode t) {
+    public XiProgramNode addReturnType(TypeExprNode t) {
         returnTypes.add(t);
         return tree;
     }

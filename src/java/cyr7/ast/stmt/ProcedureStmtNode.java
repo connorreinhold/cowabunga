@@ -15,7 +15,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents a call to a procedure [procedureCall], which is a 
  * FunctionCallExprNode with return type unit.
  */
-public class ProcedureStmtNode extends StmtNode {
+public final class ProcedureStmtNode extends StmtNode {
 	public final FunctionCallExprNode procedureCall;
 
 	public ProcedureStmtNode(ComplexSymbolFactory.Location location,

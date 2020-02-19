@@ -11,15 +11,15 @@ import org.junit.jupiter.api.Test;
 import cyr7.ast.FunctionHeaderDeclNode;
 import cyr7.ast.UseNode;
 import cyr7.ast.XiProgramNode;
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.type.TypeExprNode;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
 
 class TestUse {
 
-    LinkedList<VarDeclNode> args;
-    LinkedList<ITypeExprNode> returnTypes;
+    LinkedList<VarDeclStmtNode> args;
+    LinkedList<TypeExprNode> returnTypes;
     FunctionHeaderDeclNode function;
     LinkedList<FunctionHeaderDeclNode> functions;
     XiProgramNode expected;

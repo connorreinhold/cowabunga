@@ -107,11 +107,11 @@ terminal FUNCTION_CALL,
          ARRAY_ACCESS;
 
 // Program-wide
-nonterminal IProgramNode Program;
+nonterminal AbstractNode Program;
 
 // Type Expressions
 
-nonterminal ITypeExprNode TypeExpr;
+nonterminal TypeExprNode TypeExpr;
 nonterminal PrimitiveTypeNode Primitive;
 nonterminal LinkedList<Optional<ExprNode>> TypeExprArrayList;
 
@@ -124,8 +124,8 @@ nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
 
 nonterminal LinkedList<VarDeclNode> FunctionVarDeclList;
 
-nonterminal LinkedList<ITypeExprNode> ReturnType;
-nonterminal LinkedList<ITypeExprNode> ReturnTypeList;
+nonterminal LinkedList<TypeExprNode> ReturnType;
+nonterminal LinkedList<TypeExprNode> ReturnTypeList;
 
 // Xi program
 
@@ -145,9 +145,14 @@ nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
 nonterminal AssignAccessNode AssignAccess;
 
-nonterminal VarDeclStmtNode VarDeclStatement;
+nonterminal StmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
 
+nonterminal ArrayDeclStmtNode VarDeclArrayInit;
+nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionedBracket;
+nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionlessBracket;
+
+nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
 nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
@@ -161,12 +166,6 @@ nonterminal ExprNode IntegerExpr;
 nonterminal ExprNode BoolExpr;
 nonterminal ExprNode ArrayExpr;
 nonterminal LinkedList<ExprNode> ArrayElements;
-
-nonterminal VarDeclNode VarDeclArrayInit;
-nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionedBracket;
-nonterminal LinkedList<Optional<ExprNode>> VarDeclDimensionlessBracket;
-
-nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
 
 // Precedence
 
@@ -320,32 +319,24 @@ AssignAccess ::=
 
 VarDeclStatement ::=
     VarDeclArrayInit:arr {:
-            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-            l.addFirst(Optional.of(arr));
-            RESULT = new VarDeclStmtNode(arrxleft, l, Optional.empty());
+            RESULT = arr;
         :}
     | UNDERSCORE:u ASSIGN FunctionCall:e {:
-            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-            l.addFirst(Optional.empty());
-            RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(e));
+            RESULT = new ExprStmtNode(uxleft, e);
         :}
     | VarDecl:v ASSIGN Expr:e {:
-            LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-            l.addFirst(Optional.of(v));
-            RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
+            RESULT = new VarInitStmtNode(vxleft, v, e);
         :}
 	| VarDecl:v {:
-			LinkedList<Optional<VarDeclNode>> l = new LinkedList<>();
-			l.addFirst(Optional.of(v));
-			RESULT = new VarDeclStmtNode(vxleft, l, Optional.empty());
+            RESULT = new VarDeclStmtNode(vxleft, v);
 	    :}
     | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.of(v));
-            RESULT = new VarDeclStmtNode(vxleft, l, Optional.of(e));
+            RESULT = new MultiAssignStmtNode(vxleft, l, e);
         :}
     | UNDERSCORE:u COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.empty());
-            RESULT = new VarDeclStmtNode(uxleft, l, Optional.of(e));
+            RESULT = new MultiAssignStmtNode(uxleft, l, e);
         :}
     ;
 
@@ -373,8 +364,8 @@ MultiVarDeclList ::=
 VarDeclArrayInit ::=
     ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
             l.addFirst(Optional.of(v));
-            ITypeExprNode t = ITypeExprNode.fromDimensionList(p, l);
-            RESULT = new VarDeclNode(idxleft, id, t);
+            TypeExprArrayNode t = TypeExprNode.fromDimensionList(p, l);
+            RESULT = new ArrayDeclStmtNode(idxleft, id, t);
         :}
     ;
 
@@ -406,7 +397,7 @@ Primitive ::=
 TypeExpr ::=
     Primitive:p L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {:
             l.addFirst(Optional.empty());
-            RESULT = ITypeExprNode.fromDimensionList(p, l);
+            RESULT = TypeExprNode.fromDimensionList(p, l);
         :}
     | Primitive:p {: RESULT = p; :}
     ;

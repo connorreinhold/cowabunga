@@ -2,8 +2,8 @@ package cyr7.ast;
 
 import java.util.List;
 
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.type.TypeExprNode;
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -17,12 +17,12 @@ public class FunctionHeaderDeclNode extends AbstractNode {
 
     final String identifier;
     final List<VarDeclNode> args;
-    final List<ITypeExprNode> returnTypes;
+    final List<TypeExprNode> returnTypes;
 
     public FunctionHeaderDeclNode(ComplexSymbolFactory.Location location,
                                   String id,
                                   List<VarDeclNode> args,
-                                  List<ITypeExprNode> returnTypes) {
+                                  List<TypeExprNode> returnTypes) {
         super(location);
 
         assert id != null;

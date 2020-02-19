@@ -8,8 +8,8 @@ import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.ast.stmt.ReturnStmtNode;
 import cyr7.ast.stmt.StmtNode;
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.type.TypeExprNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.parser.XiParser;
@@ -24,8 +24,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestFunctionDeclarations {
 
-    LinkedList<VarDeclNode> args;
-    LinkedList<ITypeExprNode> returnTypes;
+    LinkedList<VarDeclStmtNode> args;
+    LinkedList<TypeExprNode> returnTypes;
     FunctionHeaderDeclNode function;
     LinkedList<FunctionHeaderDeclNode> functions;
     XiProgramNode expected;
@@ -38,7 +38,7 @@ class TestFunctionDeclarations {
     void test() throws Exception {
         program = "main(): int { return 0; }";
         LinkedList<FunctionDeclNode> funcs = new LinkedList<>();
-        LinkedList<ITypeExprNode> retTypes = new LinkedList<>();
+        LinkedList<TypeExprNode> retTypes = new LinkedList<>();
         LinkedList<ExprNode> retExpr = new LinkedList<>();
         retExpr.add(new LiteralIntExprNode(null, "0"));
         StmtNode stmt = new ReturnStmtNode(null, retExpr);
@@ -46,7 +46,7 @@ class TestFunctionDeclarations {
         stmts.add(stmt);
         BlockStmtNode block = new BlockStmtNode(null, stmts);
         Collections.addAll(retTypes, 
-                new ITypeExprNode[] {
+                new TypeExprNode[] {
                     new PrimitiveTypeNode(null, PrimitiveEnum.INT)
                 });
         

@@ -16,7 +16,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * ArrayAssignAccessNode(
  *      ArrayAssignAccessNode(VariableAssignAccessNode("arr"), 3), 4)
  */
-public class ArrayAssignAccessNode extends AssignAccessNode {
+public final class ArrayAssignAccessNode extends AssignAccessNode {
 	public final AssignAccessNode node;
 	public final ExprNode index;
 	

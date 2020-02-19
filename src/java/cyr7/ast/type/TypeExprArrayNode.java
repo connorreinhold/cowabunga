@@ -20,13 +20,13 @@ import java.util.Optional;
  * TypeExprArrayNode(TypeExprArrayNode(PrimitiveEnumNode(int), Optional
  * .empty()), Optional.of(4))
  */
-public final class TypeExprArrayNode extends ITypeExprNode {
+public final class TypeExprArrayNode extends TypeExprNode {
 
-    public final ITypeExprNode child;
+    public final TypeExprNode child;
     public final Optional<ExprNode> size;
 
     public TypeExprArrayNode(Location location,
-                             ITypeExprNode child, Optional<ExprNode> size) {
+                             TypeExprNode child, Optional<ExprNode> size) {
         super(location);
 
         this.child = child;
