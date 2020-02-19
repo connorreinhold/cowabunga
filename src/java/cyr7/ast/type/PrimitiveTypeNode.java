@@ -7,7 +7,7 @@ import cyr7.semantics.PrimitiveType;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class PrimitiveTypeNode extends ITypeExprNode {
+public class PrimitiveTypeNode extends TypeExprNode {
 
     public final PrimitiveEnum type;
 

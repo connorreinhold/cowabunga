@@ -1,12 +1,11 @@
 package cyr7.parser;
 
-import cyr7.ast.INode;
+import cyr7.ast.AbstractNode;
 import cyr7.exceptions.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
-import polyglot.util.CodeWriter;
 
 import java.io.*;
 
@@ -17,7 +16,7 @@ public class ParserUtil {
 
         try {
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
-            INode node = (INode) p.parse().value;
+            AbstractNode node = (AbstractNode) p.parse().value;
             CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
             node.prettyPrint(printer);
             printer.flush();
@@ -29,14 +28,14 @@ public class ParserUtil {
         }
     }
 
-    public static void printSExpr(INode node) {
+    public static void printSExpr(AbstractNode node) {
         CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
         node.prettyPrint(printer);
         printer.flush();
         printer.close();
     }
 
-    public static String toSExpr(INode node) {
+    public static String toSExpr(AbstractNode node) {
         StringWriter writer = new StringWriter();
         CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
         node.prettyPrint(printer);

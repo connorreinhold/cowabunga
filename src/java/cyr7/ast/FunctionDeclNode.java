@@ -1,8 +1,8 @@
 package cyr7.ast;
 
 import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.type.TypeExprNode;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -46,7 +46,7 @@ public class FunctionDeclNode extends AbstractNode {
         printer.endList();
 
         printer.startList();
-        for (ITypeExprNode typeNode : header.returnTypes) {
+        for (TypeExprNode typeNode : header.returnTypes) {
             typeNode.prettyPrint(printer);
         }
         printer.endList();
@@ -63,5 +63,6 @@ public class FunctionDeclNode extends AbstractNode {
             return this.header.equals(oNode.header)
                     && this.block.equals(oNode.block);
         }
-        return false;    }
+        return false;
+    }
 }

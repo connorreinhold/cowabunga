@@ -1,13 +1,12 @@
 package cyr7.ast;
 
-import java.util.LinkedList;
 import java.util.List;
 
 import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-public final class IxiProgramNode extends AbstractNode implements IProgramNode {
+public final class IxiProgramNode extends AbstractNode {
 
     public final List<FunctionHeaderDeclNode> functionDeclarations;
 

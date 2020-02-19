@@ -1,7 +1,6 @@
 package cyr7.ast.expr;
 
 import cyr7.ast.AbstractNode;
-import cyr7.ast.INode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;

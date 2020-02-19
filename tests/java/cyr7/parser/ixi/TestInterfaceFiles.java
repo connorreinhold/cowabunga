@@ -6,14 +6,13 @@ import java.io.StringReader;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import cyr7.ast.*;
 import cyr7.ast.expr.ExprNode;
-import cyr7.ast.stmt.VarDeclNode;
-import cyr7.ast.type.ITypeExprNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.type.TypeExprNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -56,7 +55,7 @@ class TestInterfaceFiles {
     @Test
     void testNoArgsProcess() throws Exception {
         LinkedList<VarDeclNode> args;
-        LinkedList<ITypeExprNode> returnTypes;
+        LinkedList<TypeExprNode> returnTypes;
         FunctionHeaderDeclNode function;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
@@ -97,7 +96,7 @@ class TestInterfaceFiles {
     @Test
     void testProcessWithArguments() throws Exception {
         LinkedList<VarDeclNode> args;
-        LinkedList<ITypeExprNode> returnTypes;
+        LinkedList<TypeExprNode> returnTypes;
         FunctionHeaderDeclNode function;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
@@ -108,18 +107,18 @@ class TestInterfaceFiles {
         args = new LinkedList<>();
         VarDeclNode[] d = new VarDeclNode[] {
             new VarDeclNode(null, "b",
-                    ITypeExprNode.fromDimensionList(
+                    TypeExprNode.fromDimensionList(
                             new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                             this.generateEmptyList(1)
                         )
                     ),
             new VarDeclNode(null, "c",
-                    ITypeExprNode.fromDimensionList(
+                    TypeExprNode.fromDimensionList(
                             new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                             this.generateEmptyList(3)
                             )
                     ),
-            new VarDeclNode(null, "d", 
+            new VarDeclNode(null, "d",
                     new PrimitiveTypeNode(null, PrimitiveEnum.BOOL)),
         };
         Collections.addAll(args, d);
@@ -139,7 +138,7 @@ class TestInterfaceFiles {
     void testNoArgsFunction() throws Exception {
         
         LinkedList<VarDeclNode> args;
-        LinkedList<ITypeExprNode> returnTypes;
+        LinkedList<TypeExprNode> returnTypes;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
         StringReader prgm;
@@ -163,7 +162,7 @@ class TestInterfaceFiles {
         
         args.clear();
         returnTypes.clear();
-        ITypeExprNode[] types = new ITypeExprNode[]{
+        TypeExprNode[] types = new TypeExprNode[]{
                 new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                 new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
                 new PrimitiveTypeNode(null, PrimitiveEnum.INT),
@@ -191,7 +190,7 @@ class TestInterfaceFiles {
         };
 
         for (int d: arrayDimensions) {
-            ITypeExprNode type = new PrimitiveTypeNode(null, PrimitiveEnum.INT);
+            TypeExprNode type = new PrimitiveTypeNode(null, PrimitiveEnum.INT);
             for (int i = 0; i < d; i++) {
                 type = new TypeExprArrayNode(null, type, Optional.empty());
             }
@@ -224,7 +223,7 @@ class TestInterfaceFiles {
     @Test
     void testFunctionWithArguments() throws Exception {
         LinkedList<VarDeclNode> args;
-        LinkedList<ITypeExprNode> returnTypes;
+        LinkedList<TypeExprNode> returnTypes;
         FunctionHeaderDeclNode function;
         LinkedList<FunctionHeaderDeclNode> functions;
         IxiProgramNode expected;
@@ -235,36 +234,36 @@ class TestInterfaceFiles {
         args = new LinkedList<>();
         VarDeclNode[] d = new VarDeclNode[] {
             new VarDeclNode(null, "b",
-                    ITypeExprNode.fromDimensionList(
+                    TypeExprNode.fromDimensionList(
                             new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                             this.generateEmptyList(1)
                         )
                     ),
             new VarDeclNode(null, "c",
-                    ITypeExprNode.fromDimensionList(
+                    TypeExprNode.fromDimensionList(
                             new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                             this.generateEmptyList(3)
                             )
                     ),
-            new VarDeclNode(null, "d", 
+            new VarDeclNode(null, "d",
                     new PrimitiveTypeNode(null, PrimitiveEnum.BOOL)),
         };
         Collections.addAll(args, d);
         
         returnTypes = new LinkedList<>();
-        ITypeExprNode[] types = new ITypeExprNode[]{
-                ITypeExprNode.fromDimensionList(
+        TypeExprNode[] types = new TypeExprNode[]{
+                TypeExprNode.fromDimensionList(
                         new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                         this.generateEmptyList(1)
                         ),
                 new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
-                ITypeExprNode.fromDimensionList(
+                TypeExprNode.fromDimensionList(
                         new PrimitiveTypeNode(null, PrimitiveEnum.INT),
                         this.generateEmptyList(5)
                         ),
                 new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
                 new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
-                ITypeExprNode.fromDimensionList(
+                TypeExprNode.fromDimensionList(
                         new PrimitiveTypeNode(null, PrimitiveEnum.BOOL),
                         this.generateEmptyList(3)
                         )

@@ -4,14 +4,13 @@ import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
-import java.util.LinkedList;
 import java.util.List;
 
 /**
  * Represents an XI program, containing a list of use statements and a list
  * of functions
  */
-public class XiProgramNode extends AbstractNode implements IProgramNode {
+public class XiProgramNode extends AbstractNode {
     public final List<UseNode> uses;
     public final List<FunctionDeclNode> functions;
 

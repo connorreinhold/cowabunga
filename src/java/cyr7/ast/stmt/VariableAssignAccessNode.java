@@ -12,7 +12,7 @@ import java.util.Optional;
  * Represents the [identifier] in a Variable Assignment, i.e. moo = 3 would have
  * moo represented by a VariableAssignAccessNode
  */
-public class VariableAssignAccessNode extends AssignAccessNode {
+public final class VariableAssignAccessNode extends AssignAccessNode {
 
 	public final String identifier;
 	
