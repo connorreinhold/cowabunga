@@ -196,22 +196,14 @@ class TestInterfaceFiles {
             }
             returnTypes.add(type);
         }
-        
-        StringBuffer prgmString = new StringBuffer("main():");
-        prgmString.append(Arrays.asList(arrayDimensions).stream()
-            .map(d -> {
-                StringBuffer typeString = new StringBuffer("int");
-                for (int i = 0; i < d; i++) {
-                    typeString.append("[]");
-                }
-                return typeString.toString();
-            }).collect(Collectors.joining(", ")));
-        
+
         function = new FunctionHeaderDeclNode(null, "main", args, returnTypes);
         functions = new LinkedList<>();
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
-        prgm = new StringReader(prgmString.toString());
+        String prgmString = "main():" + Arrays.stream(arrayDimensions)
+            .map(d -> "int" + "[]".repeat(Math.max(0, d))).collect(Collectors.joining(", "));
+        prgm = new StringReader(prgmString);
         parser = new XiParser(new MultiFileLexer(prgm, true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;

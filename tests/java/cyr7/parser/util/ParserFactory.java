@@ -18,8 +18,7 @@ public class ParserFactory {
     static public XiParser make(String contents, boolean isIxi)
             throws Exception {
         MyLexer lexer = new MultiFileLexer(new StringReader(contents), isIxi);
-        XiParser parser = new XiParser(lexer, new ComplexSymbolFactory());
-        return parser;
+        return new XiParser(lexer, new ComplexSymbolFactory());
     }
 
     public static List<StmtNode> parseStatement(String stmt) throws Exception {
