@@ -6,6 +6,7 @@ import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -52,7 +53,8 @@ public class ArrayAssignAccessNode extends AssignAccessNode {
     @Override
     public OrdinaryType typeCheck(Context c) throws SemanticException {
         OrdinaryType type = this.node.typeCheck(c);
-        if (!index.typeCheck(c).equals(PrimitiveType.INT)) {
+        if (!TypeCheckUtil.checkTypeEquality(index.typeCheck(c),
+                PrimitiveType.INT)) {
         	throw new SemanticException("Index into array must be an int");
 		}
         return new ArrayType(type);

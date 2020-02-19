@@ -5,15 +5,17 @@ import cyr7.exceptions.SemanticException;
 import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
  * Node that represents the expression [ExprNode left] && [ExprNode right]
  */
-public class AndExprNode extends BinExprNode{
+public class AndExprNode extends BinExprNode {
 
-    public AndExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
+    public AndExprNode(ComplexSymbolFactory.Location location, ExprNode left,
+            ExprNode right) {
         super(location, left, right);
     }
 
@@ -38,7 +40,10 @@ public class AndExprNode extends BinExprNode{
 
     @Override
     public ExpandedType typeCheck(Context c) throws SemanticException {
-        if (left.typeCheck(c) == PrimitiveType.BOOL && right.typeCheck(c) == PrimitiveType.BOOL) {
+        if (TypeCheckUtil.checkTypeEquality(left.typeCheck(c),
+                PrimitiveType.BOOL)
+                && TypeCheckUtil.checkTypeEquality(right.typeCheck(c),
+                        PrimitiveType.BOOL)) {
             return PrimitiveType.BOOL;
         }
         throw new SemanticException("Failed type check at AND");

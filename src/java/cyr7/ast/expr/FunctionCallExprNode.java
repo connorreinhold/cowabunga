@@ -6,19 +6,22 @@ import cyr7.util.Util;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Represents a call to a function (which is still an expression). Contains the identifier of the
- * function as well as a list of parameters. Ex: fib(4) would have identifier = fib and parameters = {4}
+ * Represents a call to a function (which is still an expression). Contains the
+ * identifier of the function as well as a list of parameters. Ex: fib(4) would
+ * have identifier = fib and parameters = {4}
  */
 public class FunctionCallExprNode extends ExprNode {
 
     public final String identifier;
     public final List<ExprNode> parameters;
 
-    public FunctionCallExprNode(ComplexSymbolFactory.Location location, String id, List<ExprNode> parameters) {
+    public FunctionCallExprNode(ComplexSymbolFactory.Location location,
+            String id, List<ExprNode> parameters) {
         super(location);
 
         assert id != null;
@@ -59,30 +62,34 @@ public class FunctionCallExprNode extends ExprNode {
             FunctionType function = optionalFn.get();
 
             if (function.input == UnitType.UNIT) {
-                if (this.parameters.isEmpty()) return function.output;
+                // Function requires no arguments
+                if (this.parameters.isEmpty())
+                    return function.output;
             } else if (function.input instanceof OrdinaryType) {
-                if (this.parameters.size() == 1 && this.parameters.get(0).typeCheck(c) == function.input) {
+                // Function requires one argument
+                if (this.parameters.size() == 1 && TypeCheckUtil
+                        .checkTypeEquality(this.parameters.get(0).typeCheck(c),
+                                function.input)) {
                     return function.output;
                 }
             } else if (function.input instanceof TupleType) {
-                TupleType paramTypes = (TupleType) function.input;
-
-                if (this.parameters.size() != paramTypes.elements.size()) {
-                    throw new SemanticException("Param Size Mismatch");
+                // Function requires multiple arguments
+                TupleType expected = (TupleType) function.input;
+                List<ExpandedType> mappedType = new LinkedList<>();
+                for (ExprNode e : this.parameters) {
+                    mappedType.add(e.typeCheck(c));
                 }
-
-                for (int i = 0; i < this.parameters.size(); i++) {
-                    if (paramTypes.elements.get(i) != this.parameters.get(i).typeCheck(c)) {
-                        throw new SemanticException("Param Type Mismatch");
-                    }
+                if (TypeCheckUtil.checkTypeEquality(new TupleType(mappedType),
+                        expected)) {
+                    return function.output;
+                } else {
+                    throw new SemanticException("Params differ from expected");
                 }
-
-                return function.output;
             }
 
-            throw new SemanticException("FUNCTION BAD");
+            throw new SemanticException("Function parameter failure");
         }
 
-        throw new SemanticException("FUNCTION DNE");
+        throw new SemanticException("Function does not exist in context");
     }
 }
