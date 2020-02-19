@@ -24,12 +24,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestFunctionDeclarations {
 
-    LinkedList<VarDeclStmtNode> args;
-    LinkedList<TypeExprNode> returnTypes;
-    FunctionHeaderDeclNode function;
-    LinkedList<FunctionHeaderDeclNode> functions;
     XiProgramNode expected;
-    StringReader prgm;
     XiParser parser;
     Object tree;
     String program;

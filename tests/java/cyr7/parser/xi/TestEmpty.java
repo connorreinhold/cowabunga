@@ -14,13 +14,8 @@ import java.util.LinkedList;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestEmpty {
-    
-    LinkedList<VarDeclStmtNode> args;
-    LinkedList<TypeExprNode> returnTypes;
-    FunctionHeaderDeclNode function;
-    LinkedList<FunctionHeaderDeclNode> functions;
+
     XiProgramNode expected;
-    StringReader prgm;
     XiParser parser;
     Object tree;
     
