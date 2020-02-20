@@ -30,9 +30,8 @@ final class SExpVisitor extends AbstractVisitor<Void> {
         this.printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
     }
 
-    public void flushAndClose() {
+    public void flush() {
         printer.flush();
-        printer.close();
     }
 
     @Override

@@ -6,6 +6,9 @@ myparser:
 
 cowabunga: myparser mylexer
 
+gradle.test: cowabunga
+	gradle test
+
 xth: xth.lexer xth.parser
 
 xth.lexer: xth.lexer.instr xth.lexer.cowa

@@ -21,10 +21,9 @@ public class test_JUNK {
 
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
             AbstractNode v = (AbstractNode) p.parse().value;
-            CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
-            v.prettyPrint(printer);
-            printer.flush();
-            printer.close();
+            SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
+            v.accept(visitor);
+            visitor.flush();
         } catch (ParserException e) {
             System.out.println(e.getMessage());
         }

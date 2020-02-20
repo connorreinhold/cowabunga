@@ -19,7 +19,7 @@ public class ParserUtil {
             AbstractNode node = (AbstractNode) p.parse().value;
             SExpVisitor visitor = new SExpVisitor(writer);
             node.accept(visitor);
-            visitor.flushAndClose();
+            visitor.flush();
         } catch (ParserException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
             writer.flush();
@@ -28,18 +28,16 @@ public class ParserUtil {
     }
 
     public static void printSExpr(AbstractNode node) {
-        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
-        node.prettyPrint(printer);
-        printer.flush();
-        printer.close();
+        SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
+        node.accept(visitor);
+        visitor.flush();
     }
 
     public static String toSExpr(AbstractNode node) {
         StringWriter writer = new StringWriter();
-        CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
-        node.prettyPrint(printer);
-        printer.flush();
-        printer.close();
+        SExpVisitor visitor = new SExpVisitor(new PrintWriter(writer));
+        node.accept(visitor);
+        visitor.flush();
         return writer.toString().trim();
     }
 
