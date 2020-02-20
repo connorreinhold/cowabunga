@@ -20,9 +20,9 @@ import java.util.Optional;
  */
 public final class IfElseStmtNode extends StmtNode {
 
-    final ExprNode guard;
-    final StmtNode ifBlock;
-    final Optional<StmtNode> elseBlock;
+    public final ExprNode guard;
+    public final StmtNode ifBlock;
+    public final Optional<StmtNode> elseBlock;
 
     public IfElseStmtNode(ComplexSymbolFactory.Location location,
             ExprNode guard, StmtNode ifBlock, Optional<StmtNode> elseBlock) {

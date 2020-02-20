@@ -285,7 +285,7 @@ class TextExpr {
             new AddExprNode(null,
                 new LiteralIntExprNode(null, "2"),
                 new VariableAccessExprNode(null, "b"))));
-        expected = new LengthCallExprNode(null, params);
+        expected = new FunctionCallExprNode(null, "length", params);
 
         assertEquals(parsed, expected);
     }

@@ -13,7 +13,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public final class LiteralIntExprNode extends ExprNode {
 
-    final String contents;
+    public final String contents;
 
     public LiteralIntExprNode(ComplexSymbolFactory.Location location, String contents) {
         super(location);

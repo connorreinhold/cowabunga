@@ -16,15 +16,16 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public final class FunctionHeaderDeclNode extends AbstractNode {
 
-    final String identifier;
-    final List<VarDeclNode> args;
-    final List<TypeExprNode> returnTypes;
+    public final String identifier;
+    public final List<VarDeclNode> args;
+    public final List<TypeExprNode> returnTypes;
 
     public FunctionHeaderDeclNode(ComplexSymbolFactory.Location location,
                                   String id,
                                   List<VarDeclNode> args,
                                   List<TypeExprNode> returnTypes) {
         super(location);
+
 
         assert id != null;
         assert args != null;

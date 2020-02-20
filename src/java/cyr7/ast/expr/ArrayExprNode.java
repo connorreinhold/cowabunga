@@ -45,7 +45,6 @@ public final class ArrayExprNode extends ExprNode {
         }
 
         printer.endList();
-
     }
 
     @Override

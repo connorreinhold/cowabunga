@@ -18,8 +18,8 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public final class ArrayAccessExprNode extends ExprAccessNode {
 
-    final ExprAccessNode accessNode;
-    final ExprNode index;
+    public final ExprAccessNode accessNode;
+    public final ExprNode index;
 
     public ArrayAccessExprNode(ComplexSymbolFactory.Location location,
             ExprAccessNode accessNode, ExprNode index) {

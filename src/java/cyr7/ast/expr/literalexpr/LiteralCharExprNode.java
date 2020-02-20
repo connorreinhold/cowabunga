@@ -14,7 +14,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public final class LiteralCharExprNode extends ExprNode {
 
-    final String contents;
+    public final String contents;
 
     public LiteralCharExprNode(ComplexSymbolFactory.Location location, String contents) {
         super(location);

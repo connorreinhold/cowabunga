@@ -429,7 +429,7 @@ FunctionCall ::=
             RESULT = new FunctionCallExprNode(idxleft, id, l);
         :} %prec FUNCTION_CALL
     | LENGTH:len L_PAREN ArgParamList:l R_PAREN {:
-            RESULT = new LengthCallExprNode(lenxleft, l);
+            RESULT = new FunctionCallExprNode(lenxleft, "length", l);
         :} %prec FUNCTION_CALL
     ;
 
