@@ -31,11 +31,6 @@ public final class LiteralStringExprNode extends ExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.printAtom("\"" + Util.unescapeString(contents) + "\"");
-    }
-    
-    @Override
     public boolean equals(Object o) {
         if (o instanceof LiteralStringExprNode) {
             LiteralStringExprNode oNode = (LiteralStringExprNode) o;

@@ -13,7 +13,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 /**
  * Represents the integer negation expression: -[ExprNode expr]
  */
-public class IntNegExprNode extends UnaryExprNode {
+public final class IntNegExprNode extends UnaryExprNode {
 
     public IntNegExprNode(ComplexSymbolFactory.Location location,
             ExprNode expr) {
@@ -23,17 +23,6 @@ public class IntNegExprNode extends UnaryExprNode {
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("-");
-
-        expr.prettyPrint(printer);
-
-        printer.endList();
     }
 
     public boolean equals(Object o) {

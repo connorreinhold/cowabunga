@@ -38,13 +38,4 @@ public final class ExprStmtNode extends StmtNode {
         return false;
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("=");
-        printer.printAtom("_");
-        expr.prettyPrint(printer);
-        printer.endList();
-    }
-
 }

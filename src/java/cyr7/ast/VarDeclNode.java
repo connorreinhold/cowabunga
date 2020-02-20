@@ -39,12 +39,4 @@ public final class VarDeclNode extends AbstractNode {
             typeExpr.equals(that.typeExpr);
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom(identifier);
-        typeExpr.prettyPrint(printer);
-        printer.endList();
-    }
-
 }

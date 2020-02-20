@@ -27,11 +27,6 @@ public final class LiteralBoolExprNode extends ExprNode {
 		return visitor.visit(this);
 	}
 
-	@Override
-	public void prettyPrint(SExpPrinter printer) {
-		printer.printAtom(String.valueOf(contents));
-	}
-	
     @Override
     public boolean equals(Object o) {
         if (o instanceof LiteralBoolExprNode) {

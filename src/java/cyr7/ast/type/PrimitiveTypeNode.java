@@ -22,11 +22,6 @@ public final class PrimitiveTypeNode extends TypeExprNode {
         return visitor.visit(this);
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.printAtom(type.toString().toLowerCase());
-    }
-    
     public boolean equals(Object o) {
         if (o instanceof PrimitiveTypeNode) {
             PrimitiveTypeNode oNode = (PrimitiveTypeNode)o;

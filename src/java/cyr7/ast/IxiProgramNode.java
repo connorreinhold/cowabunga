@@ -19,18 +19,6 @@ public final class IxiProgramNode extends AbstractNode {
         this.functionDeclarations = Util.immutableCopy(lst);
     }
 
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("");
-        printer.startUnifiedList();
-        this.functionDeclarations.forEach(f -> {
-            f.prettyPrint(printer);
-        });
-        printer.endList();
-        printer.printAtom("");
-        printer.endList();
-    }
-    
     @Override
     public boolean equals(Object o) {
     	if (o instanceof IxiProgramNode) {

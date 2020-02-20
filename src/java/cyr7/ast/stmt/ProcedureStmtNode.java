@@ -33,11 +33,6 @@ public final class ProcedureStmtNode extends StmtNode {
         return visitor.visit(this);
     }
 
-	@Override
-	public void prettyPrint(SExpPrinter printer) {
-		this.procedureCall.prettyPrint(printer);
-	}
-	
     public boolean equals(Object o) {
         if (o instanceof ProcedureStmtNode) {
             ProcedureStmtNode oNode = (ProcedureStmtNode)o;

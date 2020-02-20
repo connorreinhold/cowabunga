@@ -31,11 +31,6 @@ public final class VariableAccessExprNode extends ExprAccessNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.printAtom(identifier);
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof VariableAccessExprNode) {
             VariableAccessExprNode oNode = (VariableAccessExprNode) o;

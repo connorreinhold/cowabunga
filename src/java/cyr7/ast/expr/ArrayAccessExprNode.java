@@ -38,17 +38,6 @@ public final class ArrayAccessExprNode extends ExprAccessNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("[]");
-        accessNode.prettyPrint(printer);
-        index.prettyPrint(printer);
-
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof ArrayAccessExprNode) {
             ArrayAccessExprNode oNode = (ArrayAccessExprNode) o;

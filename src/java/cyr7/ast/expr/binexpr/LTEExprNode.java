@@ -26,15 +26,6 @@ public final class LTEExprNode extends BinExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("<=");
-        left.prettyPrint(printer);
-        right.prettyPrint(printer);
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof LTEExprNode) {
             LTEExprNode oNode = (LTEExprNode) o;

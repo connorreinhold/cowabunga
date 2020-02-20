@@ -44,16 +44,6 @@ public final class AssignmentStmtNode extends StmtNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("=");
-        node.prettyPrint(printer);
-        value.prettyPrint(printer);
-        printer.endList();
-
-    }
-
-    @Override
     public ResultType typeCheck(Context c)
             throws SemanticException, UnbalancedPushPopException {
         OrdinaryType lhsType = node.typeCheck(c);

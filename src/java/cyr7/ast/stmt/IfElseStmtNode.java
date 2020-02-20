@@ -53,21 +53,6 @@ public final class IfElseStmtNode extends StmtNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("if");
-
-        guard.prettyPrint(printer);
-
-        ifBlock.prettyPrint(printer);
-
-        elseBlock.ifPresent(stmtNode -> stmtNode.prettyPrint(printer));
-
-        printer.endList();
-    }
-
-    @Override
     public ResultType typeCheck(Context c)
             throws SemanticException, UnbalancedPushPopException {
         c.push();

@@ -40,19 +40,6 @@ public final class TypeExprArrayNode extends TypeExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("[]");
-
-        child.prettyPrint(printer);
-
-        size.ifPresent(exprNode -> exprNode.prettyPrint(printer));
-
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof TypeExprArrayNode) {
             TypeExprArrayNode oNode = (TypeExprArrayNode) o;

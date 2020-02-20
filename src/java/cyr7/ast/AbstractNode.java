@@ -22,9 +22,4 @@ public abstract class AbstractNode {
 
     public abstract <T> T accept(AbstractVisitor<T> visitor);
     
-    /**
-     * @param printer - the printer object to output s-expressions to
-     */
-    public abstract void prettyPrint(SExpPrinter printer);
-
 }

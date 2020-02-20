@@ -47,12 +47,4 @@ public final class VarInitStmtNode extends StmtNode {
             Objects.equals(initializer, that.initializer);
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("=");
-        varDecl.prettyPrint(printer);
-        initializer.prettyPrint(printer);
-        printer.endList();
-    }
 }

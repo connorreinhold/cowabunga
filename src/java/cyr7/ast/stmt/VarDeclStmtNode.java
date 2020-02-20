@@ -41,11 +41,6 @@ public final class VarDeclStmtNode extends StmtNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        varDecl.prettyPrint(printer);
-    }
-
-    @Override
     public ResultType typeCheck(Context c) throws SemanticException,
             UnbalancedPushPopException {
         if (c.contains(varDecl.identifier)) {

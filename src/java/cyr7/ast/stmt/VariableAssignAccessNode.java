@@ -31,11 +31,6 @@ public final class VariableAssignAccessNode extends AssignAccessNode {
         return visitor.visit(this);
     }
 
-    @Override
-	public void prettyPrint(SExpPrinter printer) {
-		printer.printAtom(identifier);
-	}
-
     public boolean equals(Object o) {
         if (o instanceof VariableAssignAccessNode) {
             VariableAssignAccessNode oNode = (VariableAssignAccessNode)o;

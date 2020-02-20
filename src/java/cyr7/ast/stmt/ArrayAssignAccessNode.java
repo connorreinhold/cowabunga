@@ -47,15 +47,6 @@ public final class ArrayAssignAccessNode extends AssignAccessNode {
         return false;
     }
 
-	@Override
-	public void prettyPrint(SExpPrinter printer) {
-		printer.startList();
-		printer.printAtom("[]");
-		node.prettyPrint(printer);
-		index.prettyPrint(printer);
-		printer.endList();
-	}
-
     @Override
     public OrdinaryType typeCheck(Context c) throws SemanticException {
         OrdinaryType type = this.node.typeCheck(c);

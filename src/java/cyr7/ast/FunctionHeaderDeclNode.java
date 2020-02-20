@@ -42,26 +42,6 @@ public final class FunctionHeaderDeclNode extends AbstractNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startUnifiedList();
-
-        printer.printAtom(this.identifier);
-
-        printer.startList();
-        args.forEach(a -> {
-            a.prettyPrint(printer);
-        });
-        printer.endList();
-
-        printer.startList();
-        returnTypes.forEach(r -> {
-            r.prettyPrint(printer);
-        });
-        printer.endList();
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof FunctionHeaderDeclNode) {
             FunctionHeaderDeclNode oNode = (FunctionHeaderDeclNode) o;

@@ -37,16 +37,6 @@ public final class ReturnStmtNode extends StmtNode {
         return visitor.visit(this);
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("return");
-        for (ExprNode expr : exprs) {
-            expr.prettyPrint(printer);
-        }
-        printer.endList();
-    }
-    
     public boolean equals(Object o) {
         if (o instanceof ReturnStmtNode) {
             ReturnStmtNode oNode = (ReturnStmtNode)o;

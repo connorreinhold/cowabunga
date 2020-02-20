@@ -38,19 +38,6 @@ public final class FunctionCallExprNode extends ExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom(identifier);
-
-        for (ExprNode node : parameters) {
-            node.prettyPrint(printer);
-        }
-
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof FunctionCallExprNode) {
             FunctionCallExprNode oNode = (FunctionCallExprNode) o;

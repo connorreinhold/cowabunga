@@ -37,17 +37,6 @@ public final class ArrayExprNode extends ExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        for (ExprNode e : this.arrayVals) {
-            e.prettyPrint(printer);
-        }
-
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof ArrayExprNode) {
             ArrayExprNode oNode = (ArrayExprNode) o;

@@ -35,15 +35,6 @@ public final class WhileStmtNode extends StmtNode {
         return visitor.visit(this);
     }
 
-    @Override
-	public void prettyPrint(SExpPrinter printer) {
-		printer.startList();
-		printer.printAtom("while");
-		guard.prettyPrint(printer);
-		block.prettyPrint(printer);
-		printer.endList();
-	}
-	
     public boolean equals(Object o) {
         if (o instanceof WhileStmtNode) {
             WhileStmtNode oNode = (WhileStmtNode)o;

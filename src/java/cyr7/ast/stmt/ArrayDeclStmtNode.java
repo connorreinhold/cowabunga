@@ -47,12 +47,4 @@ public final class ArrayDeclStmtNode extends StmtNode {
             type.equals(that.type);
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom(identifier);
-        type.prettyPrint(printer);
-        printer.endList();
-    }
-
 }

@@ -42,17 +42,6 @@ public final class BlockStmtNode extends StmtNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        for (StmtNode statement : statements) {
-            statement.prettyPrint(printer);
-        }
-
-        printer.endList();
-    }
-
-    @Override
     public ResultType typeCheck(Context c) throws UnbalancedPushPopException, SemanticException {        
         c.push();
         Iterator<StmtNode> stmtIterator = statements.iterator();

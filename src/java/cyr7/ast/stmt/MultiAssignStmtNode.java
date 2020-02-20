@@ -57,25 +57,4 @@ public final class MultiAssignStmtNode extends StmtNode {
             initializer.equals(that.initializer);
     }
 
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("=");
-
-        printer.startList();
-        for (Optional<VarDeclNode> n : varDecls) {
-            if (n.isPresent()) {
-                n.get().prettyPrint(printer);
-            } else {
-                printer.printAtom("_");
-            }
-        }
-        printer.endList();
-
-        initializer.prettyPrint(printer);
-
-        printer.endList();
-    }
-
 }

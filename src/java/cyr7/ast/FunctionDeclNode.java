@@ -32,29 +32,6 @@ public final class FunctionDeclNode extends AbstractNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom(header.identifier);
-
-        printer.startList();
-        for (VarDeclNode argDecl : header.args) {
-            argDecl.prettyPrint(printer);
-        }
-        printer.endList();
-
-        printer.startList();
-        for (TypeExprNode typeNode : header.returnTypes) {
-            typeNode.prettyPrint(printer);
-        }
-        printer.endList();
-
-        block.prettyPrint(printer);
-
-        printer.endList();
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (o instanceof FunctionDeclNode) {
             FunctionDeclNode oNode = (FunctionDeclNode) o;
