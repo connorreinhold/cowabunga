@@ -10,6 +10,7 @@ import cyr7.semantics.TupleType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.UnitType;
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -32,15 +33,10 @@ public final class ReturnStmtNode extends StmtNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("return");
-        for (ExprNode expr : exprs) {
-            expr.prettyPrint(printer);
-        }
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
-    
+
     public boolean equals(Object o) {
         if (o instanceof ReturnStmtNode) {
             ReturnStmtNode oNode = (ReturnStmtNode)o;

@@ -8,6 +8,7 @@ import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -17,7 +18,7 @@ import java.util.List;
  * Represents an Array Expression: i.e. {1,2,3,} with a list of ExprNode for
  * values
  */
-public class ArrayExprNode extends ExprNode {
+public final class ArrayExprNode extends ExprNode {
 
     public final List<ExprNode> arrayVals;
 
@@ -31,15 +32,8 @@ public class ArrayExprNode extends ExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        for (ExprNode e : this.arrayVals) {
-            e.prettyPrint(printer);
-        }
-
-        printer.endList();
-
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

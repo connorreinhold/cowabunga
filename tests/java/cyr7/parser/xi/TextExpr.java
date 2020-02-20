@@ -11,7 +11,6 @@ import cyr7.ast.expr.ArrayAccessExprNode;
 import cyr7.ast.expr.ArrayExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.LengthCallExprNode;
 import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
@@ -286,7 +285,7 @@ class TextExpr {
             new AddExprNode(null,
                 new LiteralIntExprNode(null, "2"),
                 new VariableAccessExprNode(null, "b"))));
-        expected = new LengthCallExprNode(null, params);
+        expected = new FunctionCallExprNode(null, "length", params);
 
         assertEquals(parsed, expected);
     }

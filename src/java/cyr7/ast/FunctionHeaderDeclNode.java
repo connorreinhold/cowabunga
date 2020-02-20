@@ -5,6 +5,7 @@ import java.util.List;
 import cyr7.ast.stmt.VarDeclStmtNode;
 import cyr7.ast.type.TypeExprNode;
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -13,17 +14,18 @@ import java_cup.runtime.ComplexSymbolFactory;
  * function arguments,
  * and a list representing the type(s) the function returns
  */
-public class FunctionHeaderDeclNode extends AbstractNode {
+public final class FunctionHeaderDeclNode extends AbstractNode {
 
-    final String identifier;
-    final List<VarDeclNode> args;
-    final List<TypeExprNode> returnTypes;
+    public final String identifier;
+    public final List<VarDeclNode> args;
+    public final List<TypeExprNode> returnTypes;
 
     public FunctionHeaderDeclNode(ComplexSymbolFactory.Location location,
                                   String id,
                                   List<VarDeclNode> args,
                                   List<TypeExprNode> returnTypes) {
         super(location);
+
 
         assert id != null;
         assert args != null;
@@ -35,23 +37,8 @@ public class FunctionHeaderDeclNode extends AbstractNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startUnifiedList();
-
-        printer.printAtom(this.identifier);
-
-        printer.startList();
-        args.forEach(a -> {
-            a.prettyPrint(printer);
-        });
-        printer.endList();
-
-        printer.startList();
-        returnTypes.forEach(r -> {
-            r.prettyPrint(printer);
-        });
-        printer.endList();
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

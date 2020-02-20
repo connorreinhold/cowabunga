@@ -3,13 +3,14 @@ package cyr7.ast;
 import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.ast.stmt.VarDeclStmtNode;
 import cyr7.ast.type.TypeExprNode;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /** 
  * Represents a Function object in XI files with a [header] and function body [block]
  */
-public class FunctionDeclNode extends AbstractNode {
+public final class FunctionDeclNode extends AbstractNode {
 
     public final FunctionHeaderDeclNode header;
     public final BlockStmtNode block;
@@ -25,35 +26,9 @@ public class FunctionDeclNode extends AbstractNode {
         this.block = block;
     }
 
-    /**
-     * 
-     * @return true if the function does not return a value, false otherwise
-     */
-    public boolean isProcedure() {
-        return header.returnTypes.isEmpty();
-    }
-
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom(header.identifier);
-
-        printer.startList();
-        for (VarDeclNode argDecl : header.args) {
-            argDecl.prettyPrint(printer);
-        }
-        printer.endList();
-
-        printer.startList();
-        for (TypeExprNode typeNode : header.returnTypes) {
-            typeNode.prettyPrint(printer);
-        }
-        printer.endList();
-
-        block.prettyPrint(printer);
-
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

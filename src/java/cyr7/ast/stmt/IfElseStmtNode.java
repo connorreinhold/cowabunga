@@ -8,6 +8,7 @@ import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ResultType;
 import cyr7.semantics.TypeCheckUtil;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -19,9 +20,9 @@ import java.util.Optional;
  */
 public final class IfElseStmtNode extends StmtNode {
 
-    final ExprNode guard;
-    final StmtNode ifBlock;
-    final Optional<StmtNode> elseBlock;
+    public final ExprNode guard;
+    public final StmtNode ifBlock;
+    public final Optional<StmtNode> elseBlock;
 
     public IfElseStmtNode(ComplexSymbolFactory.Location location,
             ExprNode guard, StmtNode ifBlock, Optional<StmtNode> elseBlock) {
@@ -36,6 +37,11 @@ public final class IfElseStmtNode extends StmtNode {
         this.elseBlock = elseBlock;
     }
 
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
     public boolean equals(Object o) {
         if (o instanceof IfElseStmtNode) {
             IfElseStmtNode oNode = (IfElseStmtNode) o;
@@ -44,21 +50,6 @@ public final class IfElseStmtNode extends StmtNode {
                     && this.elseBlock.equals(oNode.elseBlock);
         }
         return false;
-    }
-
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("if");
-
-        guard.prettyPrint(printer);
-
-        ifBlock.prettyPrint(printer);
-
-        elseBlock.ifPresent(stmtNode -> stmtNode.prettyPrint(printer));
-
-        printer.endList();
     }
 
     @Override

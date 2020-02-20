@@ -7,6 +7,7 @@ import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
 import cyr7.semantics.ResultType;
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -37,6 +38,11 @@ public final class MultiAssignStmtNode extends StmtNode {
     }
 
     @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public ResultType typeCheck(Context c) throws SemanticException, UnbalancedPushPopException {
         // TODO:
         return null;
@@ -49,27 +55,6 @@ public final class MultiAssignStmtNode extends StmtNode {
         MultiAssignStmtNode that = (MultiAssignStmtNode) o;
         return varDecls.equals(that.varDecls) &&
             initializer.equals(that.initializer);
-    }
-
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("=");
-
-        printer.startList();
-        for (Optional<VarDeclNode> n : varDecls) {
-            if (n.isPresent()) {
-                n.get().prettyPrint(printer);
-            } else {
-                printer.printAtom("_");
-            }
-        }
-        printer.endList();
-
-        initializer.prettyPrint(printer);
-
-        printer.endList();
     }
 
 }

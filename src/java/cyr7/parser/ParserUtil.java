@@ -17,10 +17,9 @@ public class ParserUtil {
         try {
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
             AbstractNode node = (AbstractNode) p.parse().value;
-            CodeWriterSExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
-            node.prettyPrint(printer);
-            printer.flush();
-            printer.close();
+            SExpVisitor visitor = new SExpVisitor(writer);
+            node.accept(visitor);
+            visitor.flushAndClose();
         } catch (ParserException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
             writer.flush();

@@ -1,6 +1,7 @@
 package cyr7.ast;
 
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -10,7 +11,8 @@ import java.util.List;
  * Represents an XI program, containing a list of use statements and a list
  * of functions
  */
-public class XiProgramNode extends AbstractNode {
+public final class XiProgramNode extends AbstractNode {
+
     public final List<UseNode> uses;
     public final List<FunctionDeclNode> functions;
 
@@ -26,22 +28,8 @@ public class XiProgramNode extends AbstractNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.startUnifiedList();
-        for (UseNode use : uses) {
-            use.prettyPrint(printer);
-        }
-        printer.endList();
-
-        printer.startUnifiedList();
-        for (FunctionDeclNode functionDeclNode : functions) {
-            functionDeclNode.prettyPrint(printer);
-        }
-        printer.endList();
-
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

@@ -8,13 +8,14 @@ import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.OrdinaryType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
  * Node that represents the expression [ExprNode left] + [ExprNode right]
  */
-public class AddExprNode extends BinExprNode {
+public final class AddExprNode extends BinExprNode {
 
     public AddExprNode(ComplexSymbolFactory.Location location, ExprNode left,
             ExprNode right) {
@@ -22,12 +23,8 @@ public class AddExprNode extends BinExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("+");
-        left.prettyPrint(printer);
-        right.prettyPrint(printer);
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

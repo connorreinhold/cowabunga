@@ -7,6 +7,7 @@ import cyr7.semantics.Context;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -30,8 +31,13 @@ public final class ArrayAssignAccessNode extends AssignAccessNode {
 		this.node = node;
 		this.index = index;
 	}
-	
-    public boolean equals(Object o) {
+
+	@Override
+	public <T> T accept(AbstractVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
+
+	public boolean equals(Object o) {
         if (o instanceof ArrayAssignAccessNode) {
             ArrayAssignAccessNode oNode = (ArrayAssignAccessNode) o;
             return this.node.equals(oNode.node)
@@ -40,15 +46,6 @@ public final class ArrayAssignAccessNode extends AssignAccessNode {
         }
         return false;
     }
-
-	@Override
-	public void prettyPrint(SExpPrinter printer) {
-		printer.startList();
-		printer.printAtom("[]");
-		node.prettyPrint(printer);
-		index.prettyPrint(printer);
-		printer.endList();
-	}
 
     @Override
     public OrdinaryType typeCheck(Context c) throws SemanticException {

@@ -3,6 +3,7 @@ package cyr7.ast.expr;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.*;
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -15,7 +16,7 @@ import java.util.Optional;
  * identifier of the function as well as a list of parameters. Ex: fib(4) would
  * have identifier = fib and parameters = {4}
  */
-public class FunctionCallExprNode extends ExprNode {
+public final class FunctionCallExprNode extends ExprNode {
 
     public final String identifier;
     public final List<ExprNode> parameters;
@@ -32,16 +33,8 @@ public class FunctionCallExprNode extends ExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom(identifier);
-
-        for (ExprNode node : parameters) {
-            node.prettyPrint(printer);
-        }
-
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

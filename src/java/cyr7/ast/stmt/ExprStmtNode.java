@@ -5,6 +5,7 @@ import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
 import cyr7.semantics.ResultType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -23,6 +24,11 @@ public final class ExprStmtNode extends StmtNode {
     }
 
     @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public ResultType typeCheck(Context c) throws SemanticException, UnbalancedPushPopException {
         return null;
     }
@@ -30,15 +36,6 @@ public final class ExprStmtNode extends StmtNode {
     @Override
     public boolean equals(Object o) {
         return false;
-    }
-
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("=");
-        printer.printAtom("_");
-        expr.prettyPrint(printer);
-        printer.endList();
     }
 
 }

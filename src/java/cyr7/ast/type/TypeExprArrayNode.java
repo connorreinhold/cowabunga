@@ -5,6 +5,7 @@ import cyr7.exceptions.SemanticException;
 import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
 import cyr7.semantics.OrdinaryType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -34,16 +35,8 @@ public final class TypeExprArrayNode extends TypeExprNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-
-        printer.printAtom("[]");
-
-        child.prettyPrint(printer);
-
-        size.ifPresent(exprNode -> exprNode.prettyPrint(printer));
-
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

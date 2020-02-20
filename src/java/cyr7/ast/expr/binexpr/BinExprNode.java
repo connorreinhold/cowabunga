@@ -9,7 +9,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public abstract class BinExprNode extends ExprNode {
 
-    final ExprNode left, right;
+    public final ExprNode left, right;
 
     public BinExprNode(ComplexSymbolFactory.Location location, ExprNode left,
             ExprNode right) {

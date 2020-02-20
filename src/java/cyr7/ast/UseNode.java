@@ -1,5 +1,6 @@
 package cyr7.ast;
 
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -7,7 +8,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents a single [use] statement at the top of XI files. Contains the name of the interface 
  * that the XI file references
  */
-public class UseNode extends AbstractNode {
+public final class UseNode extends AbstractNode {
 
     public final String interfaceName;
 
@@ -20,11 +21,8 @@ public class UseNode extends AbstractNode {
     }
 
     @Override
-    public void prettyPrint(SExpPrinter printer) {
-        printer.startList();
-        printer.printAtom("use");
-        printer.printAtom(interfaceName);
-        printer.endList();
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

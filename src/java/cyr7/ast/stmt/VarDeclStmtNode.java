@@ -7,6 +7,7 @@ import cyr7.exceptions.UnbalancedPushPopException;
 import cyr7.semantics.Context;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -27,16 +28,16 @@ public final class VarDeclStmtNode extends StmtNode {
     }
 
     @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VarDeclStmtNode that = (VarDeclStmtNode) o;
         return Objects.equals(varDecl, that.varDecl);
-    }
-
-    @Override
-    public void prettyPrint(SExpPrinter printer) {
-        varDecl.prettyPrint(printer);
     }
 
     @Override
