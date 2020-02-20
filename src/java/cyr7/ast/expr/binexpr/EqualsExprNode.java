@@ -7,6 +7,7 @@ import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.ExpandedType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -14,11 +15,16 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Node that represents taking the equality operator on [ExprNode left] &
  * [ExprNode right]. Evaluates to true or false
  */
-public class EqualsExprNode extends BinExprNode {
+public final class EqualsExprNode extends BinExprNode {
 
     public EqualsExprNode(ComplexSymbolFactory.Location location, ExprNode left,
             ExprNode right) {
         super(location, left, right);
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

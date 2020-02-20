@@ -8,6 +8,7 @@ import cyr7.semantics.ExpandedType;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.ResultType;
 import cyr7.semantics.TypeCheckUtil;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -26,6 +27,11 @@ public final class AssignmentStmtNode extends StmtNode {
 
         this.node = node;
         this.value = value;
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     public boolean equals(Object o) {

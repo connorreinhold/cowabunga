@@ -6,6 +6,7 @@ import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -15,7 +16,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * ArrayAccessExprNode(ArrayAccessExprNode(VarAccessExprNode("arr"), 3), 4) =
  * arr[3][4]
  */
-public class ArrayAccessExprNode extends ExprAccessNode {
+public final class ArrayAccessExprNode extends ExprAccessNode {
 
     final ExprAccessNode accessNode;
     final ExprNode index;
@@ -29,6 +30,11 @@ public class ArrayAccessExprNode extends ExprAccessNode {
 
         this.accessNode = accessNode;
         this.index = index;
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

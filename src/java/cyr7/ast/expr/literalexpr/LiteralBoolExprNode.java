@@ -5,13 +5,14 @@ import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.semantics.Context;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ExpandedType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
  * Represents a boolean literal of either true or false
  */
-public class LiteralBoolExprNode extends ExprNode {
+public final class LiteralBoolExprNode extends ExprNode {
 
 	public final boolean contents;
 	
@@ -20,7 +21,12 @@ public class LiteralBoolExprNode extends ExprNode {
 
 		this.contents = contents;
 	}
-	
+
+	@Override
+	public <T> T accept(AbstractVisitor<T> visitor) {
+		return visitor.visit(this);
+	}
+
 	@Override
 	public void prettyPrint(SExpPrinter printer) {
 		printer.printAtom(String.valueOf(contents));

@@ -1,5 +1,6 @@
 package cyr7.ast;
 
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -18,6 +19,8 @@ public abstract class AbstractNode {
     }
 
     public abstract boolean equals(Object o);
+
+    public abstract <T> T accept(AbstractVisitor<T> visitor);
     
     /**
      * @param printer - the printer object to output s-expressions to

@@ -1,6 +1,7 @@
 package cyr7.ast;
 
 import cyr7.ast.type.TypeExprNode;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -22,6 +23,11 @@ public final class VarDeclNode extends AbstractNode {
 
         this.identifier = identifier;
         this.typeExpr = typeExpr;
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

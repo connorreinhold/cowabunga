@@ -10,6 +10,7 @@ import cyr7.semantics.TupleType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.UnitType;
 import cyr7.util.Util;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -29,6 +30,11 @@ public final class ReturnStmtNode extends StmtNode {
         assert exprs != null;
 
         this.exprs = Util.immutableCopy(exprs);
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

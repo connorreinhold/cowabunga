@@ -6,16 +6,22 @@ import cyr7.semantics.Context;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.ExpandedType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
  * Node that represents the expression [ExprNode left] * [ExprNode right]
  */
-public class MultExprNode extends BinExprNode {
+public final class MultExprNode extends BinExprNode {
 
     public MultExprNode(ComplexSymbolFactory.Location location, ExprNode left, ExprNode right) {
         super(location, left, right);
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override

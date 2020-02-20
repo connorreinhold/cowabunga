@@ -6,6 +6,7 @@ import cyr7.semantics.Context;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.TypeCheckUtil;
 import cyr7.semantics.ExpandedType;
+import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -14,11 +15,16 @@ import java_cup.runtime.ComplexSymbolFactory;
  * high multiplication operator returns the highest 64 bit of the 128 bit
  * multiplication operation
  */
-public class HighMultExprNode extends BinExprNode {
+public final class HighMultExprNode extends BinExprNode {
 
     public HighMultExprNode(ComplexSymbolFactory.Location location,
             ExprNode left, ExprNode right) {
         super(location, left, right);
+    }
+
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
     @Override
