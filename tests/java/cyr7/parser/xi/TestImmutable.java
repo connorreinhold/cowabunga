@@ -1,8 +1,8 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.FunctionDeclNode;
-import cyr7.ast.FunctionHeaderDeclNode;
-import cyr7.ast.XiProgramNode;
+import cyr7.ast.toplevel.FunctionDeclNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
+import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.stmt.BlockStmtNode;
 import org.junit.jupiter.api.Test;
 

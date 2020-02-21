@@ -1,14 +1,10 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.FunctionHeaderDeclNode;
-import cyr7.ast.XiProgramNode;
-import cyr7.ast.stmt.VarDeclStmtNode;
-import cyr7.ast.type.TypeExprNode;
+import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
-import java.io.StringReader;
 import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;

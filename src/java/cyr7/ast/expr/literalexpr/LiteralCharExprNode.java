@@ -38,8 +38,4 @@ public final class LiteralCharExprNode extends ExprNode {
         return false;    
     }
 
-    @Override
-    public ExpandedType typeCheck(Context c) {
-        return PrimitiveType.INT;
-    }
 }

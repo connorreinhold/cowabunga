@@ -36,8 +36,4 @@ public final class LiteralBoolExprNode extends ExprNode {
         return false;    
     }
 
-	@Override
-	public ExpandedType typeCheck(Context c) {
-		return PrimitiveType.BOOL;
-	}
 }

@@ -1,10 +1,8 @@
-package cyr7.ast;
+package cyr7.ast.toplevel;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.VarDeclStmtNode;
-import cyr7.ast.type.TypeExprNode;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /** 

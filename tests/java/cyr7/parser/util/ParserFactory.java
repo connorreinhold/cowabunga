@@ -1,9 +1,8 @@
 package cyr7.parser.util;
 
-import cyr7.ast.XiProgramNode;
+import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.stmt.StmtNode;
-import cyr7.ast.stmt.VarDeclStmtNode;
 import cyr7.ast.stmt.VarInitStmtNode;
 import java_cup.runtime.ComplexSymbolFactory;
 

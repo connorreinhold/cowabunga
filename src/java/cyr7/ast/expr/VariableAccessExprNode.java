@@ -39,13 +39,4 @@ public final class VariableAccessExprNode extends ExprAccessNode {
         return false;
     }
 
-    @Override
-    public ExpandedType typeCheck(Context c) throws SemanticException {
-        Optional<OrdinaryType> optionalVar = c.getVar(this.identifier);
-        if (optionalVar.isPresent()) {
-            return optionalVar.get();
-        }
-        throw new SemanticException("Variable does not exist in context");
-    }
-
 }

@@ -7,7 +7,12 @@ public class ArrayType implements OrdinaryType {
     public ArrayType(OrdinaryType child) {
         this.child = child;
     }
-    
+
+    @Override
+    public Type getType() {
+        return Type.ARRAY;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof ArrayType) {

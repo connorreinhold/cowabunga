@@ -6,10 +6,8 @@ import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.TypeCheckUtil;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.List;
@@ -45,23 +43,4 @@ public final class ArrayExprNode extends ExprNode {
         return false;
     }
 
-    @Override
-    public ExpandedType typeCheck(Context c) throws SemanticException {
-        if (arrayVals.size() == 0) {
-            return new ArrayType(PrimitiveType.ANY);
-        }
-
-        ExpandedType firstType = arrayVals.get(0).typeCheck(c);
-        if (firstType instanceof OrdinaryType) {
-            for (ExprNode value : arrayVals) {
-                // make sure all array elements have the same type as the first
-                if (!TypeCheckUtil.checkTypeEquality(value.typeCheck(c),
-                        firstType))
-                    throw new SemanticException("Invalid array element");
-            }
-            return new ArrayType((OrdinaryType) firstType);
-        }
-
-        throw new SemanticException("Invalid array element");
-    }
 }

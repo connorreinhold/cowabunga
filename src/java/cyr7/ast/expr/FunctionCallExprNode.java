@@ -47,42 +47,4 @@ public final class FunctionCallExprNode extends ExprNode {
         return false;
     }
 
-    @Override
-    public ExpandedType typeCheck(Context c) throws SemanticException {
-        Optional<FunctionType> optionalFn = c.getFn(this.identifier);
-
-        if (optionalFn.isPresent()) {
-            FunctionType function = optionalFn.get();
-
-            if (function.input == UnitType.UNIT) {
-                // Function requires no arguments
-                if (this.parameters.isEmpty())
-                    return function.output;
-            } else if (function.input instanceof OrdinaryType) {
-                // Function requires one argument
-                if (this.parameters.size() == 1 && TypeCheckUtil
-                        .checkTypeEquality(this.parameters.get(0).typeCheck(c),
-                                function.input)) {
-                    return function.output;
-                }
-            } else if (function.input instanceof TupleType) {
-                // Function requires multiple arguments
-                TupleType expected = (TupleType) function.input;
-                List<ExpandedType> mappedType = new LinkedList<>();
-                for (ExprNode e : this.parameters) {
-                    mappedType.add(e.typeCheck(c));
-                }
-                if (TypeCheckUtil.checkTypeEquality(new TupleType(mappedType),
-                        expected)) {
-                    return function.output;
-                } else {
-                    throw new SemanticException("Params differ from expected");
-                }
-            }
-
-            throw new SemanticException("Function parameter failure");
-        }
-
-        throw new SemanticException("Function does not exist in context");
-    }
 }

@@ -39,9 +39,4 @@ public final class LiteralStringExprNode extends ExprNode {
         return false;    
     }
 
-    @Override
-    public ExpandedType typeCheck(Context c) {
-        return new ArrayType(PrimitiveType.INT);
-    }
-
 }

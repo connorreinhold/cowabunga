@@ -8,4 +8,5 @@ public class FunctionType {
 		this.input = input;
 		this.output = output;
 	}
+
 }

@@ -5,9 +5,7 @@ import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
 import cyr7.semantics.ExpandedType;
 import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.TypeCheckUtil;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 
 /**
@@ -47,16 +45,4 @@ public final class ArrayAccessExprNode extends ExprAccessNode {
         return false;
     }
 
-    @Override
-    public ExpandedType typeCheck(Context c) throws SemanticException {
-        if (TypeCheckUtil.checkTypeEquality(index.typeCheck(c),
-                PrimitiveType.INT)) {
-            ExpandedType accessNodeType = accessNode.typeCheck(c);
-            if (accessNodeType instanceof ArrayType) {
-                return ((ArrayType) accessNodeType).child;
-            }
-            throw new SemanticException("invalid access");
-        }
-        throw new SemanticException("index not an int");
-    }
 }

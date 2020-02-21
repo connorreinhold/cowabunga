@@ -11,7 +11,8 @@ import java.util.stream.Collectors;
 
 import cyr7.ast.*;
 import cyr7.ast.expr.ExprNode;
-import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
+import cyr7.ast.toplevel.IxiProgramNode;
 import cyr7.ast.type.TypeExprNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
