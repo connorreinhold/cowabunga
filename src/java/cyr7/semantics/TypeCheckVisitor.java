@@ -1,10 +1,10 @@
 package cyr7.semantics;
 
+import cyr7.ast.ArrayAccessNode;
 import cyr7.ast.VarDeclNode;
-import cyr7.ast.expr.ArrayAccessExprNode;
+import cyr7.ast.VariableAccessNode;
 import cyr7.ast.expr.ArrayExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -167,12 +167,33 @@ public class TypeCheckVisitor extends
         return null;
     }
 
-    // Statement
+    // Statement and Expr
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayAssignAccessNode n) {
-        return null;
+    public OneOfTwo<ExpandedType, ResultType> visit(ArrayAccessNode n) {
+        ExpandedType arrayType = n.index.accept(this).assertFirst();
+        ExpandedType indexType = n.index.accept(this).assertFirst();
+
+        if (arrayType.getType() == Type.ARRAY
+            && isSubtype(indexType, PrimitiveType.INT)) {
+            ArrayType actualArrayType = (ArrayType) arrayType;
+            return OneOfTwo.ofFirst(actualArrayType.child);
+        }
+
+        throw new SemanticException();
     }
+
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(VariableAccessNode n) {
+        Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
+        if (optionalVar.isPresent()) {
+            return OneOfTwo.ofFirst(optionalVar.get());
+        }
+
+        throw new SemanticException();
+    }
+
+    // Statement
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayDeclStmtNode n) {
@@ -220,11 +241,6 @@ public class TypeCheckVisitor extends
     }
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(VariableAssignAccessNode n) {
-        return null;
-    }
-
-    @Override
     public OneOfTwo<ExpandedType, ResultType> visit(VarInitStmtNode n) {
         return null;
     }
@@ -267,20 +283,6 @@ public class TypeCheckVisitor extends
         if (isSubtype(left, PrimitiveType.INT)
             && isSubtype(right, PrimitiveType.INT)) {
             return PrimitiveType.BOOL;
-        }
-
-        throw new SemanticException();
-    }
-
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayAccessExprNode n) {
-        ExpandedType arrayType = n.index.accept(this).assertFirst();
-        ExpandedType indexType = n.index.accept(this).assertFirst();
-
-        if (arrayType.getType() == Type.ARRAY
-            && isSubtype(indexType, PrimitiveType.INT)) {
-            ArrayType actualArrayType = (ArrayType) arrayType;
-            return OneOfTwo.ofFirst(actualArrayType.child);
         }
 
         throw new SemanticException();
@@ -353,16 +355,6 @@ public class TypeCheckVisitor extends
             } else {
                 throw new SemanticException();
             }
-        }
-
-        throw new SemanticException();
-    }
-
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(VariableAccessExprNode n) {
-        Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
-        if (optionalVar.isPresent()) {
-            return OneOfTwo.ofFirst(optionalVar.get());
         }
 
         throw new SemanticException();

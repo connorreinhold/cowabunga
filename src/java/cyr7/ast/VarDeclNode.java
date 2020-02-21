@@ -1,5 +1,7 @@
 package cyr7.ast;
 
+import cyr7.ast.expr.ExprNode;
+import cyr7.ast.stmt.StmtNode;
 import cyr7.ast.type.TypeExprNode;
 import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
@@ -9,7 +11,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * Represents a Variable Declaration, with a String [identifier] and a type [typeExpr] of the initialized
  * variable
  */
-public final class VarDeclNode extends AbstractNode {
+public final class VarDeclNode extends AbstractNode implements StmtNode, ExprNode {
 
     public final String identifier;
 

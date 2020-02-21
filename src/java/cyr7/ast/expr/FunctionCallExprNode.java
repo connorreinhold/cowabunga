@@ -1,5 +1,6 @@
 package cyr7.ast.expr;
 
+import cyr7.ast.AbstractNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.*;
 import cyr7.util.Util;
@@ -16,7 +17,7 @@ import java.util.Optional;
  * identifier of the function as well as a list of parameters. Ex: fib(4) would
  * have identifier = fib and parameters = {4}
  */
-public final class FunctionCallExprNode extends ExprNode {
+public final class FunctionCallExprNode extends AbstractNode implements ExprNode {
 
     public final String identifier;
     public final List<ExprNode> parameters;
