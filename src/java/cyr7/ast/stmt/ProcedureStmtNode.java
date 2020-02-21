@@ -15,15 +15,13 @@ import java_cup.runtime.ComplexSymbolFactory;
  * FunctionCallExprNode with return type unit.
  */
 public final class ProcedureStmtNode extends StmtNode {
-	public final FunctionCallExprNode procedureCall;
-
-	public ProcedureStmtNode(ComplexSymbolFactory.Location location,
-							 FunctionCallExprNode procedureCall) {
-		super(location);
-
-		assert procedureCall != null;
-
-		this.procedureCall = procedureCall;
+    
+    public final FunctionCallExprNode procedureCall;
+    public ProcedureStmtNode(ComplexSymbolFactory.Location location,
+            FunctionCallExprNode procedureCall) {
+        super(location);
+        assert procedureCall != null;
+        this.procedureCall = procedureCall;
 	}
 
     @Override

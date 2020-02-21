@@ -19,13 +19,12 @@ public final class WhileStmtNode extends StmtNode {
     public final StmtNode block;
 	
     public WhileStmtNode(ComplexSymbolFactory.Location location, ExprNode guard, StmtNode block) {
-    	super(location);
-
-    	assert guard != null;
-    	assert block != null;
-
-    	this.guard = guard;
-    	this.block = block;
+        super(location);
+        
+        assert guard != null;
+        assert block != null;
+        this.guard = guard;
+        this.block = block;
     }
 
     @Override

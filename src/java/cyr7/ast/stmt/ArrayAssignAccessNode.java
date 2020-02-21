@@ -16,26 +16,27 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  *      ArrayAssignAccessNode(VariableAssignAccessNode("arr"), 3), 4)
  */
 public final class ArrayAssignAccessNode extends AssignAccessNode {
-	public final AssignAccessNode node;
-	public final ExprNode index;
+
+    public final AssignAccessNode node;
+    public final ExprNode index;
 	
-	public ArrayAssignAccessNode(Location location, AssignAccessNode node, 
-	        ExprNode index) {
-		super(location);
+    public ArrayAssignAccessNode(Location location, AssignAccessNode node, 
+            ExprNode index) {
+        super(location);
 
-		assert node != null;
-		assert index != null;
+        assert node != null;
+        assert index != null;
 
-		this.node = node;
-		this.index = index;
-	}
+        this.node = node;
+        this.index = index;
+    }
+    
+    @Override
+    public <T> T accept(AbstractVisitor<T> visitor) {
+        return visitor.visit(this);
+    }
 
-	@Override
-	public <T> T accept(AbstractVisitor<T> visitor) {
-		return visitor.visit(this);
-	}
-
-	public boolean equals(Object o) {
+    public boolean equals(Object o) {
         if (o instanceof ArrayAssignAccessNode) {
             ArrayAssignAccessNode oNode = (ArrayAssignAccessNode) o;
             return this.node.equals(oNode.node)
@@ -51,7 +52,7 @@ public final class ArrayAssignAccessNode extends AssignAccessNode {
         if (!TypeCheckUtil.checkTypeEquality(index.typeCheck(c),
                 PrimitiveType.INT)) {
         	throw new SemanticException("Index into array must be an int");
-		}
+        }
         return new ArrayType(type);
     }
 

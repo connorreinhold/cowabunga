@@ -14,23 +14,21 @@ import java.util.Optional;
  * moo represented by a VariableAssignAccessNode
  */
 public final class VariableAssignAccessNode extends AssignAccessNode {
-
-	public final String identifier;
-	
-	public VariableAssignAccessNode(ComplexSymbolFactory.Location location,
-									String identifier) {
-		super(location);
-
-		assert identifier != null;
-
-		this.identifier = identifier;
-	}
-
+    
+    public final String identifier;
+    
+    public VariableAssignAccessNode(ComplexSymbolFactory.Location location,
+                                    String identifier) {
+        super(location);
+        assert identifier != null;
+        this.identifier = identifier;
+    }
+    
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
     }
-
+    
     public boolean equals(Object o) {
         if (o instanceof VariableAssignAccessNode) {
             VariableAssignAccessNode oNode = (VariableAssignAccessNode)o;
