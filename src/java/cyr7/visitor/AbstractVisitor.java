@@ -60,7 +60,7 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(GTExprNode n);
     abstract public T visit(HighMultExprNode n);
     abstract public T visit(LTEExprNode n);
-    public abstract T visit(LTExprNode n);
+    abstract public T visit(LTExprNode n);
     abstract public T visit(MultExprNode n);
     abstract public T visit(NotEqualsExprNode n);
     abstract public T visit(OrExprNode n);
