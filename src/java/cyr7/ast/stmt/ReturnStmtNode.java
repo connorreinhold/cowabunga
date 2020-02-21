@@ -44,38 +44,4 @@ public final class ReturnStmtNode extends AbstractNode implements StmtNode {
         return false;
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c) throws SemanticException,
-//            UnbalancedPushPopException {
-//        int numOfValues = exprs.size();
-//        Optional<ExpandedType> maybeTypes = c.getRet();
-//        assert(maybeTypes.isPresent());
-//        ExpandedType expected = maybeTypes.get();
-//        ExpandedType exprType;
-//
-//        switch (numOfValues) {
-//        case 0:
-//            if (expected.equals(UnitType.UNIT))
-//                return ResultType.VOID;
-//            break;
-//        case 1:
-//            exprType = exprs.get(0).typeCheck(c);
-//            if (expected.equals(exprType))
-//                return ResultType.VOID;
-//            break;
-//        default:
-//            List<ExpandedType> mappedType = new LinkedList<>();
-//            for (ExprNode e: exprs) {
-//                mappedType.add(e.typeCheck(c));
-//            }
-//            exprType = new TupleType(mappedType);
-//            if (TypeCheckUtil.checkTypeEquality(exprType, expected)) {
-//                return ResultType.VOID;
-//            }
-//            break;
-//        }
-//        throw new SemanticException("Return types do not match the function's "
-//                + "expected return types");
-//    }
-
 }

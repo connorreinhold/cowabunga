@@ -164,7 +164,7 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     public Void visit(ArrayAccessNode n) {
         printer.startList();
         printer.printAtom("[]");
-        n.node.accept(this);
+        n.child.accept(this);
         n.index.accept(this);
         printer.endList();
 
@@ -193,7 +193,7 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     public Void visit(AssignmentStmtNode n) {
         printer.startList();
         printer.printAtom("=");
-        n.node.accept(this);
+        n.access.accept(this);
         n.value.accept(this);
         printer.endList();
 

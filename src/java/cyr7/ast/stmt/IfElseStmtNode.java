@@ -51,30 +51,4 @@ public final class IfElseStmtNode extends AbstractNode implements StmtNode {
         return false;
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c)
-//            throws SemanticException, UnbalancedPushPopException {
-//        c.push();
-//        ExpandedType guardType = guard.typeCheck(c);
-//        c.pop();
-//        if (!TypeCheckUtil.checkTypeEquality(guardType,
-//                PrimitiveType.BOOL)) {
-//            throw new SemanticException(
-//                    "Guard expression does not evaluate to bool");
-//        } else {
-//            c.push();
-//            ResultType ifType = ifBlock.typeCheck(c);
-//            c.pop();
-//
-//            if (elseBlock.isPresent()) {
-//                c.push();
-//                ResultType elseType = elseBlock.get().typeCheck(c);
-//                c.pop();
-//                return ResultType.leastUpperBound(ifType, elseType);
-//            } else {
-//                return ifType;
-//            }
-//        }
-//    }
-
 }

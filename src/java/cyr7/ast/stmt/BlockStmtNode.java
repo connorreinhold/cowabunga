@@ -42,21 +42,4 @@ public final class BlockStmtNode extends AbstractNode implements StmtNode {
         return false;
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c) throws UnbalancedPushPopException, SemanticException {
-//        c.push();
-//        Iterator<StmtNode> stmtIterator = statements.iterator();
-//        while (stmtIterator.hasNext()) {
-//            StmtNode stmt = stmtIterator.next();
-//            ResultType type = stmt.typeCheck(c);
-//            if (stmtIterator.hasNext() && type == ResultType.VOID) {
-//                throw new SemanticException("Early void statement");
-//            } else {
-//                c.pop();
-//                return type;
-//            }
-//        }
-//        c.pop();
-//        return ResultType.UNIT;
-//    }
 }

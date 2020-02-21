@@ -43,12 +43,6 @@ public final class MultiAssignStmtNode extends AbstractNode implements StmtNode 
         return visitor.visit(this);
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c) throws SemanticException, UnbalancedPushPopException {
-//        // TODO:
-//        return null;
-//    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

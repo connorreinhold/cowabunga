@@ -8,17 +8,17 @@ import java.util.Objects;
 
 public final class ArrayAccessNode extends AbstractNode implements AccessNode {
 
-    public final AccessNode node;
+    public final AccessNode child;
     public final ExprNode index;
 
-    public ArrayAccessNode(ComplexSymbolFactory.Location location, AccessNode node,
+    public ArrayAccessNode(ComplexSymbolFactory.Location location, AccessNode child,
                                  ExprNode index) {
         super(location);
 
-        assert node != null;
+        assert child != null;
         assert index != null;
 
-        this.node = node;
+        this.child = child;
         this.index = index;
     }
 
@@ -32,7 +32,7 @@ public final class ArrayAccessNode extends AbstractNode implements AccessNode {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ArrayAccessNode that = (ArrayAccessNode) o;
-        return Objects.equals(node, that.node) &&
+        return Objects.equals(child, that.child) &&
             Objects.equals(index, that.index);
     }
 

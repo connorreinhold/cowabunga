@@ -38,16 +38,4 @@ public final class ProcedureStmtNode extends AbstractNode implements StmtNode {
         return false;
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c) throws SemanticException,
-//            UnbalancedPushPopException {
-//        ExpandedType type = procedureCall.typeCheck(c);
-//        if (TypeCheckUtil.checkTypeEquality(type, UnitType.UNIT)) {
-//            return ResultType.UNIT;
-//        } else {
-//            throw new SemanticException("Expected a procedure but found a "
-//                    + "function instead.");
-//        }
-//    }
-
 }

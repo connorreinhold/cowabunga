@@ -42,20 +42,4 @@ public final class WhileStmtNode extends AbstractNode implements StmtNode {
         return false;
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c) throws SemanticException,
-//            UnbalancedPushPopException {
-//        var guardType = guard.typeCheck(c);
-//        if (!TypeCheckUtil.checkTypeEquality(guardType, PrimitiveType.BOOL)) {
-//            throw new SemanticException("Guard expression does "
-//                    + "not evaluate to bool");
-//        }
-//
-//        c.push();
-//        block.typeCheck(c);
-//        c.pop();
-//
-//        return ResultType.UNIT;
-//    }
-
 }

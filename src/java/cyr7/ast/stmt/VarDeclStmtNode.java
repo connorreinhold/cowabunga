@@ -41,15 +41,4 @@ public final class VarDeclStmtNode extends AbstractNode implements StmtNode {
         return Objects.equals(varDecl, that.varDecl);
     }
 
-//    @Override
-//    public ResultType typeCheck(Context c) throws SemanticException,
-//            UnbalancedPushPopException {
-//        if (c.contains(varDecl.identifier)) {
-//            throw new SemanticException("Duplicate variable " + varDecl.identifier);
-//        }
-//        OrdinaryType type = varDecl.typeExpr.typeCheck(c);
-//        c.addVar(varDecl.identifier, type);
-//        return ResultType.UNIT;
-//    }
-
 }
