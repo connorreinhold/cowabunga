@@ -5,13 +5,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.LinkedList;
 import java.util.List;
 
+import cyr7.ast.ArrayAccessNode;
+import cyr7.ast.VariableAccessNode;
 import org.junit.jupiter.api.Test;
 
-import cyr7.ast.expr.ArrayAccessExprNode;
 import cyr7.ast.expr.ArrayExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -252,17 +252,17 @@ class TextExpr {
         ExprNode parsed = ParserFactory.parseExpr(expr);
         ExprNode expected =
             new AddExprNode(null,
-                new VariableAccessExprNode(null, "a"),
-                new VariableAccessExprNode(null, "b")
+                new VariableAccessNode(null, "a"),
+                new VariableAccessNode(null, "b")
             );
         assertEquals(parsed, expected);
 
         expr = "a[2][3][4]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new ArrayAccessExprNode(null,
-            new ArrayAccessExprNode(null,
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
+        expected = new ArrayAccessNode(null,
+            new ArrayAccessNode(null,
+                new ArrayAccessNode(null,
+                    new VariableAccessNode(null, "a"),
                     new LiteralIntExprNode(null, "2")),
                 new LiteralIntExprNode(null, "3")),
             new LiteralIntExprNode(null, "4"));
@@ -270,8 +270,8 @@ class TextExpr {
 
         expr = "abcdefghij[2+2]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new ArrayAccessExprNode(null,
-            new VariableAccessExprNode(null, "abcdefghij"),
+        expected = new ArrayAccessNode(null,
+            new VariableAccessNode(null, "abcdefghij"),
             new AddExprNode(null,
                 new LiteralIntExprNode(null, "2"),
                 new LiteralIntExprNode(null, "2")));
@@ -280,11 +280,11 @@ class TextExpr {
         expr = "length(a[2+b])";
         parsed = ParserFactory.parseExpr(expr);
         LinkedList<ExprNode> params = new LinkedList<>();
-        params.add(new ArrayAccessExprNode(null,
-            new VariableAccessExprNode(null, "a"),
+        params.add(new ArrayAccessNode(null,
+            new VariableAccessNode(null, "a"),
             new AddExprNode(null,
                 new LiteralIntExprNode(null, "2"),
-                new VariableAccessExprNode(null, "b"))));
+                new VariableAccessNode(null, "b"))));
         expected = new FunctionCallExprNode(null, "length", params);
 
         assertEquals(parsed, expected);
@@ -297,10 +297,10 @@ class TextExpr {
         ExprNode expected = new FunctionCallExprNode(null,
             "hello",
             List.of(new LiteralCharExprNode(null, "a"),
-                new VariableAccessExprNode(null, "b"),
+                new VariableAccessNode(null, "b"),
                 new LiteralIntExprNode(null, "3"),
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
+                new ArrayAccessNode(null,
+                    new VariableAccessNode(null, "a"),
                     new LiteralIntExprNode(null, "4")),
                 new LiteralStringExprNode(null, "hello")));
         assertEquals(parsed, expected);
@@ -310,16 +310,16 @@ class TextExpr {
         expected = new AddExprNode(null,
             new FunctionCallExprNode(null,
                 "a", List.of(new AddExprNode(null,
-                new VariableAccessExprNode(null, "b"),
+                new VariableAccessNode(null, "b"),
                 new LiteralIntExprNode(null, "4")))),
-            new HighMultExprNode(null, new ArrayAccessExprNode(null,
-                new VariableAccessExprNode(null, "b"),
-                new VariableAccessExprNode(null, "a")),
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
+            new HighMultExprNode(null, new ArrayAccessNode(null,
+                new VariableAccessNode(null, "b"),
+                new VariableAccessNode(null, "a")),
+                new ArrayAccessNode(null,
+                    new VariableAccessNode(null, "a"),
                     new AddExprNode(null,
-                        new VariableAccessExprNode(null, "b"),
-                        new VariableAccessExprNode(null, "a")))));
+                        new VariableAccessNode(null, "b"),
+                        new VariableAccessNode(null, "a")))));
         assertEquals(parsed, expected);
     }
 

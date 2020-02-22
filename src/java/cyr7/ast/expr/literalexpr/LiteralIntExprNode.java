@@ -1,5 +1,6 @@
 package cyr7.ast.expr.literalexpr;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.semantics.Context;
 import cyr7.semantics.PrimitiveType;
@@ -11,7 +12,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 /**
  * Represents an integer literal, Ex: [contents] = "20"
  */
-public final class LiteralIntExprNode extends ExprNode {
+public final class LiteralIntExprNode extends AbstractNode implements ExprNode {
 
     public final String contents;
 

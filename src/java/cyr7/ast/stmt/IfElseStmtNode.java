@@ -1,5 +1,6 @@
 package cyr7.ast.stmt;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
@@ -16,7 +17,7 @@ import java.util.Optional;
  * Represents an if/else statement. Contains [ExprNode guard], a body [ifBlock],
  * and an optional [elseBlock]
  */
-public final class IfElseStmtNode extends StmtNode {
+public final class IfElseStmtNode extends AbstractNode implements StmtNode {
 
     public final ExprNode guard;
     public final StmtNode ifBlock;
@@ -48,32 +49,6 @@ public final class IfElseStmtNode extends StmtNode {
                     && this.elseBlock.equals(oNode.elseBlock);
         }
         return false;
-    }
-
-    @Override
-    public ResultType typeCheck(Context c)
-            throws SemanticException, UnbalancedPushPopException {
-        c.push();
-        ExpandedType guardType = guard.typeCheck(c);
-        c.pop();
-        if (!TypeCheckUtil.checkTypeEquality(guardType,
-                PrimitiveType.BOOL)) {
-            throw new SemanticException(
-                    "Guard expression does not evaluate to bool");
-        } else {
-            c.push();
-            ResultType ifType = ifBlock.typeCheck(c);
-            c.pop();
-
-            if (elseBlock.isPresent()) {
-                c.push();
-                ResultType elseType = elseBlock.get().typeCheck(c);
-                c.pop();
-                return ResultType.leastUpperBound(ifType, elseType);
-            } else {
-                return ifType;
-            }
-        }
     }
 
 }

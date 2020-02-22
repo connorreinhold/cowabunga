@@ -161,15 +161,23 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(ArrayAssignAccessNode n) {
+    public Void visit(ArrayAccessNode n) {
         printer.startList();
         printer.printAtom("[]");
-        n.node.accept(this);
+        n.child.accept(this);
         n.index.accept(this);
         printer.endList();
 
         return null;
     }
+
+    @Override
+    public Void visit(VariableAccessNode n) {
+        printer.printAtom(n.identifier);
+
+        return null;
+    }
+
 
     @Override
     public Void visit(ArrayDeclStmtNode n) {
@@ -185,7 +193,7 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     public Void visit(AssignmentStmtNode n) {
         printer.startList();
         printer.printAtom("=");
-        n.node.accept(this);
+        n.access.accept(this);
         n.value.accept(this);
         printer.endList();
 
@@ -276,13 +284,6 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(VariableAssignAccessNode n) {
-        printer.printAtom(n.identifier);
-
-        return null;
-    }
-
-    @Override
     public Void visit(VarInitStmtNode n) {
         printer.startList();
         printer.printAtom("=");
@@ -299,19 +300,6 @@ final class SExpVisitor extends AbstractVisitor<Void> {
         printer.printAtom("while");
         n.guard.accept(this);
         n.block.accept(this);
-        printer.endList();
-
-        return null;
-    }
-
-    @Override
-    public Void visit(ArrayAccessExprNode n) {
-        printer.startList();
-
-        printer.printAtom("[]");
-        n.accessNode.accept(this);
-        n.index.accept(this);
-
         printer.endList();
 
         return null;
@@ -339,13 +327,6 @@ final class SExpVisitor extends AbstractVisitor<Void> {
         }
 
         printer.endList();
-
-        return null;
-    }
-
-    @Override
-    public Void visit(VariableAccessExprNode n) {
-        printer.printAtom(n.identifier);
 
         return null;
     }

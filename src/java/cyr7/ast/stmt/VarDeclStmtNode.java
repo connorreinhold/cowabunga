@@ -1,5 +1,6 @@
 package cyr7.ast.stmt;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.type.TypeExprNode;
 import cyr7.exceptions.SemanticException;
@@ -17,7 +18,7 @@ import java.util.Objects;
  * A statement of the form
  * x:t
  */
-public final class VarDeclStmtNode extends StmtNode {
+public final class VarDeclStmtNode extends AbstractNode implements StmtNode {
 
     public final VarDeclNode varDecl;
 
@@ -38,17 +39,6 @@ public final class VarDeclStmtNode extends StmtNode {
         if (o == null || getClass() != o.getClass()) return false;
         VarDeclStmtNode that = (VarDeclStmtNode) o;
         return Objects.equals(varDecl, that.varDecl);
-    }
-
-    @Override
-    public ResultType typeCheck(Context c) throws SemanticException,
-            UnbalancedPushPopException {
-        if (c.contains(varDecl.identifier)) {
-            throw new SemanticException("Duplicate variable " + varDecl.identifier);
-        }
-        OrdinaryType type = varDecl.typeExpr.typeCheck(c);
-        c.addVar(varDecl.identifier, type);
-        return ResultType.UNIT;
     }
 
 }

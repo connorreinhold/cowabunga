@@ -1,5 +1,6 @@
 package cyr7.ast.stmt;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
@@ -14,7 +15,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  * Represents a call to a procedure [procedureCall], which is a 
  * FunctionCallExprNode with return type unit.
  */
-public final class ProcedureStmtNode extends StmtNode {
+public final class ProcedureStmtNode extends AbstractNode implements StmtNode {
     
     public final FunctionCallExprNode procedureCall;
     public ProcedureStmtNode(ComplexSymbolFactory.Location location,
@@ -36,19 +37,5 @@ public final class ProcedureStmtNode extends StmtNode {
         }
         return false;
     }
-
-    @Override
-    public ResultType typeCheck(Context c) throws SemanticException,
-            UnbalancedPushPopException {
-        ExpandedType type = procedureCall.typeCheck(c);
-        if (TypeCheckUtil.checkTypeEquality(type, UnitType.UNIT)) {
-            return ResultType.UNIT;
-        } else {
-            throw new SemanticException("Expected a procedure but found a "
-                    + "function instead.");
-        }
-    }
-
-
 
 }

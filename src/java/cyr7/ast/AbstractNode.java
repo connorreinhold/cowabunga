@@ -6,7 +6,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Optional;
 
-public abstract class AbstractNode {
+public abstract class AbstractNode implements Node {
 
     private final Location location;
 
@@ -18,8 +18,4 @@ public abstract class AbstractNode {
         return Optional.ofNullable(location);
     }
 
-    public abstract boolean equals(Object o);
-
-    public abstract <T> T accept(AbstractVisitor<T> visitor);
-    
 }

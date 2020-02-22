@@ -1,9 +1,9 @@
 package cyr7.parser.xi;
 
+import cyr7.ast.ArrayAccessNode;
 import cyr7.ast.VarDeclNode;
-import cyr7.ast.expr.ArrayAccessExprNode;
+import cyr7.ast.VariableAccessNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.*;
@@ -37,7 +37,7 @@ public class TestVariableDeclarationStatement {
                     PrimitiveEnum.INT
                 )
             ),
-            new VariableAccessExprNode(
+            new VariableAccessNode(
                 null,
                 "x"
             )
@@ -63,7 +63,7 @@ public class TestVariableDeclarationStatement {
                     Optional.empty()
                 )
             ),
-            new VariableAccessExprNode(
+            new VariableAccessNode(
                 null,
                 "x"
             )
@@ -80,9 +80,9 @@ public class TestVariableDeclarationStatement {
                     PrimitiveEnum.INT
                 )
             ),
-            new ArrayAccessExprNode(
+            new ArrayAccessNode(
                 null,
-                new VariableAccessExprNode(
+                new VariableAccessNode(
                     null,
                     "c"
                 ),
@@ -309,7 +309,7 @@ public class TestVariableDeclarationStatement {
                                 null,
                                 "4"
                             ),
-                            new VariableAccessExprNode(
+                            new VariableAccessNode(
                                 null,
                                 "j"
                             )
@@ -323,7 +323,7 @@ public class TestVariableDeclarationStatement {
                             null,
                             "5"
                         ),
-                        new VariableAccessExprNode(
+                        new VariableAccessNode(
                             null,
                             "i"
                         )

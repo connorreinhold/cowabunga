@@ -1,10 +1,8 @@
 package cyr7.visitor;
 
 import cyr7.ast.*;
-import cyr7.ast.expr.ArrayAccessExprNode;
 import cyr7.ast.expr.ArrayExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -31,8 +29,12 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(PrimitiveTypeNode n);
     abstract public T visit(TypeExprArrayNode n);
 
+    // stmt and expr
+
+    abstract public T visit(ArrayAccessNode n);
+    abstract public T visit(VariableAccessNode n);
+
     // stmt
-    abstract public T visit(ArrayAssignAccessNode n);
     abstract public T visit(ArrayDeclStmtNode n);
     abstract public T visit(AssignmentStmtNode n);
     abstract public T visit(BlockStmtNode n);
@@ -42,15 +44,12 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(ProcedureStmtNode n);
     abstract public T visit(ReturnStmtNode n);
     abstract public T visit(VarDeclStmtNode n);
-    abstract public T visit(VariableAssignAccessNode n);
     abstract public T visit(VarInitStmtNode n);
     abstract public T visit(WhileStmtNode n);
 
     // expr
-    abstract public T visit(ArrayAccessExprNode n);
     abstract public T visit(ArrayExprNode n);
     abstract public T visit(FunctionCallExprNode n);
-    abstract public T visit(VariableAccessExprNode n);
 
     // bin expr
     abstract public T visit(AddExprNode n);

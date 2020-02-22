@@ -144,7 +144,7 @@ nonterminal ProcedureStmtNode ProcedureStatement;
 nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
-nonterminal AssignAccessNode AssignAccess;
+nonterminal AccessNode AssignAccess;
 
 nonterminal StmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
@@ -160,7 +160,7 @@ nonterminal ExprNode Expr;
 nonterminal FunctionCallExprNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
 
-nonterminal ExprAccessNode Access;
+nonterminal AccessNode Access;
 nonterminal ExprNode LiteralExpr;
 nonterminal ExprNode UnaryExpr;
 nonterminal ExprNode IntegerExpr;
@@ -314,8 +314,8 @@ AssignmentStatement ::=
     ;
 
 AssignAccess ::=
-    AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAssignAccessNode(axleft, a, e); :}
-    | ID:id {: RESULT = new VariableAssignAccessNode(idxleft, id); :}
+    AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAccessNode(axleft, a, e); :}
+    | ID:id {: RESULT = new VariableAccessNode(idxleft, id); :}
     ;
 
 VarDeclStatement ::=
@@ -442,9 +442,9 @@ ArgParamList ::=
 
 Access::=
     Access:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
-            RESULT = new ArrayAccessExprNode(axleft, a, e);
+            RESULT = new ArrayAccessNode(axleft, a, e);
         :} 	%prec ARRAY_ACCESS
-    | ID:id {: RESULT = new VariableAccessExprNode(idxleft, id); :}
+    | ID:id {: RESULT = new VariableAccessNode(idxleft, id); :}
     ;
 
 LiteralExpr ::=

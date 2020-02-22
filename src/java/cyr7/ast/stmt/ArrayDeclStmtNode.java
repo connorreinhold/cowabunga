@@ -1,5 +1,6 @@
 package cyr7.ast.stmt;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.exceptions.UnbalancedPushPopException;
@@ -15,7 +16,7 @@ import java.util.Objects;
  * A statement of the form
  * a: int[e1]...[en][]...[]
  */
-public final class ArrayDeclStmtNode extends StmtNode {
+public final class ArrayDeclStmtNode extends AbstractNode implements StmtNode {
 
     public final String identifier;
 
@@ -30,12 +31,6 @@ public final class ArrayDeclStmtNode extends StmtNode {
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    @Override
-    public ResultType typeCheck(Context c) throws SemanticException, UnbalancedPushPopException {
-        // TODO:
-        return null;
     }
 
     @Override

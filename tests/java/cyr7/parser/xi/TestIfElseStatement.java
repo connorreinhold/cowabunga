@@ -1,6 +1,6 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.expr.VariableAccessExprNode;
+import cyr7.ast.VariableAccessNode;
 import cyr7.ast.expr.binexpr.LTExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
@@ -134,28 +134,28 @@ public class TestIfElseStatement {
             null,
             new LTExprNode(
                 null,
-                new VariableAccessExprNode(
+                new VariableAccessNode(
                     null,
                     "a"
                 ),
-                new VariableAccessExprNode(
+                new VariableAccessNode(
                     null,
                     "b"
                 )
             ),
             new AssignmentStmtNode(
                 null,
-                new VariableAssignAccessNode(
+                new VariableAccessNode(
                     null,
                     "b"
                 ),
                 new SubExprNode(
                     null,
-                    new VariableAccessExprNode(
+                    new VariableAccessNode(
                         null,
                         "b"
                     ),
-                    new VariableAccessExprNode(
+                    new VariableAccessNode(
                         null,
                         "a"
                     )
@@ -164,17 +164,17 @@ public class TestIfElseStatement {
             Optional.of(
                 new AssignmentStmtNode(
                     null,
-                    new VariableAssignAccessNode(
+                    new VariableAccessNode(
                         null,
                         "a"
                     ),
                     new SubExprNode(
                         null,
-                        new VariableAccessExprNode(
+                        new VariableAccessNode(
                             null,
                             "a"
                         ),
-                        new VariableAccessExprNode(
+                        new VariableAccessNode(
                             null,
                             "b"
                         )

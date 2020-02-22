@@ -1,5 +1,6 @@
 package cyr7.ast.stmt;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.exceptions.SemanticException;
@@ -16,7 +17,7 @@ import java.util.Objects;
  * A statement of the form
  * x:t = e
  */
-public final class VarInitStmtNode extends StmtNode {
+public final class VarInitStmtNode extends AbstractNode implements StmtNode {
 
     public final VarDeclNode varDecl;
     public final ExprNode initializer;
@@ -31,11 +32,6 @@ public final class VarInitStmtNode extends StmtNode {
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    @Override
-    public ResultType typeCheck(Context c) throws SemanticException, UnbalancedPushPopException {
-        return null;
     }
 
     @Override

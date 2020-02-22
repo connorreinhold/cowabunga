@@ -1,5 +1,6 @@
 package cyr7.ast.expr;
 
+import cyr7.ast.AbstractNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
@@ -16,7 +17,7 @@ import java.util.List;
  * Represents an Array Expression: i.e. {1,2,3,} with a list of ExprNode for
  * values
  */
-public final class ArrayExprNode extends ExprNode {
+public final class ArrayExprNode extends AbstractNode implements ExprNode {
 
     public final List<ExprNode> arrayVals;
 

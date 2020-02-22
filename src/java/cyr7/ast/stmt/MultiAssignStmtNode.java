@@ -1,5 +1,6 @@
 package cyr7.ast.stmt;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.exceptions.SemanticException;
@@ -18,7 +19,7 @@ import java.util.Optional;
  * A statement of the form
  * v1:t1, ..., vn:tn = f(e)
  */
-public final class MultiAssignStmtNode extends StmtNode {
+public final class MultiAssignStmtNode extends AbstractNode implements StmtNode {
 
     public final List<Optional<VarDeclNode>> varDecls;
 
@@ -40,12 +41,6 @@ public final class MultiAssignStmtNode extends StmtNode {
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
-    }
-
-    @Override
-    public ResultType typeCheck(Context c) throws SemanticException, UnbalancedPushPopException {
-        // TODO:
-        return null;
     }
 
     @Override
