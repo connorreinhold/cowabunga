@@ -19,9 +19,11 @@ import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.exceptions.LexerIntegerOverflowException;
+import cyr7.exceptions.ParserIntegerOverflowException;
 import cyr7.parser.util.ParserFactory;
 
-class TextExpr {
+class TestExpr {
 
     @Test
     void testIntOperations() throws Exception {
@@ -336,5 +338,39 @@ class TextExpr {
             new LiteralIntExprNode(null, "5")
         ));
         assertEquals(parsed, expected);
+    }
+    
+    @Test
+    void testMaxInt() throws Exception {
+        String expr = "9223372036854775807";
+        ExprNode parsed = ParserFactory.parseExpr(expr);
+        ExprNode expected = new LiteralIntExprNode(null, expr);
+        assertEquals(parsed, expected);
+        
+        expr = "-9223372036854775808";
+        parsed = ParserFactory.parseExpr(expr);
+        expected = new IntNegExprNode(null, 
+                new LiteralIntExprNode(null, "9223372036854775808"));
+        assertEquals(parsed, expected);
+        
+        final String largeExpr = "9223372036854775808";
+        assertThrows(ParserIntegerOverflowException.class, () -> 
+            ParserFactory.parseExpr(largeExpr)
+        );
+        
+        final String largeNegInt = "-9223372036854775809";
+        assertThrows(LexerIntegerOverflowException.class, () -> 
+            ParserFactory.parseExpr(largeNegInt)
+        );
+        
+        final String veryLargeInt = "99129428931919223372036854775809";
+        assertThrows(LexerIntegerOverflowException.class, () -> 
+            ParserFactory.parseExpr(veryLargeInt)
+        );
+        
+        final String veryLargeNegInt = "-99129428931919223372036854775809";
+        assertThrows(LexerIntegerOverflowException.class, () -> 
+            ParserFactory.parseExpr(veryLargeNegInt)
+        );
     }
 }

@@ -11,8 +11,10 @@ public abstract class TestContext {
 
     private final Optional<OrdinaryType> INT = Optional.of(PrimitiveType.INT);
     private final Optional<OrdinaryType> BOOL = Optional.of(PrimitiveType.BOOL);
-    private final Optional<OrdinaryType> INT_ARRAY = Optional.of(new ArrayType(PrimitiveType.INT));
-    private final Optional<OrdinaryType> BOOL_ARRAY = Optional.of(new ArrayType(PrimitiveType.BOOL));
+    private final Optional<OrdinaryType> INT_ARRAY = Optional.of(
+                                        new ArrayType(PrimitiveType.INT));
+    private final Optional<OrdinaryType> BOOL_ARRAY = Optional.of(
+                                        new ArrayType(PrimitiveType.BOOL));
 
     abstract Context createEmptyContext();
 
