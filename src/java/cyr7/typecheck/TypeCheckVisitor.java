@@ -577,7 +577,7 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralBoolExprNode n) {
-        return OneOfTwo.ofFirst(ExpandedType.intType);
+        return OneOfTwo.ofFirst(ExpandedType.boolType);
     }
 
     @Override
