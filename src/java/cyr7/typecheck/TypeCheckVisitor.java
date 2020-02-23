@@ -25,7 +25,6 @@ import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ResultType;
 import cyr7.semantics.VoidType;
-import cyr7.semantics.OrdinaryType.Type;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
