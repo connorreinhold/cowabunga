@@ -23,7 +23,9 @@ public class CLI {
     static boolean debugPrintingEnabled = false;
     static boolean wantsLexing = false;
     static boolean wantsParsing = false;
+    static boolean wantsTypechecking = false;
     static File sourceRoot = new File(".");
+    static File libRoot = new File(".");
     static File destinationRoot = new File(".");
 
     /**
@@ -65,9 +67,27 @@ public class CLI {
                 .required(false)
                 .build();
 
+        Option typecheck = Option
+                .builder("t")
+                .longOpt("typecheck")
+                .desc("Generate output from semantic analysis.")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         Option source = Option
                 .builder("sourcepath")
                 .desc("Specify where to find generated diagnostic files")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+        
+        Option libpath = Option
+                .builder("libpath")
+                .desc("Specify where to find library interface files.")
                 .hasArg(true)
                 .argName("path")
                 .numberOfArgs(1)
@@ -106,7 +126,9 @@ public class CLI {
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
+                .addOption(typecheck)
                 .addOption(source)
+                .addOption(libpath)
                 .addOption(destination)
                 .addOption(version)
                 .addOption(debugPrinting);
@@ -234,22 +256,30 @@ public class CLI {
                 case "p":
                     wantsParsing = true;
                     break;
-                case "D":
+                case "t":
+                    wantsTypechecking = true;
+                    break;
+                case "D": {
                     String directory = cmd.getOptionValue("D");
                     destinationRoot = new File(directory);
                     break;
-                case "sourcepath":
-                    directory = cmd.getOptionValue("sourcepath");
+                }
+                case "sourcepath": {
+                    String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
                     break;
+                }
+                case "libpath": {
+                    String directory = cmd.getOptionValue("sourcepath");
+                    libRoot = new File(directory);
+                    break;
+                }
                 case "v":
                     printVersionMessage();
                     break;
-
                 case "debug":
                     debugPrintingEnabled = true;
                     break;
-
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -286,6 +316,17 @@ public class CLI {
                     writer.write(e.getMessage());
                 }
             }
+            
+            if (wantsTypechecking) {
+                debugPrint("Typechecking file: " + filename);
+                try {
+                    Reader input = getReader(filename);
+                    Writer output = getWriter(filename, "typed");
+                    // Insert Typechecker here
+                } catch (Exception e) {
+                    writer.write(e.getMessage());
+                }
+            }
         }
 
         writer.flush();
@@ -298,9 +339,13 @@ public class CLI {
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
 
-    private static Writer getWriter(String relativePath, String fileExtension) throws IOException {
-        Path destPath = Paths.get(destinationRoot.getAbsolutePath(), relativePath).getParent();
-        File dest = new File(destPath.toFile(), String.format("%s." + fileExtension, getMainFilename(Path.of(relativePath))));
+    private static Writer getWriter(String relativePath, String fileExtension) 
+            throws IOException {
+        Path destPath = Paths.get(destinationRoot.getAbsolutePath(), 
+                                    relativePath).getParent();
+        File dest = new File(destPath.toFile(), String.format("%s." + 
+                                    fileExtension, 
+                                    getMainFilename(Path.of(relativePath))));
         if (!dest.exists()) {
             // Create directories if they don't exist
             dest.getParentFile().mkdirs();
