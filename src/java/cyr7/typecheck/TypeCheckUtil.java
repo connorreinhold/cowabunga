@@ -9,7 +9,6 @@ import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
 import cyr7.semantics.Context;
 import cyr7.semantics.HashMapStackContext;
-import cyr7.semantics.TypeCheckVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 

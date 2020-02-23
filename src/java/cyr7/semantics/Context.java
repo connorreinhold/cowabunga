@@ -21,6 +21,11 @@ public interface Context {
 
     Optional<ExpandedType> getRet();
 
+    /**
+     * Returns {@code true} if there is a mapping with the symbol {@code id}.
+     * Otherwise, returns {@code false}.
+     * @param id
+     */
     boolean contains(String id);
 
     /**

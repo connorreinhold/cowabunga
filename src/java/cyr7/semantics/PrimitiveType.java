@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public class PrimitiveType implements OrdinaryType {
+public class PrimitiveType extends OrdinaryType {
     
     final private Type type;
     
@@ -30,6 +30,7 @@ public class PrimitiveType implements OrdinaryType {
 
     @Override
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
-        return this.type == expectedSupertype.getType();
+        return expectedSupertype.isUnit() || 
+                    this.type == expectedSupertype.getType();
     }
 }

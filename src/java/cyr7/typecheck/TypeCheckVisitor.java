@@ -1,4 +1,4 @@
-package cyr7.semantics;
+package cyr7.typecheck;
 
 import cyr7.ast.ArrayAccessNode;
 import cyr7.ast.VarDeclNode;
@@ -17,6 +17,15 @@ import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.exceptions.SemanticException;
+import cyr7.semantics.ArrayType;
+import cyr7.semantics.Context;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.FunctionType;
+import cyr7.semantics.OrdinaryType;
+import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.ResultType;
+import cyr7.semantics.VoidType;
+import cyr7.semantics.OrdinaryType.Type;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -44,14 +53,20 @@ public class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Symbol table that maps identifiers to types.
+     */
     private final Context context;
 
+    /**
+     * Initialize typecheck visitor with given Context {@code initialContext}.
+     * @param initialContext
+     */
     public TypeCheckVisitor(Context initialContext) {
         this.context = initialContext;
     }
 
     // Top Level
-
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(FunctionDeclNode n) {
         ExpandedType outputTypes = n.header.accept(this).assertFirst();

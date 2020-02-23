@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public interface OrdinaryType {
+public abstract class OrdinaryType {
     
     public enum Type {
         // OrdinaryType.Type.UNIT and OrdinaryType.Type are to be distinct
@@ -8,7 +8,15 @@ public interface OrdinaryType {
         INT, BOOL, ARRAY, VOID, UNIT;
     }
     
-    public Type getType();
+    public abstract Type getType();
     
-    public boolean isSubtypeOf(OrdinaryType expectedSupertype);
+    public boolean isUnit() {
+        return this.getType() == Type.UNIT;
+    }
+
+    public boolean isVoid() {
+        return this.getType() == Type.VOID;
+    }
+    
+    public abstract boolean isSubtypeOf(OrdinaryType expectedSupertype);
 }

@@ -1,7 +1,10 @@
 package cyr7.semantics;
 
-public class ArrayType implements OrdinaryType {
+public class ArrayType extends OrdinaryType {
 
+    /**
+     * May be a primitive type or another array.
+     */
     public final OrdinaryType child;
 
     public ArrayType(OrdinaryType child) {
@@ -23,6 +26,9 @@ public class ArrayType implements OrdinaryType {
 
     @Override
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
+        if (expectedSupertype.isUnit()) {
+            return true;
+        }
         if (expectedSupertype instanceof ArrayType) {
             return this.child.isSubtypeOf(((ArrayType)expectedSupertype).child);
         }
