@@ -7,20 +7,23 @@ import java.util.List;
 public class ExpandedType implements AnyType {
     
     final public static ExpandedType boolType = 
-                new ExpandedType(PrimitiveType.boolType);
+                new ExpandedType(OrdinaryType.boolType);
     final public static ExpandedType intType = 
-            new ExpandedType(PrimitiveType.intType);
+            new ExpandedType(OrdinaryType.intType);
+    final public static ExpandedType unitExpandedType = 
+            new ExpandedType();
     final public static ExpandedType unitOrdinaryType = 
-            new ExpandedType(UnitType.value);
+            new ExpandedType(OrdinaryType.unitType);
     final public static ExpandedType voidOrdinaryType = 
-            new ExpandedType(VoidType.value);
+            new ExpandedType(OrdinaryType.voidType);
 
+    
     final private List<OrdinaryType> types;
     
     /**
      * Creates a Unit ExpandedType.
      */
-    public ExpandedType() {
+    private ExpandedType() {
         this.types = Collections.unmodifiableList(List.of());
     }
     
@@ -101,8 +104,8 @@ public class ExpandedType implements AnyType {
     }
     
     public boolean isArray() {
-        assert(this.isOrdinary());
-        return this.getOrdinaryType().getType() == OrdinaryType.Type.ARRAY;
+        return this.isOrdinary() 
+                && this.getOrdinaryType().getType() == OrdinaryType.Type.ARRAY;
     }
     
     public OrdinaryType getOrdinaryType() {

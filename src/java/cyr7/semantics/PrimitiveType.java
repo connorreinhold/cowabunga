@@ -4,13 +4,7 @@ public class PrimitiveType extends OrdinaryType {
     
     final private Type type;
     
-    public static PrimitiveType intType = 
-            new PrimitiveType(OrdinaryType.Type.INT);
-
-    public static PrimitiveType boolType = 
-            new PrimitiveType(OrdinaryType.Type.BOOL);
-
-    public PrimitiveType(Type type) {
+    protected PrimitiveType(Type type) {
         assert(type != Type.ARRAY);
         this.type = type;
     }

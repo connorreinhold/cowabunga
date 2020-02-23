@@ -3,9 +3,7 @@ package cyr7.semantics;
 public class UnitType extends OrdinaryType {
     // The wildcard _ is a unit type, i.e. a supertype of every type.
     
-    public static final UnitType value = new UnitType();
-    
-    private UnitType() {}
+    protected UnitType() {}
     
     @Override
     public Type getType() {

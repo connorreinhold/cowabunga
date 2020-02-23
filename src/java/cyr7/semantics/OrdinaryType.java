@@ -8,6 +8,11 @@ public abstract class OrdinaryType {
         INT, BOOL, ARRAY, VOID, UNIT;
     }
     
+    public final static OrdinaryType intType = new PrimitiveType(Type.INT);
+    public final static OrdinaryType boolType = new PrimitiveType(Type.BOOL);
+    public final static OrdinaryType unitType = new UnitType();
+    public final static OrdinaryType voidType = new VoidType();
+    
     public abstract Type getType();
     
     public boolean isUnit() {
