@@ -4,7 +4,6 @@ import cyr7.ast.ArrayAccessNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.VariableAccessNode;
 import cyr7.ast.expr.ArrayExprNode;
-import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
@@ -17,13 +16,13 @@ import cyr7.ast.stmt.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.ast.type.TypeExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.semantics.ExpandedType.Type;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -131,12 +130,46 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(FunctionDeclNode n) {
-        return null;
+        ResultType headerResult = n.header.accept(this).assertSecond();
+        ResultType resultType = n.block.accept(this).assertSecond();
+        return OneOfTwo.ofSecond(ResultType.UNIT);
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(FunctionHeaderDeclNode n) {
-        return null;
+        String functionName = n.identifier;
+        if (context.contains(functionName)) {
+            throw new SemanticException("Duplicate name: " + functionName);
+        }
+        List<VarDeclNode> arguments = n.args;
+        ExpandedType input;
+        if (arguments.size() == 0) {
+            input = UnitType.UNIT;
+        } else if (arguments.size() == 1) {
+            input = arguments.get(0).accept(this).assertFirst();
+            assert(input.isOrdinary());
+        } else {
+            input = new TupleType(arguments
+                    .stream()
+                    .map(v -> v.typeExpr.accept(this).assertFirst())
+                    .collect(Collectors.toList()));
+        }
+        List<TypeExprNode> returnTypes = n.returnTypes;
+        ExpandedType output;
+        if (returnTypes.size() == 0) {
+            output = UnitType.UNIT;
+        } else if (returnTypes.size() == 1) {
+            output = returnTypes.get(0).accept(this).assertFirst();
+            assert(output.isOrdinary());
+        } else {
+            output = new TupleType(returnTypes
+                    .stream()
+                    .map(v -> v.accept(this).assertFirst())
+                    .collect(Collectors.toList()));
+        }
+        FunctionType functionType = new FunctionType(input, output);
+        context.addFn(functionName, functionType);
+        return OneOfTwo.ofSecond(ResultType.UNIT);
     }
 
     @Override
@@ -151,7 +184,11 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(VarDeclNode n) {
-        return null;
+        if (context.contains(n.identifier)) {
+            throw new SemanticException("Duplicate variable declaration");
+        }
+        ExpandedType type = n.typeExpr.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(type);
     }
 
     @Override
@@ -163,14 +200,33 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(PrimitiveTypeNode n) {
-        return null;
+        switch (n.type) {
+        case BOOL:
+            return OneOfTwo.ofFirst(PrimitiveType.BOOL);
+        case INT:
+            return OneOfTwo.ofFirst(PrimitiveType.INT);
+        }
+        throw new SemanticException("Found unknown primitive type");
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(TypeExprArrayNode n) {
-        return null;
+        ExpandedType type = n.child.accept(this).assertFirst();
+        if (n.size.isPresent()) {
+            ExpandedType sizeType = n.size.get().accept(this).assertFirst();
+            if (!isSubtype(sizeType, PrimitiveType.INT)) {
+                throw new SemanticException("Size of array is not an integer");
+            }
+        }
+        if (type.isOrdinary()) {
+            return OneOfTwo.ofFirst(new ArrayType((OrdinaryType)type));
+        } else {
+            throw new SemanticException("Expected an array of primitives or"
+                    + " of arrays, but found an array of tuples");
+        }
     }
 
+    
     // Statement and Expr
 
     @Override
@@ -183,7 +239,6 @@ public class TypeCheckVisitor extends
             ArrayType actualArrayType = (ArrayType) arrayType;
             return OneOfTwo.ofFirst(actualArrayType.child);
         }
-
         throw new SemanticException();
     }
 
@@ -201,7 +256,22 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayDeclStmtNode n) {
-        return null;
+        if (context.contains(n.identifier)) {
+            throw new SemanticException("Duplicate variablee declaration");
+        }
+        
+        ExpandedType expectedArray = n.type.accept(this).assertFirst();
+        if (!expectedArray.isArray()) {
+            throw new SemanticException("Expected an array, but found a "
+                    + "non-array type instead");
+        }
+        if (expectedArray.isOrdinary()) {
+            context.addVar(n.identifier, (OrdinaryType)expectedArray);
+            return OneOfTwo.ofSecond(ResultType.UNIT);
+        } else {
+            throw new SemanticException("Expected an array or primitive, but "
+                    + "found a tuple");
+        }
     }
 
     @Override
@@ -235,7 +305,16 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ExprStmtNode n) {
-        return null;
+        ExpandedType type = n.expr.accept(this).assertFirst();
+        if (type.isOrdinary()) {
+            return OneOfTwo.ofSecond(ResultType.UNIT);
+        } else if (type.isTuple()) {
+            throw new SemanticException("Expected a single return value, but "
+                    + "found a tuple");
+        } else {
+            throw new SemanticException("Expected a function, but found "
+                    + "a procedure");
+        }
     }
 
     @Override
@@ -265,7 +344,38 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(MultiAssignStmtNode n) {
-        return null;
+        ExpandedType types = n.initializer.accept(this).assertFirst();
+        if (types.isUnit()) {
+            throw new SemanticException("Expected function call, but found a "
+                    + "procedure instead.");
+        }
+        TupleType tupleType = (TupleType)types;
+        List<ExpandedType> typeList = tupleType.elements;
+        List<Optional<VarDeclNode>> varDecls = n.varDecls;
+        if (typeList.size() != varDecls.size()) {
+            throw new SemanticException("Number of variable declarations and "
+                    + "function return values do not match");
+        }
+        
+        Iterator<ExpandedType> typeIterator = typeList.iterator();
+        Iterator<Optional<VarDeclNode>> declIterator = varDecls.iterator();
+        while(typeIterator.hasNext() && declIterator.hasNext() ) {
+            ExpandedType returnedType = typeIterator.next();
+            Optional<VarDeclNode> maybeVarDecl = declIterator.next();
+            
+            if (maybeVarDecl.isPresent()) {
+                VarDeclNode varDecl = maybeVarDecl.get();
+                ExpandedType varDeclType = varDecl.accept(this).assertFirst();
+                assert(returnedType.isOrdinary() && varDeclType.isOrdinary());
+                if (isSubtype(returnedType, varDeclType)) {
+                    context.addVar(varDecl.identifier, 
+                                (OrdinaryType)varDeclType);
+                } else {
+                    throw new SemanticException("Mismatched types");
+                }
+            }
+        }
+        return OneOfTwo.ofSecond(ResultType.UNIT);
     }
 
     @Override
@@ -315,10 +425,7 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(VarDeclStmtNode n) {
-        if (context.contains(n.varDecl.identifier)) {
-            throw new SemanticException("Duplicate variable " + n.varDecl.identifier);
-        }
-        ExpandedType type = n.varDecl.typeExpr.accept(this).assertFirst();
+        ExpandedType type = n.varDecl.accept(this).assertFirst();
         if (type.isOrdinary()) {
             context.addVar(n.varDecl.identifier, (OrdinaryType) type);
             return OneOfTwo.ofSecond(ResultType.UNIT);
@@ -329,7 +436,17 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(VarInitStmtNode n) {
-        return null;
+        VarDeclNode varDecl = n.varDecl;
+        ExpandedType varDeclType = varDecl.accept(this).assertFirst();
+        ExpandedType initializedType = n.initializer.accept(this).assertFirst();
+        
+        if (isSubtype(initializedType, varDeclType)) {
+            assert(varDeclType.isOrdinary() && initializedType.isOrdinary());
+            context.addVar(varDecl.identifier, (OrdinaryType)varDeclType);
+            return OneOfTwo.ofSecond(ResultType.UNIT);
+        } else {
+            throw new SemanticException("Mismatched types");
+        }
     }
 
     @Override

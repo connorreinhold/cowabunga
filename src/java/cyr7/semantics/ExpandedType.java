@@ -17,5 +17,17 @@ public interface ExpandedType extends AnyType {
         Type type = getType();
         return type == Type.TUPLE || type == Type.UNIT;
     }
-
+    
+    default boolean isTuple() {
+        return getType() == Type.TUPLE;
+    }
+    
+    default boolean isUnit() {
+        return getType() == Type.UNIT;
+    }
+    
+    default boolean isArray() {
+        return getType() == Type.ARRAY;
+    }
+    
 }

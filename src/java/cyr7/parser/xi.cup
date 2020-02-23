@@ -31,7 +31,8 @@ public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
         ComplexSymbol token = (ComplexSymbol) cur_token;
 
         if (token.sym == sym.INT_MAX) {
-            throw new ParserIntegerOverflowException(token.xleft.getLine(), token.xleft.getColumn());
+            throw new ParserIntegerOverflowException(token.xleft.getLine(), 
+                    token.xleft.getColumn());
         } else {
             throw new UnexpectedTokenException(token);
         }
@@ -57,7 +58,8 @@ init with {:
 
 scan with {: 
     Symbol sym = getScanner().next_token();
-    return (sym != null) ? sym : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
+    return (sym != null) ? sym : 
+                       getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
 :};
 
 /* Terminals (tokens returned by the scanner). */
@@ -207,7 +209,9 @@ FunctionHeaderDeclList ::=
             lst.addLast(decl);
             RESULT = lst;
         :}
-    | FunctionHeaderDecl:decl ZeroOrMoreSemicolons {: RESULT = new LinkedList<>(List.of(decl)); :}
+    | FunctionHeaderDecl:decl ZeroOrMoreSemicolons {: 
+            RESULT = new LinkedList<>(List.of(decl)); 
+        :}
     ;
 
 ZeroOrMoreSemicolons ::=
@@ -363,7 +367,8 @@ MultiVarDeclList ::=
     ;
 
 VarDeclArrayInit ::=
-    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
+    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT 
+    VarDeclDimensionedBracket:l {:
             l.addFirst(Optional.of(v));
             TypeExprArrayNode t = TypeExprNode.fromDimensionList(p, l);
             RESULT = new ArrayDeclStmtNode(idxleft, id, t);
