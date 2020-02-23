@@ -399,6 +399,9 @@ public class TypeCheckVisitor extends
 
     // Expression
 
+    /**
+     * Typechecks an integer binary operation expression, e.g. 9 + 10.
+     */
     private ExpandedType typecheckIntegerBinExpr(BinExprNode n) {
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
@@ -409,6 +412,9 @@ public class TypeCheckVisitor extends
         throw new SemanticException();
     }
 
+    /**
+     * Typechecks a boolean binary operation expression, e.g. true || false.
+     */
     private ExpandedType typecheckBooleanBinExpr(BinExprNode n) {
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
@@ -420,16 +426,35 @@ public class TypeCheckVisitor extends
         throw new SemanticException();
     }
 
+    /**
+     * Typechecks a comparison expression, e.g. 3 <= 31.
+     */
     private ExpandedType typecheckComparisonBinExpr(BinExprNode n) {
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
-            return ExpandedType.intType;
+            return ExpandedType.boolType;
         }
 
         throw new SemanticException();
     }
+    
+    /**
+     * Typechecks an equality expression, e.g. 3 == 31.
+     */
+    private ExpandedType typecheckEqualityBinExpr(BinExprNode n) {
+        ExpandedType left = n.accept(this).assertFirst();
+        ExpandedType right = n.accept(this).assertFirst();
+
+        if (left.isOrdinary() && right.isOrdinary()
+                && supertypeOf(left, right).isPresent()) {
+                return ExpandedType.boolType;
+        }
+        throw new SemanticException("Types of values being compared are "
+                    + "incompatible");
+    }
+
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayExprNode n) {
@@ -497,46 +522,37 @@ public class TypeCheckVisitor extends
     }
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(AndExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
-
-        if (left.isSubtypeOfBool() && right.isSubtypeOfBool()) {
-            return OneOfTwo.ofFirst(ExpandedType.boolType);
-        }
-        throw new SemanticException("Cannot perform AND on non-bool values");
-    }
-
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(DivExprNode n) {
-        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
-    }
-
-    @Override
     public OneOfTwo<ExpandedType, ResultType> visit(EqualsExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
-
-        if (left.isOrdinary() && right.isOrdinary()
-            && supertypeOf(left, right).isPresent()) {
-            return OneOfTwo.ofFirst(ExpandedType.boolType);
-        }
-        throw new SemanticException("Types of values being compared are "
-                + "incompatible");
+        return OneOfTwo.ofFirst(this.typecheckEqualityBinExpr(n));
     }
-
+    
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(GTEExprNode n) {
-        return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
-    }
-
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(GTExprNode n) {
-        return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
+    public OneOfTwo<ExpandedType, ResultType> visit(NotEqualsExprNode n) {
+        return OneOfTwo.ofFirst(this.typecheckEqualityBinExpr(n));
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(HighMultExprNode n) {
+        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
+    }
+
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(MultExprNode n) {
+        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
+    }
+    
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(RemExprNode n) {
+        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
+    }
+
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(SubExprNode n) {
+        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
+    }
+
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(DivExprNode n) {
         return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
     }
 
@@ -549,15 +565,15 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(LTExprNode n) {
         return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
     }
-
+    
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(MultExprNode n) {
-        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
+    public OneOfTwo<ExpandedType, ResultType> visit(GTEExprNode n) {
+        return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
     }
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(NotEqualsExprNode n) {
-        return OneOfTwo.ofFirst(typecheckBooleanBinExpr(n));
+    public OneOfTwo<ExpandedType, ResultType> visit(GTExprNode n) {
+        return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
     }
 
     @Override
@@ -566,15 +582,11 @@ public class TypeCheckVisitor extends
     }
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(RemExprNode n) {
-        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
+    public OneOfTwo<ExpandedType, ResultType> visit(AndExprNode n) {
+        return OneOfTwo.ofFirst(typecheckBooleanBinExpr(n));
     }
 
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(SubExprNode n) {
-        return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
-    }
-
+    
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralBoolExprNode n) {
         return OneOfTwo.ofFirst(ExpandedType.boolType);
