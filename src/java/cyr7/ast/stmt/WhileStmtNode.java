@@ -2,13 +2,8 @@ package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.exceptions.UnbalancedPushPopException;
-import cyr7.semantics.Context;
-import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.ResultType;
 import cyr7.visitor.AbstractVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Represents a while statement, with [ExprNode guard] and a [block] representing the body of the while 
@@ -19,7 +14,7 @@ public final class WhileStmtNode extends AbstractNode implements StmtNode {
 	public final ExprNode guard;
     public final StmtNode block;
 	
-    public WhileStmtNode(ComplexSymbolFactory.Location location, ExprNode guard, StmtNode block) {
+    public WhileStmtNode(Location location, ExprNode guard, StmtNode block) {
         super(location);
         
         assert guard != null;

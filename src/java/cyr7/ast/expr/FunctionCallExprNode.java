@@ -1,16 +1,11 @@
 package cyr7.ast.expr;
 
 import cyr7.ast.AbstractNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.semantics.*;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Represents a call to a function (which is still an expression). Contains the
@@ -22,7 +17,7 @@ public final class FunctionCallExprNode extends AbstractNode implements ExprNode
     public final String identifier;
     public final List<ExprNode> parameters;
 
-    public FunctionCallExprNode(ComplexSymbolFactory.Location location,
+    public FunctionCallExprNode(Location location,
             String id, List<ExprNode> parameters) {
         super(location);
 

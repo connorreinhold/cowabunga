@@ -3,14 +3,9 @@ package cyr7.ast.stmt;
 import cyr7.ast.AbstractNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.exceptions.UnbalancedPushPopException;
-import cyr7.semantics.Context;
-import cyr7.semantics.ResultType;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +26,7 @@ public final class MultiAssignStmtNode extends AbstractNode implements StmtNode 
 
     public final FunctionCallExprNode initializer;
 
-    public MultiAssignStmtNode(ComplexSymbolFactory.Location location,
+    public MultiAssignStmtNode(Location location,
                            List<Optional<VarDeclNode>> varDecls,
                            FunctionCallExprNode initializer) {
         super(location);

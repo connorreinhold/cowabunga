@@ -1,13 +1,8 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.semantics.Context;
-import cyr7.semantics.OrdinaryType;
-import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.ExpandedType;
 import cyr7.visitor.AbstractVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Node that represents taking the equality operator on [ExprNode left] &
@@ -15,8 +10,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public final class EqualsExprNode extends BinExprNode {
 
-    public EqualsExprNode(ComplexSymbolFactory.Location location, ExprNode left,
-            ExprNode right) {
+    public EqualsExprNode(Location location, ExprNode left, ExprNode right) {
         super(location, left, right);
     }
 

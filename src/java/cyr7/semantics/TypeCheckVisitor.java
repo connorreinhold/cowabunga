@@ -54,8 +54,11 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(FunctionDeclNode n) {
-        ResultType headerResult = n.header.accept(this).assertSecond();
-        ResultType resultType = n.block.accept(this).assertSecond();
+        ExpandedType outputTypes = n.header.accept(this).assertFirst();
+        context.push();
+        context.addRet(outputTypes);
+        n.block.accept(this);
+        context.pop();
         return OneOfTwo.ofSecond(ResultType.UNIT);
     }
 
@@ -72,14 +75,15 @@ public class TypeCheckVisitor extends
             return t.getOrdinaryType();
         }).collect(Collectors.toList()));
         
-        ExpandedType output = new ExpandedType(n.returnTypes.stream().map(v -> {
+        ExpandedType output = new ExpandedType(n.returnTypes.stream()
+               .map(v -> {
             ExpandedType t = v.accept(this).assertFirst();
             assert(t.isOrdinary());
             return t.getOrdinaryType();
         }).collect(Collectors.toList()));
         FunctionType functionType = new FunctionType(input, output);
         context.addFn(functionName, functionType);
-        return OneOfTwo.ofSecond(ResultType.UNIT);
+        return OneOfTwo.ofFirst(output);
     }
 
     @Override

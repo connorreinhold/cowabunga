@@ -1,12 +1,7 @@
 package cyr7.ast.type;
 
 import cyr7.ast.expr.ExprNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.semantics.ArrayType;
-import cyr7.semantics.Context;
-import cyr7.semantics.OrdinaryType;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Optional;

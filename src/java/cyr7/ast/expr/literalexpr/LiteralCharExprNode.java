@@ -2,26 +2,20 @@ package cyr7.ast.expr.literalexpr;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
-import cyr7.semantics.Context;
-import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.ExpandedType;
-import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Represents a character literal, Ex: [contents] ='r'
  */
-public final class LiteralCharExprNode extends AbstractNode implements ExprNode {
+public final class LiteralCharExprNode extends AbstractNode 
+                                                implements ExprNode {
 
     public final String contents;
 
-    public LiteralCharExprNode(ComplexSymbolFactory.Location location, String contents) {
+    public LiteralCharExprNode(Location location, String contents) {
         super(location);
-
         assert contents != null;
-
         this.contents = contents;
     }
 
@@ -36,7 +30,7 @@ public final class LiteralCharExprNode extends AbstractNode implements ExprNode 
             LiteralCharExprNode oNode = (LiteralCharExprNode) o;
             return this.contents.equals(oNode.contents);
         }
-        return false;    
+        return false;
     }
 
 }

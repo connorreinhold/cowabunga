@@ -3,7 +3,6 @@ package cyr7.parser;
 import cyr7.ast.AbstractNode;
 import cyr7.exceptions.ParserException;
 import cyr7.lexer.MultiFileLexer;
-import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 
