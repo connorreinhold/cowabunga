@@ -8,13 +8,12 @@ import cyr7.semantics.ExpandedType.Type;
 
 public class ExpandedType implements AnyType {
     
-    private static ExpandedType boolType = 
-                new ExpandedType(new PrimitiveType(OrdinaryType.Type.BOOL));
-    private static ExpandedType intType = 
-            new ExpandedType(new PrimitiveType(OrdinaryType.Type.INT));
+    final public static ExpandedType boolType = 
+                new ExpandedType(PrimitiveType.makeBool());
+    final public static ExpandedType intType = 
+            new ExpandedType(PrimitiveType.makeInt());
 
-    
-    private List<OrdinaryType> types;
+    final private List<OrdinaryType> types;
     
     /**
      * Creates a Unit ExpandedType.

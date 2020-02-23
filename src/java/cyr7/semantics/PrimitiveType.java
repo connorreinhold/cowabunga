@@ -2,17 +2,14 @@ package cyr7.semantics;
 
 public class PrimitiveType implements OrdinaryType {
     
-    private Type type;
+    final private Type type;
     
-    public static PrimitiveType makeInt() {
-        return new PrimitiveType(OrdinaryType.Type.INT);
-    }
+    public static PrimitiveType intType = 
+            new PrimitiveType(OrdinaryType.Type.INT);
 
-    public static PrimitiveType makeBool() {
-        return new PrimitiveType(OrdinaryType.Type.BOOL);
-    }
+    public static PrimitiveType boolType = 
+            new PrimitiveType(OrdinaryType.Type.BOOL);
 
-    
     public PrimitiveType(Type type) {
         assert(type != Type.ARRAY);
         this.type = type;

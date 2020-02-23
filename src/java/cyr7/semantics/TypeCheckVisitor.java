@@ -16,9 +16,7 @@ import cyr7.ast.stmt.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ast.type.TypeExprNode;
 import cyr7.exceptions.SemanticException;
-import cyr7.semantics.ExpandedType.Type;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -405,33 +403,33 @@ public class TypeCheckVisitor extends
 
     // Expression
 
-    private PrimitiveType typecheckIntegerBinExpr(BinExprNode n) {
+    private ExpandedType typecheckIntegerBinExpr(BinExprNode n) {
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
-            return PrimitiveType.makeInt();
+            return ExpandedType.intType;
         }
         throw new SemanticException();
     }
 
-    private PrimitiveType typecheckBooleanBinExpr(BinExprNode n) {
+    private ExpandedType typecheckBooleanBinExpr(BinExprNode n) {
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
         if (left.isSubtypeOfBool() && right.isSubtypeOfBool()) {
-            return PrimitiveType.makeBool();
+            return ExpandedType.boolType;
         }
 
         throw new SemanticException();
     }
 
-    private PrimitiveType typecheckComparisonBinExpr(BinExprNode n) {
+    private ExpandedType typecheckComparisonBinExpr(BinExprNode n) {
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
-            return PrimitiveType.makeInt();
+            return ExpandedType.intType;
         }
 
         throw new SemanticException();
@@ -490,18 +488,16 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
-        if (isSubtype(left, PrimitiveType.INT)
-            && isSubtype(right, PrimitiveType.INT)) {
-            return OneOfTwo.ofFirst(PrimitiveType.INT);
-        } else if (left.getType() == Type.ARRAY
-            && right.getType() == Type.ARRAY) {
+        if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
+            return OneOfTwo.ofFirst(ExpandedType.intType);
+        }
+        if (left.isArray() && right.isArray()) {
             Optional<ExpandedType> supertype = supertypeOf(left, right);
             if (supertype.isPresent()) {
                 return OneOfTwo.ofFirst(supertype.get());
             }
         }
-
-        throw new SemanticException();
+        throw new SemanticException("Cannot add incompatible types");
     }
 
     @Override
@@ -509,12 +505,10 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
-        if (isSubtype(left, PrimitiveType.BOOL)
-            && isSubtype(right, PrimitiveType.BOOL)) {
-            return OneOfTwo.ofFirst(PrimitiveType.BOOL);
+        if (left.isSubtypeOfBool() && right.isSubtypeOfBool()) {
+            return OneOfTwo.ofFirst(ExpandedType.boolType);
         }
-
-        throw new SemanticException();
+        throw new SemanticException("Cannot perform AND on non-bool values");
     }
 
     @Override
@@ -527,13 +521,12 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
-        if (left.isOrdinary()
-            && right.isOrdinary()
+        if (left.isOrdinary() && right.isOrdinary()
             && supertypeOf(left, right).isPresent()) {
-            return OneOfTwo.ofFirst(PrimitiveType.BOOL);
+            return OneOfTwo.ofFirst(ExpandedType.boolType);
         }
-
-        throw new SemanticException();
+        throw new SemanticException("Types of values being compared are "
+                + "incompatible");
     }
 
     @Override
@@ -588,39 +581,39 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralBoolExprNode n) {
-        return OneOfTwo.ofFirst(PrimitiveType.BOOL);
+        return OneOfTwo.ofFirst(ExpandedType.intType);
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralCharExprNode n) {
-        return OneOfTwo.ofFirst(PrimitiveType.INT);
+        return OneOfTwo.ofFirst(ExpandedType.intType);
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralIntExprNode n) {
-        return OneOfTwo.ofFirst(PrimitiveType.INT);
+        return OneOfTwo.ofFirst(ExpandedType.intType);
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralStringExprNode n) {
-        return OneOfTwo.ofFirst(new ArrayType(PrimitiveType.INT));
+        return OneOfTwo.ofFirst(
+                new ExpandedType(new ArrayType(PrimitiveType.intType)));
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(BoolNegExprNode n) {
         ExpandedType type = n.expr.accept(this).assertFirst();
-        if (isSubtype(type, PrimitiveType.BOOL)) {
-            return OneOfTwo.ofFirst(PrimitiveType.BOOL);
+        if (type.isSubtypeOfBool()) {
+            return OneOfTwo.ofFirst(ExpandedType.boolType);
         }
-
-        throw new SemanticException();
+        throw new SemanticException("Cannot negate a non-bool value");
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(IntNegExprNode n) {
         ExpandedType type = n.expr.accept(this).assertFirst();
-        if (isSubtype(type, PrimitiveType.INT)) {
-            return OneOfTwo.ofFirst(PrimitiveType.INT);
+        if (type.isSubtypeOfInt()) {
+            return OneOfTwo.ofFirst(ExpandedType.intType);
         }
 
         throw new SemanticException();
