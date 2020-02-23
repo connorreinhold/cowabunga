@@ -20,6 +20,8 @@ import java.util.Optional;
  * Example: the type int[4][] would be represented as:
  * TypeExprArrayNode(TypeExprArrayNode(PrimitiveEnumNode(int), Optional
  * .empty()), Optional.of(4))
+ * <p>
+ * Example expression: x: int[2][3][];
  */
 public final class TypeExprArrayNode extends TypeExprNode {
 
@@ -48,12 +50,6 @@ public final class TypeExprArrayNode extends TypeExprNode {
         }
         return false;
 
-    }
-
-    @Override
-    public OrdinaryType typeCheck(Context c) throws SemanticException {
-        OrdinaryType type = this.child.typeCheck(c);
-        return new ArrayType(type);
     }
 
 }

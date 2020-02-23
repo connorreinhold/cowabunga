@@ -44,76 +44,19 @@ public class TypeCheckVisitor extends
      * @param right the rhs type
      * @return true iff lhs <= rhs
      */
-    private static boolean isSubtype(ExpandedType left, ExpandedType right) {
-        // Warning: the order of comparisons in this method is delicate and
-        // a lot of thought was put into this. Please be careful editing this
-        // method.
-
-        if (left.getType() == ExpandedType.Type.TUPLE) {
-            // We can only compare tuple types to other tuple types
-            if (right.getType() != ExpandedType.Type.TUPLE) {
-                return false;
-            }
-
-            TupleType tup1 = (TupleType) left;
-            TupleType tup2 = (TupleType) right;
-            if (tup1.elements.size() != tup2.elements.size()) {
-                return false;
-            }
-
-            // Ensure all types of the tuple are compatible
-            for (int i = 0; i < tup1.elements.size(); i++) {
-                if (!isSubtype(tup1.elements.get(i), tup2.elements.get(i))) {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-
-        assert left.getType() != Type.TUPLE && right.getType() != Type.TUPLE;
-
-        if (right.getType() == Type.UNIT) {
-            return true;
-        }
-        if (left.getType() == Type.UNIT) {
-            return false;
-        }
-
-        assert left.getType() != Type.UNIT && right.getType() != Type.UNIT;
-
-        if (left.getType() == Type.VOID) {
-            return true;
-        }
-        if (right.getType() == Type.VOID) {
-            return false;
-        }
-
-        assert left.getType() != Type.VOID && right.getType() != Type.VOID;
-
-        assert left.getType() == Type.PRIMITIVE || left.getType() == Type.ARRAY;
-        assert right.getType() == Type.PRIMITIVE || right.getType() == Type.ARRAY;
-
-        if (left.getType() == Type.PRIMITIVE && right.getType() == Type.PRIMITIVE) {
-            return left.equals(right);
-        } else if (left.getType() == Type.ARRAY && right.getType() == Type.ARRAY) {
-            ArrayType l = (ArrayType) left;
-            ArrayType r = (ArrayType) right;
-            return isSubtype(l.child, r.child);
-        }
-
-        return false;
-    }
-
-    private static boolean isEqual(ExpandedType left, ExpandedType right) {
-        return isSubtype(left, right) && isSubtype(right, left);
-    }
+//    private static boolean isSubtype(ExpandedType left, ExpandedType right) {
+//        // Warning: the order of comparisons in this method is delicate and
+//        // a lot of thought was put into this. Please be careful editing this
+//        // method.
+//        
+//        return left.isSubtypeOf(right);
+//    }
 
     private static Optional<ExpandedType> supertypeOf(ExpandedType left,
                                                       ExpandedType right) {
-        if (isSubtype(left, right)) {
+        if (left.isSubtypeOf(right)) {
             return Optional.of(right);
-        } else if (isSubtype(right, left)) {
+        } else if (right.isSubtypeOf(left)) {
             return Optional.of(left);
         } else {
             return Optional.empty();
@@ -141,32 +84,18 @@ public class TypeCheckVisitor extends
         if (context.contains(functionName)) {
             throw new SemanticException("Duplicate name: " + functionName);
         }
-        List<VarDeclNode> arguments = n.args;
-        ExpandedType input;
-        if (arguments.size() == 0) {
-            input = UnitType.UNIT;
-        } else if (arguments.size() == 1) {
-            input = arguments.get(0).accept(this).assertFirst();
-            assert(input.isOrdinary());
-        } else {
-            input = new TupleType(arguments
-                    .stream()
-                    .map(v -> v.typeExpr.accept(this).assertFirst())
-                    .collect(Collectors.toList()));
-        }
-        List<TypeExprNode> returnTypes = n.returnTypes;
-        ExpandedType output;
-        if (returnTypes.size() == 0) {
-            output = UnitType.UNIT;
-        } else if (returnTypes.size() == 1) {
-            output = returnTypes.get(0).accept(this).assertFirst();
-            assert(output.isOrdinary());
-        } else {
-            output = new TupleType(returnTypes
-                    .stream()
-                    .map(v -> v.accept(this).assertFirst())
-                    .collect(Collectors.toList()));
-        }
+        
+        ExpandedType input = new ExpandedType(n.args.stream().map(v -> {
+            ExpandedType t = v.accept(this).assertFirst();
+            assert(t.isOrdinary());
+            return t.getOrdinaryType();
+        }).collect(Collectors.toList()));
+        
+        ExpandedType output = new ExpandedType(n.returnTypes.stream().map(v -> {
+            ExpandedType t = v.accept(this).assertFirst();
+            assert(t.isOrdinary());
+            return t.getOrdinaryType();
+        }).collect(Collectors.toList()));
         FunctionType functionType = new FunctionType(input, output);
         context.addFn(functionName, functionType);
         return OneOfTwo.ofSecond(ResultType.UNIT);
@@ -200,13 +129,18 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(PrimitiveTypeNode n) {
+        ExpandedType t;
         switch (n.type) {
         case BOOL:
-            return OneOfTwo.ofFirst(PrimitiveType.BOOL);
+            t = new ExpandedType(new PrimitiveType(OrdinaryType.Type.BOOL));
+            break;
         case INT:
-            return OneOfTwo.ofFirst(PrimitiveType.INT);
+            t = new ExpandedType(new PrimitiveType(OrdinaryType.Type.INT));
+            break;
+         default:
+            throw new SemanticException("Found unknown primitive type");
         }
-        throw new SemanticException("Found unknown primitive type");
+        return OneOfTwo.ofFirst(t);
     }
 
     @Override
@@ -214,16 +148,17 @@ public class TypeCheckVisitor extends
         ExpandedType type = n.child.accept(this).assertFirst();
         if (n.size.isPresent()) {
             ExpandedType sizeType = n.size.get().accept(this).assertFirst();
-            if (!isSubtype(sizeType, PrimitiveType.INT)) {
+            if (!sizeType.isSubtypeOfInt()) {
                 throw new SemanticException("Size of array is not an integer");
             }
         }
-        if (type.isOrdinary()) {
-            return OneOfTwo.ofFirst(new ArrayType((OrdinaryType)type));
-        } else {
+        
+        if (!type.isOrdinary()) {
             throw new SemanticException("Expected an array of primitives or"
-                    + " of arrays, but found an array of tuples");
+                    + " of arrays, but found an array of tuples");            
         }
+        return OneOfTwo.ofFirst(
+                new ExpandedType(new ArrayType(type.getOrdinaryType())));
     }
 
     
@@ -231,13 +166,12 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayAccessNode n) {
-        ExpandedType arrayType = n.index.accept(this).assertFirst();
+        ExpandedType arrayType = n.child.accept(this).assertFirst();
         ExpandedType indexType = n.index.accept(this).assertFirst();
 
-        if (arrayType.getType() == Type.ARRAY
-            && isSubtype(indexType, PrimitiveType.INT)) {
-            ArrayType actualArrayType = (ArrayType) arrayType;
-            return OneOfTwo.ofFirst(actualArrayType.child);
+        if (arrayType.isArray() && indexType.isSubtypeOfInt()) {
+            ArrayType actualArrayType = arrayType.getArrayType();
+            return OneOfTwo.ofFirst(new ExpandedType(actualArrayType.child));
         }
         throw new SemanticException();
     }
@@ -246,9 +180,8 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(VariableAccessNode n) {
         Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
         if (optionalVar.isPresent()) {
-            return OneOfTwo.ofFirst(optionalVar.get());
+            return OneOfTwo.ofFirst(new ExpandedType(optionalVar.get()));
         }
-
         throw new SemanticException();
     }
 

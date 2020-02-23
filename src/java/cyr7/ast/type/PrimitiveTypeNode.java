@@ -30,14 +30,4 @@ public final class PrimitiveTypeNode extends TypeExprNode {
         return false;
     }
 
-    @Override
-    public OrdinaryType typeCheck(Context c) throws SemanticException {
-        switch (type) {
-        case BOOL:
-            return PrimitiveType.BOOL;
-        case INT:
-            return PrimitiveType.INT;
-        }
-        throw new SemanticException("Unexpected type check");
-    }
 }

@@ -21,4 +21,11 @@ public class ArrayType implements OrdinaryType {
         return false;
     }
 
+    @Override
+    public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
+        if (expectedSupertype instanceof ArrayType) {
+            return this.child.isSubtypeOf(((ArrayType)expectedSupertype).child);
+        }
+        return false;
+    }
 }
