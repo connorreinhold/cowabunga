@@ -172,3 +172,10 @@ buildNumber.properties
 .project
 .settings/
 bin/
+
+
+# CLI-generated files
+*.lexed
+*.parsed
+*.typed
+
