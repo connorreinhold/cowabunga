@@ -256,7 +256,7 @@ public class TypeCheckVisitor extends
         ExpandedType guardType = n.guard.accept(this).assertFirst();
         context.pop();
 
-        if (!isSubtype(guardType, PrimitiveType.BOOL)) {
+        if (!guardType.isSubtypeOfBool()) {
             throw new SemanticException(
                     "Guard expression does not evaluate to bool");
         }
@@ -269,7 +269,8 @@ public class TypeCheckVisitor extends
             context.push();
             ResultType elseType = n.elseBlock.get().accept(this).assertSecond();
             context.pop();
-            return OneOfTwo.ofSecond(ResultType.leastUpperBound(ifType, elseType));
+            return OneOfTwo.ofSecond(
+                        ResultType.leastUpperBound(ifType, elseType));
         } else {
             return OneOfTwo.ofSecond(ifType);
         }
@@ -282,31 +283,28 @@ public class TypeCheckVisitor extends
             throw new SemanticException("Expected function call, but found a "
                     + "procedure instead.");
         }
-        TupleType tupleType = (TupleType)types;
-        List<ExpandedType> typeList = tupleType.elements;
+        List<OrdinaryType> typeList = types.getTypes();
         List<Optional<VarDeclNode>> varDecls = n.varDecls;
         if (typeList.size() != varDecls.size()) {
             throw new SemanticException("Number of variable declarations and "
                     + "function return values do not match");
         }
-        
-        Iterator<ExpandedType> typeIterator = typeList.iterator();
+        Iterator<OrdinaryType> typeIterator = typeList.iterator();
         Iterator<Optional<VarDeclNode>> declIterator = varDecls.iterator();
-        while(typeIterator.hasNext() && declIterator.hasNext() ) {
-            ExpandedType returnedType = typeIterator.next();
+        while(typeIterator.hasNext() && declIterator.hasNext()) {
+            OrdinaryType returnedType = typeIterator.next();
             Optional<VarDeclNode> maybeVarDecl = declIterator.next();
-            
             if (maybeVarDecl.isPresent()) {
                 VarDeclNode varDecl = maybeVarDecl.get();
                 ExpandedType varDeclType = varDecl.accept(this).assertFirst();
-                assert(returnedType.isOrdinary() && varDeclType.isOrdinary());
-                if (isSubtype(returnedType, varDeclType)) {
-                    context.addVar(varDecl.identifier, 
-                                (OrdinaryType)varDeclType);
+                assert(varDeclType.isOrdinary());
+                OrdinaryType varDeclTrueType = varDeclType.getOrdinaryType();
+                if (returnedType.isSubtypeOf(varDeclTrueType)) {
+                    context.addVar(varDecl.identifier, varDeclTrueType);
                 } else {
                     throw new SemanticException("Mismatched types");
                 }
-            }
+            } // else is a wildcard and returned value is thrown away.
         }
         return OneOfTwo.ofSecond(ResultType.UNIT);
     }
@@ -314,7 +312,7 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ProcedureStmtNode n) {
         ExpandedType type = n.procedureCall.accept(this).assertFirst();
-        if (isEqual(type, UnitType.UNIT)) {
+        if (type.isUnit()) {
             return OneOfTwo.ofSecond(ResultType.UNIT);
         } else {
             throw new SemanticException("Expected a procedure but found a "
@@ -329,25 +327,28 @@ public class TypeCheckVisitor extends
         assert(maybeTypes.isPresent());
         ExpandedType expected = maybeTypes.get();
         ExpandedType exprType;
-
         switch (numOfValues) {
         case 0:
-            if (expected.equals(UnitType.UNIT)) {
+            if (expected.isUnit()) {
                 return OneOfTwo.ofSecond(ResultType.VOID);
             }
             break;
         case 1:
-            exprType = n.exprs.get(0).accept(this).assertFirst();
-            if (expected.equals(exprType)) {
-                return OneOfTwo.ofSecond(ResultType.VOID);
+            if (expected.isOrdinary()) {
+                exprType = n.exprs.get(0).accept(this).assertFirst();
+                if (exprType.isASubtypeOf(expected)) {
+                    return OneOfTwo.ofSecond(ResultType.VOID);
+                }
             }
             break;
         default:
-            exprType = new TupleType(
-                n.exprs.stream()
-                    .map(e -> e.accept(this).assertFirst())
-                    .collect(Collectors.toList()));
-            if (isSubtype(exprType, expected)) {
+            exprType = new ExpandedType(n.exprs.stream()
+                    .map(e -> {
+                        ExpandedType t = e.accept(this).assertFirst();
+                        assert(t.isOrdinary());
+                        return t.getOrdinaryType();
+                    }).collect(Collectors.toList()));
+            if (exprType.isASubtypeOf(expected)) {
                 return OneOfTwo.ofSecond(ResultType.VOID);
             }
             break;
@@ -373,7 +374,7 @@ public class TypeCheckVisitor extends
         ExpandedType varDeclType = varDecl.accept(this).assertFirst();
         ExpandedType initializedType = n.initializer.accept(this).assertFirst();
         
-        if (isSubtype(initializedType, varDeclType)) {
+        if (initializedType.isASubtypeOf(varDeclType)) {
             assert(varDeclType.isOrdinary() && initializedType.isOrdinary());
             context.addVar(varDecl.identifier, (OrdinaryType)varDeclType);
             return OneOfTwo.ofSecond(ResultType.UNIT);
@@ -385,7 +386,7 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(WhileStmtNode n) {
         ExpandedType guardType = n.guard.accept(this).assertFirst();
-        if (!isSubtype(guardType, PrimitiveType.BOOL)){
+        if (!guardType.isSubtypeOfBool()) {
             throw new SemanticException("Guard expression does "
                     + "not evaluate to bool");
         }
@@ -403,11 +404,9 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
-        if (isSubtype(left, PrimitiveType.INT)
-            && isSubtype(right, PrimitiveType.INT)) {
-            return PrimitiveType.INT;
+        if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
+            return PrimitiveType.makeInt();
         }
-
         throw new SemanticException();
     }
 
@@ -415,9 +414,8 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
-        if (isSubtype(left, PrimitiveType.BOOL)
-            && isSubtype(right, PrimitiveType.BOOL)) {
-            return PrimitiveType.BOOL;
+        if (left.isSubtypeOfBool() && right.isSubtypeOfBool()) {
+            return PrimitiveType.makeBool();
         }
 
         throw new SemanticException();
@@ -427,9 +425,8 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.accept(this).assertFirst();
         ExpandedType right = n.accept(this).assertFirst();
 
-        if (isSubtype(left, PrimitiveType.INT)
-            && isSubtype(right, PrimitiveType.INT)) {
-            return PrimitiveType.BOOL;
+        if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
+            return PrimitiveType.makeInt();
         }
 
         throw new SemanticException();
