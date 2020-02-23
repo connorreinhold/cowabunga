@@ -67,7 +67,7 @@ public class ExpandedType implements AnyType {
      * @param supertypeSet 
      * @return
      */
-    public boolean isSubtypeOf(ExpandedType supertypeSet) {
+    public boolean isASubtypeOf(ExpandedType supertypeSet) {
         if (this.types.size() != supertypeSet.types.size()) {
             return false;
         }
@@ -124,11 +124,11 @@ public class ExpandedType implements AnyType {
     }
         
     public boolean isSubtypeOfInt() {
-        return this.isSubtypeOf(ExpandedType.intType);
+        return this.isASubtypeOf(ExpandedType.intType);
     }
 
     public boolean isSubtypeOfBool() {
-        return this.isSubtypeOf(ExpandedType.boolType);
+        return this.isASubtypeOf(ExpandedType.boolType);
     }
 
     

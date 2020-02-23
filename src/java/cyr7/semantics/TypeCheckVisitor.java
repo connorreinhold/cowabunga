@@ -54,9 +54,9 @@ public class TypeCheckVisitor extends
 
     private static Optional<ExpandedType> supertypeOf(ExpandedType left,
                                                       ExpandedType right) {
-        if (left.isSubtypeOf(right)) {
+        if (left.isASubtypeOf(right)) {
             return Optional.of(right);
-        } else if (right.isSubtypeOf(left)) {
+        } else if (right.isASubtypeOf(left)) {
             return Optional.of(left);
         } else {
             return Optional.empty();
@@ -211,11 +211,11 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(AssignmentStmtNode n) {
         ExpandedType lhsType = n.access.accept(this).assertFirst();
         ExpandedType rhsType = n.value.accept(this).assertFirst();
-        if (isSubtype(lhsType, rhsType)) {
+        
+        if (rhsType.isASubtypeOf(lhsType)) {
             return OneOfTwo.ofSecond(ResultType.UNIT);
-        } else {
-            throw new SemanticException("Inequivalent type assignment");
         }
+        throw new SemanticException("Inequivalent type assignment");
     }
 
     @Override
