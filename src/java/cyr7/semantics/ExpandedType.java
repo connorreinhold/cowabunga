@@ -10,6 +10,10 @@ public class ExpandedType implements AnyType {
                 new ExpandedType(PrimitiveType.boolType);
     final public static ExpandedType intType = 
             new ExpandedType(PrimitiveType.intType);
+    final public static ExpandedType unitOrdinaryType = 
+            new ExpandedType(UnitType.value);
+    final public static ExpandedType voidOrdinaryType = 
+            new ExpandedType(VoidType.value);
 
     final private List<OrdinaryType> types;
     

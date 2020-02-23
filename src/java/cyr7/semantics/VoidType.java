@@ -3,6 +3,9 @@ package cyr7.semantics;
 public class VoidType extends OrdinaryType {
     // The empty array {} is an array type of ArrayType(VoidType.VOID)
 
+    public static final VoidType value = new VoidType();
+    private VoidType() {}
+    
     @Override
     public Type getType() {
         return Type.VOID;

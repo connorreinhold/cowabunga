@@ -435,7 +435,7 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayExprNode n) {
         if (n.arrayVals.size() == 0) {
             return OneOfTwo.ofFirst(new ExpandedType(
-                    new ArrayType(new VoidType())));
+                    new ArrayType(VoidType.value)));
         }
         // arrayType is the supertype of the first 0...i array values
         Optional<ExpandedType> arrayType = Optional.empty();
