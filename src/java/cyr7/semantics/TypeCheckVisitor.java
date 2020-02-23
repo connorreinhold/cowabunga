@@ -52,6 +52,11 @@ public class TypeCheckVisitor extends
 //        return left.isSubtypeOf(right);
 //    }
 
+    /**
+     * Returns the supertype of two types, if such a relation exists.
+     * @return Empty if there is typing relation between {@code left}
+     * and {@code right}.
+     */
     private static Optional<ExpandedType> supertypeOf(ExpandedType left,
                                                       ExpandedType right) {
         if (left.isASubtypeOf(right)) {
@@ -435,73 +440,49 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayExprNode n) {
         if (n.arrayVals.size() == 0) {
-            return OneOfTwo.ofFirst(new ArrayType(VoidType.VOID));
+            return OneOfTwo.ofFirst(new ExpandedType(
+                    new ArrayType(new VoidType())));
         }
-
         // arrayType is the supertype of the first 0...i array values
-        ExpandedType arrayType = n.arrayVals.get(0).accept(this).assertFirst();
-
-        for (int i = 1; i < n.arrayVals.size(); i++) {
-            ExpandedType valueType = n.arrayVals.get(i).accept(this).assertFirst();
-            Optional<ExpandedType> possibleSupertype = supertypeOf(arrayType, valueType);
-
-            if (possibleSupertype.isEmpty()) {
-                // type mismatch within array
-                throw new SemanticException();
+        Optional<ExpandedType> arrayType = Optional.empty();
+        List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
+            return e.accept(this).assertFirst();
+        }).collect(Collectors.toList());
+        for (ExpandedType t: arrayTypes) {
+            if (arrayType.isEmpty()) {
+                arrayType = Optional.of(t);
+            } else {
+                Optional<ExpandedType> possibleSupertype = 
+                        supertypeOf(arrayType.get(), t);
+                if (possibleSupertype.isEmpty()) {
+                    throw new SemanticException("Mismatch types in array");
+                } else {
+                    arrayType = possibleSupertype;
+                }
             }
-
-            arrayType = possibleSupertype.get();
         }
-
-        return OneOfTwo.ofFirst(arrayType);
+        assert(arrayType.isPresent());
+        return OneOfTwo.ofFirst(arrayType.get());
     }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(FunctionCallExprNode n) {
         Optional<FunctionType> optionalFn = context.getFn(n.identifier);
         if (optionalFn.isEmpty()) {
-            throw new SemanticException();
+            throw new SemanticException("Function does not exist");
         }
-
         FunctionType function = optionalFn.get();
-
-        if (function.input.getType() == Type.UNIT) {
-            // Function requires no arguments
-            if (n.parameters.isEmpty()) {
-                return OneOfTwo.ofFirst(function.output);
-            } else {
-                throw new SemanticException();
-            }
-
-        } else if (function.input.isOrdinary()) {
-            // Function requires one argument
-            if (n.parameters.size() != 1) {
-                throw new SemanticException();
-            }
-
-            ExpandedType parameterType = n.parameters.get(0).accept(this).assertFirst();
-            if (isSubtype(parameterType, function.input)) {
-                return OneOfTwo.ofFirst(function.output);
-            } else {
-                throw new SemanticException();
-            }
-
-        } else if (function.input.getType() == Type.TUPLE) {
-            // Function requires multiple arguments
-            TupleType expected = (TupleType) function.input;
-            TupleType actual = new TupleType(
-                n.parameters.stream()
-                    .map(e -> e.accept(this).assertFirst())
-                    .collect(Collectors.toList()));
-
-            if (isSubtype(actual, expected)) {
-                return OneOfTwo.ofFirst(function.output);
-            } else {
-                throw new SemanticException();
-            }
+        ExpandedType inputTypes = function.input;
+        ExpandedType params = new ExpandedType(n.parameters.stream()
+                .map(e -> e.accept(this).assertFirst().getOrdinaryType())
+                .collect(Collectors.toList()));
+        
+        if (params.isASubtypeOf(inputTypes)) {
+            return OneOfTwo.ofFirst(function.output);
+        } else {
+            throw new SemanticException("Parameter types do not match types "
+                    + "specified by function");
         }
-
-        throw new SemanticException();
     }
 
     @Override

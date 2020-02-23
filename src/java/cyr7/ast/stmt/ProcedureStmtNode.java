@@ -8,6 +8,8 @@ import java_cup.runtime.ComplexSymbolFactory;
 /**
  * Represents a call to a procedure [procedureCall], which is a 
  * FunctionCallExprNode with return type unit.
+ * <p>
+ * Example:
  */
 public final class ProcedureStmtNode extends AbstractNode implements StmtNode {
     
