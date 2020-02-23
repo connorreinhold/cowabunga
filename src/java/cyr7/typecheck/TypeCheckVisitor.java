@@ -199,7 +199,7 @@ public class TypeCheckVisitor extends
                     + "non-array type instead");
         }
         if (expectedArray.isOrdinary()) {
-            context.addVar(n.identifier, (OrdinaryType)expectedArray);
+            context.addVar(n.identifier, expectedArray.getOrdinaryType());
             return OneOfTwo.ofSecond(ResultType.UNIT);
         } else {
             throw new SemanticException("Expected an array or primitive, but "
@@ -361,7 +361,7 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(VarDeclStmtNode n) {
         ExpandedType type = n.varDecl.accept(this).assertFirst();
         if (type.isOrdinary()) {
-            context.addVar(n.varDecl.identifier, (OrdinaryType) type);
+            context.addVar(n.varDecl.identifier, type.getOrdinaryType());
             return OneOfTwo.ofSecond(ResultType.UNIT);
         } else {
             throw new SemanticException();
@@ -376,7 +376,7 @@ public class TypeCheckVisitor extends
         
         if (initializedType.isASubtypeOf(varDeclType)) {
             assert(varDeclType.isOrdinary() && initializedType.isOrdinary());
-            context.addVar(varDecl.identifier, (OrdinaryType)varDeclType);
+            context.addVar(varDecl.identifier, varDeclType.getOrdinaryType());
             return OneOfTwo.ofSecond(ResultType.UNIT);
         } else {
             throw new SemanticException("Mismatched types");
