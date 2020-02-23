@@ -3,12 +3,27 @@ package cyr7.cli;
 import cyr7.lexer.LexerUtil;
 
 import cyr7.parser.ParserUtil;
-import org.apache.commons.cli.*;
+import cyr7.typecheck.TypeCheckUtil;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 public class CLI {
 
@@ -294,12 +309,14 @@ public class CLI {
             	continue;
             }
 
+            Reader input = null;
+            Writer output = null;
             if (wantsLexing) {
                 debugPrint("Lexing file: " + filename);
 
                 try {
-                    Reader input = getReader(filename);
-                    Writer output = getWriter(filename, "lexed");
+                    input = getReader(filename, isIXI);
+                    output = getWriter(filename, "lexed");
                     LexerUtil.lex(input, output);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -309,8 +326,8 @@ public class CLI {
             if (wantsParsing) {
                 debugPrint("Parsing file: " + filename);
                 try {
-                    Reader input = getReader(filename);
-                    Writer output = getWriter(filename, "parsed");
+                    input = getReader(filename, isIXI);
+                    output = getWriter(filename, "parsed");
                     ParserUtil.parse(input, output, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -320,21 +337,37 @@ public class CLI {
             if (wantsTypechecking) {
                 debugPrint("Typechecking file: " + filename);
                 try {
-                    Reader input = getReader(filename);
-                    Writer output = getWriter(filename, "typed");
-                    // Insert Typechecker here
+                    input = getReader(filename, isIXI);
+                    output = getWriter(filename, "typed");
+                    TypeCheckUtil.typeCheck(input, output, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
             }
+            
+            if (input != null && output != null) {
+                try {
+                    output.close();
+                    input.close();
+                } catch (IOException e) {
+                    writer.write("Unexpected error occurred when closing "
+                            + "io stream.");
+                }
+            }
+            
         }
-
         writer.flush();
         writer.close();
     }
 
-    private static Reader getReader(String filename) throws IOException {
-        Path sourcePath = Paths.get(sourceRoot.getAbsolutePath(), filename);
+    private static Reader getReader(String filename, boolean isIXI) 
+            throws IOException {
+        Path sourcePath;
+        if (isIXI) {
+            sourcePath = Paths.get(libRoot.getAbsolutePath(), filename);
+        } else {
+            sourcePath = Paths.get(sourceRoot.getAbsolutePath(), filename);
+        }
         debugPrint("Opening reader to: " + sourcePath);
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
