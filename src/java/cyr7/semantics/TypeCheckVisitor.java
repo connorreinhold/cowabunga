@@ -29,28 +29,6 @@ public class TypeCheckVisitor extends
     AbstractVisitor<OneOfTwo<ExpandedType, ResultType>> {
 
     /**
-     * Returns true iff left <= right where (<=) is the subtype relation.
-     * <p>
-     * Note that the subtype relation (and therefore this function) is not
-     * antisymmetric, i.e. it may be the case that lhs <= rhs is false AND
-     * rhs <= lhs is false.
-     * <p>
-     * However, the subtype relation is reflexive, meaning
-     * lhs <= rhs and rhs <= lhs implies lhs == rhs.
-     *
-     * @param left  the lhs type
-     * @param right the rhs type
-     * @return true iff lhs <= rhs
-     */
-//    private static boolean isSubtype(ExpandedType left, ExpandedType right) {
-//        // Warning: the order of comparisons in this method is delicate and
-//        // a lot of thought was put into this. Please be careful editing this
-//        // method.
-//        
-//        return left.isSubtypeOf(right);
-//    }
-
-    /**
      * Returns the supertype of two types, if such a relation exists.
      * @return Empty if there is typing relation between {@code left}
      * and {@code right}.

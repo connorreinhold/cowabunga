@@ -4,14 +4,12 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import cyr7.semantics.ExpandedType.Type;
-
 public class ExpandedType implements AnyType {
     
     final public static ExpandedType boolType = 
-                new ExpandedType(PrimitiveType.makeBool());
+                new ExpandedType(PrimitiveType.boolType);
     final public static ExpandedType intType = 
-            new ExpandedType(PrimitiveType.makeInt());
+            new ExpandedType(PrimitiveType.intType);
 
     final private List<OrdinaryType> types;
     
