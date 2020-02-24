@@ -271,7 +271,7 @@ public class TypeCheckVisitor extends
             return OneOfTwo.ofSecond(
                         ResultType.leastUpperBound(ifType, elseType));
         } else {
-            return OneOfTwo.ofSecond(ifType);
+            return OneOfTwo.ofSecond(ResultType.UNIT);
         }
     }
 
