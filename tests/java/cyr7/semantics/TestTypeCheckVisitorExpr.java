@@ -39,7 +39,7 @@ import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
-class TypeCheckVisitorExprTests {
+class TestTypeCheckVisitorExpr {
 
     Context context;
     TypeCheckVisitor visitor;

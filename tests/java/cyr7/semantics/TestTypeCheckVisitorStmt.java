@@ -38,7 +38,7 @@ import cyr7.exceptions.SemanticException;
 import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfTwo;
 
-class TypeCheckVisitorStmtTests {
+class TestTypeCheckVisitorStmt {
 
     Context context;
     TypeCheckVisitor visitor;
