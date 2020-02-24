@@ -1,9 +1,10 @@
 package cyr7.typecheck;
 
-import cyr7.ast.ArrayAccessNode;
+import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.VariableAccessNode;
-import cyr7.ast.expr.ArrayExprNode;
+import cyr7.ast.expr.ArrayLiteralAccessExprNode;
+import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
@@ -159,7 +160,7 @@ public class TypeCheckVisitor extends
         
         if (!type.isOrdinary()) {
             throw new SemanticException("Expected an array of primitives or"
-                    + " of arrays, but found an array of tuples");            
+                    + " of arrays, but found an array of tuples");
         }
         return OneOfTwo.ofFirst(
                 new ExpandedType(new ArrayType(type.getOrdinaryType())));
@@ -169,7 +170,7 @@ public class TypeCheckVisitor extends
     // Statement and Expr
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayAccessNode n) {
+    public OneOfTwo<ExpandedType, ResultType> visit(ArrayVariableAccessNode n) {
         ExpandedType arrayType = n.child.accept(this).assertFirst();
         ExpandedType indexType = n.index.accept(this).assertFirst();
 
@@ -405,7 +406,7 @@ public class TypeCheckVisitor extends
     // Expression
     
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayExprNode n) {
+    public OneOfTwo<ExpandedType, ResultType> visit(ArrayLiteralExprNode n) {
         if (n.arrayVals.size() == 0) {
             return OneOfTwo.ofFirst(new ExpandedType(
                     new ArrayType(OrdinaryType.voidType)));
@@ -518,9 +519,12 @@ public class TypeCheckVisitor extends
         ExpandedType right = n.right.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
-            return OneOfTwo.ofFirst(ExpandedType.intType);
+            Optional<ExpandedType> supertype = supertypeOf(left, right);
+            if (supertype.isPresent()) {
+                return OneOfTwo.ofFirst(supertype.get());
+            }
         }
-        if (left.isArray() && right.isArray()) {
+        if (left.isSubtypeOfArray() && right.isSubtypeOfArray()) {
             Optional<ExpandedType> supertype = supertypeOf(left, right);
             if (supertype.isPresent()) {
                 return OneOfTwo.ofFirst(supertype.get());
@@ -632,6 +636,19 @@ public class TypeCheckVisitor extends
             return OneOfTwo.ofFirst(ExpandedType.intType);
         }
 
+        throw new SemanticException();
+    }
+
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(
+            ArrayLiteralAccessExprNode n) {
+        ExpandedType arrayType = n.child.accept(this).assertFirst();
+        ExpandedType indexType = n.index.accept(this).assertFirst();
+
+        if (arrayType.isArray() && indexType.isSubtypeOfInt()) {
+            ArrayType actualArrayType = arrayType.getArrayType();
+            return OneOfTwo.ofFirst(new ExpandedType(actualArrayType.child));
+        }
         throw new SemanticException();
     }
 }

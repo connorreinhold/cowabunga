@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Optional;
 
-final class SExpVisitor extends AbstractVisitor<Void> {
+public final class SExpVisitor extends AbstractVisitor<Void> {
 
     private final SExpPrinter printer;
 
@@ -161,7 +161,7 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(ArrayAccessNode n) {
+    public Void visit(ArrayVariableAccessNode n) {
         printer.startList();
         printer.printAtom("[]");
         n.child.accept(this);
@@ -306,7 +306,7 @@ final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(ArrayExprNode n) {
+    public Void visit(ArrayLiteralExprNode n) {
         printer.startList();
         for (ExprNode e : n.arrayVals) {
             e.accept(this);
@@ -463,6 +463,17 @@ final class SExpVisitor extends AbstractVisitor<Void> {
         n.left.accept(this);
         n.right.accept(this);
         printer.endList();
+    }
+
+    @Override
+    public Void visit(ArrayLiteralAccessExprNode n) {
+        printer.startList();
+        printer.printAtom("[]");
+        n.child.accept(this);
+        n.index.accept(this);
+        printer.endList();
+
+        return null;
     }
 
 }

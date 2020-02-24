@@ -1,6 +1,6 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.expr.ArrayExprNode;
+import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.ProcedureStmtNode;
@@ -33,7 +33,7 @@ public class TestProcedureStatememt {
                 null,
                 "length",
                 List.of(
-                    new ArrayExprNode(
+                    new ArrayLiteralExprNode(
                         null,
                         List.of(
                             new LiteralIntExprNode(
