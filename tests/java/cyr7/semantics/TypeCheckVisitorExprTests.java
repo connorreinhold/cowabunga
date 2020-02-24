@@ -39,12 +39,13 @@ import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
-class TypeCheckVisitorTests {
+class TypeCheckVisitorExprTests {
 
     Context context;
     TypeCheckVisitor visitor;
     Node node;
     OneOfTwo<ExpandedType, ResultType> result;
+
     @Test
     void testIntNegExprNode() {
         context = new HashMapStackContext();

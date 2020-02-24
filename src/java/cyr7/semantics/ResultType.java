@@ -17,4 +17,5 @@ public enum ResultType implements AnyType {
             return VOID;
         }
 	}
+	
 }
