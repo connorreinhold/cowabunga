@@ -952,6 +952,7 @@ class TypeCheckVisitorExprTests {
                 new ExpandedType(
                         new ArrayType(new ArrayType(OrdinaryType.intType)))));
 
+        
         node = new ArrayExprNode(null, List.of());
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
@@ -1097,6 +1098,82 @@ class TypeCheckVisitorExprTests {
 
         node = new FunctionCallExprNode(null, "genMany", 
                 List.of(new LiteralStringExprNode(null, "Bad Input")));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+    }
+    
+    
+    @Test
+    void testAccessNodes() {
+
+        context = new HashMapStackContext();
+        visitor = new TypeCheckVisitor(context);
+        
+        context.addVar("cash", OrdinaryType.intType);
+        node = new VariableAccessNode(null, "cash");
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        
+        context.addVar("empty", new ArrayType(OrdinaryType.intType));
+        node = new ArrayAccessNode(null, 
+                new VariableAccessNode(null, "empty"), 
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        
+        
+        node = new VariableAccessNode(null, "empty");
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        
+        
+        node = new ArrayAccessNode(null, 
+                new VariableAccessNode(null, "empty"), 
+                new LiteralBoolExprNode(null, true));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        
+        node = new ArrayAccessNode(null, 
+                new VariableAccessNode(null, "empty"), 
+                new LiteralStringExprNode(null, "this is not a number"));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        
+        node = new ArrayAccessNode(null, 
+                new ArrayAccessNode(
+                        null,
+                        new VariableAccessNode(null, "empty"), 
+                        new LiteralIntExprNode(null, "0")),
+                new LiteralIntExprNode(null, "0"));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        
+        context.addVar("twoDimensionMap", new ArrayType(
+                new ArrayType(OrdinaryType.intType)));
+        node = new ArrayAccessNode(null, 
+                new VariableAccessNode(null, "twoDimensionMap"), 
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertTrue(result.assertFirst().getArrayType().child.isInt());
+
+        
+        node = new ArrayAccessNode(null, 
+                new ArrayAccessNode(
+                        null,
+                        new VariableAccessNode(null, "twoDimensionMap"), 
+                        new LiteralIntExprNode(null, "0")),
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+
+        
+        node = new ArrayAccessNode(null, 
+                new ArrayAccessNode(
+                        null,
+                        new VariableAccessNode(null, "twoDimensionMap"), 
+                        new LiteralIntExprNode(null, "0")),
+                new LiteralStringExprNode(null, "NaN"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
     }

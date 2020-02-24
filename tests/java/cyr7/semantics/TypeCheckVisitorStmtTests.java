@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
+import cyr7.ast.VariableAccessNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
@@ -67,6 +68,20 @@ class TypeCheckVisitorStmtTests {
                         List.of(new LiteralIntExprNode(null, "1000"))));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
 
+    }
+    
+    @Test
+    void testAssignmentStmtNode() {
+        context = new HashMapStackContext();
+        context.addVar("cash", OrdinaryType.intType);
+        visitor = new TypeCheckVisitor(context);
+        
+        node = new AssignmentStmtNode(null, 
+                new VariableAccessNode(null, "cash"), 
+                new LiteralIntExprNode(null, "123"));
+        result = node.accept(visitor);
+        assertEquals(result.assertSecond(), ResultType.UNIT);
+        
     }
     
     @Test
@@ -133,19 +148,6 @@ class TypeCheckVisitorStmtTests {
         return OneOfTwo.ofSecond(ResultType.UNIT);
     }
 
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ExprStmtNode n) {
-        ExpandedType type = n.expr.accept(this).assertFirst();
-        if (type.isOrdinary()) {
-            return OneOfTwo.ofSecond(ResultType.UNIT);
-        } else if (type.isTuple()) {
-            throw new SemanticException("Expected a single return value, but "
-                    + "found a tuple");
-        } else {
-            throw new SemanticException("Expected a function, but found "
-                    + "a procedure");
-        }
-    }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(IfElseStmtNode n) {
