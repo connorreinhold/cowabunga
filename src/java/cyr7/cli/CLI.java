@@ -313,7 +313,6 @@ public class CLI {
             Writer output = null;
             if (wantsLexing) {
                 debugPrint("Lexing file: " + filename);
-
                 try {
                     input = getReader(filename, isIXI);
                     output = getWriter(filename, "lexed");
@@ -321,6 +320,7 @@ public class CLI {
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
             }
 
             if (wantsParsing) {
@@ -332,6 +332,7 @@ public class CLI {
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
             }
             
             if (wantsTypechecking) {
@@ -343,19 +344,8 @@ public class CLI {
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
             }
-            
-            if (input != null && output != null) {
-                try {
-                    output.flush();
-                    output.close();
-                    input.close();
-                } catch (IOException e) {
-                    writer.write("Unexpected error occurred when closing "
-                            + "io stream.");
-                }
-            }
-            
         }
         writer.flush();
         writer.close();
@@ -390,6 +380,21 @@ public class CLI {
         return new BufferedWriter(new FileWriter(dest));
     }
 
+    
+    private static void closeIOStreams(Reader input, Writer output) {
+        if (input != null && output != null) {
+            try {
+                output.flush();
+                output.close();
+                input.close();
+            } catch (IOException e) {
+                writer.write("Unexpected error occurred when closing "
+                        + "io stream.");
+            }
+        }
+    }
+    
+    
     private static void debugPrint(Object v) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + v);
