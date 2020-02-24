@@ -70,6 +70,11 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(FunctionDeclNode n) {
         ExpandedType outputTypes = n.header.accept(this).assertFirst();
         context.push();
+        n.header.args.forEach(v -> {
+            ExpandedType t = v.accept(this).assertFirst();
+            assert(t.isOrdinary());
+            context.addVar(v.identifier, t.getOrdinaryType());
+        });
         context.addRet(outputTypes);
         n.block.accept(this);
         context.pop();
