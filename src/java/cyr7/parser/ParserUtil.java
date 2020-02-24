@@ -20,7 +20,6 @@ public class ParserUtil {
             AbstractNode node = (AbstractNode) p.parse().value;
             SExpVisitor visitor = new SExpVisitor(writer);
             node.accept(visitor);
-            visitor.flush();
         } catch (ParserException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
@@ -29,15 +28,12 @@ public class ParserUtil {
     public static void printSExpr(AbstractNode node) {
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
         node.accept(visitor);
-        visitor.flush();
     }
 
     public static String toSExpr(AbstractNode node) {
         StringWriter writer = new StringWriter();
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(writer));
         node.accept(visitor);
-        visitor.flush();
-        return writer.toString().trim();
+        return writer.toString().strip();
     }
-
 }

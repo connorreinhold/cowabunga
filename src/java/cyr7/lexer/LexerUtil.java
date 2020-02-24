@@ -31,9 +31,6 @@ public class LexerUtil {
             writer.append(e.getMessage())
                   .append(System.lineSeparator());
         }
-
-        writer.flush();
-
     }
 
     /**
