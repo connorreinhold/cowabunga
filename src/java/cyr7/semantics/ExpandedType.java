@@ -1,21 +1,148 @@
 package cyr7.semantics;
 
-public interface ExpandedType extends AnyType {
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
+import cyr7.util.Util;
+
+public class ExpandedType implements AnyType {
+    
+    final public static ExpandedType boolType = 
+                new ExpandedType(OrdinaryType.boolType);
+    final public static ExpandedType intType = 
+            new ExpandedType(OrdinaryType.intType);
+    final public static ExpandedType unitExpandedType = 
+            new ExpandedType();
+    final public static ExpandedType unitOrdinaryType = 
+            new ExpandedType(OrdinaryType.unitType);
+    final public static ExpandedType voidOrdinaryType = 
+            new ExpandedType(OrdinaryType.voidType);
+
+    
+    final private List<OrdinaryType> types;
+    
+    /**
+     * Creates a Unit ExpandedType.
+     */
+    private ExpandedType() {
+        this.types = Util.immutableCopy(List.of());
+    }
+    
+    /**
+     * Creates an OrdinaryType ExpandedType.
+     */
+    public ExpandedType(OrdinaryType type) {
+        this.types = Util.immutableCopy(List.of(type));
+    }
+    
+    
+    /**
+     * Creates a Tuple ExpandedType.
+     */
+    public ExpandedType(List<OrdinaryType> types) {
+        this.types = Util.immutableCopy(types);
+    }
+    
     enum Type {
-        PRIMITIVE, UNIT, TUPLE, ARRAY, VOID;
+        ORDINARY, TUPLE, UNIT;
+    }
+    
+    public List<OrdinaryType> getTypes() {
+        return this.types;
+    }
+    
+    
+    /**
+     * Returns {@code true} if {@code this} is a subtype of 
+     * {@code supertypeSet}. The following rules determine if ExpandedType x 
+     * is a subtype of ExpandedType y:
+     * 
+     * <ul>
+     * <li> If x and y are both Unit, then x is a subtype of y because 
+     * there are no ordinary types.</li> 
+     * <li> If x and y are both Ordinary, then x is a subtype of y if and
+     * only if the OrdinaryType of x is a subtype of the ordinary type of y.</li>
+     * <li> If x and y are both Tuples, then x is a subtype of y if and only if
+     * the size of x == size of y, and for each OrdinaryType x_i of x and each
+     * OrdinaryType y_i in y, x_i is a subtype of y_i. </li>
+     * <li> If size of x != size of y, then x is not a subtype of y.</li>
+     * </ul>.  
+     * 
+     * @param supertypeSet 
+     * @return
+     */
+    public boolean isASubtypeOf(ExpandedType supertypeSet) {
+        if (this.types.size() != supertypeSet.types.size()) {
+            return false;
+        }
+        
+        Iterator<OrdinaryType> expectedSubtype = this.types.iterator();
+        Iterator<OrdinaryType> expectedSupertype = supertypeSet.types.iterator();
+        
+        boolean isSubtype = true;
+        while (expectedSubtype.hasNext() && expectedSupertype.hasNext()) {
+            OrdinaryType subtype = expectedSubtype.next();
+            OrdinaryType supertype = expectedSupertype.next();
+            
+            isSubtype &= subtype.isSubtypeOf(supertype);
+        }
+        
+        return isSubtype;
+    }
+    
+    public Type getType() {
+        int size = this.types.size();
+        switch (size) {
+        case 0: return Type.UNIT;
+        case 1: return Type.ORDINARY;
+        default: return Type.TUPLE;
+        }
+    }
+    
+    public boolean isOrdinary() {
+        return this.types.size() == 1;
+    }
+    
+    public boolean isArray() {
+        return this.isOrdinary() && this.getOrdinaryType().isArray();
+    }
+   
+    
+    public OrdinaryType getOrdinaryType() {
+        assert(this.isOrdinary());
+        return this.types.get(0);
     }
 
-    Type getType();
-
-    default boolean isOrdinary() {
-        Type type = getType();
-        return type == Type.PRIMITIVE || type == Type.VOID || type == Type.ARRAY;
+    public ArrayType getArrayType() {
+        assert(this.isOrdinary() && this.isArray());
+        return (ArrayType)this.getOrdinaryType();
     }
 
-    default boolean isExpanded() {
-        Type type = getType();
-        return type == Type.TUPLE || type == Type.UNIT;
+    
+    public boolean isTuple() {
+        return this.types.size() >= 2;
+    }
+    
+    public boolean isUnit() {
+        return this.types.isEmpty();
+    }
+        
+    public boolean isSubtypeOfInt() {
+        return this.isASubtypeOf(ExpandedType.intType);
     }
 
+    public boolean isVoid() {
+        return this.isOrdinary() && this.getOrdinaryType().isVoid();
+    }
+    
+    public boolean isSubtypeOfArray() {
+        return this.isVoid() || this.isArray();
+    }
+
+    public boolean isSubtypeOfBool() {
+        return this.isASubtypeOf(ExpandedType.boolType);
+    }
+
+    
 }

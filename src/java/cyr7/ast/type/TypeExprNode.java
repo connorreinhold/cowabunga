@@ -2,9 +2,6 @@ package cyr7.ast.type;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.semantics.Context;
-import cyr7.semantics.OrdinaryType;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Collections;
@@ -47,8 +44,5 @@ public abstract class TypeExprNode extends AbstractNode {
         }
         return (TypeExprArrayNode) node;
     }
-
-    public abstract OrdinaryType typeCheck(Context c) throws SemanticException;
-
 
 }

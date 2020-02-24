@@ -1,12 +1,8 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.expr.ExprNode;
-import cyr7.exceptions.SemanticException;
-import cyr7.semantics.Context;
-import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.ExpandedType;
 import cyr7.visitor.AbstractVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Node that represents the expression [ExprNode left] % [ExprNode right], or
@@ -14,8 +10,7 @@ import java_cup.runtime.ComplexSymbolFactory;
  */
 public final class RemExprNode extends BinExprNode {
 
-    public RemExprNode(ComplexSymbolFactory.Location location, ExprNode left,
-            ExprNode right) {
+    public RemExprNode(Location location, ExprNode left, ExprNode right) {
         super(location, left, right);
     }
 

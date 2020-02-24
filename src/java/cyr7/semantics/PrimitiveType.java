@@ -1,11 +1,30 @@
 package cyr7.semantics;
 
-public enum PrimitiveType implements OrdinaryType {
-    INT, 
-    BOOL;
-
+public class PrimitiveType extends OrdinaryType {
+    
+    final private Type type;
+    
+    protected PrimitiveType(Type type) {
+        assert(type != Type.ARRAY);
+        this.type = type;
+    }
+    
     @Override
     public Type getType() {
-        return Type.PRIMITIVE;
+        return this.type;
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof PrimitiveType) {
+            return this.type.equals(((PrimitiveType)o).type);
+        }
+        return false;
+    }
+
+    @Override
+    public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
+        return expectedSupertype.isUnit() || 
+                    this.type == expectedSupertype.getType();
     }
 }

@@ -1,11 +1,6 @@
 package cyr7.ast.type;
 
-import cyr7.exceptions.SemanticException;
-import cyr7.semantics.Context;
-import cyr7.semantics.OrdinaryType;
-import cyr7.semantics.PrimitiveType;
 import cyr7.visitor.AbstractVisitor;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public final class PrimitiveTypeNode extends TypeExprNode {
@@ -30,14 +25,4 @@ public final class PrimitiveTypeNode extends TypeExprNode {
         return false;
     }
 
-    @Override
-    public OrdinaryType typeCheck(Context c) throws SemanticException {
-        switch (type) {
-        case BOOL:
-            return PrimitiveType.BOOL;
-        case INT:
-            return PrimitiveType.INT;
-        }
-        throw new SemanticException("Unexpected type check");
-    }
 }

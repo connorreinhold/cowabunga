@@ -1,11 +1,22 @@
 package cyr7.semantics;
 
-public enum VoidType implements OrdinaryType {
-    VOID // The empty array {} is an array type of ArrayType(VoidType.VOID)
-    ;
+public class VoidType extends OrdinaryType {
+    // The empty array {} is an array type of ArrayType(VoidType.VOID)
 
+    protected VoidType() {}
+    
     @Override
     public Type getType() {
         return Type.VOID;
+    }
+
+    /**
+     * Void is always a subtype of any other type.
+     * <p>
+     * Returns {@code true} for any type {@code expectedSupertype}.
+     */
+    @Override
+    public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
+        return true;
     }
 }

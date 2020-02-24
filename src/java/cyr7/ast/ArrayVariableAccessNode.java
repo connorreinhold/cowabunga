@@ -2,16 +2,22 @@ package cyr7.ast;
 
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
-public final class ArrayAccessNode extends AbstractNode implements AccessNode {
+/**
+ * Example Expression: arr[1][4][2]
+ * @author ayang
+ *
+ */
+public final class ArrayVariableAccessNode extends AbstractNode 
+                                                    implements AccessNode {
 
     public final AccessNode child;
     public final ExprNode index;
 
-    public ArrayAccessNode(ComplexSymbolFactory.Location location, AccessNode child,
+    public ArrayVariableAccessNode(Location location, AccessNode child,
                                  ExprNode index) {
         super(location);
 
@@ -31,7 +37,7 @@ public final class ArrayAccessNode extends AbstractNode implements AccessNode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ArrayAccessNode that = (ArrayAccessNode) o;
+        ArrayVariableAccessNode that = (ArrayVariableAccessNode) o;
         return Objects.equals(child, that.child) &&
             Objects.equals(index, that.index);
     }

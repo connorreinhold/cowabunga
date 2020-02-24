@@ -1,6 +1,6 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.ArrayAccessNode;
+import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.VariableAccessNode;
 import cyr7.ast.expr.FunctionCallExprNode;
@@ -80,7 +80,7 @@ public class TestVariableDeclarationStatement {
                     PrimitiveEnum.INT
                 )
             ),
-            new ArrayAccessNode(
+            new ArrayVariableAccessNode(
                 null,
                 new VariableAccessNode(
                     null,

@@ -31,7 +31,8 @@ public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
         ComplexSymbol token = (ComplexSymbol) cur_token;
 
         if (token.sym == sym.INT_MAX) {
-            throw new ParserIntegerOverflowException(token.xleft.getLine(), token.xleft.getColumn());
+            throw new ParserIntegerOverflowException(token.xleft.getLine(), 
+                    token.xleft.getColumn());
         } else {
             throw new UnexpectedTokenException(token);
         }
@@ -57,7 +58,8 @@ init with {:
 
 scan with {: 
     Symbol sym = getScanner().next_token();
-    return (sym != null) ? sym : getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
+    return (sym != null) ? sym : 
+                       getSymbolFactory().newSymbol("END_OF_FILE",EOF_sym());
 :};
 
 /* Terminals (tokens returned by the scanner). */
@@ -144,7 +146,7 @@ nonterminal ProcedureStmtNode ProcedureStatement;
 nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
-nonterminal AccessNode AssignAccess;
+nonterminal AccessNode VarAccess;
 
 nonterminal StmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
@@ -160,7 +162,7 @@ nonterminal ExprNode Expr;
 nonterminal FunctionCallExprNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
 
-nonterminal AccessNode Access;
+nonterminal ArrayExprNode ArrayLiteralExpr;
 nonterminal ExprNode LiteralExpr;
 nonterminal ExprNode UnaryExpr;
 nonterminal ExprNode IntegerExpr;
@@ -207,7 +209,9 @@ FunctionHeaderDeclList ::=
             lst.addLast(decl);
             RESULT = lst;
         :}
-    | FunctionHeaderDecl:decl ZeroOrMoreSemicolons {: RESULT = new LinkedList<>(List.of(decl)); :}
+    | FunctionHeaderDecl:decl ZeroOrMoreSemicolons {: 
+            RESULT = new LinkedList<>(List.of(decl)); 
+        :}
     ;
 
 ZeroOrMoreSemicolons ::=
@@ -310,11 +314,13 @@ WhileStatement ::=
     ;
 
 AssignmentStatement ::=
-    AssignAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(axleft, a, e); :}
+    VarAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(axleft, a, e); :}
     ;
 
-AssignAccess ::=
-    AssignAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: RESULT = new ArrayAccessNode(axleft, a, e); :}
+VarAccess ::=
+    VarAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: 
+        RESULT = new ArrayVariableAccessNode(axleft, a, e); 
+    :}
     | ID:id {: RESULT = new VariableAccessNode(idxleft, id); :}
     ;
 
@@ -363,7 +369,8 @@ MultiVarDeclList ::=
     ;
 
 VarDeclArrayInit ::=
-    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT VarDeclDimensionedBracket:l {:
+    ID:id COLON Primitive:p L_SQ_BRKT Expr:v R_SQ_BRKT 
+    VarDeclDimensionedBracket:l {:
             l.addFirst(Optional.of(v));
             TypeExprArrayNode t = TypeExprNode.fromDimensionList(p, l);
             RESULT = new ArrayDeclStmtNode(idxleft, id, t);
@@ -415,13 +422,13 @@ ExprList ::=
 
 Expr ::=
     FunctionCall:e {: RESULT = e; :}
-    | Access:e {: RESULT = e; :}
+    | ArrayLiteralExpr:e {: RESULT = e; :}
+    | VarAccess:e {: RESULT = e; :}
     | LiteralExpr:e  {: RESULT = e; :}
     | UnaryExpr:e {: RESULT = e; :}
     | IntegerExpr:e {: RESULT = e; :}
     | BoolExpr:e {: RESULT = e; :}
     | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
-    | ArrayExpr:e {: RESULT = e; :}
     ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
@@ -440,11 +447,23 @@ ArgParamList ::=
     | {: RESULT = new LinkedList<>();:}
     ;
 
-Access::=
-    Access:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
-            RESULT = new ArrayAccessNode(axleft, a, e);
-        :} 	%prec ARRAY_ACCESS
-    | ID:id {: RESULT = new VariableAccessNode(idxleft, id); :}
+ArrayLiteralExpr::=
+    ArrayLiteralExpr:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
+        RESULT = new ArrayLiteralAccessExprNode(axleft, a, e);
+    :} 	%prec ARRAY_ACCESS
+    | L_BRACE ArrayElements:l R_BRACE {:
+        RESULT = new ArrayLiteralExprNode(lxleft, l); 
+    :}
+    ;
+    
+ArrayElements ::=
+    Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
+    | Expr:e {:
+            LinkedList<ExprNode> l = new LinkedList<>();
+            l.add(e);
+            RESULT = l;
+         :}
+    | {: RESULT = new LinkedList<>(); :}
     ;
 
 LiteralExpr ::=
@@ -483,19 +502,5 @@ BoolExpr ::=
     | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1xleft, e1, e2); :}
     | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1xleft, e1, e2); :}
     | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1xleft, e1, e2); :}
-    ;
-
-ArrayExpr ::=
-    L_BRACE ArrayElements:l R_BRACE {: RESULT = new ArrayExprNode(lxleft, l); :}
-    ;
-
-ArrayElements ::=
-    Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
-    | Expr:e {:
-            LinkedList<ExprNode> l = new LinkedList<>();
-            l.add(e);
-            RESULT = l;
-         :}
-    | {: RESULT = new LinkedList<>(); :}
     ;
 

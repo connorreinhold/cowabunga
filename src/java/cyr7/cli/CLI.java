@@ -3,12 +3,27 @@ package cyr7.cli;
 import cyr7.lexer.LexerUtil;
 
 import cyr7.parser.ParserUtil;
-import org.apache.commons.cli.*;
+import cyr7.typecheck.TypeCheckUtil;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 public class CLI {
 
@@ -23,7 +38,9 @@ public class CLI {
     static boolean debugPrintingEnabled = false;
     static boolean wantsLexing = false;
     static boolean wantsParsing = false;
+    static boolean wantsTypechecking = false;
     static File sourceRoot = new File(".");
+    static File libRoot = new File(".");
     static File destinationRoot = new File(".");
 
     /**
@@ -65,9 +82,27 @@ public class CLI {
                 .required(false)
                 .build();
 
+        Option typecheck = Option
+                .builder("t")
+                .longOpt("typecheck")
+                .desc("Generate output from semantic analysis.")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         Option source = Option
                 .builder("sourcepath")
                 .desc("Specify where to find generated diagnostic files")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+        
+        Option libpath = Option
+                .builder("libpath")
+                .desc("Specify where to find library interface files.")
                 .hasArg(true)
                 .argName("path")
                 .numberOfArgs(1)
@@ -106,7 +141,9 @@ public class CLI {
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
+                .addOption(typecheck)
                 .addOption(source)
+                .addOption(libpath)
                 .addOption(destination)
                 .addOption(version)
                 .addOption(debugPrinting);
@@ -234,22 +271,30 @@ public class CLI {
                 case "p":
                     wantsParsing = true;
                     break;
-                case "D":
+                case "t":
+                    wantsTypechecking = true;
+                    break;
+                case "D": {
                     String directory = cmd.getOptionValue("D");
                     destinationRoot = new File(directory);
                     break;
-                case "sourcepath":
-                    directory = cmd.getOptionValue("sourcepath");
+                }
+                case "sourcepath": {
+                    String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
                     break;
+                }
+                case "libpath": {
+                    String directory = cmd.getOptionValue("sourcepath");
+                    libRoot = new File(directory);
+                    break;
+                }
                 case "v":
                     printVersionMessage();
                     break;
-
                 case "debug":
                     debugPrintingEnabled = true;
                     break;
-
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -264,43 +309,67 @@ public class CLI {
             	continue;
             }
 
+            Reader input = null;
+            Writer output = null;
             if (wantsLexing) {
                 debugPrint("Lexing file: " + filename);
-
                 try {
-                    Reader input = getReader(filename);
-                    Writer output = getWriter(filename, "lexed");
+                    input = getReader(filename, isIXI);
+                    output = getWriter(filename, "lexed");
                     LexerUtil.lex(input, output);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
             }
 
             if (wantsParsing) {
                 debugPrint("Parsing file: " + filename);
                 try {
-                    Reader input = getReader(filename);
-                    Writer output = getWriter(filename, "parsed");
+                    input = getReader(filename, isIXI);
+                    output = getWriter(filename, "parsed");
                     ParserUtil.parse(input, output, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
+            }
+            
+            if (wantsTypechecking) {
+                debugPrint("Typechecking file: " + filename);
+                try {
+                    input = getReader(filename, isIXI);
+                    output = getWriter(filename, "typed");
+                    TypeCheckUtil.typeCheck(input, output, isIXI);
+                } catch (Exception e) {
+                    writer.write(e.getMessage());
+                }
+                closeIOStreams(input, output);
             }
         }
-
         writer.flush();
         writer.close();
     }
 
-    private static Reader getReader(String filename) throws IOException {
-        Path sourcePath = Paths.get(sourceRoot.getAbsolutePath(), filename);
+    private static Reader getReader(String filename, boolean isIXI) 
+            throws IOException {
+        Path sourcePath;
+        if (isIXI) {
+            sourcePath = Paths.get(libRoot.getAbsolutePath(), filename);
+        } else {
+            sourcePath = Paths.get(sourceRoot.getAbsolutePath(), filename);
+        }
         debugPrint("Opening reader to: " + sourcePath);
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
 
-    private static Writer getWriter(String relativePath, String fileExtension) throws IOException {
-        Path destPath = Paths.get(destinationRoot.getAbsolutePath(), relativePath).getParent();
-        File dest = new File(destPath.toFile(), String.format("%s." + fileExtension, getMainFilename(Path.of(relativePath))));
+    private static Writer getWriter(String relativePath, String fileExtension) 
+            throws IOException {
+        Path destPath = Paths.get(destinationRoot.getAbsolutePath(), 
+                                    relativePath).getParent();
+        File dest = new File(destPath.toFile(), String.format("%s." + 
+                                    fileExtension, 
+                                    getMainFilename(Path.of(relativePath))));
         if (!dest.exists()) {
             // Create directories if they don't exist
             dest.getParentFile().mkdirs();
@@ -311,6 +380,21 @@ public class CLI {
         return new BufferedWriter(new FileWriter(dest));
     }
 
+    
+    private static void closeIOStreams(Reader input, Writer output) {
+        if (input != null && output != null) {
+            try {
+                output.flush();
+                output.close();
+                input.close();
+            } catch (IOException e) {
+                writer.write("Unexpected error occurred when closing "
+                        + "io stream.");
+            }
+        }
+    }
+    
+    
     private static void debugPrint(Object v) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + v);

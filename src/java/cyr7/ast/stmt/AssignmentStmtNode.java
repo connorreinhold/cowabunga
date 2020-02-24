@@ -4,7 +4,7 @@ import cyr7.ast.AbstractNode;
 import cyr7.ast.AccessNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
 
@@ -12,7 +12,7 @@ public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
     public final AccessNode access;
     public final ExprNode value;
 
-    public AssignmentStmtNode(ComplexSymbolFactory.Location location,
+    public AssignmentStmtNode(Location location,
                               AccessNode access, ExprNode value) {
         super(location);
 
