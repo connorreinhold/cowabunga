@@ -9,11 +9,13 @@ import java_cup.runtime.*;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 import cyr7.ast.*;
 import cyr7.ast.expr.*;
+import cyr7.ast.expr.access.*;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.*;
 import cyr7.ast.type.*;
 import cyr7.exceptions.*;
 import cyr7.lexer.LexerUtil;
@@ -106,9 +108,6 @@ terminal ASSIGN,
          LOGICAL_OR
          ;
 
-terminal FUNCTION_CALL,
-         ARRAY_ACCESS;
-
 // Program-wide
 nonterminal AbstractNode Program;
 
@@ -146,7 +145,7 @@ nonterminal ProcedureStmtNode ProcedureStatement;
 nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
-nonterminal AccessNode VarAccess;
+nonterminal AssignNode AssignmentLHS;
 
 nonterminal StmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
@@ -159,16 +158,13 @@ nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
 nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
+nonterminal AccessNode AccessExpr;
 nonterminal FunctionCallExprNode FunctionCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
-
-nonterminal ArrayExprNode ArrayLiteralExpr;
 nonterminal ExprNode LiteralExpr;
-nonterminal ExprNode UnaryExpr;
-nonterminal ExprNode IntegerExpr;
-nonterminal ExprNode BoolExpr;
-nonterminal ExprNode ArrayExpr;
 nonterminal LinkedList<ExprNode> ArrayElements;
+nonterminal ExprNode UnaryExpr;
+nonterminal ExprNode BinaryExpr;
 
 // Precedence
 
@@ -178,7 +174,6 @@ precedence nonassoc L_BRACE;
 precedence nonassoc IF;
 precedence nonassoc ELSE;
 
-precedence nonassoc ID;
 precedence left LOGICAL_OR;
 precedence left LOGICAL_AND;
 precedence left EQUALS, NOT_EQUALS;
@@ -186,8 +181,7 @@ precedence left LT, LTE, GTE, GT;
 precedence left PLUS, MINUS;
 precedence left MULT, HIGH_MULT, DIVIDE, REMAINDER;
 precedence nonassoc NEG_INT, NEG_BOOL;
-precedence left FUNCTION_CALL, ARRAY_ACCESS;
-precedence left LENGTH;
+precedence left L_PAREN, L_SQ_BRKT;
 
 // Grammar
 
@@ -314,14 +308,14 @@ WhileStatement ::=
     ;
 
 AssignmentStatement ::=
-    VarAccess:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(axleft, a, e); :}
+    AssignmentLHS:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(axleft, a, e); :}
     ;
 
-VarAccess ::=
-    VarAccess:a L_SQ_BRKT Expr: e R_SQ_BRKT {: 
-        RESULT = new ArrayVariableAccessNode(axleft, a, e); 
-    :}
-    | ID:id {: RESULT = new VariableAccessNode(idxleft, id); :}
+AssignmentLHS ::=
+    AssignmentLHS:a L_SQ_BRKT Expr: e R_SQ_BRKT {:
+            RESULT = new ArrayAssignNode(axleft, a, e);
+        :}
+    | ID:id {: RESULT = new VariableAssignNode(idxleft, id); :}
     ;
 
 VarDeclStatement ::=
@@ -421,24 +415,29 @@ ExprList ::=
     ;
 
 Expr ::=
-    FunctionCall:e {: RESULT = e; :}
-    | ArrayLiteralExpr:e {: RESULT = e; :}
-    | VarAccess:e {: RESULT = e; :}
+    AccessExpr:e {: RESULT = e; :}
+    | FunctionCall:e {: RESULT = e; :}
     | LiteralExpr:e  {: RESULT = e; :}
     | UnaryExpr:e {: RESULT = e; :}
-    | IntegerExpr:e {: RESULT = e; :}
-    | BoolExpr:e {: RESULT = e; :}
+    | BinaryExpr:e {: RESULT = e; :}
     | L_PAREN Expr:e R_PAREN {: RESULT = e; :}
+    ;
+
+AccessExpr ::=
+    ID:id {: RESULT = new VariableAccessExprNode(idxleft, id); :}
+    | Expr:e L_SQ_BRKT:l Expr:i R_SQ_BRKT {:
+            RESULT = new ArrayAccessExprNode(lxleft, e, i);
+        :}
     ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
 FunctionCall ::=
     ID:id L_PAREN ArgParamList:l R_PAREN {:
             RESULT = new FunctionCallExprNode(idxleft, id, l);
-        :} %prec FUNCTION_CALL
+        :}
     | LENGTH:len L_PAREN ArgParamList:l R_PAREN {:
             RESULT = new FunctionCallExprNode(lenxleft, "length", l);
-        :} %prec FUNCTION_CALL
+        :}
     ;
 
 ArgParamList ::=
@@ -447,15 +446,14 @@ ArgParamList ::=
     | {: RESULT = new LinkedList<>();:}
     ;
 
-ArrayLiteralExpr::=
-    ArrayLiteralExpr:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
-        RESULT = new ArrayLiteralAccessExprNode(axleft, a, e);
-    :} 	%prec ARRAY_ACCESS
-    | L_BRACE ArrayElements:l R_BRACE {:
-        RESULT = new ArrayLiteralExprNode(lxleft, l); 
-    :}
+LiteralExpr ::=
+    INT_LITERAL:l {: RESULT = new LiteralIntExprNode(lxleft, l); :}
+    | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(lxleft, l); :}
+    | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(lxleft, l); :}
+    | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(lxleft, l); :}
+    | L_BRACE ArrayElements:l R_BRACE {: RESULT = new LiteralArrayExprNode(lxleft, l); :}
     ;
-    
+
 ArrayElements ::=
     Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
     | Expr:e {:
@@ -464,13 +462,6 @@ ArrayElements ::=
             RESULT = l;
          :}
     | {: RESULT = new LinkedList<>(); :}
-    ;
-
-LiteralExpr ::=
-    INT_LITERAL:l {: RESULT = new LiteralIntExprNode(lxleft, l); :}
-    | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(lxleft, l); :}
-    | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(lxleft, l); :}
-    | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(lxleft, l); :}
     ;
 
 UnaryExpr ::=
@@ -484,17 +475,14 @@ UnaryExpr ::=
         :} %prec NEG_INT
     ;
 
-IntegerExpr ::=
+BinaryExpr ::=
     Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1xleft, e1, e2); :}
     | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1xleft, e1, e2); :}
     | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1xleft, e1, e2); :}
     | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1xleft, e1, e2); :}
     | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1xleft, e1, e2); :}
     | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1xleft, e1, e2); :}
-    ;
-
-BoolExpr ::=
-    Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1xleft, e1, e2); :}
+    | Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1xleft, e1, e2); :}
     | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1xleft, e1, e2); :}
     | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1xleft, e1, e2); :}
     | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1xleft, e1, e2); :}

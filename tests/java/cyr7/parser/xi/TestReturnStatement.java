@@ -1,6 +1,6 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.VariableAccessNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.stmt.ReturnStmtNode;
 import cyr7.ast.stmt.StmtNode;
 import cyr7.exceptions.UnexpectedTokenException;
@@ -35,7 +35,7 @@ public class TestReturnStatement {
         assertEquals(new ReturnStmtNode(
             null,
             List.of(
-                new VariableAccessNode(null, "x")
+                new VariableAccessExprNode(null, "x")
             )
         ), statement);
 
@@ -44,7 +44,7 @@ public class TestReturnStatement {
         assertEquals(new ReturnStmtNode(
             null,
             List.of(
-                new VariableAccessNode(null, "x")
+                new VariableAccessExprNode(null, "x")
             )
         ), statement);
 
@@ -53,8 +53,8 @@ public class TestReturnStatement {
         assertEquals(new ReturnStmtNode(
             null,
             List.of(
-                new VariableAccessNode(null, "x"),
-                new VariableAccessNode(null, "y")
+                new VariableAccessExprNode(null, "x"),
+                new VariableAccessExprNode(null, "y")
             )
         ),statement);
     }

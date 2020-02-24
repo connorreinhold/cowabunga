@@ -1,5 +1,6 @@
-package cyr7.ast;
+package cyr7.ast.expr.access;
 
+import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -7,27 +8,20 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 import java.util.Objects;
 
 /**
- * Example Expression: arr[1][4][2]
- * @author ayang
- *
+ * An expression of the form {@code a[0] }, {@code f()[0] }, or {@code b[i][j] }
  */
-public final class ArrayVariableAccessNode extends AbstractNode 
-                                                    implements AccessNode {
+public final class ArrayAccessExprNode extends AbstractNode implements AccessNode {
 
-    public final AccessNode child;
+    public final ExprNode child;
     public final ExprNode index;
-
-    public ArrayVariableAccessNode(Location location, AccessNode child,
-                                 ExprNode index) {
+    
+    public ArrayAccessExprNode(Location location, ExprNode child,
+                               ExprNode index) {
         super(location);
-
-        assert child != null;
-        assert index != null;
-
         this.child = child;
         this.index = index;
     }
-
+    
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
@@ -37,7 +31,7 @@ public final class ArrayVariableAccessNode extends AbstractNode
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        ArrayVariableAccessNode that = (ArrayVariableAccessNode) o;
+        ArrayAccessExprNode that = (ArrayAccessExprNode) o;
         return Objects.equals(child, that.child) &&
             Objects.equals(index, that.index);
     }

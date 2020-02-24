@@ -1,10 +1,9 @@
 package cyr7.typecheck;
 
-import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.VarDeclNode;
-import cyr7.ast.VariableAccessNode;
-import cyr7.ast.expr.ArrayLiteralAccessExprNode;
-import cyr7.ast.expr.ArrayLiteralExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
@@ -14,6 +13,8 @@ import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.ArrayAssignNode;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -25,7 +26,6 @@ import cyr7.semantics.FunctionType;
 import cyr7.semantics.OrdinaryType;
 import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ResultType;
-import cyr7.semantics.VoidType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -88,13 +88,13 @@ public class TypeCheckVisitor extends
         if (context.contains(functionName)) {
             throw new SemanticException("Duplicate name: " + functionName);
         }
-        
+
         ExpandedType input = new ExpandedType(n.args.stream().map(v -> {
             ExpandedType t = v.accept(this).assertFirst();
             assert(t.isOrdinary());
             return t.getOrdinaryType();
         }).collect(Collectors.toList()));
-        
+
         ExpandedType output = new ExpandedType(n.returnTypes.stream()
                .map(v -> {
             ExpandedType t = v.accept(this).assertFirst();
@@ -157,7 +157,7 @@ public class TypeCheckVisitor extends
                 throw new SemanticException("Size of array is not an integer");
             }
         }
-        
+
         if (!type.isOrdinary()) {
             throw new SemanticException("Expected an array of primitives or"
                     + " of arrays, but found an array of tuples");
@@ -166,11 +166,8 @@ public class TypeCheckVisitor extends
                 new ExpandedType(new ArrayType(type.getOrdinaryType())));
     }
 
-    
-    // Statement and Expr
-
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayVariableAccessNode n) {
+    public OneOfTwo<ExpandedType, ResultType> visit(ArrayAssignNode n) {
         ExpandedType arrayType = n.child.accept(this).assertFirst();
         ExpandedType indexType = n.index.accept(this).assertFirst();
 
@@ -182,7 +179,7 @@ public class TypeCheckVisitor extends
     }
 
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(VariableAccessNode n) {
+    public OneOfTwo<ExpandedType, ResultType> visit(VariableAssignNode n) {
         Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
         if (optionalVar.isPresent()) {
             return OneOfTwo.ofFirst(new ExpandedType(optionalVar.get()));
@@ -197,7 +194,7 @@ public class TypeCheckVisitor extends
         if (context.contains(n.identifier)) {
             throw new SemanticException("Duplicate variable declaration");
         }
-        
+
         ExpandedType expectedArray = n.type.accept(this).assertFirst();
         if (!expectedArray.isArray()) {
             throw new SemanticException("Expected an array, but found a "
@@ -214,9 +211,9 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(AssignmentStmtNode n) {
-        ExpandedType lhsType = n.access.accept(this).assertFirst();
+        ExpandedType lhsType = n.assign.accept(this).assertFirst();
         ExpandedType rhsType = n.value.accept(this).assertFirst();
-        
+
         if (rhsType.isASubtypeOf(lhsType)) {
             return OneOfTwo.ofSecond(ResultType.UNIT);
         }
@@ -378,7 +375,7 @@ public class TypeCheckVisitor extends
         VarDeclNode varDecl = n.varDecl;
         ExpandedType varDeclType = varDecl.accept(this).assertFirst();
         ExpandedType initializedType = n.initializer.accept(this).assertFirst();
-        
+
         if (initializedType.isASubtypeOf(varDeclType)) {
             assert(varDeclType.isOrdinary() && initializedType.isOrdinary());
             context.addVar(varDecl.identifier, varDeclType.getOrdinaryType());
@@ -404,9 +401,9 @@ public class TypeCheckVisitor extends
     }
 
     // Expression
-    
+
     @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayLiteralExprNode n) {
+    public OneOfTwo<ExpandedType, ResultType> visit(LiteralArrayExprNode n) {
         if (n.arrayVals.size() == 0) {
             return OneOfTwo.ofFirst(new ExpandedType(
                     new ArrayType(OrdinaryType.voidType)));
@@ -420,7 +417,7 @@ public class TypeCheckVisitor extends
             if (arrayType.isEmpty()) {
                 arrayType = Optional.of(t);
             } else {
-                Optional<ExpandedType> possibleSupertype = 
+                Optional<ExpandedType> possibleSupertype =
                         supertypeOf(arrayType.get(), t);
                 if (possibleSupertype.isEmpty()) {
                     throw new SemanticException("Mismatch types in array");
@@ -446,7 +443,7 @@ public class TypeCheckVisitor extends
         ExpandedType params = new ExpandedType(n.parameters.stream()
                 .map(e -> e.accept(this).assertFirst().getOrdinaryType())
                 .collect(Collectors.toList()));
-        
+
         if (params.isASubtypeOf(inputTypes)) {
             return OneOfTwo.ofFirst(function.output);
         } else {
@@ -454,8 +451,8 @@ public class TypeCheckVisitor extends
                     + "specified by function");
         }
     }
-    
-    
+
+
     /**
      * Typechecks an integer binary operation expression, e.g. 9 + 10.
      */
@@ -496,7 +493,7 @@ public class TypeCheckVisitor extends
 
         throw new SemanticException();
     }
-    
+
     /**
      * Typechecks an equality expression, e.g. 3 == 31.
      */
@@ -537,7 +534,7 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(EqualsExprNode n) {
         return OneOfTwo.ofFirst(this.typecheckEqualityBinExpr(n));
     }
-    
+
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(NotEqualsExprNode n) {
         return OneOfTwo.ofFirst(this.typecheckEqualityBinExpr(n));
@@ -552,7 +549,7 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(MultExprNode n) {
         return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
     }
-    
+
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(RemExprNode n) {
         return OneOfTwo.ofFirst(typecheckIntegerBinExpr(n));
@@ -577,7 +574,7 @@ public class TypeCheckVisitor extends
     public OneOfTwo<ExpandedType, ResultType> visit(LTExprNode n) {
         return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
     }
-    
+
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(GTEExprNode n) {
         return OneOfTwo.ofFirst(typecheckComparisonBinExpr(n));
@@ -598,7 +595,7 @@ public class TypeCheckVisitor extends
         return OneOfTwo.ofFirst(typecheckBooleanBinExpr(n));
     }
 
-    
+
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(LiteralBoolExprNode n) {
         return OneOfTwo.ofFirst(ExpandedType.boolType);
@@ -641,7 +638,7 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(
-            ArrayLiteralAccessExprNode n) {
+            ArrayAccessExprNode n) {
         ExpandedType arrayType = n.child.accept(this).assertFirst();
         ExpandedType indexType = n.index.accept(this).assertFirst();
 
@@ -651,4 +648,14 @@ public class TypeCheckVisitor extends
         }
         throw new SemanticException();
     }
+
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(VariableAccessExprNode n) {
+        Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
+        if (optionalVar.isPresent()) {
+            return OneOfTwo.ofFirst(new ExpandedType(optionalVar.get()));
+        }
+        throw new SemanticException();
+    }
+
 }

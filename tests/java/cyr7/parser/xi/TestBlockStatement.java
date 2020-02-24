@@ -1,6 +1,6 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.VariableAccessNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.ast.stmt.ReturnStmtNode;
 import cyr7.ast.stmt.StmtNode;
@@ -49,7 +49,7 @@ public class TestBlockStatement {
             List.of(
                 new WhileStmtNode(
                     null,
-                    new VariableAccessNode(
+                    new VariableAccessExprNode(
                         null,
                         "x"
                     ),

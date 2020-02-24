@@ -1,11 +1,12 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.VariableAccessNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.binexpr.LTExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.exceptions.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
@@ -13,7 +14,6 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class TestWhileStatement {
@@ -24,21 +24,21 @@ public class TestWhileStatement {
             null,
             new LTExprNode(
                 null,
-                new VariableAccessNode(
+                new VariableAccessExprNode(
                     null,
                     "a"
                 ),
-                new VariableAccessNode(
+                new VariableAccessExprNode(
                     null,
                     "b"
                 )
             ),
             new AssignmentStmtNode(
                 null,
-                new VariableAccessNode(null, "a"),
+                new VariableAssignNode(null, "a"),
                 new AddExprNode(
                     null,
-                    new VariableAccessNode(
+                    new VariableAccessExprNode(
                         null,
                         "a"
                     ),
@@ -65,11 +65,11 @@ public class TestWhileStatement {
                 null,
             new LTExprNode(
                 null,
-                new VariableAccessNode(
+                new VariableAccessExprNode(
                     null,
                     "a"
                 ),
-                new VariableAccessNode(
+                new VariableAccessExprNode(
                     null,
                     "b"
                 )
@@ -79,10 +79,10 @@ public class TestWhileStatement {
                 List.of(
                     new AssignmentStmtNode(
                         null,
-                        new VariableAccessNode(null, "a"),
+                        new VariableAssignNode(null, "a"),
                         new AddExprNode(
                             null,
-                            new VariableAccessNode(
+                            new VariableAccessExprNode(
                                 null,
                                 "a"
                             ),
@@ -115,7 +115,7 @@ public class TestWhileStatement {
             ParserFactory.parseStatement("while b { return 0; }").get(0);
         assertEquals(new WhileStmtNode(
             null,
-            new VariableAccessNode(null, "b"),
+            new VariableAccessExprNode(null, "b"),
             new BlockStmtNode(
                 null,
                 List.of(
@@ -135,13 +135,13 @@ public class TestWhileStatement {
             ).get(0);
         assertEquals(new WhileStmtNode(
             null,
-            new VariableAccessNode(null, "c"),
+            new VariableAccessExprNode(null, "c"),
             new BlockStmtNode(
                 null,
                 List.of(
                     new AssignmentStmtNode(
                         null,
-                        new VariableAccessNode(null, "b"),
+                        new VariableAssignNode(null, "b"),
                         new LiteralBoolExprNode(null, true)
                     ),
                     new ReturnStmtNode(

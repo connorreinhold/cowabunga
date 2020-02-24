@@ -1,43 +1,28 @@
 package cyr7.semantics;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.Test;
-
-import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
-import cyr7.ast.VariableAccessNode;
-import cyr7.ast.expr.ArrayLiteralAccessExprNode;
-import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
-import cyr7.ast.stmt.ArrayDeclStmtNode;
-import cyr7.ast.stmt.AssignmentStmtNode;
-import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.ExprStmtNode;
-import cyr7.ast.stmt.IfElseStmtNode;
-import cyr7.ast.stmt.MultiAssignStmtNode;
-import cyr7.ast.stmt.ProcedureStmtNode;
-import cyr7.ast.stmt.ReturnStmtNode;
-import cyr7.ast.stmt.StmtNode;
-import cyr7.ast.stmt.VarDeclStmtNode;
-import cyr7.ast.stmt.VarInitStmtNode;
-import cyr7.ast.stmt.WhileStmtNode;
+import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ast.type.TypeExprNode;
 import cyr7.exceptions.SemanticException;
 import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfTwo;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TestTypeCheckVisitorStmt {
 
@@ -118,7 +103,7 @@ class TestTypeCheckVisitorStmt {
         visitor = new TypeCheckVisitor(context);
         
         node = new AssignmentStmtNode(null, 
-                new VariableAccessNode(null, "cash"), 
+                new VariableAssignNode(null, "cash"),
                 new LiteralIntExprNode(null, "123"));
         result = node.accept(visitor);
         assertEquals(ResultType.UNIT, result.assertSecond());
@@ -126,7 +111,7 @@ class TestTypeCheckVisitorStmt {
         
         // Mismatched types
         node = new AssignmentStmtNode(null, 
-                new VariableAccessNode(null, "cash"), 
+                new VariableAssignNode(null, "cash"),
                 new LiteralBoolExprNode(null, false));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
 
@@ -134,7 +119,7 @@ class TestTypeCheckVisitorStmt {
         
         // Attempting to assign to undeclared variable.
         node = new AssignmentStmtNode(null, 
-                new VariableAccessNode(null, "undeclaredValue"), 
+                new VariableAssignNode(null, "undeclaredValue"),
                 new LiteralStringExprNode(null, "Anything"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -483,7 +468,7 @@ class TestTypeCheckVisitorStmt {
         context = new HashMapStackContext();
         context.addRet(ExpandedType.unitExpandedType);
         visitor = new TypeCheckVisitor(context);
-        node = new IfElseStmtNode(null, new ArrayLiteralExprNode(null, List.of()), 
+        node = new IfElseStmtNode(null, new LiteralArrayExprNode(null, List.of()),
                 new BlockStmtNode(null, List.of(
                         new ReturnStmtNode(null, List.of(
                                 new LiteralIntExprNode(null, "123")))
@@ -509,8 +494,8 @@ class TestTypeCheckVisitorStmt {
         context.addRet(ExpandedType.unitExpandedType);
         visitor = new TypeCheckVisitor(context);
         node = new IfElseStmtNode(null, 
-                new ArrayLiteralAccessExprNode(null, 
-                        new ArrayLiteralExprNode(null, List.of()),
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
                 new BlockStmtNode(null, List.of(
                         new ReturnStmtNode(null, List.of())
@@ -536,8 +521,8 @@ class TestTypeCheckVisitorStmt {
         context.addRet(ExpandedType.intType);
         visitor = new TypeCheckVisitor(context);
         node = new IfElseStmtNode(null, 
-                new ArrayLiteralAccessExprNode(null, 
-                        new ArrayLiteralExprNode(null, List.of()),
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
                 new BlockStmtNode(null, List.of(
                         new ReturnStmtNode(null, List.of(
@@ -657,7 +642,7 @@ class TestTypeCheckVisitorStmt {
         context = new HashMapStackContext();
         context.addRet(ExpandedType.unitExpandedType);
         visitor = new TypeCheckVisitor(context);
-        node = new WhileStmtNode(null, new ArrayLiteralExprNode(null, List.of()), 
+        node = new WhileStmtNode(null, new LiteralArrayExprNode(null, List.of()),
                 new BlockStmtNode(null, List.of(
                         new ReturnStmtNode(null, List.of(
                                 new LiteralIntExprNode(null, "123")))

@@ -1,12 +1,16 @@
 package cyr7.parser;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.exceptions.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 
-import java.io.*;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 public class ParserUtil {
 
@@ -25,12 +29,13 @@ public class ParserUtil {
         }
     }
 
-    public static void printSExpr(AbstractNode node) {
+    public static void printSExpr(Node node) {
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
         node.accept(visitor);
+        visitor.flush();
     }
 
-    public static String toSExpr(AbstractNode node) {
+    public static String toSExpr(Node node) {
         StringWriter writer = new StringWriter();
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(writer));
         node.accept(visitor);

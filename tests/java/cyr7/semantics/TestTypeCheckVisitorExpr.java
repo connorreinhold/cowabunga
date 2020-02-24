@@ -1,44 +1,23 @@
 package cyr7.semantics;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.Test;
-
-import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.Node;
-import cyr7.ast.VariableAccessNode;
-import cyr7.ast.expr.ArrayLiteralAccessExprNode;
-import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.binexpr.AddExprNode;
-import cyr7.ast.expr.binexpr.AndExprNode;
-import cyr7.ast.expr.binexpr.DivExprNode;
-import cyr7.ast.expr.binexpr.EqualsExprNode;
-import cyr7.ast.expr.binexpr.GTEExprNode;
-import cyr7.ast.expr.binexpr.GTExprNode;
-import cyr7.ast.expr.binexpr.HighMultExprNode;
-import cyr7.ast.expr.binexpr.LTEExprNode;
-import cyr7.ast.expr.binexpr.LTExprNode;
-import cyr7.ast.expr.binexpr.MultExprNode;
-import cyr7.ast.expr.binexpr.NotEqualsExprNode;
-import cyr7.ast.expr.binexpr.OrExprNode;
-import cyr7.ast.expr.binexpr.RemExprNode;
-import cyr7.ast.expr.binexpr.SubExprNode;
-import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
-import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
-import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
-import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
+import cyr7.ast.expr.binexpr.*;
+import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.stmt.assign.ArrayAssignNode;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.exceptions.SemanticException;
-import cyr7.semantics.OrdinaryType.Type;
 import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfTwo;
-import cyr7.visitor.AbstractVisitor;
+import org.junit.jupiter.api.Test;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestTypeCheckVisitorExpr {
 
@@ -161,7 +140,7 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("numbers", new ArrayType(OrdinaryType.intType));
         visitor = new TypeCheckVisitor(context);
-        node = new AddExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new AddExprNode(null, new VariableAccessExprNode(null, "numbers"),
                                      new LiteralStringExprNode(null, "1324"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
@@ -198,7 +177,7 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("bools", new ArrayType(OrdinaryType.boolType));
         visitor = new TypeCheckVisitor(context);
-        node = new AddExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new AddExprNode(null, new VariableAccessExprNode(null, "bools"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -244,7 +223,7 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("numbers", new ArrayType(OrdinaryType.intType));
         visitor = new TypeCheckVisitor(context);
-        node = new EqualsExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new EqualsExprNode(null, new VariableAccessExprNode(null, "numbers"),
                                      new LiteralStringExprNode(null, "1324"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfBool());
@@ -283,7 +262,7 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("bools", new ArrayType(OrdinaryType.boolType));
         visitor = new TypeCheckVisitor(context);
-        node = new EqualsExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new EqualsExprNode(null, new VariableAccessExprNode(null, "bools"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -330,7 +309,7 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("numbers", new ArrayType(OrdinaryType.intType));
         visitor = new TypeCheckVisitor(context);
-        node = new NotEqualsExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new NotEqualsExprNode(null, new VariableAccessExprNode(null, "numbers"),
                                      new LiteralStringExprNode(null, "1324"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfBool());
@@ -369,7 +348,7 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("bools", new ArrayType(OrdinaryType.boolType));
         visitor = new TypeCheckVisitor(context);
-        node = new NotEqualsExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new NotEqualsExprNode(null, new VariableAccessExprNode(null, "bools"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -488,19 +467,19 @@ class TestTypeCheckVisitorExpr {
         context.addVar("numbers", new ArrayType(OrdinaryType.intType));
         visitor = new TypeCheckVisitor(context);
         node = new HighMultExprNode(null, 
-                                     new VariableAccessNode(null, "numbers"),
+                                     new VariableAccessExprNode(null, "numbers"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new MultExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new MultExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new RemExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new RemExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new SubExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new SubExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new DivExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new DivExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
@@ -588,19 +567,19 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("bools", new ArrayType(OrdinaryType.boolType));
         visitor = new TypeCheckVisitor(context);
-        node = new HighMultExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new HighMultExprNode(null, new VariableAccessExprNode(null, "bools"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new MultExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new MultExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new RemExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new RemExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new SubExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new SubExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new DivExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new DivExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -704,16 +683,16 @@ class TestTypeCheckVisitorExpr {
         context.addVar("numbers", new ArrayType(OrdinaryType.intType));
         visitor = new TypeCheckVisitor(context);
         node = new LTEExprNode(null, 
-                                     new VariableAccessNode(null, "numbers"),
+                                     new VariableAccessExprNode(null, "numbers"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new LTExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new LTExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new GTEExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new GTEExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new GTExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new GTExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
@@ -795,16 +774,16 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("bools", new ArrayType(OrdinaryType.boolType));
         visitor = new TypeCheckVisitor(context);
-        node = new LTEExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new LTEExprNode(null, new VariableAccessExprNode(null, "bools"),
                                      new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new LTExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new LTExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new GTEExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new GTEExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new GTExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new GTExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -857,10 +836,10 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("numbers", new ArrayType(OrdinaryType.intType));
         visitor = new TypeCheckVisitor(context);
-        node = new AndExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new AndExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new OrExprNode(null, new VariableAccessNode(null, "numbers"),
+        node = new OrExprNode(null, new VariableAccessExprNode(null, "numbers"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
@@ -915,10 +894,10 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         context.addVar("bools", new ArrayType(OrdinaryType.boolType));
         visitor = new TypeCheckVisitor(context);
-        node = new AndExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new AndExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
-        node = new OrExprNode(null, new VariableAccessNode(null, "bools"),
+        node = new OrExprNode(null, new VariableAccessExprNode(null, "bools"),
                 new LiteralStringExprNode(null, "1324"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
@@ -929,7 +908,7 @@ class TestTypeCheckVisitorExpr {
     void testArrayExprNode() {
         context = new HashMapStackContext();
         visitor = new TypeCheckVisitor(context);
-        node = new ArrayLiteralExprNode(null,
+        node = new LiteralArrayExprNode(null,
                 List.of(new LiteralIntExprNode(null, "9"),
                         new LiteralIntExprNode(null, "10"),
                         new LiteralIntExprNode(null, "21")));
@@ -938,13 +917,13 @@ class TestTypeCheckVisitorExpr {
         assertTrue(result.assertFirst().getArrayType().child.isInt());
 
 
-        node = new ArrayLiteralExprNode(null,
+        node = new LiteralArrayExprNode(null,
                 List.of(
-                new ArrayLiteralExprNode(null, 
+                new LiteralArrayExprNode(null,
                         List.of(new LiteralIntExprNode(null, "9"))),
-                new ArrayLiteralExprNode(null, 
+                new LiteralArrayExprNode(null,
                         List.of(new LiteralIntExprNode(null, "10"))),
-                new ArrayLiteralExprNode(null, 
+                new LiteralArrayExprNode(null,
                         List.of(new LiteralIntExprNode(null, "21")))));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
@@ -954,25 +933,25 @@ class TestTypeCheckVisitorExpr {
                         new ArrayType(new ArrayType(OrdinaryType.intType)))));
 
         
-        node = new ArrayLiteralExprNode(null, List.of());
+        node = new LiteralArrayExprNode(null, List.of());
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         assertTrue(result.assertFirst().getArrayType().child.isVoid());
         
         
-        node = new ArrayLiteralExprNode(null,
+        node = new LiteralArrayExprNode(null,
                 List.of(new LiteralBoolExprNode(null, true),
                         new LiteralIntExprNode(null, "10"),
                         new LiteralBoolExprNode(null, false)));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
-        node = new ArrayLiteralExprNode(null,
+        node = new LiteralArrayExprNode(null,
                 List.of(
-                new ArrayLiteralExprNode(null, 
+                new LiteralArrayExprNode(null,
                         List.of(new LiteralIntExprNode(null, "9"))),
                 new LiteralIntExprNode(null, "10"),
-                new ArrayLiteralExprNode(null, 
+                new LiteralArrayExprNode(null,
                         List.of(new LiteralIntExprNode(null, "21")))));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -1111,44 +1090,44 @@ class TestTypeCheckVisitorExpr {
         visitor = new TypeCheckVisitor(context);
         
         context.addVar("cash", OrdinaryType.intType);
-        node = new VariableAccessNode(null, "cash");
+        node = new VariableAssignNode(null, "cash");
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
         // empty[0]
         context.addVar("empty", new ArrayType(OrdinaryType.intType));
-        node = new ArrayVariableAccessNode(null, 
-                new VariableAccessNode(null, "empty"), 
+        node = new ArrayAssignNode(null, 
+                new VariableAssignNode(null, "empty"),
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
         
         // empty
-        node = new VariableAccessNode(null, "empty");
+        node = new VariableAssignNode(null, "empty");
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         
 
         // empty[true]
-        node = new ArrayVariableAccessNode(null, 
-                new VariableAccessNode(null, "empty"), 
+        node = new ArrayAssignNode(null, 
+                new VariableAssignNode(null, "empty"),
                 new LiteralBoolExprNode(null, true));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
         // empty["this is not a number"]
-        node = new ArrayVariableAccessNode(null, 
-                new VariableAccessNode(null, "empty"), 
+        node = new ArrayAssignNode(null, 
+                new VariableAssignNode(null, "empty"),
                 new LiteralStringExprNode(null, "this is not a number"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
         // empty[0][0]
-        node = new ArrayVariableAccessNode(null, 
-                new ArrayVariableAccessNode(
+        node = new ArrayAssignNode(null, 
+                new ArrayAssignNode(
                         null,
-                        new VariableAccessNode(null, "empty"), 
+                        new VariableAssignNode(null, "empty"),
                         new LiteralIntExprNode(null, "0")),
                 new LiteralIntExprNode(null, "0"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
@@ -1156,28 +1135,28 @@ class TestTypeCheckVisitorExpr {
         
         context.addVar("twoDimensionMap", new ArrayType(
                 new ArrayType(OrdinaryType.intType)));
-        node = new ArrayVariableAccessNode(null, 
-                new VariableAccessNode(null, "twoDimensionMap"), 
+        node = new ArrayAssignNode(null, 
+                new VariableAssignNode(null, "twoDimensionMap"),
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         assertTrue(result.assertFirst().getArrayType().child.isInt());
 
         
-        node = new ArrayVariableAccessNode(null, 
-                new ArrayVariableAccessNode(
+        node = new ArrayAssignNode(null, 
+                new ArrayAssignNode(
                         null,
-                        new VariableAccessNode(null, "twoDimensionMap"), 
+                        new VariableAssignNode(null, "twoDimensionMap"),
                         new LiteralIntExprNode(null, "0")),
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
 
         
-        node = new ArrayVariableAccessNode(null, 
-                new ArrayVariableAccessNode(
+        node = new ArrayAssignNode(null, 
+                new ArrayAssignNode(
                         null,
-                        new VariableAccessNode(null, "twoDimensionMap"), 
+                        new VariableAssignNode(null, "twoDimensionMap"),
                         new LiteralIntExprNode(null, "0")),
                 new LiteralStringExprNode(null, "NaN"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
@@ -1190,8 +1169,8 @@ class TestTypeCheckVisitorExpr {
         context = new HashMapStackContext();
         visitor = new TypeCheckVisitor(context);
         
-        node = new ArrayLiteralAccessExprNode(null,
-                new ArrayLiteralExprNode(null, 
+        node = new ArrayAccessExprNode(null,
+                new LiteralArrayExprNode(null,
                         List.of(new LiteralIntExprNode(null, "0"))), 
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
@@ -1199,8 +1178,8 @@ class TestTypeCheckVisitorExpr {
         
         
         // Access to an empty array can be potentially any type.
-        node = new ArrayLiteralAccessExprNode(null,
-                new ArrayLiteralExprNode(null, List.of()), 
+        node = new ArrayAccessExprNode(null,
+                new LiteralArrayExprNode(null, List.of()),
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
@@ -1212,10 +1191,10 @@ class TestTypeCheckVisitorExpr {
         
         // The array literal's type becomes the supertype of among the elements.
         // {{}, {1,2,3}}
-        node = new ArrayLiteralExprNode(null,
+        node = new LiteralArrayExprNode(null,
                 List.of(
-                        new ArrayLiteralExprNode(null, List.of()),
-                        new ArrayLiteralExprNode(null, List.of(
+                        new LiteralArrayExprNode(null, List.of()),
+                        new LiteralArrayExprNode(null, List.of(
                                 new LiteralIntExprNode(null, "1"),
                                 new LiteralIntExprNode(null, "2"),
                                 new LiteralIntExprNode(null, "3")
@@ -1231,12 +1210,12 @@ class TestTypeCheckVisitorExpr {
         
         // The array literal's type becomes the supertype of among the elements.
         // {{}, {1,2,3}}[0][0]
-        node = new ArrayLiteralAccessExprNode(null, 
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null,
+        node = new ArrayAccessExprNode(null,
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null,
                           List.of(
-                               new ArrayLiteralExprNode(null, List.of()),
-                               new ArrayLiteralExprNode(null, List.of(
+                               new LiteralArrayExprNode(null, List.of()),
+                               new LiteralArrayExprNode(null, List.of(
                                        new LiteralIntExprNode(null, "1"),
                                        new LiteralIntExprNode(null, "2"),
                                        new LiteralIntExprNode(null, "3")))
@@ -1251,12 +1230,12 @@ class TestTypeCheckVisitorExpr {
         
         
         // {{}, {}}[0][0]
-        node = new ArrayLiteralAccessExprNode(null, 
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null,
+        node = new ArrayAccessExprNode(null,
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null,
                           List.of(
-                               new ArrayLiteralExprNode(null, List.of()),
-                               new ArrayLiteralExprNode(null, List.of())
+                               new LiteralArrayExprNode(null, List.of()),
+                               new LiteralArrayExprNode(null, List.of())
                                )), new LiteralIntExprNode(null, "0")),
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
@@ -1272,8 +1251,8 @@ class TestTypeCheckVisitorExpr {
         
         // Attempt to add an access to an empty array to an array
         node = new AddExprNode(null,
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
                 new LiteralStringExprNode(null, "A string"));
         result = node.accept(visitor);
@@ -1282,8 +1261,8 @@ class TestTypeCheckVisitorExpr {
         
         
         node = new AddExprNode(null,
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
                 new LiteralIntExprNode(null, "132"));
         result = node.accept(visitor);
@@ -1294,11 +1273,11 @@ class TestTypeCheckVisitorExpr {
         
         
         node = new DivExprNode(null,
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
@@ -1307,11 +1286,11 @@ class TestTypeCheckVisitorExpr {
         
         
         node = new AddExprNode(null,
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isVoid());
@@ -1319,11 +1298,11 @@ class TestTypeCheckVisitorExpr {
         
         
         node = new AndExprNode(null,
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")), 
-                new ArrayLiteralAccessExprNode(null,
-                        new ArrayLiteralExprNode(null, List.of()), 
+                new ArrayAccessExprNode(null,
+                        new LiteralArrayExprNode(null, List.of()),
                         new LiteralIntExprNode(null, "0")));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfBool());

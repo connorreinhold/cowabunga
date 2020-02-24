@@ -1,10 +1,11 @@
 package cyr7.parser.xi;
 
-import cyr7.ast.VariableAccessNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.LTExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.exceptions.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
@@ -134,28 +135,28 @@ public class TestIfElseStatement {
             null,
             new LTExprNode(
                 null,
-                new VariableAccessNode(
+                new VariableAccessExprNode(
                     null,
                     "a"
                 ),
-                new VariableAccessNode(
+                new VariableAccessExprNode(
                     null,
                     "b"
                 )
             ),
             new AssignmentStmtNode(
                 null,
-                new VariableAccessNode(
+                new VariableAssignNode(
                     null,
                     "b"
                 ),
                 new SubExprNode(
                     null,
-                    new VariableAccessNode(
+                    new VariableAccessExprNode(
                         null,
                         "b"
                     ),
-                    new VariableAccessNode(
+                    new VariableAccessExprNode(
                         null,
                         "a"
                     )
@@ -164,17 +165,17 @@ public class TestIfElseStatement {
             Optional.of(
                 new AssignmentStmtNode(
                     null,
-                    new VariableAccessNode(
+                    new VariableAssignNode(
                         null,
                         "a"
                     ),
                     new SubExprNode(
                         null,
-                        new VariableAccessNode(
+                        new VariableAccessExprNode(
                             null,
                             "a"
                         ),
-                        new VariableAccessNode(
+                        new VariableAccessExprNode(
                             null,
                             "b"
                         )

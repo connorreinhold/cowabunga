@@ -1,15 +1,16 @@
-package cyr7.ast;
+package cyr7.ast.expr.access;
 
+import cyr7.ast.AbstractNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.Objects;
 
-public final class VariableAccessNode extends AbstractNode implements AccessNode {
+public final class VariableAccessExprNode extends AbstractNode implements AccessNode {
 
     public final String identifier;
 
-    public VariableAccessNode(ComplexSymbolFactory.Location location,
+    public VariableAccessExprNode(ComplexSymbolFactory.Location location,
                                   String id) {
         super(location);
         assert id != null;
@@ -25,7 +26,7 @@ public final class VariableAccessNode extends AbstractNode implements AccessNode
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VariableAccessNode that = (VariableAccessNode) o;
+        VariableAccessExprNode that = (VariableAccessExprNode) o;
         return Objects.equals(identifier, that.identifier);
     }
 

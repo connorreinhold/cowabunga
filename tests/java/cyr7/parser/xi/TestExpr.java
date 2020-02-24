@@ -1,27 +1,24 @@
 package cyr7.parser.xi;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import cyr7.ast.ArrayVariableAccessNode;
-import cyr7.ast.VariableAccessNode;
-import org.junit.jupiter.api.Test;
-
-import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
-import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
-import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
-import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
-import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
+import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.exceptions.LexerIntegerOverflowException;
 import cyr7.exceptions.ParserIntegerOverflowException;
+import cyr7.parser.ParserUtil;
 import cyr7.parser.util.ParserFactory;
+import org.junit.jupiter.api.Test;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class TestExpr {
 
@@ -254,17 +251,17 @@ class TestExpr {
         ExprNode parsed = ParserFactory.parseExpr(expr);
         ExprNode expected =
             new AddExprNode(null,
-                new VariableAccessNode(null, "a"),
-                new VariableAccessNode(null, "b")
+                new VariableAccessExprNode(null, "a"),
+                new VariableAccessExprNode(null, "b")
             );
         assertEquals(parsed, expected);
 
         expr = "a[2][3][4]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new ArrayVariableAccessNode(null,
-            new ArrayVariableAccessNode(null,
-                new ArrayVariableAccessNode(null,
-                    new VariableAccessNode(null, "a"),
+        expected = new ArrayAccessExprNode(null,
+            new ArrayAccessExprNode(null,
+                new ArrayAccessExprNode(null,
+                    new VariableAccessExprNode(null, "a"),
                     new LiteralIntExprNode(null, "2")),
                 new LiteralIntExprNode(null, "3")),
             new LiteralIntExprNode(null, "4"));
@@ -272,8 +269,8 @@ class TestExpr {
 
         expr = "abcdefghij[2+2]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new ArrayVariableAccessNode(null,
-            new VariableAccessNode(null, "abcdefghij"),
+        expected = new ArrayAccessExprNode(null,
+            new VariableAccessExprNode(null, "abcdefghij"),
             new AddExprNode(null,
                 new LiteralIntExprNode(null, "2"),
                 new LiteralIntExprNode(null, "2")));
@@ -282,11 +279,11 @@ class TestExpr {
         expr = "length(a[2+b])";
         parsed = ParserFactory.parseExpr(expr);
         LinkedList<ExprNode> params = new LinkedList<>();
-        params.add(new ArrayVariableAccessNode(null,
-            new VariableAccessNode(null, "a"),
+        params.add(new ArrayAccessExprNode(null,
+            new VariableAccessExprNode(null, "a"),
             new AddExprNode(null,
                 new LiteralIntExprNode(null, "2"),
-                new VariableAccessNode(null, "b"))));
+                new VariableAccessExprNode(null, "b"))));
         expected = new FunctionCallExprNode(null, "length", params);
 
         assertEquals(parsed, expected);
@@ -299,10 +296,10 @@ class TestExpr {
         ExprNode expected = new FunctionCallExprNode(null,
             "hello",
             List.of(new LiteralCharExprNode(null, "a"),
-                new VariableAccessNode(null, "b"),
+                new VariableAccessExprNode(null, "b"),
                 new LiteralIntExprNode(null, "3"),
-                new ArrayVariableAccessNode(null,
-                    new VariableAccessNode(null, "a"),
+                new ArrayAccessExprNode(null,
+                    new VariableAccessExprNode(null, "a"),
                     new LiteralIntExprNode(null, "4")),
                 new LiteralStringExprNode(null, "hello")));
         assertEquals(parsed, expected);
@@ -312,16 +309,18 @@ class TestExpr {
         expected = new AddExprNode(null,
             new FunctionCallExprNode(null,
                 "a", List.of(new AddExprNode(null,
-                new VariableAccessNode(null, "b"),
+                new VariableAccessExprNode(null, "b"),
                 new LiteralIntExprNode(null, "4")))),
-            new HighMultExprNode(null, new ArrayVariableAccessNode(null,
-                new VariableAccessNode(null, "b"),
-                new VariableAccessNode(null, "a")),
-                new ArrayVariableAccessNode(null,
-                    new VariableAccessNode(null, "a"),
+            new HighMultExprNode(null, new ArrayAccessExprNode(null,
+                new VariableAccessExprNode(null, "b"),
+                new VariableAccessExprNode(null, "a")),
+                new ArrayAccessExprNode(null,
+                    new VariableAccessExprNode(null, "a"),
                     new AddExprNode(null,
-                        new VariableAccessNode(null, "b"),
-                        new VariableAccessNode(null, "a")))));
+                        new VariableAccessExprNode(null, "b"),
+                        new VariableAccessExprNode(null, "a")))));
+        ParserUtil.printSExpr(parsed);
+        ParserUtil.printSExpr(expected);
         assertEquals(parsed, expected);
     }
 
@@ -330,7 +329,7 @@ class TestExpr {
     void testMisc() throws Exception {
         String expr = "{1,2,3,4,5}";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new ArrayLiteralExprNode(null, List.of(
+        ExprNode expected = new LiteralArrayExprNode(null, List.of(
             new LiteralIntExprNode(null, "1"),
             new LiteralIntExprNode(null, "2"),
             new LiteralIntExprNode(null, "3"),

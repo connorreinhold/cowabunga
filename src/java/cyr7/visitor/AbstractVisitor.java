@@ -1,17 +1,16 @@
 package cyr7.visitor;
 
-import cyr7.ast.*;
-import cyr7.ast.expr.ArrayLiteralAccessExprNode;
-import cyr7.ast.expr.ArrayLiteralExprNode;
+import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
-import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
-import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
-import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
-import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
+import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.ArrayAssignNode;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -30,10 +29,9 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(PrimitiveTypeNode n);
     abstract public T visit(TypeExprArrayNode n);
 
-    // stmt and expr
-
-    abstract public T visit(ArrayVariableAccessNode n);
-    abstract public T visit(VariableAccessNode n);
+    // assign
+    abstract public T visit(ArrayAssignNode n);
+    abstract public T visit(VariableAssignNode n);
 
     // stmt
     abstract public T visit(ArrayDeclStmtNode n);
@@ -49,9 +47,11 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(WhileStmtNode n);
 
     // expr
-    abstract public T visit(ArrayLiteralExprNode n);
-    abstract public T visit(ArrayLiteralAccessExprNode n);
     abstract public T visit(FunctionCallExprNode n);
+
+    // access
+    abstract public T visit(ArrayAccessExprNode n);
+    abstract public T visit(VariableAccessExprNode n);
 
     // bin expr
     abstract public T visit(AddExprNode n);
@@ -70,6 +70,7 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(SubExprNode n);
 
     // literal expr
+    abstract public T visit(LiteralArrayExprNode n);
     abstract public T visit(LiteralBoolExprNode n);
     abstract public T visit(LiteralCharExprNode n);
     abstract public T visit(LiteralIntExprNode n);

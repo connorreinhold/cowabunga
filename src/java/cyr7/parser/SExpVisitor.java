@@ -1,15 +1,17 @@
 package cyr7.parser;
 
-import cyr7.ast.*;
-import cyr7.ast.expr.*;
+import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.ExprNode;
+import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.*;
-import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
-import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
-import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
-import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
+import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.assign.ArrayAssignNode;
+import cyr7.ast.stmt.assign.VariableAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -160,8 +162,10 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
         return null;
     }
 
+    /* ---- ASSIGN ---- */
+
     @Override
-    public Void visit(ArrayVariableAccessNode n) {
+    public Void visit(ArrayAssignNode n) {
         printer.startList();
         printer.printAtom("[]");
         n.child.accept(this);
@@ -172,12 +176,11 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(VariableAccessNode n) {
+    public Void visit(VariableAssignNode n) {
         printer.printAtom(n.identifier);
 
         return null;
     }
-
 
     @Override
     public Void visit(ArrayDeclStmtNode n) {
@@ -193,7 +196,7 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     public Void visit(AssignmentStmtNode n) {
         printer.startList();
         printer.printAtom("=");
-        n.access.accept(this);
+        n.assign.accept(this);
         n.value.accept(this);
         printer.endList();
 
@@ -306,7 +309,7 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(ArrayLiteralExprNode n) {
+    public Void visit(LiteralArrayExprNode n) {
         printer.startList();
         for (ExprNode e : n.arrayVals) {
             e.accept(this);
@@ -466,12 +469,19 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(ArrayLiteralAccessExprNode n) {
+    public Void visit(ArrayAccessExprNode n) {
         printer.startList();
         printer.printAtom("[]");
         n.child.accept(this);
         n.index.accept(this);
         printer.endList();
+
+        return null;
+    }
+
+    @Override
+    public Void visit(VariableAccessExprNode n) {
+        printer.printAtom(n.identifier);
 
         return null;
     }
