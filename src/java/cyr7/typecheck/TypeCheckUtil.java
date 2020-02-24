@@ -28,7 +28,6 @@ public class TypeCheckUtil {
         } catch (ParserException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
-        writer.flush();
     }
     
     

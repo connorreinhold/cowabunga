@@ -10,8 +10,10 @@ import java.io.*;
 
 public class ParserUtil {
 
-    public static void parse(Reader reader, Writer writer, boolean isIXI) throws Exception {
-        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, isIXI));
+    public static void parse(Reader reader, Writer writer, boolean isIXI) 
+            throws Exception {
+        ScannerBuffer lexer = new ScannerBuffer(
+                            new MultiFileLexer(reader, isIXI));
 
         try {
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
@@ -21,7 +23,6 @@ public class ParserUtil {
             visitor.flush();
         } catch (ParserException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
-            writer.flush();
         }
     }
 

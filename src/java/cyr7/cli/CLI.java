@@ -347,6 +347,7 @@ public class CLI {
             
             if (input != null && output != null) {
                 try {
+                    output.flush();
                     output.close();
                     input.close();
                 } catch (IOException e) {
