@@ -8,10 +8,11 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.ast.ArrayAccessNode;
+import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.Node;
 import cyr7.ast.VariableAccessNode;
-import cyr7.ast.expr.ArrayExprNode;
+import cyr7.ast.expr.ArrayLiteralAccessExprNode;
+import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.binexpr.AndExprNode;
@@ -928,7 +929,7 @@ class TestTypeCheckVisitorExpr {
     void testArrayExprNode() {
         context = new HashMapStackContext();
         visitor = new TypeCheckVisitor(context);
-        node = new ArrayExprNode(null,
+        node = new ArrayLiteralExprNode(null,
                 List.of(new LiteralIntExprNode(null, "9"),
                         new LiteralIntExprNode(null, "10"),
                         new LiteralIntExprNode(null, "21")));
@@ -937,13 +938,13 @@ class TestTypeCheckVisitorExpr {
         assertTrue(result.assertFirst().getArrayType().child.isInt());
 
 
-        node = new ArrayExprNode(null,
+        node = new ArrayLiteralExprNode(null,
                 List.of(
-                new ArrayExprNode(null, 
+                new ArrayLiteralExprNode(null, 
                         List.of(new LiteralIntExprNode(null, "9"))),
-                new ArrayExprNode(null, 
+                new ArrayLiteralExprNode(null, 
                         List.of(new LiteralIntExprNode(null, "10"))),
-                new ArrayExprNode(null, 
+                new ArrayLiteralExprNode(null, 
                         List.of(new LiteralIntExprNode(null, "21")))));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
@@ -953,25 +954,25 @@ class TestTypeCheckVisitorExpr {
                         new ArrayType(new ArrayType(OrdinaryType.intType)))));
 
         
-        node = new ArrayExprNode(null, List.of());
+        node = new ArrayLiteralExprNode(null, List.of());
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         assertTrue(result.assertFirst().getArrayType().child.isVoid());
         
         
-        node = new ArrayExprNode(null,
+        node = new ArrayLiteralExprNode(null,
                 List.of(new LiteralBoolExprNode(null, true),
                         new LiteralIntExprNode(null, "10"),
                         new LiteralBoolExprNode(null, false)));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
-        node = new ArrayExprNode(null,
+        node = new ArrayLiteralExprNode(null,
                 List.of(
-                new ArrayExprNode(null, 
+                new ArrayLiteralExprNode(null, 
                         List.of(new LiteralIntExprNode(null, "9"))),
                 new LiteralIntExprNode(null, "10"),
-                new ArrayExprNode(null, 
+                new ArrayLiteralExprNode(null, 
                         List.of(new LiteralIntExprNode(null, "21")))));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
@@ -1114,33 +1115,38 @@ class TestTypeCheckVisitorExpr {
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
+        // empty[0]
         context.addVar("empty", new ArrayType(OrdinaryType.intType));
-        node = new ArrayAccessNode(null, 
+        node = new ArrayVariableAccessNode(null, 
                 new VariableAccessNode(null, "empty"), 
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
         
+        // empty
         node = new VariableAccessNode(null, "empty");
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         
-        
-        node = new ArrayAccessNode(null, 
+
+        // empty[true]
+        node = new ArrayVariableAccessNode(null, 
                 new VariableAccessNode(null, "empty"), 
                 new LiteralBoolExprNode(null, true));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
-        node = new ArrayAccessNode(null, 
+        // empty["this is not a number"]
+        node = new ArrayVariableAccessNode(null, 
                 new VariableAccessNode(null, "empty"), 
                 new LiteralStringExprNode(null, "this is not a number"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
-        node = new ArrayAccessNode(null, 
-                new ArrayAccessNode(
+        // empty[0][0]
+        node = new ArrayVariableAccessNode(null, 
+                new ArrayVariableAccessNode(
                         null,
                         new VariableAccessNode(null, "empty"), 
                         new LiteralIntExprNode(null, "0")),
@@ -1150,7 +1156,7 @@ class TestTypeCheckVisitorExpr {
         
         context.addVar("twoDimensionMap", new ArrayType(
                 new ArrayType(OrdinaryType.intType)));
-        node = new ArrayAccessNode(null, 
+        node = new ArrayVariableAccessNode(null, 
                 new VariableAccessNode(null, "twoDimensionMap"), 
                 new LiteralIntExprNode(null, "0"));
         result = node.accept(visitor);
@@ -1158,8 +1164,8 @@ class TestTypeCheckVisitorExpr {
         assertTrue(result.assertFirst().getArrayType().child.isInt());
 
         
-        node = new ArrayAccessNode(null, 
-                new ArrayAccessNode(
+        node = new ArrayVariableAccessNode(null, 
+                new ArrayVariableAccessNode(
                         null,
                         new VariableAccessNode(null, "twoDimensionMap"), 
                         new LiteralIntExprNode(null, "0")),
@@ -1168,8 +1174,8 @@ class TestTypeCheckVisitorExpr {
         assertTrue(result.assertFirst().isSubtypeOfInt());
 
         
-        node = new ArrayAccessNode(null, 
-                new ArrayAccessNode(
+        node = new ArrayVariableAccessNode(null, 
+                new ArrayVariableAccessNode(
                         null,
                         new VariableAccessNode(null, "twoDimensionMap"), 
                         new LiteralIntExprNode(null, "0")),
@@ -1178,4 +1184,87 @@ class TestTypeCheckVisitorExpr {
         
     }
     
+    
+    @Test
+    void testArrayLiterals() {
+        context = new HashMapStackContext();
+        visitor = new TypeCheckVisitor(context);
+        
+        node = new ArrayLiteralAccessExprNode(null,
+                new ArrayLiteralExprNode(null, 
+                        List.of(new LiteralIntExprNode(null, "0"))), 
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        
+        // Access to an empty array can be potentially any type.
+        node = new ArrayLiteralAccessExprNode(null,
+                new ArrayLiteralExprNode(null, List.of()), 
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertTrue(result.assertFirst().isSubtypeOfBool());
+        assertTrue(result.assertFirst().isSubtypeOfArray());
+
+        
+        // Attempt to add an access to an empty array to an array
+        node = new AddExprNode(null,
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")), 
+                new LiteralStringExprNode(null, "A string"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertFalse(result.assertFirst().isVoid());
+        
+        
+        node = new AddExprNode(null,
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")), 
+                new LiteralIntExprNode(null, "132"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertFalse(result.assertFirst().isVoid());
+        
+        
+        
+        
+        node = new DivExprNode(null,
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")), 
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertFalse(result.assertFirst().isVoid());
+        
+        
+        
+        node = new AddExprNode(null,
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")), 
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isVoid());
+        
+        
+        
+        node = new AndExprNode(null,
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")), 
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null, List.of()), 
+                        new LiteralIntExprNode(null, "0")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfBool());
+        assertFalse(result.assertFirst().isVoid());
+
+    }
 }

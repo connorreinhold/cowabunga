@@ -107,6 +107,7 @@ public class ExpandedType implements AnyType {
     public boolean isArray() {
         return this.isOrdinary() && this.getOrdinaryType().isArray();
     }
+   
     
     public OrdinaryType getOrdinaryType() {
         assert(this.isOrdinary());
@@ -129,6 +130,14 @@ public class ExpandedType implements AnyType {
         
     public boolean isSubtypeOfInt() {
         return this.isASubtypeOf(ExpandedType.intType);
+    }
+
+    public boolean isVoid() {
+        return this.isOrdinary() && this.getOrdinaryType().isVoid();
+    }
+    
+    public boolean isSubtypeOfArray() {
+        return this.isVoid() || this.isArray();
     }
 
     public boolean isSubtypeOfBool() {

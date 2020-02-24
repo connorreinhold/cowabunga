@@ -9,11 +9,12 @@ import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.ast.ArrayAccessNode;
+import cyr7.ast.ArrayVariableAccessNode;
 import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.VariableAccessNode;
-import cyr7.ast.expr.ArrayExprNode;
+import cyr7.ast.expr.ArrayLiteralAccessExprNode;
+import cyr7.ast.expr.ArrayLiteralExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
@@ -355,7 +356,7 @@ class TestTypeCheckVisitorStmt {
         context.addRet(ExpandedType.intType);
         visitor = new TypeCheckVisitor(context);
         node = new ReturnStmtNode(null, List.of());
-        assertThrows(SemanticException.class, () -> node.accept(visitor));        
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
         context = new HashMapStackContext();
@@ -365,7 +366,7 @@ class TestTypeCheckVisitorStmt {
         visitor = new TypeCheckVisitor(context);
         node = new ReturnStmtNode(null, 
                 List.of(new LiteralIntExprNode(null, "0")));
-        assertThrows(SemanticException.class, () -> node.accept(visitor));        
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
     }
     
     
@@ -482,7 +483,7 @@ class TestTypeCheckVisitorStmt {
         context = new HashMapStackContext();
         context.addRet(ExpandedType.unitExpandedType);
         visitor = new TypeCheckVisitor(context);
-        node = new IfElseStmtNode(null, new ArrayExprNode(null, List.of()), 
+        node = new IfElseStmtNode(null, new ArrayLiteralExprNode(null, List.of()), 
                 new BlockStmtNode(null, List.of(
                         new ReturnStmtNode(null, List.of(
                                 new LiteralIntExprNode(null, "123")))
@@ -492,6 +493,64 @@ class TestTypeCheckVisitorStmt {
                                 new ReturnStmtNode(null, List.of())
                         ))));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        
+        
+        
+        
+        /**
+         * if ({}[0]) {
+         *    return 123;
+         * } else {
+         *    return;
+         * }
+         */
+        context = new HashMapStackContext();
+        context.addRet(ExpandedType.unitExpandedType);
+        visitor = new TypeCheckVisitor(context);
+        node = new IfElseStmtNode(null, 
+                new ArrayLiteralAccessExprNode(null, 
+                        new ArrayLiteralExprNode(null, List.of()),
+                        new LiteralIntExprNode(null, "0")), 
+                new BlockStmtNode(null, List.of(
+                        new ReturnStmtNode(null, List.of())
+                )),
+                Optional.of(
+                        new BlockStmtNode(null, List.of(
+                                new ReturnStmtNode(null, List.of())
+                        ))));
+        result = node.accept(visitor);
+        assertEquals(ResultType.VOID, result.assertSecond());
+        
+        
+        
+        
+        
+        
+        /**
+         * if ({}[0]) {
+         *    return 123;
+         * }         
+         */
+        context = new HashMapStackContext();
+        context.addRet(ExpandedType.intType);
+        visitor = new TypeCheckVisitor(context);
+        node = new IfElseStmtNode(null, 
+                new ArrayLiteralAccessExprNode(null, 
+                        new ArrayLiteralExprNode(null, List.of()),
+                        new LiteralIntExprNode(null, "0")), 
+                new BlockStmtNode(null, List.of(
+                        new ReturnStmtNode(null, List.of(
+                                new LiteralIntExprNode(null, "123")))
+                )),
+                Optional.empty());
+        result = node.accept(visitor);
+        assertEquals(ResultType.UNIT, result.assertSecond());
+        
+        
+        
+        
+        
         
         
         
@@ -598,7 +657,7 @@ class TestTypeCheckVisitorStmt {
         context = new HashMapStackContext();
         context.addRet(ExpandedType.unitExpandedType);
         visitor = new TypeCheckVisitor(context);
-        node = new WhileStmtNode(null, new ArrayExprNode(null, List.of()), 
+        node = new WhileStmtNode(null, new ArrayLiteralExprNode(null, List.of()), 
                 new BlockStmtNode(null, List.of(
                         new ReturnStmtNode(null, List.of(
                                 new LiteralIntExprNode(null, "123")))
