@@ -160,7 +160,7 @@ public class TypeCheckVisitor extends
         
         if (!type.isOrdinary()) {
             throw new SemanticException("Expected an array of primitives or"
-                    + " of arrays, but found an array of tuples");            
+                    + " of arrays, but found an array of tuples");
         }
         return OneOfTwo.ofFirst(
                 new ExpandedType(new ArrayType(type.getOrdinaryType())));

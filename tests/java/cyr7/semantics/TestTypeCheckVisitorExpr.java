@@ -1197,6 +1197,7 @@ class TestTypeCheckVisitorExpr {
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
+        
         // Access to an empty array can be potentially any type.
         node = new ArrayLiteralAccessExprNode(null,
                 new ArrayLiteralExprNode(null, List.of()), 
@@ -1206,6 +1207,68 @@ class TestTypeCheckVisitorExpr {
         assertTrue(result.assertFirst().isSubtypeOfBool());
         assertTrue(result.assertFirst().isSubtypeOfArray());
 
+        
+        
+        
+        // The array literal's type becomes the supertype of among the elements.
+        // {{}, {1,2,3}}
+        node = new ArrayLiteralExprNode(null,
+                List.of(
+                        new ArrayLiteralExprNode(null, List.of()),
+                        new ArrayLiteralExprNode(null, List.of(
+                                new LiteralIntExprNode(null, "1"),
+                                new LiteralIntExprNode(null, "2"),
+                                new LiteralIntExprNode(null, "3")
+                                ))
+                        ));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertTrue(result.assertFirst().isASubtypeOf(
+                new ExpandedType(
+                        new ArrayType(new ArrayType(OrdinaryType.intType)))));
+
+        
+        
+        // The array literal's type becomes the supertype of among the elements.
+        // {{}, {1,2,3}}[0][0]
+        node = new ArrayLiteralAccessExprNode(null, 
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null,
+                          List.of(
+                               new ArrayLiteralExprNode(null, List.of()),
+                               new ArrayLiteralExprNode(null, List.of(
+                                       new LiteralIntExprNode(null, "1"),
+                                       new LiteralIntExprNode(null, "2"),
+                                       new LiteralIntExprNode(null, "3")))
+                               )), new LiteralIntExprNode(null, "0")),
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertTrue(result.assertFirst().getOrdinaryType().isInt());
+        
+        
+        
+        
+        
+        // {{}, {}}[0][0]
+        node = new ArrayLiteralAccessExprNode(null, 
+                new ArrayLiteralAccessExprNode(null,
+                        new ArrayLiteralExprNode(null,
+                          List.of(
+                               new ArrayLiteralExprNode(null, List.of()),
+                               new ArrayLiteralExprNode(null, List.of())
+                               )), new LiteralIntExprNode(null, "0")),
+                new LiteralIntExprNode(null, "0"));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertTrue(result.assertFirst().isSubtypeOfBool());
+        assertTrue(result.assertFirst().isSubtypeOfArray());
+        assertTrue(result.assertFirst().isVoid());
+        
+        
+        
+        
+        
         
         // Attempt to add an access to an empty array to an array
         node = new AddExprNode(null,
