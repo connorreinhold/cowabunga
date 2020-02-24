@@ -194,7 +194,7 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(ArrayDeclStmtNode n) {
         if (context.contains(n.identifier)) {
-            throw new SemanticException("Duplicate variablee declaration");
+            throw new SemanticException("Duplicate variable declaration");
         }
         
         ExpandedType expectedArray = n.type.accept(this).assertFirst();

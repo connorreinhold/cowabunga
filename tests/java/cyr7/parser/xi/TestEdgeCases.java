@@ -10,13 +10,13 @@ import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
 import java_cup.runtime.ComplexSymbolFactory;
 
-class EdgeCaseTest {
+class TestEdgeCases {
 
     String program;
     XiParser parser;
     
     @Test
-    void ReadElementOfBraceTest() throws Exception {
+    void readElementOfBraceTest() throws Exception {
         program = "main() { i: int = {2,4,6}[1]; }";
         parser = new XiParser(
                 new MultiFileLexer(new StringReader(program), false), 
@@ -33,7 +33,7 @@ class EdgeCaseTest {
     
     
     @Test
-    void ReturnMustBeLastStatementInABlock() throws Exception {
+    void returnMustBeLastStatementInABlock() throws Exception {
         program = "main() { return; i: int; }";
         parser = new XiParser(
                 new MultiFileLexer(new StringReader(program), false), 

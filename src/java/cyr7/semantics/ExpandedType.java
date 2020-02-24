@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import cyr7.util.Util;
+
 public class ExpandedType implements AnyType {
     
     final public static ExpandedType boolType = 
@@ -24,23 +26,22 @@ public class ExpandedType implements AnyType {
      * Creates a Unit ExpandedType.
      */
     private ExpandedType() {
-        this.types = Collections.unmodifiableList(List.of());
+        this.types = Util.immutableCopy(List.of());
     }
     
     /**
      * Creates an OrdinaryType ExpandedType.
      */
     public ExpandedType(OrdinaryType type) {
-        this.types = Collections.unmodifiableList(List.of(type));
+        this.types = Util.immutableCopy(List.of(type));
     }
-
     
     
     /**
      * Creates a Tuple ExpandedType.
      */
     public ExpandedType(List<OrdinaryType> types) {
-        this.types = Collections.unmodifiableList(types);
+        this.types = Util.immutableCopy(types);
     }
     
     enum Type {
