@@ -403,8 +403,8 @@ public class TypeCheckVisitor extends
      * Typechecks an integer binary operation expression, e.g. 9 + 10.
      */
     private ExpandedType typecheckIntegerBinExpr(BinExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
             return ExpandedType.intType;
@@ -416,8 +416,8 @@ public class TypeCheckVisitor extends
      * Typechecks a boolean binary operation expression, e.g. true || false.
      */
     private ExpandedType typecheckBooleanBinExpr(BinExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (left.isSubtypeOfBool() && right.isSubtypeOfBool()) {
             return ExpandedType.boolType;
@@ -430,8 +430,8 @@ public class TypeCheckVisitor extends
      * Typechecks a comparison expression, e.g. 3 <= 31.
      */
     private ExpandedType typecheckComparisonBinExpr(BinExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
             return ExpandedType.boolType;
@@ -444,8 +444,8 @@ public class TypeCheckVisitor extends
      * Typechecks an equality expression, e.g. 3 == 31.
      */
     private ExpandedType typecheckEqualityBinExpr(BinExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (left.isOrdinary() && right.isOrdinary()
                 && supertypeOf(left, right).isPresent()) {
@@ -506,8 +506,8 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(AddExprNode n) {
-        ExpandedType left = n.accept(this).assertFirst();
-        ExpandedType right = n.accept(this).assertFirst();
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
             return OneOfTwo.ofFirst(ExpandedType.intType);
