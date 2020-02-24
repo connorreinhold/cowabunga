@@ -398,7 +398,58 @@ public class TypeCheckVisitor extends
     }
 
     // Expression
+    
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(ArrayExprNode n) {
+        if (n.arrayVals.size() == 0) {
+            return OneOfTwo.ofFirst(new ExpandedType(
+                    new ArrayType(OrdinaryType.voidType)));
+        }
+        // arrayType is the supertype of the first 0...i array values
+        Optional<ExpandedType> arrayType = Optional.empty();
+        List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
+            return e.accept(this).assertFirst();
+        }).collect(Collectors.toList());
+        for (ExpandedType t: arrayTypes) {
+            if (arrayType.isEmpty()) {
+                arrayType = Optional.of(t);
+            } else {
+                Optional<ExpandedType> possibleSupertype = 
+                        supertypeOf(arrayType.get(), t);
+                if (possibleSupertype.isEmpty()) {
+                    throw new SemanticException("Mismatch types in array");
+                } else {
+                    arrayType = possibleSupertype;
+                }
+            }
+        }
+        assert(arrayType.isPresent());
+        assert(arrayType.get().isOrdinary());
+        OrdinaryType elementType = arrayType.get().getOrdinaryType();
+        return OneOfTwo.ofFirst(new ExpandedType(new ArrayType(elementType)));
+    }
 
+    @Override
+    public OneOfTwo<ExpandedType, ResultType> visit(FunctionCallExprNode n) {
+        Optional<FunctionType> optionalFn = context.getFn(n.identifier);
+        if (optionalFn.isEmpty()) {
+            throw new SemanticException("Function does not exist");
+        }
+        FunctionType function = optionalFn.get();
+        ExpandedType inputTypes = function.input;
+        ExpandedType params = new ExpandedType(n.parameters.stream()
+                .map(e -> e.accept(this).assertFirst().getOrdinaryType())
+                .collect(Collectors.toList()));
+        
+        if (params.isASubtypeOf(inputTypes)) {
+            return OneOfTwo.ofFirst(function.output);
+        } else {
+            throw new SemanticException("Parameter types do not match types "
+                    + "specified by function");
+        }
+    }
+    
+    
     /**
      * Typechecks an integer binary operation expression, e.g. 9 + 10.
      */
@@ -455,54 +506,6 @@ public class TypeCheckVisitor extends
                     + "incompatible");
     }
 
-
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(ArrayExprNode n) {
-        if (n.arrayVals.size() == 0) {
-            return OneOfTwo.ofFirst(new ExpandedType(
-                    new ArrayType(OrdinaryType.voidType)));
-        }
-        // arrayType is the supertype of the first 0...i array values
-        Optional<ExpandedType> arrayType = Optional.empty();
-        List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
-            return e.accept(this).assertFirst();
-        }).collect(Collectors.toList());
-        for (ExpandedType t: arrayTypes) {
-            if (arrayType.isEmpty()) {
-                arrayType = Optional.of(t);
-            } else {
-                Optional<ExpandedType> possibleSupertype = 
-                        supertypeOf(arrayType.get(), t);
-                if (possibleSupertype.isEmpty()) {
-                    throw new SemanticException("Mismatch types in array");
-                } else {
-                    arrayType = possibleSupertype;
-                }
-            }
-        }
-        assert(arrayType.isPresent());
-        return OneOfTwo.ofFirst(arrayType.get());
-    }
-
-    @Override
-    public OneOfTwo<ExpandedType, ResultType> visit(FunctionCallExprNode n) {
-        Optional<FunctionType> optionalFn = context.getFn(n.identifier);
-        if (optionalFn.isEmpty()) {
-            throw new SemanticException("Function does not exist");
-        }
-        FunctionType function = optionalFn.get();
-        ExpandedType inputTypes = function.input;
-        ExpandedType params = new ExpandedType(n.parameters.stream()
-                .map(e -> e.accept(this).assertFirst().getOrdinaryType())
-                .collect(Collectors.toList()));
-        
-        if (params.isASubtypeOf(inputTypes)) {
-            return OneOfTwo.ofFirst(function.output);
-        } else {
-            throw new SemanticException("Parameter types do not match types "
-                    + "specified by function");
-        }
-    }
 
     @Override
     public OneOfTwo<ExpandedType, ResultType> visit(AddExprNode n) {

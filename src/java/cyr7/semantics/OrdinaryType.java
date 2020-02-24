@@ -23,5 +23,18 @@ public abstract class OrdinaryType {
         return this.getType() == Type.VOID;
     }
     
+    public boolean isInt() {
+        return this.getType() == Type.INT;
+    }
+
+    public boolean isBool() {
+        return this.getType() == Type.BOOL;
+    }
+
+    public boolean isArray() {
+        return this.getType() == Type.ARRAY;
+    }
+
+    
     public abstract boolean isSubtypeOf(OrdinaryType expectedSupertype);
 }

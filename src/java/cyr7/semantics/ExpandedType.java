@@ -104,8 +104,7 @@ public class ExpandedType implements AnyType {
     }
     
     public boolean isArray() {
-        return this.isOrdinary() 
-                && this.getOrdinaryType().getType() == OrdinaryType.Type.ARRAY;
+        return this.isOrdinary() && this.getOrdinaryType().isArray();
     }
     
     public OrdinaryType getOrdinaryType() {

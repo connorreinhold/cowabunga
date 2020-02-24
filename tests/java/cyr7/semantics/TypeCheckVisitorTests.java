@@ -2,13 +2,17 @@ package cyr7.semantics;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
 import cyr7.ast.ArrayAccessNode;
 import cyr7.ast.Node;
 import cyr7.ast.VariableAccessNode;
+import cyr7.ast.expr.ArrayExprNode;
+import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.binexpr.AndExprNode;
 import cyr7.ast.expr.binexpr.DivExprNode;
@@ -30,6 +34,7 @@ import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.exceptions.SemanticException;
+import cyr7.semantics.OrdinaryType.Type;
 import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
@@ -917,4 +922,182 @@ class TypeCheckVisitorTests {
         
     }
 
+    
+    @Test
+    void testArrayExprNode() {
+        context = new HashMapStackContext();
+        visitor = new TypeCheckVisitor(context);
+        node = new ArrayExprNode(null,
+                List.of(new LiteralIntExprNode(null, "9"),
+                        new LiteralIntExprNode(null, "10"),
+                        new LiteralIntExprNode(null, "21")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertTrue(result.assertFirst().getArrayType().child.isInt());
+
+
+        node = new ArrayExprNode(null,
+                List.of(
+                new ArrayExprNode(null, 
+                        List.of(new LiteralIntExprNode(null, "9"))),
+                new ArrayExprNode(null, 
+                        List.of(new LiteralIntExprNode(null, "10"))),
+                new ArrayExprNode(null, 
+                        List.of(new LiteralIntExprNode(null, "21")))));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertTrue(result.assertFirst().getArrayType().child.isArray());
+        assertTrue(result.assertFirst().isASubtypeOf(
+                new ExpandedType(
+                        new ArrayType(new ArrayType(OrdinaryType.intType)))));
+
+        node = new ArrayExprNode(null, List.of());
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertTrue(result.assertFirst().getArrayType().child.isVoid());
+        
+        
+        node = new ArrayExprNode(null,
+                List.of(new LiteralBoolExprNode(null, true),
+                        new LiteralIntExprNode(null, "10"),
+                        new LiteralBoolExprNode(null, false)));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        
+        node = new ArrayExprNode(null,
+                List.of(
+                new ArrayExprNode(null, 
+                        List.of(new LiteralIntExprNode(null, "9"))),
+                new LiteralIntExprNode(null, "10"),
+                new ArrayExprNode(null, 
+                        List.of(new LiteralIntExprNode(null, "21")))));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+    }
+    
+    
+    @Test
+    void testFunctionCall() {
+        context = new HashMapStackContext();
+        context.addFn("print", new FunctionType(
+                new ExpandedType(new ArrayType(OrdinaryType.intType)), 
+                ExpandedType.unitExpandedType));
+
+        
+        visitor = new TypeCheckVisitor(context);
+        node = new FunctionCallExprNode(null, "print", 
+                List.of(new LiteralStringExprNode(null, "Hello World")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isUnit());
+        
+        
+        
+        context.addFn("duplicate", new FunctionType(
+                new ExpandedType(new ArrayType(OrdinaryType.intType)), 
+                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+
+        
+        visitor = new TypeCheckVisitor(context);
+        node = new FunctionCallExprNode(null, "duplicate", 
+                List.of(new LiteralStringExprNode(null, "Hello World")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isArray());
+        assertTrue(result.assertFirst().getArrayType().child.isInt());
+
+        
+        
+        context.addFn("exit", new FunctionType(
+                ExpandedType.unitExpandedType, 
+                ExpandedType.unitExpandedType));
+        
+        visitor = new TypeCheckVisitor(context);
+        node = new FunctionCallExprNode(null, "exit", List.of());
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isUnit());
+
+
+        
+        context.addFn("random", new FunctionType(
+                ExpandedType.unitExpandedType, ExpandedType.intType));
+        
+        visitor = new TypeCheckVisitor(context);
+        node = new FunctionCallExprNode(null, "random", List.of());
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertTrue(result.assertFirst().getOrdinaryType().isInt());
+        
+        
+        
+        ExpandedType tuple = new ExpandedType(
+                List.of(OrdinaryType.intType, OrdinaryType.boolType,
+                        OrdinaryType.boolType)
+                );
+        ExpandedType oppositeTuple = new ExpandedType(
+                List.of(OrdinaryType.boolType, OrdinaryType.intType,
+                        OrdinaryType.intType)
+                );
+        context.addFn("genMany", 
+                new FunctionType(ExpandedType.unitExpandedType, tuple));
+        context.addFn("singleToMany",
+                new FunctionType(ExpandedType.intType, tuple));
+        context.addFn("transform", new FunctionType(tuple, oppositeTuple));
+        context.addFn("consume", new FunctionType(
+                tuple, ExpandedType.unitExpandedType));
+        context.addFn("manyToSingle", 
+                new FunctionType(tuple, ExpandedType.intType));
+
+        
+        visitor = new TypeCheckVisitor(context);
+        node = new FunctionCallExprNode(null, "genMany", List.of());
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isTuple());
+        assertTrue(result.assertFirst().isASubtypeOf(tuple));
+
+        node = new FunctionCallExprNode(null, "singleToMany", 
+                List.of(new LiteralIntExprNode(null, "0")));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isTuple());
+        assertTrue(result.assertFirst().isASubtypeOf(tuple));
+        
+        
+        node = new FunctionCallExprNode(null, "transform", 
+                List.of(new LiteralIntExprNode(null, "0"),
+                        new LiteralBoolExprNode(null, false),
+                        new LiteralBoolExprNode(null, true)));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isTuple());
+        assertTrue(result.assertFirst().isASubtypeOf(oppositeTuple));
+
+        
+        node = new FunctionCallExprNode(null, "consume", 
+                List.of(new LiteralIntExprNode(null, "0"),
+                        new LiteralBoolExprNode(null, false),
+                        new LiteralBoolExprNode(null, true)));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isUnit());
+        
+        
+        node = new FunctionCallExprNode(null, "manyToSingle", 
+                List.of(new LiteralIntExprNode(null, "0"),
+                        new LiteralBoolExprNode(null, false),
+                        new LiteralBoolExprNode(null, true)));
+        result = node.accept(visitor);
+        assertTrue(result.assertFirst().isSubtypeOfInt());
+        assertTrue(result.assertFirst().getOrdinaryType().isInt());
+        
+        
+        node = new FunctionCallExprNode(null, "nonexistantFunction", List.of());
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        node = new FunctionCallExprNode(null, "manyToSingle", List.of());
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+        node = new FunctionCallExprNode(null, "consume", List.of());
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+
+        node = new FunctionCallExprNode(null, "genMany", 
+                List.of(new LiteralStringExprNode(null, "Bad Input")));
+        assertThrows(SemanticException.class, () -> node.accept(visitor));
+        
+    }
+    
 }
