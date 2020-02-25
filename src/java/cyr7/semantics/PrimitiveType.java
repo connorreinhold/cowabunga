@@ -5,8 +5,13 @@ public class PrimitiveType extends OrdinaryType {
     final private Type type;
     
     protected PrimitiveType(Type type) {
-        assert(type != Type.ARRAY);
+        assert type != Type.ARRAY;
         this.type = type;
+    }
+    
+    @Override
+    public String toString() {
+        return this.type.toString().toLowerCase();
     }
     
     @Override

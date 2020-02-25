@@ -15,6 +15,11 @@ public class ArrayType extends OrdinaryType {
     public Type getType() {
         return Type.ARRAY;
     }
+    
+    @Override
+    public String toString() {
+        return child.toString() + "[]";
+    }
 
     @Override
     public boolean equals(Object o) {

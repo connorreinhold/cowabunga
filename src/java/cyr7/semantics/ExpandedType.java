@@ -1,8 +1,8 @@
 package cyr7.semantics;
 
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import cyr7.util.Util;
 
@@ -18,7 +18,31 @@ public class ExpandedType implements AnyType {
             new ExpandedType(OrdinaryType.unitType);
     final public static ExpandedType voidOrdinaryType = 
             new ExpandedType(OrdinaryType.voidType);
-
+    final public static ExpandedType genericArrayType =
+            new ExpandedType(OrdinaryType.genericArray);
+    
+    
+    @Override
+    public String toString() {
+        if (this.isUnit()) {
+            return "()";
+        } else if (this.isOrdinary()) {
+            if (this.equals(genericArrayType)) {
+                return "array";
+            } else {
+                return this.getOrdinaryType().toString();
+            }
+        } else {
+            final StringBuffer buffer = new StringBuffer("(");
+            buffer.append(
+                    String.join(", ", this.types.stream()
+                                                .map(t -> t.toString())
+                                                .collect(Collectors.toList())));
+            buffer.append(")");
+            return buffer.toString();
+        }
+    }
+    
     
     final private List<OrdinaryType> types;
     
@@ -110,13 +134,17 @@ public class ExpandedType implements AnyType {
    
     
     public OrdinaryType getOrdinaryType() {
-        assert(this.isOrdinary());
+        assert this.isOrdinary();
         return this.types.get(0);
     }
-
-    public ArrayType getArrayType() {
-        assert(this.isOrdinary() && this.isArray());
-        return (ArrayType)this.getOrdinaryType();
+    
+    public OrdinaryType getInnerArrayType() {
+        if (this.isVoid()) {
+            return OrdinaryType.voidType;
+        } else {
+            assert this.isArray();
+            return ((ArrayType)this.getOrdinaryType()).child;
+        }
     }
 
     
