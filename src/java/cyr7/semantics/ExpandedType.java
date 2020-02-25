@@ -18,8 +18,8 @@ public class ExpandedType implements AnyType {
             new ExpandedType(OrdinaryType.unitType);
     final public static ExpandedType voidOrdinaryType = 
             new ExpandedType(OrdinaryType.voidType);
-    final public static ExpandedType genericArrayType =
-            new ExpandedType(OrdinaryType.genericArray);
+    final public static ExpandedType voidArrayType =
+            new ExpandedType(OrdinaryType.voidArray);
     
     
     @Override
@@ -27,7 +27,7 @@ public class ExpandedType implements AnyType {
         if (this.isUnit()) {
             return "()";
         } else if (this.isOrdinary()) {
-            if (this.equals(genericArrayType)) {
+            if (this.equals(voidArrayType)) {
                 return "array";
             } else {
                 return this.getOrdinaryType().toString();

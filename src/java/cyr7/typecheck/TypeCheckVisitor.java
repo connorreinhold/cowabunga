@@ -182,7 +182,7 @@ public class TypeCheckVisitor extends
         
         if (!arrayType.isSubtypeOfArray()) {
             throw new TypeMismatchException(
-                    indexType, ExpandedType.genericArrayType,
+                    indexType, ExpandedType.voidArrayType,
                     n.child.getLocation().get());
         }
         
@@ -649,7 +649,7 @@ public class TypeCheckVisitor extends
         
         if (!arrayType.isSubtypeOfArray()) {
             throw new TypeMismatchException(arrayType, 
-                    ExpandedType.genericArrayType, 
+                    ExpandedType.voidArrayType, 
                     n.index.getLocation().get());
         }
         

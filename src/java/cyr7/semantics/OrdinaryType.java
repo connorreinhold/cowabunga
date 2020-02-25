@@ -12,7 +12,7 @@ public abstract class OrdinaryType {
     public final static OrdinaryType boolType = new PrimitiveType(Type.BOOL);
     public final static OrdinaryType unitType = new UnitType();
     public final static OrdinaryType voidType = new VoidType();
-    public final static OrdinaryType genericArray = new ArrayType(voidType);
+    public final static OrdinaryType voidArray = new ArrayType(voidType);
 
     public abstract Type getType();
     
