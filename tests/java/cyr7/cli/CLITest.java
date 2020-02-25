@@ -1,15 +1,12 @@
 package cyr7.cli;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import java.io.File;
-import java.util.Arrays;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.ParseException;
 import org.junit.jupiter.api.Test;
 
-import cyr7.cli.CLI;
+import java.io.File;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 class CLITest {
 

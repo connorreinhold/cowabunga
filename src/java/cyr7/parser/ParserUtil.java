@@ -24,6 +24,7 @@ public class ParserUtil {
             AbstractNode node = (AbstractNode) p.parse().value;
             SExpVisitor visitor = new SExpVisitor(writer);
             node.accept(visitor);
+            visitor.flush();
         } catch (ParserException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }

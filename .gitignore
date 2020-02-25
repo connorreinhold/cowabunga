@@ -14,7 +14,14 @@ src/java/cyr7/parser/sym.java
 
 cowabunga.zip
 
-xthScript.results
+**/xthScript*.results
+tests/xth/xthScriptAll
+
+# CLI-generated files
+
+*.lexed
+*.parsed
+*.typed
 
 # <-- COWABUNGA SPECIFIC
 
@@ -174,8 +181,4 @@ buildNumber.properties
 bin/
 
 
-# CLI-generated files
-*.lexed
-*.parsed
-*.typed
 
