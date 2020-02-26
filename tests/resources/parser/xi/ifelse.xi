@@ -7,7 +7,7 @@ main() {
 
     if (false) {
         i: int = 0;
-        length(i);
+        a:int = length(i);
     }
 
     if true

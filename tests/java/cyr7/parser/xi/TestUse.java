@@ -4,13 +4,17 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.ast.toplevel.FunctionDeclNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
 import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
+import cyr7.ast.stmt.BlockStmtNode;
 
 class TestUse {
 
@@ -20,15 +24,16 @@ class TestUse {
 
     @Test
     void test() throws Exception {
-        String program = "use io\nuse math;\nuse nothing";
+        String program = "use io\nuse math;\nuse nothing main() {}";
         LinkedList<UseNode> uses = new LinkedList<>();
-        Collections.addAll(
-            uses,
-            new UseNode(null, "io"),
-            new UseNode(null, "math"),
-            new UseNode(null, "nothing")
-        );
-        expected = new XiProgramNode(null, uses, new LinkedList<>());
+        Collections.addAll(uses, new UseNode(null, "io"),
+                new UseNode(null, "math"), new UseNode(null, "nothing"));
+        FunctionHeaderDeclNode header = new FunctionHeaderDeclNode(null, "main",
+                new LinkedList<>(), new LinkedList<>());
+        FunctionDeclNode decl = new FunctionDeclNode(null, header,
+                new BlockStmtNode(null, new LinkedList<>()));
+        expected = new XiProgramNode(null, uses,
+                new LinkedList<>(List.of(decl)));
         parser = ParserFactory.make(program, false);
         tree = parser.parse().value;
         assertEquals(expected, tree);
