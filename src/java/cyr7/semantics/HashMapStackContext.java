@@ -75,8 +75,6 @@ public final class HashMapStackContext implements Context {
         assert type != null;
 
         stack.peek().put(id, type);
-
-//        System.out.println(this);
     }
 
     @Override
@@ -148,7 +146,6 @@ public final class HashMapStackContext implements Context {
     @Override
     public Context push() {
         stack.push(new HashMap<>());
-//        System.out.println(this);
         return this;
     }
 
@@ -162,7 +159,6 @@ public final class HashMapStackContext implements Context {
             throw new UnbalancedPushPopException("Unbalanced pop call made");
         }
         stack.pop();
-//        System.out.println(this);
 
         return this;
     }

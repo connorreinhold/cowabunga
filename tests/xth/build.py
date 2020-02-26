@@ -26,9 +26,9 @@ if __name__ == '__main__':
     add_xth_block('Cowabunga Parser Tests', '--parse', './shared/cowabunga/**/*.parsedsol')
     add_xth_block('Cowabunga Type-checker Tests', '--typecheck', './shared/cowabunga/**/*.typedsol')
 
-    add_xth_block('Instructor Lexer Tests', '--lex', './xth/tests/**/*.lexedsol')
-    add_xth_block('Instructor Parser Tests', '--parse', './xth/tests/**/*.parsedsol')
-    add_xth_block('Instructor Type-checker Tests', '--typecheck', './xth/tests/**/*.typedsol')
+    add_xth_block('Instructor Lexer Tests', '--lex', './xth/tests/pa1/*.lexedsol')
+    add_xth_block('Instructor Parser Tests', '--parse', './xth/tests/pa2/*.parsedsol')
+    add_xth_block('Instructor Type-checker Tests', '-libpath ./xth/tests/pa3/ --typecheck', './xth/tests/pa3/*.typedsol')
 
     script_file.close()
 

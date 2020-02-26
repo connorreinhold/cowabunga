@@ -174,6 +174,11 @@ public class TypeCheckVisitor extends
 
         n.uses.forEach(use -> use.accept(this));
         n.functions.forEach(decl -> decl.header.accept(this));
+
+        for (var funcDecl : interfaceFuncDecls.entrySet()) {
+            context.addFn(funcDecl.getKey(), funcDecl.getValue());
+        }
+
         n.functions.forEach(decl -> decl.accept(this));
 
         return OneOfThree.ofThird(Optional.empty());

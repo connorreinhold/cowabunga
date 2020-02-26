@@ -279,7 +279,7 @@ public class CLI {
                     break;
                 }
                 case "libpath": {
-                    String directory = cmd.getOptionValue("sourcepath");
+                    String directory = cmd.getOptionValue("libpath");
                     libRoot = new File(directory);
                     break;
                 }
