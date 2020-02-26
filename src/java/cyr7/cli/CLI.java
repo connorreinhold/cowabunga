@@ -16,7 +16,7 @@ public class CLI {
 
         @Override
         public Reader openIxiLibraryFile(String name) throws IOException {
-            return getReader(name, true);
+            return getReader(name + ".ixi", true);
         }
 
     }
