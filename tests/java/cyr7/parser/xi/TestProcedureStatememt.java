@@ -5,6 +5,7 @@ import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.ProcedureStmtNode;
 import cyr7.ast.stmt.StmtNode;
+import cyr7.parser.ParserUtil;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
@@ -26,12 +27,12 @@ public class TestProcedureStatememt {
             )
         ));
 
-        statement = ParserFactory.parseStatement("length({5, 10, 15})").get(0);
+        statement = ParserFactory.parseStatement("lengthy({5, 10, 15})").get(0);
         assertEquals(statement, new ProcedureStmtNode(
             null,
             new FunctionCallExprNode(
                 null,
-                "length",
+                "lengthy",
                 List.of(
                     new LiteralArrayExprNode(
                         null,

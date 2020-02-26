@@ -1,19 +1,20 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * A statement of the form
- * _ = f(e)
+ * _ = e
  */
 public final class ExprStmtNode extends AbstractNode implements StmtNode {
 
-    public final FunctionCallExprNode expr;
+    public final ExprNode expr;
 
-    public ExprStmtNode(Location location, FunctionCallExprNode expr) {
+    public ExprStmtNode(Location location, ExprNode expr) {
         super(location);
 
         this.expr = expr;

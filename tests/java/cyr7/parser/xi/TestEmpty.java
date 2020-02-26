@@ -1,6 +1,8 @@
 package cyr7.parser.xi;
 
 import cyr7.ast.toplevel.XiProgramNode;
+import cyr7.exceptions.LexerIntegerOverflowException;
+import cyr7.exceptions.ParserException;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
@@ -8,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestEmpty {
 
@@ -18,17 +21,12 @@ public class TestEmpty {
     @Test
     void test() throws Exception {
         String program = "";
-        expected = new XiProgramNode(null, new LinkedList<>(), new LinkedList<>());
         parser = ParserFactory.make(program, false);
-        tree = parser.parse().value;
-        assertEquals(expected, tree);
+        assertThrows(ParserException.class, parser::parse);
         
         program = "\n\n\n\n";
-        expected = new XiProgramNode(null, new LinkedList<>(), new LinkedList<>());
         parser = ParserFactory.make(program, false);
-        tree = parser.parse().value;
-        assertEquals(expected, tree);
-
+        assertThrows(ParserException.class, parser::parse);
     }
     
 }
