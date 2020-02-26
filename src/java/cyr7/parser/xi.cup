@@ -121,7 +121,6 @@ nonterminal LinkedList<Optional<ExprNode>> TypeExprArrayList;
 
 nonterminal IxiProgramNode IxiProgram;
 nonterminal LinkedList<FunctionHeaderDeclNode> FunctionHeaderDeclList;
-nonterminal ZeroOrMoreSemicolons;
 nonterminal FunctionHeaderDeclNode FunctionHeaderDecl;
 
 nonterminal LinkedList<VarDeclNode> FunctionVarDeclList;
@@ -160,6 +159,7 @@ nonterminal LinkedList<ExprNode> ExprList;
 nonterminal ExprNode Expr;
 nonterminal AccessNode AccessExpr;
 nonterminal FunctionCallExprNode FunctionCall;
+nonterminal FunctionCallExprNode ProcedureCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
 nonterminal ExprNode LiteralExpr;
 nonterminal LinkedList<ExprNode> ArrayElements;
@@ -199,32 +199,30 @@ IxiProgram ::=
     ;
 
 FunctionHeaderDeclList ::=
-    FunctionHeaderDeclList:lst FunctionHeaderDecl:decl ZeroOrMoreSemicolons {:
+    FunctionHeaderDeclList:lst FunctionHeaderDecl:decl {:
             lst.addLast(decl);
             RESULT = lst;
         :}
-    | FunctionHeaderDecl:decl ZeroOrMoreSemicolons {: 
+    | FunctionHeaderDecl:decl {: 
             RESULT = new LinkedList<>(List.of(decl)); 
         :}
     ;
 
-ZeroOrMoreSemicolons ::=
-    SEMICOLON ZeroOrMoreSemicolons
-    |
-    ;
-
 FunctionHeaderDecl ::=
-    ID:id L_PAREN FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
+    ID:id L_PAREN R_PAREN ReturnType:returnList {:
+            RESULT = new FunctionHeaderDeclNode(idxleft, id, new LinkedList<>(), returnList);
+        :}
+    | ID:id L_PAREN VarDecl:v FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
+            l.addFirst(v);
             RESULT = new FunctionHeaderDeclNode(idxleft, id, l, returnList);
         :}
     ;
 
 FunctionVarDeclList ::=
-    VarDecl:v COMMA FunctionVarDeclList:l {:
+    COMMA VarDecl:v FunctionVarDeclList:l {:
             l.addFirst(v);
             RESULT = l;
         :}
-    | VarDecl:v {: RESULT = new LinkedList<>(List.of(v)); :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -245,7 +243,8 @@ XiProgram ::=
     ;
 
 UseList ::=
-    USE:u ID:id ZeroOrMoreSemicolons UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
+    USE:u ID:id UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
+    | USE:u ID:id SEMICOLON UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -261,8 +260,7 @@ XiStatement ::=
 
 // Xi statement list excluding return
 XiStatementList ::=
-    XiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
-    | SEMICOLON XiStatementList:l {: RESULT = l; :}
+    SingleXiStatement:s XiStatementList:l {: l.addFirst(s); RESULT = l; :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -273,7 +271,9 @@ SingleXiStatement ::=
 
 FunctionDeclList ::=
     FunctionDecl:fd FunctionDeclList:l {: l.addFirst(fd); RESULT = l; :}
-    | {: RESULT = new LinkedList<>(); :}
+    | FunctionDecl: fd {: 
+        RESULT = new LinkedList<>(List.of(fd));
+    :}
     ;
 
 FunctionDecl ::=
@@ -293,7 +293,7 @@ ReturnStatement ::=
     ;
 
 ProcedureStatement ::=
-    FunctionCall:c {: RESULT = new ProcedureStmtNode(cxleft, c); :}
+    ProcedureCall:c {: RESULT = new ProcedureStmtNode(cxleft, c); :}
     ;
 
 IfElseStatement ::=
@@ -322,15 +322,15 @@ VarDeclStatement ::=
     VarDeclArrayInit:arr {:
             RESULT = arr;
         :}
-    | UNDERSCORE:u ASSIGN FunctionCall:e {:
+    | UNDERSCORE:u ASSIGN Expr:e {:
             RESULT = new ExprStmtNode(uxleft, e);
         :}
     | VarDecl:v ASSIGN Expr:e {:
             RESULT = new VarInitStmtNode(vxleft, v, e);
         :}
-	| VarDecl:v {:
+    | VarDecl:v {:
             RESULT = new VarDeclStmtNode(vxleft, v);
-	    :}
+        :}
     | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.of(v));
             RESULT = new MultiAssignStmtNode(vxleft, l, e);
@@ -429,20 +429,33 @@ AccessExpr ::=
             RESULT = new ArrayAccessExprNode(lxleft, e, i);
         :}
     ;
+// can't have the length call in a procedure
+ProcedureCall ::=
+    ID:id L_PAREN R_PAREN {:
+            RESULT = new FunctionCallExprNode(idxleft, id, new LinkedList<>());
+        :}
+    | ID:id L_PAREN Expr:e ArgParamList:l R_PAREN {:
+            l.addFirst(e);
+            RESULT = new FunctionCallExprNode(idxleft, id, l);
+        :}
+    ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
 FunctionCall ::=
-    ID:id L_PAREN ArgParamList:l R_PAREN {:
+    ID:id L_PAREN R_PAREN {:
+            RESULT = new FunctionCallExprNode(idxleft, id, new LinkedList<>());
+        :}
+    | ID:id L_PAREN Expr:e ArgParamList:l R_PAREN {:
+            l.addFirst(e);
             RESULT = new FunctionCallExprNode(idxleft, id, l);
         :}
-    | LENGTH:len L_PAREN ArgParamList:l R_PAREN {:
-            RESULT = new FunctionCallExprNode(lenxleft, "length", l);
+    | LENGTH:len L_PAREN Expr:e R_PAREN {:
+            RESULT = new FunctionCallExprNode(lenxleft, "length", List.of(e));
         :}
     ;
 
 ArgParamList ::=
-    Expr:e COMMA ArgParamList:l {: l.addFirst(e); RESULT = l; :}
-    | Expr:e {: RESULT = new LinkedList<>(List.of(e)); :}
+    COMMA Expr:e ArgParamList:l {: l.addFirst(e); RESULT = l; :}
     | {: RESULT = new LinkedList<>();:}
     ;
 
