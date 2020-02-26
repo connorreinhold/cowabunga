@@ -23,7 +23,11 @@ import cyr7.visitor.AbstractVisitor;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class TypeCheckVisitor extends
@@ -50,6 +54,10 @@ public class TypeCheckVisitor extends
      */
     protected final Context context;
 
+    /**
+     * An interface that communicates with the CLI when the contents of an
+     * interface file (*.ixi) is requested.
+     */
     private final IxiFileOpener fileOpener;
 
     private final Map<String, FunctionType> interfaceFuncDecls;

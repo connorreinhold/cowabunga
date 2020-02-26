@@ -11,7 +11,8 @@ import java.io.Writer;
 
 public class TypeCheckUtil {
     
-    public static void typeCheck(Reader reader, Writer writer, IxiFileOpener opener) throws Exception {
+    public static void typeCheck(Reader reader, Writer writer, 
+            IxiFileOpener opener) throws Exception {
         try {
             Node node = ParserUtil.parseNode(reader, false);
             node.accept(new TypeCheckVisitor(opener));
