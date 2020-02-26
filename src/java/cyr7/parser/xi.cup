@@ -209,13 +209,13 @@ FunctionHeaderDeclList ::=
     ;
 
 FunctionHeaderDecl ::=
-	ID:id L_PAREN R_PAREN ReturnType:returnList {:
-			RESULT = new FunctionHeaderDeclNode(idxleft, id, new LinkedList<>(), returnList);
-		:}
+    ID:id L_PAREN R_PAREN ReturnType:returnList {:
+            RESULT = new FunctionHeaderDeclNode(idxleft, id, new LinkedList<>(), returnList);
+        :}
     | ID:id L_PAREN VarDecl:v FunctionVarDeclList:l R_PAREN ReturnType:returnList {:
-			l.addFirst(v);
+            l.addFirst(v);
             RESULT = new FunctionHeaderDeclNode(idxleft, id, l, returnList);
-    	:}
+        :}
     ;
 
 FunctionVarDeclList ::=
@@ -272,8 +272,8 @@ SingleXiStatement ::=
 FunctionDeclList ::=
     FunctionDecl:fd FunctionDeclList:l {: l.addFirst(fd); RESULT = l; :}
     | FunctionDecl: fd {: 
-		RESULT = new LinkedList<>(List.of(fd));
-	:}
+        RESULT = new LinkedList<>(List.of(fd));
+    :}
     ;
 
 FunctionDecl ::=
@@ -328,9 +328,9 @@ VarDeclStatement ::=
     | VarDecl:v ASSIGN Expr:e {:
             RESULT = new VarInitStmtNode(vxleft, v, e);
         :}
-	| VarDecl:v {:
+    | VarDecl:v {:
             RESULT = new VarDeclStmtNode(vxleft, v);
-	    :}
+        :}
     | VarDecl:v COMMA MultiVarDeclList:l ASSIGN FunctionCall:e {:
             l.addFirst(Optional.of(v));
             RESULT = new MultiAssignStmtNode(vxleft, l, e);
@@ -431,22 +431,22 @@ AccessExpr ::=
     ;
 // can't have the length call in a procedure
 ProcedureCall ::=
-	ID:id L_PAREN R_PAREN {:
-			RESULT = new FunctionCallExprNode(idxleft, id, new LinkedList<>());
-		:}
+    ID:id L_PAREN R_PAREN {:
+            RESULT = new FunctionCallExprNode(idxleft, id, new LinkedList<>());
+        :}
     | ID:id L_PAREN Expr:e ArgParamList:l R_PAREN {:
-			l.addFirst(e);
+            l.addFirst(e);
             RESULT = new FunctionCallExprNode(idxleft, id, l);
         :}
     ;
 
 // For an explanation of %prec https://www.cs.princeton.edu/~appel/modern/java/CUP/manual.html#cpp
 FunctionCall ::=
-	ID:id L_PAREN R_PAREN {:
-			RESULT = new FunctionCallExprNode(idxleft, id, new LinkedList<>());
-		:}
+    ID:id L_PAREN R_PAREN {:
+            RESULT = new FunctionCallExprNode(idxleft, id, new LinkedList<>());
+        :}
     | ID:id L_PAREN Expr:e ArgParamList:l R_PAREN {:
-			l.addFirst(e);
+            l.addFirst(e);
             RESULT = new FunctionCallExprNode(idxleft, id, l);
         :}
     | LENGTH:len L_PAREN Expr:e R_PAREN {:
