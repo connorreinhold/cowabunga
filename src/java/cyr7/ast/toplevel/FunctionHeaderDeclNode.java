@@ -8,6 +8,7 @@ import cyr7.ast.type.TypeExprNode;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Represents an IXI function declaration with an identifier, a list of
@@ -20,7 +21,7 @@ public final class FunctionHeaderDeclNode extends AbstractNode {
     public final List<VarDeclNode> args;
     public final List<TypeExprNode> returnTypes;
 
-    public FunctionHeaderDeclNode(ComplexSymbolFactory.Location location,
+    public FunctionHeaderDeclNode(Location location,
                                   String id,
                                   List<VarDeclNode> args,
                                   List<TypeExprNode> returnTypes) {

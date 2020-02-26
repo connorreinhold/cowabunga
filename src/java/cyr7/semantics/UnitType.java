@@ -10,6 +10,11 @@ public class UnitType extends OrdinaryType {
         return Type.UNIT;
     }
 
+    @Override
+    public String toString() {
+        return "unit";
+    }
+    
     /**
      * The only type that is a supertype of Unit is Unit itself.
      * <p>

@@ -10,6 +10,11 @@ public class VoidType extends OrdinaryType {
         return Type.VOID;
     }
 
+    @Override
+    public String toString() {
+        return "Any";
+    }
+    
     /**
      * Void is always a subtype of any other type.
      * <p>
