@@ -1,31 +1,25 @@
 package cyr7.cli;
 
 import cyr7.lexer.LexerUtil;
-
 import cyr7.parser.ParserUtil;
+import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
+import org.apache.commons.cli.*;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
+import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.CommandLineParser;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
-
 public class CLI {
+
+    private static class FileOpener implements IxiFileOpener {
+
+        @Override
+        public Reader openIxiLibraryFile(String name) throws IOException {
+            return getReader(name, true);
+        }
+
+    }
 
     final static private String usage = "xic [options] <source files>";
     final static private int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
@@ -340,7 +334,7 @@ public class CLI {
                 try {
                     input = getReader(filename, isIXI);
                     output = getWriter(filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output, isIXI);
+                    TypeCheckUtil.typeCheck(input, output, new FileOpener());
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }

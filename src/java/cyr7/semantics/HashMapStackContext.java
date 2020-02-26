@@ -13,23 +13,45 @@ public final class HashMapStackContext implements Context {
     }
 
     private final static class Var implements Sigma {
+
         public final OrdinaryType type;
+
         public Var(OrdinaryType t) {
             this.type = t;
+        }
+
+        @Override
+        public String toString() {
+            return type.toString();
         }
     }
 
     private final static class Fn implements Sigma {
+
         public final FunctionType type;
+
         public Fn(FunctionType t) {
             this.type = t;
         }
+
+        @Override
+        public String toString() {
+            return type.toString();
+        }
+
     }
 
     private final static class Ret implements Sigma {
+
         public final ExpandedType type;
+
         private Ret(ExpandedType type) {
             this.type = type;
+        }
+
+        @Override
+        public String toString() {
+            return "Ret " + type.toString();
         }
     }
 
@@ -53,6 +75,8 @@ public final class HashMapStackContext implements Context {
         assert type != null;
 
         stack.peek().put(id, type);
+
+//        System.out.println(this);
     }
 
     @Override
@@ -124,6 +148,7 @@ public final class HashMapStackContext implements Context {
     @Override
     public Context push() {
         stack.push(new HashMap<>());
+//        System.out.println(this);
         return this;
     }
 
@@ -137,13 +162,14 @@ public final class HashMapStackContext implements Context {
             throw new UnbalancedPushPopException("Unbalanced pop call made");
         }
         stack.pop();
+//        System.out.println(this);
 
         return this;
     }
 
     @Override
     public String toString() {
-        return stack.toString();
+        return stack.toString().replaceAll("Optional", "");
     }
 
 }

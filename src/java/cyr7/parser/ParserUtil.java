@@ -30,6 +30,12 @@ public class ParserUtil {
         }
     }
 
+    public static Node parseNode(Reader reader, boolean isIxi) throws Exception {
+        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, isIxi));
+        XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
+        return (Node) p.parse().value;
+    }
+
     public static void printSExpr(Node node) {
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
         node.accept(visitor);
