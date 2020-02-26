@@ -48,7 +48,7 @@ public class TypeCheckVisitor extends
     /**
      * Symbol table that maps identifiers to types.
      */
-    private final Context context;
+    protected final Context context;
 
     private final IxiFileOpener fileOpener;
 
