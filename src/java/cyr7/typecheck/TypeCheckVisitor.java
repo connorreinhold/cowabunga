@@ -160,7 +160,9 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(XiProgramNode n) {
-        context.addFn("length", new FunctionType(ExpandedType.voidArrayType, ExpandedType.intType));
+        context.addFn("length", new FunctionType(
+                new ExpandedType(new ArrayType(OrdinaryType.unitType)), 
+                ExpandedType.intType));
 
         n.uses.forEach(use -> use.accept(this));
         n.functions.forEach(decl -> decl.header.accept(this));
