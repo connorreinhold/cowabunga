@@ -38,6 +38,11 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
+    protected void finalize() throws Throwable {
+        flush();
+    }
+
+    @Override
     public Void visit(FunctionDeclNode n) {
         printer.startList();
 
