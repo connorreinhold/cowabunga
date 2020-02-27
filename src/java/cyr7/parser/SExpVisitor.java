@@ -430,7 +430,7 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
     @Override
     public Void visit(LiteralCharExprNode n) {
-        printer.printAtom("'" + Util.unescapeString(n.contents) + "'");
+        printer.printAtom("'" + Util.unescapeCharacterString(n.contents) + "'");
         return null;
     }
 

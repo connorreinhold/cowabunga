@@ -293,6 +293,9 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ExprStmtNode n) {
         ExpandedType type = n.expr.accept(this).assertFirst();
+        if (!(n.expr instanceof FunctionCallExprNode)) {
+            throw new ExpectedFunctionException(n.expr.getLocation().get());
+        }
         if (type.isOrdinary()) {
             return OneOfThree.ofSecond(ResultType.UNIT);
         } else {
