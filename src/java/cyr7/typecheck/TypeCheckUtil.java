@@ -18,7 +18,7 @@ public class TypeCheckUtil {
             node.accept(new TypeCheckVisitor(opener));
             writer.append("Valid Xi Program").append(System.lineSeparator());
         } catch (ParserException e) {
-            printErrorToStdOut(ErrorType.Parser, e.filename, 
+            printErrorToStdOut(ErrorType.Syntax, e.filename, 
                     e.line, e.column, e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         } catch (SemanticException e) {
@@ -26,7 +26,7 @@ public class TypeCheckUtil {
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         } catch (LexerException e) {
-            printErrorToStdOut(ErrorType.Lexer, e.filename, e.line, e.col, 
+            printErrorToStdOut(ErrorType.Lexical, e.filename, e.line, e.col, 
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
@@ -40,6 +40,6 @@ public class TypeCheckUtil {
     }
 
     protected static enum ErrorType {
-        Lexer, Semantic, Parser;
+        Lexical, Semantic, Syntax;
     }    
 }
