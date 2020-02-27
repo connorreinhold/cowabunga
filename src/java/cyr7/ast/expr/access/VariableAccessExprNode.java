@@ -3,6 +3,7 @@ package cyr7.ast.expr.access;
 import cyr7.ast.AbstractNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -10,8 +11,7 @@ public final class VariableAccessExprNode extends AbstractNode implements Access
 
     public final String identifier;
 
-    public VariableAccessExprNode(ComplexSymbolFactory.Location location,
-                                  String id) {
+    public VariableAccessExprNode(Location location, String id) {
         super(location);
         assert id != null;
         this.identifier = id;

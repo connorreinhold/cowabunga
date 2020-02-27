@@ -10,7 +10,7 @@ import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
 import cyr7.ast.stmt.assign.ArrayAssignNode;
-import cyr7.ast.stmt.assign.VariableAssignNode;
+import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -237,13 +237,8 @@ public class TypeCheckVisitor extends
     }
 
     @Override
-    public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(VariableAssignNode n) {
-        Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
-        if (optionalVar.isPresent()) {
-            return OneOfThree.ofFirst(new ExpandedType(optionalVar.get()));
-        }
-        throw new UnboundIdentifierException(n.identifier, 
-                                             n.getLocation().get());
+    public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ExprAssignNode n) {
+        return n.expr.accept(this);
     }
 
     // Statement
