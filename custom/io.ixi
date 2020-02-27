@@ -1,3 +1,4 @@
 
 
-print(s: int[][]): 'integer
+print(s: int[][]): int
+

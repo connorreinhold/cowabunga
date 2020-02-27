@@ -149,15 +149,11 @@ public class TypeCheckVisitor extends
                             n.interfaceName + ".ixi", true);
             interfaceNode.accept(this);
             return OneOfThree.ofThird(Optional.empty());
-        } catch(ParserException e) {
+        } catch(ParserException | LexerException | SemanticException e) {
             throw e;
-        } catch(LexerException e) {
-            throw e;
-        } catch(IOException e) {
+        } catch(Exception e) {
             throw new InterfaceFileNotFoundException(n.interfaceName, 
                     n.getLocation().get());
-        } catch(Exception e) {
-            throw new SemanticParserException(e, n.getLocation().get());
         }
     }
 

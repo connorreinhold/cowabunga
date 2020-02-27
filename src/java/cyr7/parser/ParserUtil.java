@@ -8,6 +8,7 @@ import cyr7.lexer.MultiFileLexer;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -16,8 +17,7 @@ import java.io.Writer;
 public class ParserUtil {
 
     public static void parse(Reader reader, Writer writer, String filename, 
-            boolean isIXI) 
-            throws Exception {
+            boolean isIXI) throws IOException {
         ScannerBuffer lexer = new ScannerBuffer(
                             new MultiFileLexer(reader, filename, isIXI));
 
@@ -28,6 +28,8 @@ public class ParserUtil {
             node.accept(visitor);
             visitor.flush();
         } catch (ParserException | LexerException e) {
+            writer.append(e.getMessage()).append(System.lineSeparator());
+        } catch (Exception e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
     }
