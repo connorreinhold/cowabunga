@@ -12,7 +12,7 @@ public abstract class BinExprNode extends AbstractNode implements ExprNode {
 
     public final ExprNode left, right;
 
-    public BinExprNode(Location location, ExprNode left,
+    BinExprNode(Location location, ExprNode left,
             ExprNode right) {
         super(location);
 

@@ -8,8 +8,6 @@ import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
-import cyr7.ast.stmt.assign.ArrayAssignNode;
-import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.exceptions.semantics.SemanticException;
 import cyr7.semantics.ArrayType;
 import cyr7.semantics.Context;
@@ -1104,46 +1102,44 @@ class TestTypeCheckVisitorExpr {
         visitor = new TypeCheckVisitor(null);
         
         visitor.context.addVar("cash", OrdinaryType.intType);
-        node = new ExprAssignNode(loc, new VariableAccessExprNode(loc, "cash"));
+        node = new VariableAccessExprNode(loc, "cash");
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
         // empty[0]
         visitor.context.addVar("empty", new ArrayType(OrdinaryType.intType));
-        node = new ArrayAssignNode(loc, 
-                new ExprAssignNode(loc, new VariableAccessExprNode(loc, "empty")),
+        node = new ArrayAccessExprNode(loc, 
+                new VariableAccessExprNode(loc, "empty"),
                 new LiteralIntExprNode(loc, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
         
         
         // empty
-        node = new ExprAssignNode(loc, new VariableAccessExprNode(loc, "empty"));
+        node = new VariableAccessExprNode(loc, "empty");
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         
 
         // empty[true]
-        node = new ArrayAssignNode(loc, 
-                new ExprAssignNode(loc, new VariableAccessExprNode(loc, "empty")),
+        node = new ArrayAccessExprNode(loc, 
+                new VariableAccessExprNode(loc, "empty"),
                 new LiteralBoolExprNode(loc, true));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
         // empty["this is not a number"]
-        node = new ArrayAssignNode(loc, 
-                new ExprAssignNode(loc, 
-                        new VariableAccessExprNode(loc, "empty")),
+        node = new ArrayAccessExprNode(loc, 
+                new VariableAccessExprNode(loc, "empty"),
                 new LiteralStringExprNode(loc, "this is not a number"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
         
         
         // empty[0][0]
-        node = new ArrayAssignNode(loc, 
-                new ArrayAssignNode(
+        node = new ArrayAccessExprNode(loc, 
+                new ArrayAccessExprNode(
                         loc,
-                        new ExprAssignNode(loc, 
-                                new VariableAccessExprNode(loc, "empty")),
+                        new VariableAccessExprNode(loc, "empty"),
                         new LiteralIntExprNode(loc, "0")),
                 new LiteralIntExprNode(loc, "0"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
@@ -1151,31 +1147,28 @@ class TestTypeCheckVisitorExpr {
         
         visitor.context.addVar("twoDimensionMap", new ArrayType(
                 new ArrayType(OrdinaryType.intType)));
-        node = new ArrayAssignNode(loc, 
-                new ExprAssignNode(loc, 
-                        new VariableAccessExprNode(loc, "twoDimensionMap")),
+        node = new ArrayAccessExprNode(loc, 
+                        new VariableAccessExprNode(loc, "twoDimensionMap"),
                 new LiteralIntExprNode(loc, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isArray());
         assertTrue(result.assertFirst().getInnerArrayType().isInt());
 
         
-        node = new ArrayAssignNode(loc, 
-                new ArrayAssignNode(
+        node = new ArrayAccessExprNode(loc, 
+                new ArrayAccessExprNode(
                         loc,
-                        new ExprAssignNode(loc, 
-                                new VariableAccessExprNode(loc, "twoDimensionMap")),
+                        new VariableAccessExprNode(loc, "twoDimensionMap"),
                         new LiteralIntExprNode(loc, "0")),
                 new LiteralIntExprNode(loc, "0"));
         result = node.accept(visitor);
         assertTrue(result.assertFirst().isSubtypeOfInt());
 
         
-        node = new ArrayAssignNode(loc, 
-                new ArrayAssignNode(
+        node = new ArrayAccessExprNode(loc, 
+                new ArrayAccessExprNode(
                         loc,
-                        new ExprAssignNode(loc, 
-                                new VariableAccessExprNode(loc, "twoDimensionMap")),
+                        new VariableAccessExprNode(loc, "twoDimensionMap"),
                         new LiteralIntExprNode(loc, "0")),
                 new LiteralStringExprNode(loc, "NaN"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));

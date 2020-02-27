@@ -11,7 +11,7 @@ public class LexerException extends RuntimeException {
     public final String errorMsg;
     public final String filename;
     
-    public LexerException(String msg, int line, int col, String filename) {
+    LexerException(String msg, int line, int col, String filename) {
         super(String.format("%d:%d error:%s", line + 1, col + 1, msg));
         this.line = line;
         this.col = col;

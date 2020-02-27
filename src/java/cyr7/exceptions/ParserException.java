@@ -1,7 +1,5 @@
 package cyr7.exceptions;
 
-import java.util.Optional;
-
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class ParserException extends RuntimeException {
@@ -15,15 +13,7 @@ public class ParserException extends RuntimeException {
     public final String errorMsg;
     public final String filename;
     
-    public ParserException(String msg) {
-        super(String.format("%d:%d error:%s", -1, -1, msg));
-        this.line = -1;
-        this.column = -1;
-        this.errorMsg = msg;
-        this.filename = null;
-    }
-
-    public ParserException(String msg, Location loc) {
+    ParserException(String msg, Location loc) {
         super(String.format("%d:%d error:%s", loc.getLine(), 
                 loc.getColumn(), msg));
         this.line = loc.getLine();

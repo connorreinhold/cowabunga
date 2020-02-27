@@ -6,7 +6,6 @@ import cyr7.ast.expr.binexpr.LTExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.*;
-import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.exceptions.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
@@ -35,8 +34,7 @@ public class TestWhileStatement {
             ),
             new AssignmentStmtNode(
                 null,
-                new ExprAssignNode(null, 
-                        new VariableAccessExprNode(null, "a")),
+                new VariableAccessExprNode(null, "a"),
                 new AddExprNode(
                     null,
                     new VariableAccessExprNode(
@@ -80,8 +78,7 @@ public class TestWhileStatement {
                 List.of(
                     new AssignmentStmtNode(
                         null,
-                        new ExprAssignNode(null, 
-                                new VariableAccessExprNode(null, "a")),
+                        new VariableAccessExprNode(null, "a"),
                         new AddExprNode(
                             null,
                             new VariableAccessExprNode(
@@ -143,9 +140,8 @@ public class TestWhileStatement {
                 List.of(
                     new AssignmentStmtNode(
                         null,
-                        new ExprAssignNode(null, 
-                                new VariableAccessExprNode(null, "b")),
-                        new LiteralBoolExprNode(null, true)
+                        new VariableAccessExprNode(null, "b"),
+                    new LiteralBoolExprNode(null, true)
                     ),
                     new ReturnStmtNode(
                         null,

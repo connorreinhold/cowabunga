@@ -9,7 +9,7 @@ import java.io.*;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-public class CLI {
+class CLI { // NO_UCD (test only)
 
     final static private String usage = "xic [options] <source files>";
     final static private int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
@@ -19,13 +19,13 @@ public class CLI {
     final static private Options options = createOptions();
     final static private CommandLineParser parser = new DefaultParser();
 
-    static boolean debugPrintingEnabled = false;
-    static boolean wantsLexing = false;
-    static boolean wantsParsing = false;
-    static boolean wantsTypechecking = false;
-    static File sourceRoot = new File(".");
-    static File libRoot = new File(".");
-    static File destinationRoot = new File(".");
+    private static boolean debugPrintingEnabled = false;
+    private static boolean wantsLexing = false;
+    private static boolean wantsParsing = false;
+    private static boolean wantsTypechecking = false;
+    private static File sourceRoot = new File(".");
+    private static File libRoot = new File(".");
+    private static File destinationRoot = new File(".");
 
     /**
      * Creates an {@code Options} instance of the CLI parser. <\br> In this
@@ -33,7 +33,7 @@ public class CLI {
      * following CLI options: {@literal --help}, {@literal --lex}, and
      * {@literal -D <path>}.
      */
-    public static Options createOptions() {
+    private static Options createOptions() {
         Options options = new Options();
 
         Option help = Option
@@ -136,7 +136,7 @@ public class CLI {
     /**
      * Prints a synopsis of the options.
      */
-    public static void printHelpMessage() {
+    private static void printHelpMessage() {
         helpFormatter.printHelp(writer, consoleWidth, usage,
             "where possible options include:", options, 0, leftPadding,
             "\n");
@@ -146,7 +146,7 @@ public class CLI {
     /**
      * Prints the version of xic.
      */
-    public static void printVersionMessage() {
+    private static void printVersionMessage() {
         writer.append("xic 1.0")
             .append(System.lineSeparator());
         writer.flush();
@@ -162,25 +162,26 @@ public class CLI {
      * @throws ParseException Command contains invalid flags or incorrect number
      *                        of arguments.
      */
-    public static CommandLine parseCommand(String[] args)
+    static CommandLine parseCommand(String[] args)
         throws ParseException {
         return parser.parse(options, args);
     }
 
-    /**
-     * Returns the filename without its extension if an extension exists.
-     *
-     * @param file A filename
-     * @return The filename of {@code file} without the extension.
-     */
-    public static String getMainFilename(File file) {
-        String name = file.getName();
-        int pos = name.lastIndexOf(".");
-        if (pos > 0) {
-            name = name.substring(0, pos);
-        }
-        return name;
-    }
+// TODO Remove unused code found by UCDetector
+//     /**
+//      * Returns the filename without its extension if an extension exists.
+//      *
+//      * @param file A filename
+//      * @return The filename of {@code file} without the extension.
+//      */
+//     public static String getMainFilename(File file) {
+//         String name = file.getName();
+//         int pos = name.lastIndexOf(".");
+//         if (pos > 0) {
+//             name = name.substring(0, pos);
+//         }
+//         return name;
+//     }
 
     /**
      * Returns the filename without its extension if an extension exists.
@@ -188,7 +189,7 @@ public class CLI {
      * @param path A path
      * @return The filename of {@code path} without the extension.
      */
-    public static String getMainFilename(Path path) {
+    private static String getMainFilename(Path path) {
         String name = path.getFileName().toString();
         int pos = name.lastIndexOf(".");
         if (pos > 0) {
@@ -203,7 +204,7 @@ public class CLI {
      *
      * @param file A filename
      */
-    public static boolean isAXiFile(File file) {
+    static boolean isAXiFile(File file) { // NO_UCD (test only)
         return getExtensionName(file).equals("xi");
     }
 
@@ -214,7 +215,7 @@ public class CLI {
      * @param file A filename
      * @return The extension name of {@code file}.
      */
-    public static String getExtensionName(File file) {
+    private static String getExtensionName(File file) {
         String name = file.getName();
         int pos = name.lastIndexOf(".");
         if (pos > 0) {

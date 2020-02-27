@@ -42,16 +42,17 @@ public class ParserUtil {
         return (Node) p.parse().value;
     }
 
-    public static void printSExpr(Node node) {
+    public static void printSExpr(Node node) { // NO_UCD (test only)
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
         node.accept(visitor);
         visitor.flush();
     }
 
-    public static String toSExpr(Node node) {
-        StringWriter writer = new StringWriter();
-        SExpVisitor visitor = new SExpVisitor(new PrintWriter(writer));
-        node.accept(visitor);
-        return writer.toString().strip();
-    }
+//    TODO: Unused Code.
+//    public static String toSExpr(Node node) {
+//        StringWriter writer = new StringWriter();
+//        SExpVisitor visitor = new SExpVisitor(new PrintWriter(writer));
+//        node.accept(visitor);
+//        return writer.toString().strip();
+//    }
 }

@@ -9,8 +9,6 @@ import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
-import cyr7.ast.stmt.assign.ArrayAssignNode;
-import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -217,34 +215,7 @@ public class TypeCheckVisitor extends
                 new ExpandedType(new ArrayType(type.getOrdinaryType())));
     }
 
-    @Override
-    public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ArrayAssignNode n) {
-        ExpandedType arrayType = n.child.accept(this).assertFirst();
-        ExpandedType indexType = n.index.accept(this).assertFirst();
-
-        if (!indexType.isSubtypeOfInt()) {
-            throw new TypeMismatchException(
-                    indexType, ExpandedType.intType,
-                    n.index.getLocation().get());
-        }
-        
-        if (!arrayType.isSubtypeOfArray()) {
-            throw new TypeMismatchException(
-                    indexType, ExpandedType.voidArrayType,
-                    n.child.getLocation().get());
-        }
-        
-        OrdinaryType innerArrayType = arrayType.getInnerArrayType();
-        return OneOfThree.ofFirst(new ExpandedType(innerArrayType));
-    }
-
-    @Override
-    public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ExprAssignNode n) {
-        return n.expr.accept(this);
-    }
-
     // Statement
-
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ArrayDeclStmtNode n) {
         if (context.contains(n.identifier)) {
@@ -263,14 +234,14 @@ public class TypeCheckVisitor extends
 
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(AssignmentStmtNode n) {
-        ExpandedType lhsType = n.assign.accept(this).assertFirst();
-        ExpandedType rhsType = n.value.accept(this).assertFirst();
+        ExpandedType lhsType = n.lhs.accept(this).assertFirst();
+        ExpandedType rhsType = n.rhs.accept(this).assertFirst();
 
         if (rhsType.isASubtypeOf(lhsType)) {
             return OneOfThree.ofSecond(ResultType.UNIT);
         } else {
             throw new TypeMismatchException(lhsType, rhsType, 
-                    n.value.getLocation().get());
+                    n.rhs.getLocation().get());
         }
     }
 

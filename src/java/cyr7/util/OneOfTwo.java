@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public final class OneOfTwo<T, U> {
+public final class OneOfTwo<T, U> { // NO_UCD (unused code)
 
     public static <T, U> OneOfTwo<T, U> ofFirst(T first) {
         assert first != null;
