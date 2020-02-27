@@ -20,7 +20,7 @@ import java.math.BigInteger;
 %column
 
 %yylexthrow{
-	cyr7.exceptions.LexerException
+   cyr7.exceptions.LexerException
 %yylexthrow}
 
 %{
@@ -36,81 +36,81 @@ import java.math.BigInteger;
     public final static BigInteger maxInteger = new BigInteger(maxIntegerString); // 2^63
     
     protected ComplexSymbol symbol(int id) {
-    	String name = sym.terminalNames[id];
+       String name = sym.terminalNames[id];
         return new ComplexSymbol(name, id,
             new Location(filename, yyline+1,yycolumn+1,yychar),
             new Location(filename, yyline+1,yycolumn+yylength(),yychar+yylength()));
     }
 
     protected ComplexSymbol symbol(int id, Object val) {
-    	String name = sym.terminalNames[id];
+       String name = sym.terminalNames[id];
         Location left = new Location(filename, yyline+1,yycolumn+1,yychar);
         Location right = new Location(filename, yyline+1,
-        						      yycolumn+yylength(), 
-        							  yychar+yylength());
-        							  
+                                yycolumn+yylength(), 
+                               yychar+yylength());
+                               
         return new ComplexSymbol(name, id, left, right, val);
     }
     
     protected ComplexSymbol symbol(int id, String val, int line, int col) {
-    	String name = sym.terminalNames[id];
+       String name = sym.terminalNames[id];
         Location left = new Location(filename, line+1,col+1);
         Location right = new Location(filename, line + 1, col + 1 + val.length());
-        							  
+                               
         return new ComplexSymbol(name, id, left, right, val);
     }
 
     public String fromHex(String hex) {
-     	hex = hex.substring(2);
-     	int hexVal = Integer.parseInt(hex, 16);
-     	return ""+(char)hexVal;
+        hex = hex.substring(2);
+        int hexVal = Integer.parseInt(hex, 16);
+        return ""+(char)hexVal;
      }
 
-	public class LexerStringBuffer {
-		private StringBuffer buffer;
-		private int lineNumber;
-		private int columnNumber;
-		
-		public LexerStringBuffer() {
-			buffer = new StringBuffer();
-			lineNumber = -1;
-			columnNumber = -1;
-		}
-		
-		private void clear() {
-			buffer.delete(0, buffer.length());
-			lineNumber = -1;
-			columnNumber = -1;
-		}
-		
-		public void init(int line, int column) {
-			this.clear();
-			lineNumber = line;
-			columnNumber = column;
-		}
-		
-		public void append(String s) {
-			buffer.append(s);
-		}
-		
-		public int getLineNumber() {
-			return lineNumber;
-		}
-		
-		public int getColumnNumber() {
-			return columnNumber;
-		}
-		
-		public ComplexSymbol generateSymbol(int id) {
-			return symbol(id, buffer.toString(), lineNumber, columnNumber);
-		}
-		
-		public String toString() {
-			return buffer.toString();
-		}
-		
-	}
-	
+   public class LexerStringBuffer {
+      private StringBuffer buffer;
+      private int lineNumber;
+      private int columnNumber;
+      
+      public LexerStringBuffer() {
+         buffer = new StringBuffer();
+         lineNumber = -1;
+         columnNumber = -1;
+      }
+      
+      private void clear() {
+         buffer.delete(0, buffer.length());
+         lineNumber = -1;
+         columnNumber = -1;
+      }
+      
+      public void init(int line, int column) {
+         this.clear();
+         lineNumber = line;
+         columnNumber = column;
+      }
+      
+      public void append(String s) {
+         buffer.append(s);
+      }
+      
+      public int getLineNumber() {
+         return lineNumber;
+      }
+      
+      public int getColumnNumber() {
+         return columnNumber;
+      }
+      
+      public ComplexSymbol generateSymbol(int id) {
+         return symbol(id, buffer.toString(), lineNumber, columnNumber);
+      }
+      
+      public String toString() {
+         return buffer.toString();
+      }
+      
+   }
+   
     private LexerStringBuffer stringBuffer = new LexerStringBuffer();
     private LexerStringBuffer charBuffer = new LexerStringBuffer();
     
@@ -138,7 +138,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 <YYINITIAL> {
     {Whitespace}        { /* IGNORE */ }
-    "//"				{ yybegin(COMMENT); }
+    "//"            { yybegin(COMMENT); }
     
     "use"               { return symbol(sym.USE); }
     "if"                { return symbol(sym.IF); }
@@ -154,10 +154,10 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     "false"             { return symbol(sym.BOOL_LITERAL, false); }
     
     0
-    	{ 
-    		return symbol(sym.INT_LITERAL, "0");
-		}
-		
+       { 
+          return symbol(sym.INT_LITERAL, "0");
+      }
+      
     {Integer}   
         {
             String num = yytext();
@@ -179,17 +179,17 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
             }
         }
     
-    \'	
-    	{ 
-    		charBuffer.init(yyline, yycolumn);
-    		yybegin(CHARACTER); 
-    	}
+    \'   
+       { 
+          charBuffer.init(yyline, yycolumn);
+          yybegin(CHARACTER); 
+       }
     
     \"                  
-    	{ 
-    		stringBuffer.init(yyline, yycolumn); 
-    		yybegin(STRING);
-    	}
+       { 
+          stringBuffer.init(yyline, yycolumn); 
+          yybegin(STRING);
+       }
 
     {Identifier}        { return symbol(sym.ID, yytext()); }
 
@@ -226,130 +226,130 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     "&"                 { return symbol(sym.LOGICAL_AND); }
     "|"                 { return symbol(sym.LOGICAL_OR); }
     
-    .					
-    	{ 
-    		throw new cyr7.exceptions.InvalidTokenException(yytext(), 
-    														yyline, 
-    														yycolumn,
-    														filename); 
-		}
+    .               
+       { 
+          throw new cyr7.exceptions.InvalidTokenException(yytext(), 
+                                              yyline, 
+                                              yycolumn,
+                                              filename); 
+      }
 }
 
 <COMMENT> {
-	{LineEnd}			{ yybegin(YYINITIAL); }
-	.					{ /* IGNORE */ }
+   {LineEnd}         { yybegin(YYINITIAL); }
+   .               { /* IGNORE */ }
 }
 
 <CHARACTER> {
     /* No characters */
-    {Newline}			
-    	{
-    		yybegin(YYINITIAL);
-    		throw new cyr7.exceptions.MultiLineCharacterException(
-    				charBuffer.getLineNumber(), 
-    				charBuffer.getColumnNumber(),
-    				filename); 
-    	}
-    	
-    \'					
-    	{
-    		yybegin(YYINITIAL);
-    		throw new cyr7.exceptions.InvalidCharacterLiteralException(
-    				"''", 
-    				charBuffer.getLineNumber(), 
-    				charBuffer.getColumnNumber(),
-    				filename);
-    	}
+    {Newline}         
+       {
+          yybegin(YYINITIAL);
+          throw new cyr7.exceptions.MultiLineCharacterException(
+                charBuffer.getLineNumber(), 
+                charBuffer.getColumnNumber(),
+                filename); 
+       }
+       
+    \'               
+       {
+          yybegin(YYINITIAL);
+          throw new cyr7.exceptions.InvalidCharacterLiteralException(
+                "''", 
+                charBuffer.getLineNumber(), 
+                charBuffer.getColumnNumber(),
+                filename);
+       }
 
     [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
-    \\n				    {yybegin(CHAR_END); charBuffer.append("\n"); }
-    \\t|\t				{yybegin(CHAR_END); charBuffer.append("\t"); }
-    \\r					{yybegin(CHAR_END); charBuffer.append("\r"); }
-    \\f|\f				{yybegin(CHAR_END); charBuffer.append("\f"); }
+    \\n                {yybegin(CHAR_END); charBuffer.append("\n"); }
+    \\t|\t            {yybegin(CHAR_END); charBuffer.append("\t"); }
+    \\r               {yybegin(CHAR_END); charBuffer.append("\r"); }
+    \\f|\f            {yybegin(CHAR_END); charBuffer.append("\f"); }
     
-    {Hex}				
-    	{
-    		yybegin(CHAR_END); 
-    		charBuffer.append(fromHex(yytext())); 
-    	}
-    	
-    \\'					{yybegin(CHAR_END); charBuffer.append("'"); }
-    \\\"				{yybegin(CHAR_END); charBuffer.append("\""); }
-    \\\\				{yybegin(CHAR_END); charBuffer.append("\\"); }
+    {Hex}            
+       {
+          yybegin(CHAR_END); 
+          charBuffer.append(fromHex(yytext())); 
+       }
+       
+    \\'               {yybegin(CHAR_END); charBuffer.append("'"); }
+    \\\"            {yybegin(CHAR_END); charBuffer.append("\""); }
+    \\\\            {yybegin(CHAR_END); charBuffer.append("\\"); }
     
     /*Invalid escape characters*/
-    \\[^]				
-    	{
-    		yybegin(YYINITIAL);
-    		throw new cyr7.exceptions.InvalidCharacterLiteralException(
-    			"'" + charBuffer.toString() + "'", 
-    			charBuffer.getLineNumber(), 
-    			charBuffer.getColumnNumber(),
-    			filename);
-    	} 
+    \\[^]            
+       {
+          yybegin(YYINITIAL);
+          throw new cyr7.exceptions.InvalidCharacterLiteralException(
+             "'" + charBuffer.toString() + "'", 
+             charBuffer.getLineNumber(), 
+             charBuffer.getColumnNumber(),
+             filename);
+       } 
 }
 
 <CHAR_END> {
-	\'					
-		{
-			yybegin(YYINITIAL); 
-			return charBuffer.generateSymbol(sym.CHAR_LITERAL); 
-		}
-		
-	[^\']		
-		{
-			yybegin(YYINITIAL); 
-			throw new cyr7.exceptions.InvalidCharacterLiteralException(
-				"'" + charBuffer.toString() + yytext(), 
-				charBuffer.getLineNumber(), 
-				charBuffer.getColumnNumber(),
-				filename);
-		}
-	<<EOF>>
-	   {
+   \'               
+      {
+         yybegin(YYINITIAL); 
+         return charBuffer.generateSymbol(sym.CHAR_LITERAL); 
+      }
+      
+   [^\']      
+      {
+         yybegin(YYINITIAL); 
+         throw new cyr7.exceptions.InvalidCharacterLiteralException(
+            "'" + charBuffer.toString() + yytext(), 
+            charBuffer.getLineNumber(), 
+            charBuffer.getColumnNumber(),
+            filename);
+      }
+   <<EOF>>
+      {
             throw new cyr7.exceptions.NonTerminatingCharacterException(
                 charBuffer.toString(),
                 charBuffer.getLineNumber(),
                 charBuffer.getColumnNumber(),
                 filename);
-	   }
+      }
 }
 
 <STRING> {
-	{Newline}      		
-		{
-			yybegin(YYINITIAL);
-			throw new cyr7.exceptions.MultiLineStringException(
-				stringBuffer.getLineNumber(), 
-				stringBuffer.getColumnNumber(),
-				filename); 
-		}
-		
+   {Newline}            
+      {
+         yybegin(YYINITIAL);
+         throw new cyr7.exceptions.MultiLineStringException(
+            stringBuffer.getLineNumber(), 
+            stringBuffer.getColumnNumber(),
+            filename); 
+      }
+      
     \"                  
-    	{
-    		yybegin(YYINITIAL); 
-    		return stringBuffer.generateSymbol(sym.STRING_LITERAL); 
-    	}
-    	
-    \\n				    {stringBuffer.append("\n");}
-    \\t|\t				{stringBuffer.append("\t");}
-    \\r					{stringBuffer.append("\r");}
-    \\f|\f				{stringBuffer.append("\f");}
-    {Hex}				{stringBuffer.append(fromHex(yytext())); }
-    \\'					{stringBuffer.append("'");}
-    \\\"				{stringBuffer.append("\"");}
-    \\\\	 	       	{stringBuffer.append("\\");}
+       {
+          yybegin(YYINITIAL); 
+          return stringBuffer.generateSymbol(sym.STRING_LITERAL); 
+       }
+       
+    \\n                {stringBuffer.append("\n");}
+    \\t|\t            {stringBuffer.append("\t");}
+    \\r               {stringBuffer.append("\r");}
+    \\f|\f            {stringBuffer.append("\f");}
+    {Hex}            {stringBuffer.append(fromHex(yytext())); }
+    \\'               {stringBuffer.append("'");}
+    \\\"            {stringBuffer.append("\"");}
+    \\\\                 {stringBuffer.append("\\");}
     
             // Invalid Escape Characters
-    \\[^]				
-    	{
-    		throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
-    			yytext(), 
-    			yyline, 
-    			yycolumn,
-    			filename);
-    	}
-    	    
+    \\[^]            
+       {
+          throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
+             yytext(), 
+             yyline, 
+             yycolumn,
+             filename);
+       }
+           
     <<EOF>> 
         {
             throw new cyr7.exceptions.NonTerminatingStringException(
