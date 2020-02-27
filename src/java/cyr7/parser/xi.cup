@@ -312,10 +312,17 @@ AssignmentStatement ::=
     ;
 
 AssignmentLHS ::=
-    AssignmentLHS:a L_SQ_BRKT Expr: e R_SQ_BRKT {:
-            RESULT = new ArrayAssignNode(axleft, a, e);
+    AssignmentLHS:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
+        RESULT = new ArrayAssignNode(axleft, a, e);
         :}
-    | ID:id {: RESULT = new VariableAssignNode(idxleft, id); :}
+    | ID:id {: 
+        ExprNode expr = new VariableAccessExprNode(idxleft, id);
+        RESULT = new ExprAssignNode(idxleft, expr);
+    :}
+    | FunctionCall:f L_SQ_BRKT Expr:e R_SQ_BRKT {:
+        RESULT = new ArrayAssignNode(exleft, 
+                    new ExprAssignNode(fxleft, f), e);
+    :}
     ;
 
 VarDeclStatement ::=

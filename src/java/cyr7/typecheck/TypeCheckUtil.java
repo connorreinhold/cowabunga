@@ -1,34 +1,25 @@
 package cyr7.typecheck;
 
+import cyr7.ast.Node;
+import cyr7.exceptions.LexerException;
+import cyr7.exceptions.ParserException;
+import cyr7.exceptions.semantics.SemanticException;
+import cyr7.parser.ParserUtil;
+
 import java.io.Reader;
 import java.io.Writer;
 
-import cyr7.ast.AbstractNode;
-import cyr7.exceptions.ParserException;
-import cyr7.lexer.MultiFileLexer;
-import cyr7.parser.XiParser;
-import cyr7.semantics.Context;
-import cyr7.semantics.HashMapStackContext;
-import java_cup.runtime.ComplexSymbolFactory;
-import java_cup.runtime.ScannerBuffer;
-
 public class TypeCheckUtil {
     
-    public static void typeCheck(Reader reader, Writer writer, boolean isIXI) 
-            throws Exception {
-        ScannerBuffer lexer = new ScannerBuffer(
-                                    new MultiFileLexer(reader, isIXI));
-        
+    public static void typeCheck(Reader reader, Writer writer, 
+            IxiFileOpener opener) throws Exception {
         try {
-            XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
-            AbstractNode node = (AbstractNode) p.parse().value;
-            Context context = new HashMapStackContext();
-            TypeCheckVisitor visitor = new TypeCheckVisitor(context);
-            node.accept(visitor);
-        } catch (ParserException e) {
+            Node node = ParserUtil.parseNode(reader, false);
+            node.accept(new TypeCheckVisitor(opener));
+            writer.append("Valid Xi Program").append(System.lineSeparator());
+        } catch (ParserException | SemanticException | LexerException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
     }
-    
-    
+
 }

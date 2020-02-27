@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public class PrimitiveType extends OrdinaryType {
+public final class PrimitiveType extends OrdinaryType {
     
     final private Type type;
     

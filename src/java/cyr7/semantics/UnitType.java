@@ -1,6 +1,6 @@
 package cyr7.semantics;
 
-public class UnitType extends OrdinaryType {
+public final class UnitType extends OrdinaryType {
     // The wildcard _ is a unit type, i.e. a supertype of every type.
     
     protected UnitType() {}
@@ -25,4 +25,10 @@ public class UnitType extends OrdinaryType {
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
         return expectedSupertype.isUnit();
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof UnitType;
+    }
+
 }

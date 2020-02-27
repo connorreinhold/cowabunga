@@ -118,7 +118,7 @@ Newline = [\n\r(\r\n)]
 Letter = [a-zA-Z]
 Digit = [0-9]
 Identifier = {Letter}({Digit}|{Letter}|_|')*
-Integer = "0"|[1-9]{Digit}*
+Integer = [1-9]{Digit}*
 Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 %state STRING
@@ -145,12 +145,9 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     "true"              { return symbol(sym.BOOL_LITERAL, true); }
     "false"             { return symbol(sym.BOOL_LITERAL, false); }
     
-    0+[1-9]{Digit}*
+    0
     	{ 
-    		throw new cyr7.exceptions.LeadingZeroIntegerException(
-    			yytext(), 
-				yyline, 
-				yycolumn); 
+    		return symbol(sym.INT_LITERAL, "0");
 		}
 		
     {Integer}   
@@ -160,7 +157,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
             try {
                 n = new BigInteger(num);
             } catch (Exception e) {
-                return symbol(sym.INT_LITERAL, 0);
+                return symbol(sym.INT_LITERAL, "0");
             }
 
             int result = n.compareTo(maxInteger);

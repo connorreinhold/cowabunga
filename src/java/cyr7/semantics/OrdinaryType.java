@@ -36,6 +36,6 @@ public abstract class OrdinaryType {
         return this.getType() == Type.ARRAY;
     }
 
-    
     public abstract boolean isSubtypeOf(OrdinaryType expectedSupertype);
+
 }

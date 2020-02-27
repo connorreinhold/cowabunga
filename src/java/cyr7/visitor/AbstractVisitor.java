@@ -10,7 +10,7 @@ import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
 import cyr7.ast.stmt.assign.ArrayAssignNode;
-import cyr7.ast.stmt.assign.VariableAssignNode;
+import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -31,7 +31,7 @@ public abstract class AbstractVisitor<T> {
 
     // assign
     abstract public T visit(ArrayAssignNode n);
-    abstract public T visit(VariableAssignNode n);
+    abstract public T visit(ExprAssignNode n);
 
     // stmt
     abstract public T visit(ArrayDeclStmtNode n);

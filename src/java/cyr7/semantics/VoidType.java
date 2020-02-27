@@ -24,4 +24,10 @@ public class VoidType extends OrdinaryType {
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
         return true;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof VoidType;
+    }
+
 }
