@@ -8,17 +8,17 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 /**
  * Represents a boolean literal of either true or false
  */
-public final class LiteralBoolExprNode extends AbstractNode 
-                                                implements ExprNode {
+public final class LiteralBoolExprNode extends AbstractNode
+    implements ExprNode {
     public final boolean contents;
-    
+
     public LiteralBoolExprNode(Location location, boolean contents) {
-        
+
         super(location);
         this.contents = contents;
-        
+
     }
-    
+
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);

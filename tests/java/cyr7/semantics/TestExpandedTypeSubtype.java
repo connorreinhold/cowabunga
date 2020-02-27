@@ -19,11 +19,11 @@ class TestExpandedTypeSubtype {
         assertFalse(ExpandedType.unitExpandedType.isASubtypeOf(
                                                 ExpandedType.intType));
         assertFalse(ExpandedType.unitExpandedType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+                new ExpandedType(new ArrayType(PrimitiveType.intDefault))));
         assertFalse(ExpandedType.unitExpandedType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.boolType))));
+                new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertFalse(ExpandedType.unitExpandedType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.voidType))));    
+                new ExpandedType(new ArrayType(VoidType.voidValue))));    
         
         
         assertTrue(ExpandedType.unitExpandedType.isUnit());
@@ -37,14 +37,14 @@ class TestExpandedTypeSubtype {
     @Test
     void testArrayOrdinaryTypeMethods() {
         ExpandedType intArray = new ExpandedType(
-                new ArrayType(PrimitiveType.intType));
+                new ArrayType(PrimitiveType.intDefault));
         ExpandedType intDoubleArray = new ExpandedType(
                 new ArrayType(
-                        new ArrayType(PrimitiveType.intType)));
+                        new ArrayType(PrimitiveType.intDefault)));
         ExpandedType intTripleArray = new ExpandedType(
                 new ArrayType(
                         new ArrayType(
-                                new ArrayType(PrimitiveType.intType))));
+                                new ArrayType(PrimitiveType.intDefault))));
         
         assertTrue(intArray.isASubtypeOf(intArray));
         assertTrue(intDoubleArray.isASubtypeOf(intDoubleArray));
@@ -124,11 +124,11 @@ class TestExpandedTypeSubtype {
         assertFalse(ExpandedType.intType.isASubtypeOf(
                                             ExpandedType.voidOrdinaryType));
         assertFalse(ExpandedType.intType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+                new ExpandedType(new ArrayType(PrimitiveType.intDefault))));
         assertFalse(ExpandedType.intType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.boolType))));
+                new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertFalse(ExpandedType.intType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.voidType))));    
+                new ExpandedType(new ArrayType(VoidType.voidValue))));    
     }
     
     @Test
@@ -151,11 +151,11 @@ class TestExpandedTypeSubtype {
         assertFalse(ExpandedType.boolType.isASubtypeOf(
                                                ExpandedType.unitExpandedType));
         assertFalse(ExpandedType.boolType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+                new ExpandedType(new ArrayType(PrimitiveType.intDefault))));
         assertFalse(ExpandedType.boolType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.boolType))));
+                new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertFalse(ExpandedType.boolType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.voidType))));    
+                new ExpandedType(new ArrayType(VoidType.voidValue))));    
     }
     
     
@@ -174,11 +174,11 @@ class TestExpandedTypeSubtype {
         assertFalse(ExpandedType.unitOrdinaryType.isASubtypeOf(
                                                 ExpandedType.voidOrdinaryType));
         assertFalse(ExpandedType.unitOrdinaryType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+                new ExpandedType(new ArrayType(PrimitiveType.intDefault))));
         assertFalse(ExpandedType.unitOrdinaryType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.boolType))));
+                new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertFalse(ExpandedType.unitOrdinaryType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.voidType))));    
+                new ExpandedType(new ArrayType(VoidType.voidValue))));    
         
         
         assertTrue(ExpandedType.unitOrdinaryType.isOrdinary());
@@ -202,11 +202,11 @@ class TestExpandedTypeSubtype {
         assertTrue(ExpandedType.voidOrdinaryType.isASubtypeOf(
                                                 ExpandedType.intType));
         assertTrue(ExpandedType.voidOrdinaryType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+                new ExpandedType(new ArrayType(PrimitiveType.intDefault))));
         assertTrue(ExpandedType.voidOrdinaryType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.boolType))));
+                new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertTrue(ExpandedType.voidOrdinaryType.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.voidType))));   
+                new ExpandedType(new ArrayType(VoidType.voidValue))));   
         
         assertTrue(ExpandedType.voidOrdinaryType.isOrdinary());
         assertTrue(ExpandedType.voidOrdinaryType.isSubtypeOfInt());
@@ -219,24 +219,24 @@ class TestExpandedTypeSubtype {
     @Test
     void testTupleTypeMethods() {
         List<OrdinaryType> types = List.of(
-                OrdinaryType.boolType, OrdinaryType.intType, 
-                new ArrayType(OrdinaryType.intType));
+                PrimitiveType.boolDefault, PrimitiveType.intDefault, 
+                new ArrayType(PrimitiveType.intDefault));
         ExpandedType tuple = new ExpandedType(types);
         
         List<OrdinaryType> wildcards = List.of(
-                OrdinaryType.unitType, OrdinaryType.unitType,
-                OrdinaryType.unitType);
+                UnitType.unitValue, UnitType.unitValue,
+                UnitType.unitValue);
         ExpandedType wildcardTuple = new ExpandedType(wildcards);
 
 
         List<OrdinaryType> someWildcards = List.of(
-                OrdinaryType.boolType, OrdinaryType.unitType,
-                new ArrayType(OrdinaryType.intType));
+                PrimitiveType.boolDefault, UnitType.unitValue,
+                new ArrayType(PrimitiveType.intDefault));
         ExpandedType someWildTuple = new ExpandedType(someWildcards);
         
         List<OrdinaryType> incorrectSizeWildcards = List.of(
-                OrdinaryType.unitType, OrdinaryType.unitType,
-                OrdinaryType.unitType, OrdinaryType.unitType);
+                UnitType.unitValue, UnitType.unitValue,
+                UnitType.unitValue, UnitType.unitValue);
 
         ExpandedType incorrectSizeWildTuple = 
                     new ExpandedType(incorrectSizeWildcards);
@@ -254,11 +254,11 @@ class TestExpandedTypeSubtype {
         assertFalse(tuple.isASubtypeOf(ExpandedType.unitExpandedType));
         assertFalse(tuple.isASubtypeOf(ExpandedType.intType));
         assertFalse(tuple.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.intType))));
+                new ExpandedType(new ArrayType(PrimitiveType.intDefault))));
         assertFalse(tuple.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.boolType))));
+                new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertFalse(tuple.isASubtypeOf(
-                new ExpandedType(new ArrayType(OrdinaryType.voidType))));   
+                new ExpandedType(new ArrayType(VoidType.voidValue))));   
         
         assertFalse(tuple.isOrdinary());
         assertFalse(tuple.isSubtypeOfInt());

@@ -23,7 +23,7 @@ public final class AndExprNode extends BinExprNode {
         if (o instanceof AndExprNode) {
             AndExprNode oNode = (AndExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

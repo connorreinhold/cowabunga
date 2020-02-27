@@ -1,6 +1,5 @@
 package cyr7.typecheck;
 
-import cyr7.ast.Node;
 import cyr7.exceptions.LexerException;
 import cyr7.exceptions.ParserException;
 import cyr7.exceptions.semantics.SemanticException;
@@ -14,8 +13,8 @@ public class TypeCheckUtil {
     public static void typeCheck(Reader reader, Writer writer, String filename, 
             IxiFileOpener opener) throws Exception {
         try {
-            Node node = ParserUtil.parseNode(reader, filename, false);
-            node.accept(new TypeCheckVisitor(opener));
+            ParserUtil.parseNode(reader, filename, false)
+                .accept(new TypeCheckVisitor(opener));
             writer.append("Valid Xi Program").append(System.lineSeparator());
         } catch (ParserException e) {
             printErrorToStdOut(ErrorType.Syntax, e.filename, 
@@ -31,15 +30,15 @@ public class TypeCheckUtil {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
     }
-
+    
     private static void printErrorToStdOut(ErrorType type, String filename, 
             int line, int col, String msg) {
         System.out.println(
                 String.format("%s error beginning at %s:%d:%d: %s", 
                         type, filename, line, col, msg));
     }
-
-    protected static enum ErrorType {
+    
+    protected enum ErrorType {
         Lexical, Semantic, Syntax;
     }    
 }

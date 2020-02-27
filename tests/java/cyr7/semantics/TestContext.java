@@ -10,13 +10,13 @@ import static org.junit.jupiter.api.Assertions.*;
 public abstract class TestContext {
 
     private final Optional<OrdinaryType> INT = 
-                                    Optional.of(PrimitiveType.intType);
+                                    Optional.of(PrimitiveType.intDefault);
     private final Optional<OrdinaryType> BOOL = 
-                                    Optional.of(PrimitiveType.boolType);
+                                    Optional.of(PrimitiveType.boolDefault);
     private final Optional<OrdinaryType> INT_ARRAY = Optional.of(
-                                        new ArrayType(PrimitiveType.intType));
+                                        new ArrayType(PrimitiveType.intDefault));
     private final Optional<OrdinaryType> BOOL_ARRAY = Optional.of(
-                                        new ArrayType(PrimitiveType.boolType));
+                                        new ArrayType(PrimitiveType.boolDefault));
 
     abstract Context createEmptyContext();
 

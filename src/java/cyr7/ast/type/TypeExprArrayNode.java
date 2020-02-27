@@ -41,7 +41,7 @@ public final class TypeExprArrayNode extends TypeExprNode {
         if (o instanceof TypeExprArrayNode) {
             TypeExprArrayNode oNode = (TypeExprArrayNode) o;
             return this.child.equals(oNode.child)
-                    && this.size.equals(oNode.size);
+                && this.size.equals(oNode.size);
         }
         return false;
 

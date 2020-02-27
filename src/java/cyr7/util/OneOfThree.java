@@ -43,14 +43,17 @@ public final class OneOfThree<T, U, V> {
         return third;
     }
 
-    public <W> W match(Function<T, W> mapFirst, Function<U, W> mapSecond, Function<V, W> mapThird) {
+    public <W> W match(Function<T, W> mapFirst,
+                       Function<U, W> mapSecond,
+                       Function<V, W> mapThird) {
         return getFirst().map(mapFirst)
             .orElse(getSecond().map(mapSecond)
                 .orElse(getThird().map(mapThird)
                     .orElseThrow()));
     }
 
-    public void consume(Consumer<T> consumeFirst, Consumer<U> consumeSecond, Consumer<V> consumeThird) {
+    public void consume(Consumer<T> consumeFirst,
+                        Consumer<U> consumeSecond, Consumer<V> consumeThird) {
         getFirst().ifPresentOrElse(
             consumeFirst,
             () -> getSecond().ifPresentOrElse(

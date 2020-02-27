@@ -186,8 +186,8 @@ class TestInterfaceFiles {
         returnTypes.clear();
         Integer[] arrayDimensions = new Integer[]{
                 Integer.MAX_VALUE >>> 20,
-                Integer.MAX_VALUE >>> 19,
-                Integer.MAX_VALUE >>> 18,
+                Integer.MAX_VALUE >>> 21,
+                Integer.MAX_VALUE >>> 22,
         };
 
         for (int d: arrayDimensions) {
@@ -203,7 +203,8 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
         String prgmString = "main():" + Arrays.stream(arrayDimensions)
-            .map(d -> "int" + "[]".repeat(Math.max(0, d))).collect(Collectors.joining(", "));
+            .map(d -> "int" + "[]".repeat(Math.max(0, d)))
+            .collect(Collectors.joining(", "));
         prgm = new StringReader(prgmString);
         parser = new XiParser(new MultiFileLexer(prgm, "", true),
                 new ComplexSymbolFactory());

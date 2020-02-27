@@ -57,7 +57,8 @@ public final class HashMapStackContext implements Context {
 
     // Invariant: stack is always non-empty
     // Abstraction function: the head of the deque is the "top" of the stack.
-    // Read more here: https://docs.oracle.com/javase/7/docs/api/java/util/Deque.html
+    // Read more here: https://docs.oracle
+    // .com/javase/7/docs/api/java/util/Deque.html
 
     // Why use Deque instead of Stack? Deque is preferred by Java implementers
     private final Deque<Map<Optional<String>, Sigma>> stack;

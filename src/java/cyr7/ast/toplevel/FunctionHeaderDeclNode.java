@@ -7,7 +7,6 @@ import cyr7.ast.VarDeclNode;
 import cyr7.ast.type.TypeExprNode;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
@@ -47,8 +46,8 @@ public final class FunctionHeaderDeclNode extends AbstractNode {
         if (o instanceof FunctionHeaderDeclNode) {
             FunctionHeaderDeclNode oNode = (FunctionHeaderDeclNode) o;
             return this.identifier.equals(oNode.identifier)
-                    && this.args.equals(oNode.args)
-                    && this.returnTypes.equals(oNode.returnTypes);
+                && this.args.equals(oNode.args)
+                && this.returnTypes.equals(oNode.returnTypes);
         }
         return false;
     }

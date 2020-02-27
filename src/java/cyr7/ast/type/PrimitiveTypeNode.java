@@ -19,7 +19,7 @@ public final class PrimitiveTypeNode extends TypeExprNode {
 
     public boolean equals(Object o) {
         if (o instanceof PrimitiveTypeNode) {
-            PrimitiveTypeNode oNode = (PrimitiveTypeNode)o;
+            PrimitiveTypeNode oNode = (PrimitiveTypeNode) o;
             return this.type.equals(oNode.type);
         }
         return false;

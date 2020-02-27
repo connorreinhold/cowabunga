@@ -15,7 +15,6 @@ import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.stmt.*;
-import cyr7.ast.stmt.assign.*;
 import cyr7.ast.type.*;
 import cyr7.exceptions.*;
 import cyr7.lexer.LexerUtil;
@@ -137,7 +136,7 @@ nonterminal ProcedureStmtNode ProcedureStatement;
 nonterminal IfElseStmtNode IfElseStatement;
 nonterminal WhileStmtNode WhileStatement;
 nonterminal AssignmentStmtNode AssignmentStatement;
-nonterminal AssignNode AssignmentLHS;
+nonterminal ExprNode AssignmentLHS;
 
 nonterminal StmtNode VarDeclStatement;
 nonterminal VarDeclNode VarDecl;
@@ -150,7 +149,7 @@ nonterminal LinkedList<Optional<VarDeclNode>> MultiVarDeclList;
 nonterminal LinkedList<ExprNode> ExprList;
 
 nonterminal ExprNode Expr;
-nonterminal AccessNode AccessExpr;
+nonterminal ExprNode AccessExpr;
 nonterminal FunctionCallExprNode FunctionCall;
 nonterminal FunctionCallExprNode ProcedureCall;
 nonterminal LinkedList<ExprNode> ArgParamList;
@@ -290,7 +289,9 @@ ProcedureStatement ::=
     ;
 
 IfElseStatement ::=
-    IF:i Expr:e SingleXiStatement:s {: RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); :}
+    IF:i Expr:e SingleXiStatement:s {: 
+        RESULT = new IfElseStmtNode(ixleft, e, s, Optional.empty()); 
+    :}
     | IF:i Expr:e SingleXiStatement:s ELSE SingleXiStatement:b {:
             RESULT = new IfElseStmtNode(ixleft, e, s, Optional.of(b));
         :}
@@ -301,20 +302,20 @@ WhileStatement ::=
     ;
 
 AssignmentStatement ::=
-    AssignmentLHS:a ASSIGN Expr:e {: RESULT = new AssignmentStmtNode(axleft, a, e); :}
+    AssignmentLHS:a ASSIGN Expr:e {: 
+        RESULT = new AssignmentStmtNode(axleft, a, e); 
+    :}
     ;
 
 AssignmentLHS ::=
     AssignmentLHS:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
-        RESULT = new ArrayAssignNode(axleft, a, e);
+        RESULT = new ArrayAccessExprNode(axleft, a, e);
         :}
-    | ID:id {: 
-        ExprNode expr = new VariableAccessExprNode(idxleft, id);
-        RESULT = new ExprAssignNode(idxleft, expr);
-    :}
     | FunctionCall:f L_SQ_BRKT Expr:e R_SQ_BRKT {:
-        RESULT = new ArrayAssignNode(exleft, 
-                    new ExprAssignNode(fxleft, f), e);
+        RESULT = new ArrayAccessExprNode(exleft, f, e);
+    :}
+    | ID:id {: 
+        RESULT = new VariableAccessExprNode(idxleft, id);
     :}
     ;
 

@@ -5,7 +5,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 public class InterfaceFileNotFoundException extends SemanticException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 5737163481300461998L;
 

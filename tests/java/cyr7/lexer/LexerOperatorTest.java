@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import cyr7.exceptions.InvalidCharacterLiteralException;
 import cyr7.exceptions.InvalidStringEscapeCharacterException;
 import cyr7.exceptions.InvalidTokenException;
-import cyr7.exceptions.LeadingZeroIntegerException;
 import cyr7.exceptions.LexerIntegerOverflowException;
 import cyr7.exceptions.MultiLineCharacterException;
 import cyr7.exceptions.MultiLineStringException;

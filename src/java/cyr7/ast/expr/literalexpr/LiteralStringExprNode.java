@@ -8,8 +8,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 /**
  * Represents a String literal, Ex: [contents] = "hello"
  */
-public final class LiteralStringExprNode extends AbstractNode 
-                                            implements ExprNode {
+public final class LiteralStringExprNode extends AbstractNode
+    implements ExprNode {
 
     public final String contents;
 
@@ -30,7 +30,7 @@ public final class LiteralStringExprNode extends AbstractNode
             LiteralStringExprNode oNode = (LiteralStringExprNode) o;
             return this.contents.equals(oNode.contents);
         }
-        return false;    
+        return false;
     }
 
 }

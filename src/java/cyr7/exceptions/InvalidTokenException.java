@@ -3,7 +3,7 @@ package cyr7.exceptions;
 public class InvalidTokenException extends LexerException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 8452045191222781323L;
 

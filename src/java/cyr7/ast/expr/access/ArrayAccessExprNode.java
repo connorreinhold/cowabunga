@@ -10,18 +10,18 @@ import java.util.Objects;
 /**
  * An expression of the form {@code a[0] }, {@code f()[0] }, or {@code b[i][j] }
  */
-public final class ArrayAccessExprNode extends AbstractNode implements AccessNode {
+public final class ArrayAccessExprNode extends AbstractNode implements ExprNode {
 
     public final ExprNode child;
     public final ExprNode index;
-    
+
     public ArrayAccessExprNode(Location location, ExprNode child,
                                ExprNode index) {
         super(location);
         this.child = child;
         this.index = index;
     }
-    
+
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);

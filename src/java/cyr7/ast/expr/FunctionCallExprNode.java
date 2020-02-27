@@ -18,7 +18,7 @@ public final class FunctionCallExprNode extends AbstractNode implements ExprNode
     public final List<ExprNode> parameters;
 
     public FunctionCallExprNode(Location location,
-            String id, List<ExprNode> parameters) {
+                                String id, List<ExprNode> parameters) {
         super(location);
 
         assert id != null;
@@ -38,7 +38,7 @@ public final class FunctionCallExprNode extends AbstractNode implements ExprNode
         if (o instanceof FunctionCallExprNode) {
             FunctionCallExprNode oNode = (FunctionCallExprNode) o;
             return this.identifier.equals(oNode.identifier)
-                    && this.parameters.equals(oNode.parameters);
+                && this.parameters.equals(oNode.parameters);
         }
         return false;
     }

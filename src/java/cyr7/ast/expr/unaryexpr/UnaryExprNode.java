@@ -5,21 +5,21 @@ import cyr7.ast.expr.ExprNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
- * Superclass to expressions involving one child: -[ExprNode expr] or 
+ * Superclass to expressions involving one child: -[ExprNode expr] or
  * ![ExprNode expr]
  */
 public abstract class UnaryExprNode extends AbstractNode implements ExprNode {
 
     public final ExprNode expr;
 
-    public UnaryExprNode(Location location, ExprNode expr) {
+    UnaryExprNode(Location location, ExprNode expr) {
         super(location);
 
         assert expr != null;
 
         this.expr = expr;
     }
-    
+
     public boolean equals(Object o) {
         if (o instanceof UnaryExprNode) {
             UnaryExprNode oNode = (UnaryExprNode) o;

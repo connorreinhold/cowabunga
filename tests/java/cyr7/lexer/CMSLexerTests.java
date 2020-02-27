@@ -4,16 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.function.Supplier;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.exceptions.LeadingZeroIntegerException;
 import cyr7.exceptions.LexerException;
 import cyr7.parser.sym;
 import cyr7.util.Util;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
-import java_cup.runtime.Symbol;
 
 class CMSLexerTests {
 

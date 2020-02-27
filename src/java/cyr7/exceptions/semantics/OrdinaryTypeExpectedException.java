@@ -5,7 +5,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class OrdinaryTypeExpectedException extends SemanticException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -6130982998996069299L;
 

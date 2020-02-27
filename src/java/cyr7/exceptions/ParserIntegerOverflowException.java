@@ -2,7 +2,7 @@ package cyr7.exceptions;
 
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class ParserIntegerOverflowException extends ParserException  {
+public class ParserIntegerOverflowException extends ParserException {
 
     /**
      *

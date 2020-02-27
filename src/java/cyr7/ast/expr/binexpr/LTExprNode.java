@@ -23,7 +23,7 @@ public final class LTExprNode extends BinExprNode {
         if (o instanceof LTExprNode) {
             LTExprNode oNode = (LTExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }
