@@ -2,6 +2,7 @@ package cyr7.parser;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
+import cyr7.exceptions.LexerException;
 import cyr7.exceptions.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import java_cup.runtime.ComplexSymbolFactory;
@@ -25,7 +26,7 @@ public class ParserUtil {
             SExpVisitor visitor = new SExpVisitor(writer);
             node.accept(visitor);
             visitor.flush();
-        } catch (ParserException e) {
+        } catch (ParserException | LexerException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
     }

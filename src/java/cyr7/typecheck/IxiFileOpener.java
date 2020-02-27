@@ -7,6 +7,7 @@ import java.io.Reader;
  * An interface that communicates with the CLI when the contents of an
  * interface file (*.ixi) is requested.
  */
+@FunctionalInterface
 public interface IxiFileOpener {
 
     /**
