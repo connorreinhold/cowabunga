@@ -104,13 +104,13 @@ public class TestWhileStatement {
         try {
             ParserFactory.parseStatement("while i < j return");
         } catch (UnexpectedTokenException e) {
-            assertEquals(13, e.column.get());
+            assertEquals(13, e.column);
         }
 
         try {
             ParserFactory.parseStatement("while (i < j) return 0;");
         } catch (UnexpectedTokenException e) {
-            assertEquals(15, e.column.get());
+            assertEquals(15, e.column);
         }
 
         StmtNode statement =

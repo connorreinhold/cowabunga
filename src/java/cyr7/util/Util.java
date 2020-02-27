@@ -26,8 +26,6 @@ public final class Util {
                 case '\f': sb.append("\\f"); break;
                 case '\\':  sb.append("\\\\"); break;
                 case '"':  sb.append("\\\""); break;
-            // TODO: Check whether we are supposed to un-escaped single quotes 
-                case '\'':  sb.append("\\'"); break;
                 default: sb.append(s.charAt(i));
             }
         return sb.toString();

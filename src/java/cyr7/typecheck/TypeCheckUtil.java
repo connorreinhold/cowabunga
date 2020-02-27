@@ -17,9 +17,29 @@ public class TypeCheckUtil {
             Node node = ParserUtil.parseNode(reader, false);
             node.accept(new TypeCheckVisitor(opener));
             writer.append("Valid Xi Program").append(System.lineSeparator());
-        } catch (ParserException | SemanticException | LexerException e) {
+        } catch (ParserException e) {
+            printErrorToStdOut(ErrorType.Parser, "", 
+                    e.line, e.column, e.errorMsg);
+            writer.append(e.getMessage()).append(System.lineSeparator());
+        } catch (SemanticException e) {
+            printErrorToStdOut(ErrorType.Semantic, null, e.line, e.col, 
+                    e.errorMsg);
+            writer.append(e.getMessage()).append(System.lineSeparator());
+        } catch (LexerException e) {
+            printErrorToStdOut(ErrorType.Lexer, null, e.line, e.col, 
+                    e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
     }
 
+    private static void printErrorToStdOut(ErrorType type, String filename, 
+            int line, int col, String msg) {
+        System.out.println(
+                String.format("%s error beginning at %s:%d:%d: %s", 
+                        type, filename, line, col, msg));
+    }
+
+    protected static enum ErrorType {
+        Lexer, Semantic, Parser;
+    }    
 }
