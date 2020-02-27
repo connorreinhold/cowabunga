@@ -401,7 +401,7 @@ public class TypeCheckVisitor extends
         ExpandedType initializedType = n.initializer.accept(this).assertFirst();
         
         if (!initializedType.isOrdinary()) {
-            throw new UnexpectedNonOrdinaryTypeException(
+            throw new OrdinaryTypeExpectedException(
                     n.initializer.getLocation().get());
         }
         
@@ -443,7 +443,7 @@ public class TypeCheckVisitor extends
         List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
             ExpandedType type = e.accept(this).assertFirst();
             if (!type.isOrdinary()) {
-                throw new UnexpectedNonOrdinaryTypeException(
+                throw new OrdinaryTypeExpectedException(
                         e.getLocation().get());
             }
             return type;
@@ -488,7 +488,7 @@ public class TypeCheckVisitor extends
                 .map(e -> {
                     ExpandedType type = e.accept(this).assertFirst();
                     if (!type.isOrdinary()) {
-                       throw new UnexpectedNonOrdinaryTypeException(
+                       throw new OrdinaryTypeExpectedException(
                                 e.getLocation().get());
                     } else {
                         return type.getOrdinaryType();
@@ -568,11 +568,11 @@ public class TypeCheckVisitor extends
         ExpandedType right = n.right.accept(this).assertFirst();
 
         if (!left.isOrdinary()) {
-            throw new UnexpectedNonOrdinaryTypeException(
+            throw new OrdinaryTypeExpectedException(
                     n.left.getLocation().get());
         }
         if (!right.isOrdinary()) {
-            throw new UnexpectedNonOrdinaryTypeException(
+            throw new OrdinaryTypeExpectedException(
                     n.right.getLocation().get());
         }
         
