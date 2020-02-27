@@ -37,7 +37,7 @@ public final class XiProgramNode extends AbstractNode {
         if (o instanceof XiProgramNode) {
             XiProgramNode oNode = (XiProgramNode) o;
             return this.functions.equals(oNode.functions)
-                    && this.uses.equals(oNode.uses);
+                && this.uses.equals(oNode.uses);
         }
         return false;
     }

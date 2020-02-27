@@ -22,7 +22,7 @@ public abstract class TypeExprNode extends AbstractNode {
     /**
      * @param - primitive type of the larger type
      * @param - dimensionList - the list of array dimensions associated with
-     * the type, with Optional.empty()
+     *          the type, with Optional.empty()
      *          representing no size was given for that dimension.
      *          dimensionList must be passed in order, i.e. to create
      *          the type for int[4][3][], we pass in: {Optional.of(4),

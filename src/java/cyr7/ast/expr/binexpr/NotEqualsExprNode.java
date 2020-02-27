@@ -23,7 +23,7 @@ public final class NotEqualsExprNode extends BinExprNode {
         if (o instanceof NotEqualsExprNode) {
             NotEqualsExprNode oNode = (NotEqualsExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

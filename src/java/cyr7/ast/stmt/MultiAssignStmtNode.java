@@ -13,7 +13,7 @@ import java.util.Optional;
 /**
  * A statement of the form
  * v1:t1, ..., vn:tn = f(e)
- * 
+ *
  * <p>
  * It is guaranteed that the number of variable declarations is at least 2.
  */
@@ -27,8 +27,8 @@ public final class MultiAssignStmtNode extends AbstractNode implements StmtNode 
     public final FunctionCallExprNode initializer;
 
     public MultiAssignStmtNode(Location location,
-                           List<Optional<VarDeclNode>> varDecls,
-                           FunctionCallExprNode initializer) {
+                               List<Optional<VarDeclNode>> varDecls,
+                               FunctionCallExprNode initializer) {
         super(location);
 
         assert varDecls != null;

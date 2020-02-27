@@ -11,12 +11,11 @@ import java_cup.runtime.ScannerBuffer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.io.Writer;
 
 public class ParserUtil {
 
-    public static void parse(Reader reader, Writer writer, String filename, 
+    public static void parse(Reader reader, Writer writer, String filename,
             boolean isIXI) throws IOException {
         ScannerBuffer lexer = new ScannerBuffer(
                             new MultiFileLexer(reader, filename, isIXI));
@@ -34,25 +33,18 @@ public class ParserUtil {
         }
     }
 
-    public static Node parseNode(Reader reader, String filename, boolean isIxi) 
+    public static Node parseNode(Reader reader, String filename, boolean isIxi)
             throws Exception {
-        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, 
+        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader,
                 filename, isIxi));
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
         return (Node) p.parse().value;
     }
 
-    public static void printSExpr(Node node) { // NO_UCD (test only)
+    public static void printSExpr(Node node) {
         SExpVisitor visitor = new SExpVisitor(new PrintWriter(System.out));
         node.accept(visitor);
         visitor.flush();
     }
 
-//    TODO: Unused Code.
-//    public static String toSExpr(Node node) {
-//        StringWriter writer = new StringWriter();
-//        SExpVisitor visitor = new SExpVisitor(new PrintWriter(writer));
-//        node.accept(visitor);
-//        return writer.toString().strip();
-//    }
 }

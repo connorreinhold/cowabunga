@@ -15,8 +15,8 @@ public final class ArrayDeclStmtNode extends AbstractNode implements StmtNode {
 
     public final TypeExprArrayNode type;
 
-    public ArrayDeclStmtNode(Location location, String identifier, 
-            TypeExprArrayNode type) {
+    public ArrayDeclStmtNode(Location location, String identifier,
+                             TypeExprArrayNode type) {
         super(location);
         this.identifier = identifier;
         this.type = type;

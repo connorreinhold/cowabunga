@@ -11,7 +11,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public final class DivExprNode extends BinExprNode {
 
     public DivExprNode(Location location, ExprNode left,
-            ExprNode right) {
+                       ExprNode right) {
         super(location, left, right);
     }
 
@@ -25,7 +25,7 @@ public final class DivExprNode extends BinExprNode {
         if (o instanceof DivExprNode) {
             DivExprNode oNode = (DivExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

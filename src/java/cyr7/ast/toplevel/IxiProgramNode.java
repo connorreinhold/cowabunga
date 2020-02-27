@@ -11,7 +11,8 @@ public final class IxiProgramNode extends AbstractNode {
 
     public final List<FunctionHeaderDeclNode> functionDeclarations;
 
-    public IxiProgramNode(ComplexSymbolFactory.Location location, List<FunctionHeaderDeclNode> lst) {
+    public IxiProgramNode(ComplexSymbolFactory.Location location,
+                          List<FunctionHeaderDeclNode> lst) {
         super(location);
 
         assert lst != null;
@@ -21,11 +22,11 @@ public final class IxiProgramNode extends AbstractNode {
 
     @Override
     public boolean equals(Object o) {
-    	if (o instanceof IxiProgramNode) {
-    		IxiProgramNode oNode = (IxiProgramNode) o;
-    		return this.functionDeclarations.equals(oNode.functionDeclarations);
-    	}
-    	return false;
+        if (o instanceof IxiProgramNode) {
+            IxiProgramNode oNode = (IxiProgramNode) o;
+            return this.functionDeclarations.equals(oNode.functionDeclarations);
+        }
+        return false;
     }
 
     @Override

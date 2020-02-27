@@ -46,8 +46,8 @@ public final class FunctionHeaderDeclNode extends AbstractNode {
         if (o instanceof FunctionHeaderDeclNode) {
             FunctionHeaderDeclNode oNode = (FunctionHeaderDeclNode) o;
             return this.identifier.equals(oNode.identifier)
-                    && this.args.equals(oNode.args)
-                    && this.returnTypes.equals(oNode.returnTypes);
+                && this.args.equals(oNode.args)
+                && this.returnTypes.equals(oNode.returnTypes);
         }
         return false;
     }

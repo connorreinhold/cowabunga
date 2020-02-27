@@ -19,32 +19,32 @@ import java.util.Optional;
  * Example expression: x: int[2][3][];
  */
 public final class TypeExprArrayNode extends TypeExprNode {
-    
+
     public final TypeExprNode child;
     public final Optional<ExprNode> size;
-    
+
     public TypeExprArrayNode(Location location,
-            TypeExprNode child, Optional<ExprNode> size) {
+                             TypeExprNode child, Optional<ExprNode> size) {
         super(location);
-        
+
         this.child = child;
         this.size = size;
     }
-    
+
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
     }
-    
+
     @Override
     public boolean equals(Object o) {
         if (o instanceof TypeExprArrayNode) {
             TypeExprArrayNode oNode = (TypeExprArrayNode) o;
             return this.child.equals(oNode.child)
-                    && this.size.equals(oNode.size);
+                && this.size.equals(oNode.size);
         }
         return false;
-        
+
     }
-    
+
 }

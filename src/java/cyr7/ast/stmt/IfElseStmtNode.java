@@ -17,8 +17,8 @@ public final class IfElseStmtNode extends AbstractNode implements StmtNode {
     public final StmtNode ifBlock;
     public final Optional<StmtNode> elseBlock;
 
-    public IfElseStmtNode(Location location, ExprNode guard, StmtNode ifBlock, 
-            Optional<StmtNode> elseBlock) {
+    public IfElseStmtNode(Location location, ExprNode guard, StmtNode ifBlock,
+                          Optional<StmtNode> elseBlock) {
         super(location);
 
         assert guard != null;
@@ -39,8 +39,8 @@ public final class IfElseStmtNode extends AbstractNode implements StmtNode {
         if (o instanceof IfElseStmtNode) {
             IfElseStmtNode oNode = (IfElseStmtNode) o;
             return this.guard.equals(oNode.guard)
-                    && this.ifBlock.equals(oNode.ifBlock)
-                    && this.elseBlock.equals(oNode.elseBlock);
+                && this.ifBlock.equals(oNode.ifBlock)
+                && this.elseBlock.equals(oNode.elseBlock);
         }
         return false;
     }

@@ -23,9 +23,9 @@ public final class MultExprNode extends BinExprNode {
         if (o instanceof MultExprNode) {
             MultExprNode oNode = (MultExprNode) o;
             return this.left.equals(oNode.left) && this.right.equals(
-                    oNode.right);
+                oNode.right);
         }
-        return false;    
+        return false;
     }
 
 }

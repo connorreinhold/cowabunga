@@ -13,9 +13,9 @@ import java.util.List;
 public final class BlockStmtNode extends AbstractNode implements StmtNode {
 
     public final List<StmtNode> statements;
-    
+
     public BlockStmtNode(Location location,
-            List<StmtNode> statements) {
+                         List<StmtNode> statements) {
         super(location);
 
         assert statements != null;

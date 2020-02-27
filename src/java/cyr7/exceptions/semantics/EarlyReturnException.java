@@ -5,7 +5,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class EarlyReturnException extends SemanticException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7713637890221889005L;
 

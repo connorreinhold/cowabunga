@@ -12,9 +12,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * <li> expr[expr]
  * <li> id
  * </ul>
- * 
- * @author ayang
  *
+ * @author ayang
  */
 public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
 
@@ -23,12 +22,13 @@ public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
     public final ExprNode rhs;
 
     /**
-     * 
      * @param location The location of the assignment statement.
-     * @param assign The LHS of the assignment. Must be an array access
-     * to of some expression or a variable. The {@code assign} cannot be an
-     * expression that begins with an open-parentheses or open-braces.
-     * @param value The RHS of the assignment.
+     * @param assign   The LHS of the assignment. Must be an array access
+     *                 to of some expression or a variable. The {@code assign
+     *                 } cannot be an
+     *                 expression that begins with an open-parentheses or
+     *                 open-braces.
+     * @param value    The RHS of the assignment.
      */
     public AssignmentStmtNode(Location location,
                               ExprNode assign, ExprNode value) {
@@ -50,7 +50,7 @@ public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
         if (o instanceof AssignmentStmtNode) {
             AssignmentStmtNode oNode = (AssignmentStmtNode) o;
             return this.lhs.equals(oNode.lhs)
-                    && this.rhs.equals(oNode.rhs);
+                && this.rhs.equals(oNode.rhs);
         }
         return false;
     }

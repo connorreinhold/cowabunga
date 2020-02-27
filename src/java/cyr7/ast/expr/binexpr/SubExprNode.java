@@ -23,7 +23,7 @@ public final class SubExprNode extends BinExprNode {
         if (o instanceof SubExprNode) {
             SubExprNode oNode = (SubExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

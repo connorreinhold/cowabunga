@@ -13,7 +13,7 @@ public abstract class BinExprNode extends AbstractNode implements ExprNode {
     public final ExprNode left, right;
 
     BinExprNode(Location location, ExprNode left,
-            ExprNode right) {
+                ExprNode right) {
         super(location);
 
         assert left != null;

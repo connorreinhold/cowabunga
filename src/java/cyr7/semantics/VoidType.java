@@ -1,22 +1,23 @@
 package cyr7.semantics;
 
-public class VoidType extends OrdinaryType {
+public final class VoidType extends OrdinaryType {
     // The empty array {} is an array type of ArrayType(VoidType.VOID)
-    
+
     public static final VoidType voidValue = new VoidType();
-    
-    protected VoidType() {}
-    
+
+    private VoidType() {
+    }
+
     @Override
     public Type getType() {
         return Type.VOID;
     }
-    
+
     @Override
     public String toString() {
         return "Any";
     }
-    
+
     /**
      * Void is always a subtype of any other type.
      * <p>
@@ -26,10 +27,10 @@ public class VoidType extends OrdinaryType {
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
         return true;
     }
-    
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof VoidType;
     }
-    
+
 }
