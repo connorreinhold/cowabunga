@@ -4,12 +4,13 @@ import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.stmt.*;
-import cyr7.ast.stmt.assign.VariableAssignNode;
+import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -113,7 +114,8 @@ class TestTypeCheckVisitorStmt {
         visitor.context.addVar("cash", OrdinaryType.intType);
         
         node = new AssignmentStmtNode(loc, 
-                new VariableAssignNode(loc, "cash"),
+                new ExprAssignNode(loc, 
+                        new VariableAccessExprNode(loc, "cash")),
                 new LiteralIntExprNode(loc, "123"));
         result = node.accept(visitor);
         assertEquals(ResultType.UNIT, result.assertSecond());
@@ -121,7 +123,8 @@ class TestTypeCheckVisitorStmt {
         
         // Mismatched types
         node = new AssignmentStmtNode(loc, 
-                new VariableAssignNode(loc, "cash"),
+                new ExprAssignNode(loc, 
+                        new VariableAccessExprNode(loc, "cash")),
                 new LiteralBoolExprNode(loc, false));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
 
@@ -129,7 +132,8 @@ class TestTypeCheckVisitorStmt {
         
         // Attempting to assign to undeclared variable.
         node = new AssignmentStmtNode(loc, 
-                new VariableAssignNode(loc, "undeclaredValue"),
+                new ExprAssignNode(loc, 
+                        new VariableAccessExprNode(loc, "undeclaredValue")),
                 new LiteralStringExprNode(loc, "Anything"));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
     }

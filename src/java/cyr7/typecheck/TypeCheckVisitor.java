@@ -10,10 +10,11 @@ import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
 import cyr7.ast.stmt.assign.ArrayAssignNode;
-import cyr7.ast.stmt.assign.VariableAssignNode;
+import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.exceptions.LexerException;
 import cyr7.exceptions.ParserException;
 import cyr7.exceptions.semantics.*;
 import cyr7.parser.ParserUtil;
@@ -143,15 +144,16 @@ public class TypeCheckVisitor extends
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(UseNode n) {
         try {
             Reader reader = fileOpener.openIxiLibraryFile(n.interfaceName);
-            IxiProgramNode interfaceNode = (IxiProgramNode) ParserUtil.parseNode(reader, true);
+            IxiProgramNode interfaceNode = 
+                    (IxiProgramNode) ParserUtil.parseNode(reader, 
+                            n.interfaceName + ".ixi", true);
             interfaceNode.accept(this);
             return OneOfThree.ofThird(Optional.empty());
-        } catch(ParserException e) {
-            throw new SemanticParserException(e);
-        } catch(IOException e) {
-            throw new InterfaceFileNotFoundException(n.interfaceName, n.getLocation().get());
+        } catch(ParserException | LexerException | SemanticException e) {
+            throw e;
         } catch(Exception e) {
-            throw new SemanticParserException(e, n.getLocation().get());
+            throw new InterfaceFileNotFoundException(n.interfaceName, 
+                    n.getLocation().get());
         }
     }
 
@@ -169,7 +171,8 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(XiProgramNode n) {
         context.addFn("length", new FunctionType(
-                new ExpandedType(new ArrayType(OrdinaryType.unitType)), 
+                new ExpandedType(
+                        new ArrayType(OrdinaryType.unitType)), 
                 ExpandedType.intType));
 
         n.uses.forEach(use -> use.accept(this));
@@ -231,19 +234,13 @@ public class TypeCheckVisitor extends
                     n.child.getLocation().get());
         }
         
-        // TODO: deal with the case of arrayType being void, e.g. {}[0][0].
         OrdinaryType innerArrayType = arrayType.getInnerArrayType();
         return OneOfThree.ofFirst(new ExpandedType(innerArrayType));
     }
 
     @Override
-    public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(VariableAssignNode n) {
-        Optional<OrdinaryType> optionalVar = context.getVar(n.identifier);
-        if (optionalVar.isPresent()) {
-            return OneOfThree.ofFirst(new ExpandedType(optionalVar.get()));
-        }
-        throw new UnboundIdentifierException(n.identifier, 
-                                             n.getLocation().get());
+    public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ExprAssignNode n) {
+        return n.expr.accept(this);
     }
 
     // Statement
@@ -298,6 +295,9 @@ public class TypeCheckVisitor extends
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ExprStmtNode n) {
         ExpandedType type = n.expr.accept(this).assertFirst();
+        if (!(n.expr instanceof FunctionCallExprNode)) {
+            throw new ExpectedFunctionException(n.expr.getLocation().get());
+        }
         if (type.isOrdinary()) {
             return OneOfThree.ofSecond(ResultType.UNIT);
         } else {
@@ -362,15 +362,21 @@ public class TypeCheckVisitor extends
         }
     }
 
+    
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ReturnStmtNode n) {
         Optional<ExpandedType> maybeTypes = context.getRet();
         assert maybeTypes.isPresent();
+        if (maybeTypes.get().isUnit() && !n.exprs.isEmpty()) {
+            throw new ReturnValueInUnitFunctionException(n.getLocation().get());
+        }
         ExpandedType expected = maybeTypes.get();
         ExpandedType exprType = new ExpandedType(n.exprs.stream()
                 .map(e -> {
                     ExpandedType t = e.accept(this).assertFirst();
-                    assert t.isOrdinary();
+                    if (!t.isOrdinary()) {
+                        new InvalidReturnValueException(e.getLocation().get());
+                    }
                     return t.getOrdinaryType();
                 }).collect(Collectors.toList()));;
                 
@@ -394,8 +400,13 @@ public class TypeCheckVisitor extends
         ExpandedType varDeclType = varDecl.accept(this).assertFirst();
         ExpandedType initializedType = n.initializer.accept(this).assertFirst();
         
+        if (!initializedType.isOrdinary()) {
+            throw new OrdinaryTypeExpectedException(
+                    n.initializer.getLocation().get());
+        }
+        
         if (initializedType.isASubtypeOf(varDeclType)) {
-            assert varDeclType.isOrdinary() && initializedType.isOrdinary();
+            assert varDeclType.isOrdinary();
             return OneOfThree.ofSecond(ResultType.UNIT);
         } else {
             throw new TypeMismatchException(initializedType, varDeclType,
@@ -430,8 +441,14 @@ public class TypeCheckVisitor extends
         // arrayType is the supertype of the first 0...i array values
         Optional<ExpandedType> arrayType = Optional.empty();
         List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
-            return e.accept(this).assertFirst();
+            ExpandedType type = e.accept(this).assertFirst();
+            if (!type.isOrdinary()) {
+                throw new OrdinaryTypeExpectedException(
+                        e.getLocation().get());
+            }
+            return type;
         }).collect(Collectors.toList());
+        
         
         int index = 0;
         for (ExpandedType t: arrayTypes) {
@@ -468,8 +485,15 @@ public class TypeCheckVisitor extends
         FunctionType function = optionalFn.get();
         ExpandedType inputTypes = function.input;
         ExpandedType params = new ExpandedType(n.parameters.stream()
-                .map(e -> e.accept(this).assertFirst().getOrdinaryType())
-                .collect(Collectors.toList()));
+                .map(e -> {
+                    ExpandedType type = e.accept(this).assertFirst();
+                    if (!type.isOrdinary()) {
+                       throw new OrdinaryTypeExpectedException(
+                                e.getLocation().get());
+                    } else {
+                        return type.getOrdinaryType();
+                    }
+                }).collect(Collectors.toList()));
 
         if (params.isASubtypeOf(inputTypes)) {
             return OneOfThree.ofFirst(function.output);
@@ -543,6 +567,15 @@ public class TypeCheckVisitor extends
         ExpandedType left = n.left.accept(this).assertFirst();
         ExpandedType right = n.right.accept(this).assertFirst();
 
+        if (!left.isOrdinary()) {
+            throw new OrdinaryTypeExpectedException(
+                    n.left.getLocation().get());
+        }
+        if (!right.isOrdinary()) {
+            throw new OrdinaryTypeExpectedException(
+                    n.right.getLocation().get());
+        }
+        
         if (supertypeOf(left, right).isEmpty()) {
             throw new UncomparableValuesException(left, right, 
                     n.getLocation().get());

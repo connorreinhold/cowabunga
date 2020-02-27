@@ -215,8 +215,18 @@ class LexerOperatorTest {
     void integerEdgeCases() throws Exception{
         String illegalInt = "0010";
         MyLexer lexer = LexerFactory.make(illegalInt);
-        assertThrows(LeadingZeroIntegerException.class, lexer::next_token);
-
+        Symbol token = lexer.next_token();
+        assertEquals(sym.INT_LITERAL, token.sym);
+        assertEquals("0", token.value.toString());
+        
+        token = lexer.next_token();
+        assertEquals(sym.INT_LITERAL, token.sym);
+        assertEquals("0", token.value.toString());
+        
+        token = lexer.next_token();
+        assertEquals(sym.INT_LITERAL, token.sym);
+        assertEquals("10", token.value.toString());
+        
         lexer = LexerFactory.make("00");
         assertEquals(sym.INT_LITERAL, lexer.next_token().sym);
         assertEquals(sym.INT_LITERAL, lexer.next_token().sym);

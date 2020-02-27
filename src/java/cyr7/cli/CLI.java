@@ -300,7 +300,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "lexed");
-                    LexerUtil.lex(input, output);
+                    LexerUtil.lex(input, output, filename);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -312,7 +312,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "parsed");
-                    ParserUtil.parse(input, output, isIXI);
+                    ParserUtil.parse(input, output, filename, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -324,7 +324,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output,
+                    TypeCheckUtil.typeCheck(input, output, filename,
                         ixiFilename -> getLibraryReader(ixiFilename + ".ixi")
                     );
                 } catch (Exception e) {

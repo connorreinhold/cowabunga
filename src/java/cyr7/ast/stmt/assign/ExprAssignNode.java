@@ -1,22 +1,22 @@
 package cyr7.ast.stmt.assign;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
-public final class VariableAssignNode extends AbstractNode implements AssignNode {
+public final class ExprAssignNode extends AbstractNode implements AssignNode {
 
-    public final String identifier;
+    public final ExprNode expr;
 
-    public VariableAssignNode(Location location,
-                              String id) {
+    public ExprAssignNode(Location location, ExprNode expr) {
         super(location);
 
-        assert id != null;
+        assert expr != null;
 
-        this.identifier = id;
+        this.expr = expr;
     }
 
     @Override
@@ -28,8 +28,8 @@ public final class VariableAssignNode extends AbstractNode implements AssignNode
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        VariableAssignNode that = (VariableAssignNode) o;
-        return Objects.equals(identifier, that.identifier);
+        ExprAssignNode that = (ExprAssignNode) o;
+        return Objects.equals(expr, that.expr);
     }
 
 }

@@ -28,19 +28,12 @@ import java.util.Optional;
 parser code {:
 
 @Override
-public void unrecovered_syntax_error(Symbol cur_token) throws Exception {
-    if (cur_token instanceof ComplexSymbol) {
-        ComplexSymbol token = (ComplexSymbol) cur_token;
-
-        if (token.sym == sym.INT_MAX) {
-            throw new ParserIntegerOverflowException(token.xleft.getLine(), 
-                    token.xleft.getColumn());
-        } else {
-            throw new UnexpectedTokenException(token);
-        }
+public void unrecovered_syntax_error(Symbol token) throws Exception {
+    ComplexSymbol cur_token = (ComplexSymbol) token;
+    if (cur_token.sym == sym.INT_MAX) {
+        throw new ParserIntegerOverflowException(cur_token.xleft);
     } else {
-        // We don't know the line or column
-        throw new UnexpectedTokenException(cur_token.sym, cur_token.value, 1, 1);
+        throw new UnexpectedTokenException(cur_token);
     }
 }
 
@@ -312,10 +305,17 @@ AssignmentStatement ::=
     ;
 
 AssignmentLHS ::=
-    AssignmentLHS:a L_SQ_BRKT Expr: e R_SQ_BRKT {:
-            RESULT = new ArrayAssignNode(axleft, a, e);
+    AssignmentLHS:a L_SQ_BRKT Expr:e R_SQ_BRKT {:
+        RESULT = new ArrayAssignNode(axleft, a, e);
         :}
-    | ID:id {: RESULT = new VariableAssignNode(idxleft, id); :}
+    | ID:id {: 
+        ExprNode expr = new VariableAccessExprNode(idxleft, id);
+        RESULT = new ExprAssignNode(idxleft, expr);
+    :}
+    | FunctionCall:f L_SQ_BRKT Expr:e R_SQ_BRKT {:
+        RESULT = new ArrayAssignNode(exleft, 
+                    new ExprAssignNode(fxleft, f), e);
+    :}
     ;
 
 VarDeclStatement ::=

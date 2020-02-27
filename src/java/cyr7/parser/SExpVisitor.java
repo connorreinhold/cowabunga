@@ -11,7 +11,7 @@ import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.stmt.*;
 import cyr7.ast.stmt.assign.ArrayAssignNode;
-import cyr7.ast.stmt.assign.VariableAssignNode;
+import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
@@ -181,9 +181,8 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    public Void visit(VariableAssignNode n) {
-        printer.printAtom(n.identifier);
-
+    public Void visit(ExprAssignNode n) {
+        n.expr.accept(this);
         return null;
     }
 
@@ -431,7 +430,7 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
     @Override
     public Void visit(LiteralCharExprNode n) {
-        printer.printAtom("'" + Util.unescapeString(n.contents) + "'");
+        printer.printAtom("'" + Util.unescapeCharacterString(n.contents) + "'");
         return null;
     }
 

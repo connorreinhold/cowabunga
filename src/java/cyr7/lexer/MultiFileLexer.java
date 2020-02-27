@@ -11,8 +11,8 @@ public class MultiFileLexer extends MyLexer {
     private final boolean isIXI;
     private boolean first = true;
 
-    public MultiFileLexer(Reader r, boolean isIXI) {
-        super(r);
+    public MultiFileLexer(Reader r, String filename, boolean isIXI) {
+        super(r, filename);
         this.isIXI = isIXI;
     }
 
