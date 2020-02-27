@@ -10,7 +10,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 class CLI { // NO_UCD (test only)
-
+    
     final static private String usage = "xic [options] <source files>";
     final static private int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
     final static private int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
@@ -18,7 +18,7 @@ class CLI { // NO_UCD (test only)
     final static private HelpFormatter helpFormatter = new HelpFormatter();
     final static private Options options = createOptions();
     final static private CommandLineParser parser = new DefaultParser();
-
+    
     private static boolean debugPrintingEnabled = false;
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
@@ -26,7 +26,7 @@ class CLI { // NO_UCD (test only)
     private static File sourceRoot = new File(".");
     private static File libRoot = new File(".");
     private static File destinationRoot = new File(".");
-
+    
     /**
      * Creates an {@code Options} instance of the CLI parser. <\br> In this
      * instance, an {@code Option} instance is created for at least each of the
@@ -35,123 +35,123 @@ class CLI { // NO_UCD (test only)
      */
     private static Options createOptions() {
         Options options = new Options();
-
+        
         Option help = Option
-            .builder("h")
-            .longOpt("help")
-            .desc("Print a synopsis of options")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
+                .builder("h")
+                .longOpt("help")
+                .desc("Print a synopsis of options")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+        
         Option lex = Option
-            .builder("l")
-            .longOpt("lex")
-            .desc("Generate output from lexical analysis")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
+                .builder("l")
+                .longOpt("lex")
+                .desc("Generate output from lexical analysis")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+        
         Option parse = Option
-            .builder("p")
-            .longOpt("parse")
-            .desc("Generate output from syntactic analysis")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
+                .builder("p")
+                .longOpt("parse")
+                .desc("Generate output from syntactic analysis")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+        
         Option typecheck = Option
-            .builder("t")
-            .longOpt("typecheck")
-            .desc("Generate output from semantic analysis.")
-            .hasArg(false)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
+                .builder("t")
+                .longOpt("typecheck")
+                .desc("Generate output from semantic analysis.")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+        
         Option source = Option
-            .builder("sourcepath")
-            .desc("Specify where to find generated diagnostic files")
-            .hasArg(true)
-            .argName("path")
-            .numberOfArgs(1)
-            .required(false)
-            .build();
-
+                .builder("sourcepath")
+                .desc("Specify where to find generated diagnostic files")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+        
         Option libpath = Option
-            .builder("libpath")
-            .desc("Specify where to find library interface files.")
-            .hasArg(true)
-            .argName("path")
-            .numberOfArgs(1)
-            .required(false)
-            .build();
-
+                .builder("libpath")
+                .desc("Specify where to find library interface files.")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+        
         Option destination = Option
-            .builder("D")
-            .longOpt(null)
-            .desc("Specify where to place generated diagnostic files")
-            .hasArg(true)
-            .argName("path")
-            .numberOfArgs(1)
-            .required(false)
-            .build();
-
+                .builder("D")
+                .longOpt(null)
+                .desc("Specify where to place generated diagnostic files")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+        
         Option version = Option
-            .builder("v")
-            .longOpt("version")
-            .desc("Version information")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
+                .builder("v")
+                .longOpt("version")
+                .desc("Version information")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+        
         Option debugPrinting = Option
-            .builder("debug")
-            .desc("Print debugging information")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
+                .builder("debug")
+                .desc("Print debugging information")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+        
         return options.addOption(help)
-            .addOption(lex)
-            .addOption(parse)
-            .addOption(typecheck)
-            .addOption(source)
-            .addOption(libpath)
-            .addOption(destination)
-            .addOption(version)
-            .addOption(debugPrinting);
+                .addOption(lex)
+                .addOption(parse)
+                .addOption(typecheck)
+                .addOption(source)
+                .addOption(libpath)
+                .addOption(destination)
+                .addOption(version)
+                .addOption(debugPrinting);
     }
-
+    
     /**
      * Prints a synopsis of the options.
      */
     private static void printHelpMessage() {
         helpFormatter.printHelp(writer, consoleWidth, usage,
-            "where possible options include:", options, 0, leftPadding,
-            "\n");
+                "where possible options include:", options, 0, leftPadding,
+                "\n");
         writer.flush();
     }
-
+    
     /**
      * Prints the version of xic.
      */
     private static void printVersionMessage() {
         writer.append("xic 1.0")
-            .append(System.lineSeparator());
+        .append(System.lineSeparator());
         writer.flush();
     }
-
+    
     /**
      * Parses the command given by {@code args} under the options setting
      * {@code options}.
@@ -163,10 +163,10 @@ class CLI { // NO_UCD (test only)
      *                        of arguments.
      */
     static CommandLine parseCommand(String[] args)
-        throws ParseException {
+            throws ParseException {
         return parser.parse(options, args);
     }
-
+    
 // TODO Remove unused code found by UCDetector
 //     /**
 //      * Returns the filename without its extension if an extension exists.
@@ -182,7 +182,7 @@ class CLI { // NO_UCD (test only)
 //         }
 //         return name;
 //     }
-
+    
     /**
      * Returns the filename without its extension if an extension exists.
      *
@@ -197,7 +197,7 @@ class CLI { // NO_UCD (test only)
         }
         return name;
     }
-
+    
     /**
      * Return {@code true} if {@code file} is a {@literal .xi} file. Otherwise,
      * return {@code false}.
@@ -207,7 +207,7 @@ class CLI { // NO_UCD (test only)
     static boolean isAXiFile(File file) { // NO_UCD (test only)
         return getExtensionName(file).equals("xi");
     }
-
+    
     /**
      * Returns the filename's extension name. If an extension does not exist,
      * then an empty string is returned.
@@ -224,7 +224,7 @@ class CLI { // NO_UCD (test only)
             return "";
         }
     }
-
+    
     public static void main(String[] args) {
         // If no arguments or options given, print help.
         if (args.length == 0) {
@@ -232,7 +232,7 @@ class CLI { // NO_UCD (test only)
             writer.close();
             return;
         }
-
+        
         CommandLine cmd;
         try {
             cmd = parseCommand(args);
@@ -242,48 +242,48 @@ class CLI { // NO_UCD (test only)
             writer.close();
             return;
         }
-
+        
         // For each option given, perform task corresponding to option.
         cmd.iterator().forEachRemaining(t -> {
             String opt = t.getOpt();
             switch (opt) {
-                case "h":
-                    printHelpMessage();
-                    break;
-                case "l":
-                    wantsLexing = true;
-                    break;
-                case "p":
-                    wantsParsing = true;
-                    break;
-                case "t":
-                    wantsTypechecking = true;
-                    break;
-                case "D": {
-                    String directory = cmd.getOptionValue("D");
-                    destinationRoot = new File(directory);
-                    break;
-                }
-                case "sourcepath": {
-                    String directory = cmd.getOptionValue("sourcepath");
-                    sourceRoot = new File(directory);
-                    break;
-                }
-                case "libpath": {
-                    String directory = cmd.getOptionValue("libpath");
-                    libRoot = new File(directory);
-                    break;
-                }
-                case "v":
-                    printVersionMessage();
-                    break;
-                case "debug":
-                    debugPrintingEnabled = true;
-                    break;
-                default:
-                    writer.write("No case for given for option: " + opt);
-                    writer.flush();
-                    break;
+            case "h":
+                printHelpMessage();
+                break;
+            case "l":
+                wantsLexing = true;
+                break;
+            case "p":
+                wantsParsing = true;
+                break;
+            case "t":
+                wantsTypechecking = true;
+                break;
+            case "D": {
+                String directory = cmd.getOptionValue("D");
+                destinationRoot = new File(directory);
+                break;
+            }
+            case "sourcepath": {
+                String directory = cmd.getOptionValue("sourcepath");
+                sourceRoot = new File(directory);
+                break;
+            }
+            case "libpath": {
+                String directory = cmd.getOptionValue("libpath");
+                libRoot = new File(directory);
+                break;
+            }
+            case "v":
+                printVersionMessage();
+                break;
+            case "debug":
+                debugPrintingEnabled = true;
+                break;
+            default:
+                writer.write("No case for given for option: " + opt);
+                writer.flush();
+                break;
             }
         });
         for (String filename : cmd.getArgs()) {
@@ -293,7 +293,7 @@ class CLI { // NO_UCD (test only)
             } else {
                 continue;
             }
-
+            
             Reader input = null;
             Writer output = null;
             if (wantsLexing) {
@@ -307,7 +307,7 @@ class CLI { // NO_UCD (test only)
                 }
                 closeIOStreams(input, output);
             }
-
+            
             if (wantsParsing) {
                 debugPrint("Parsing file: " + filename);
                 try {
@@ -319,15 +319,15 @@ class CLI { // NO_UCD (test only)
                 }
                 closeIOStreams(input, output);
             }
-
+            
             if (wantsTypechecking) {
                 debugPrint("Typechecking file: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "typed");
                     TypeCheckUtil.typeCheck(input, output, filename,
-                        ixiFilename -> getLibraryReader(ixiFilename + ".ixi")
-                    );
+                            ixiFilename -> getLibraryReader(ixiFilename + ".ixi")
+                            );
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -337,31 +337,31 @@ class CLI { // NO_UCD (test only)
         writer.flush();
         writer.close();
     }
-
+    
     private static Reader getReader(String filename) throws IOException {
         Path sourcePath = Paths.get(sourceRoot.getAbsolutePath(), filename);
         debugPrint("Opening reader to: " + sourcePath);
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
-
+    
     private static Writer getWriter(String relativePath, String fileExtension)
-        throws IOException {
+            throws IOException {
         Path destPath = Paths.get(destinationRoot.getAbsolutePath(),
-            relativePath).getParent();
+                relativePath).getParent();
         File dest = new File(destPath.toFile(), String.format("%s." +
                 fileExtension,
-            getMainFilename(Path.of(relativePath))));
+                getMainFilename(Path.of(relativePath))));
         if (!dest.exists()) {
             // Create directories if they don't exist
             dest.getParentFile().mkdirs();
         }
-
+        
         debugPrint("Opening writer to: " + dest);
-
+        
         return new BufferedWriter(new FileWriter(dest));
     }
-
-
+    
+    
     private static void closeIOStreams(Reader input, Writer output) {
         if (input != null && output != null) {
             try {
@@ -370,23 +370,23 @@ class CLI { // NO_UCD (test only)
                 input.close();
             } catch (IOException e) {
                 writer.write("Unexpected error occurred when closing "
-                    + "io stream.");
+                        + "io stream.");
             }
         }
     }
-
-
+    
+    
     private static void debugPrint(Object v) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + v);
         }
     }
-
+    
     private static Reader getLibraryReader(String filename) throws IOException {
         Path sourcePath = Paths.get(libRoot.getAbsolutePath(), filename);
         debugPrint("Opening reader to: " + sourcePath);
         return new BufferedReader(new FileReader(sourcePath.toFile()));
-
+        
     }
-
+    
 }
