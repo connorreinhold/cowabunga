@@ -24,20 +24,28 @@ import java.math.BigInteger;
 %yylexthrow}
 
 %{
+    
+    private String filename;
+
+    public MyLexer(java.io.Reader in, String filename) {
+        this(in);
+        this.filename = filename;
+    }
+
     public final static String maxIntegerString = "9223372036854775808";
     public final static BigInteger maxInteger = new BigInteger(maxIntegerString); // 2^63
     
     protected ComplexSymbol symbol(int id) {
     	String name = sym.terminalNames[id];
         return new ComplexSymbol(name, id,
-            new Location(yyline+1,yycolumn+1,yychar),
-            new Location(yyline+1,yycolumn+yylength(),yychar+yylength()));
+            new Location(filename, yyline+1,yycolumn+1,yychar),
+            new Location(filename, yyline+1,yycolumn+yylength(),yychar+yylength()));
     }
 
     protected ComplexSymbol symbol(int id, Object val) {
     	String name = sym.terminalNames[id];
-        Location left = new Location(yyline+1,yycolumn+1,yychar);
-        Location right = new Location(yyline+1,
+        Location left = new Location(filename, yyline+1,yycolumn+1,yychar);
+        Location right = new Location(filename, yyline+1,
         						      yycolumn+yylength(), 
         							  yychar+yylength());
         							  
@@ -46,8 +54,8 @@ import java.math.BigInteger;
     
     protected ComplexSymbol symbol(int id, String val, int line, int col) {
     	String name = sym.terminalNames[id];
-        Location left = new Location(line+1,col+1);
-        Location right = new Location(line + 1, col + 1 + val.length());
+        Location left = new Location(filename, line+1,col+1);
+        Location right = new Location(filename, line + 1, col + 1 + val.length());
         							  
         return new ComplexSymbol(name, id, left, right, val);
     }
@@ -167,7 +175,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
                 return symbol(sym.INT_MAX);
             } else { // n > maxInteger
                 throw new cyr7.exceptions.LexerIntegerOverflowException(
-                                    num, yyline, yycolumn);
+                                    num, yyline, yycolumn, filename);
             }
         }
     
@@ -222,7 +230,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     	{ 
     		throw new cyr7.exceptions.InvalidTokenException(yytext(), 
     														yyline, 
-    														yycolumn); 
+    														yycolumn,
+    														filename); 
 		}
 }
 
@@ -238,7 +247,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     		yybegin(YYINITIAL);
     		throw new cyr7.exceptions.MultiLineCharacterException(
     				charBuffer.getLineNumber(), 
-    				charBuffer.getColumnNumber()); 
+    				charBuffer.getColumnNumber(),
+    				filename); 
     	}
     	
     \'					
@@ -247,7 +257,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     				"''", 
     				charBuffer.getLineNumber(), 
-    				charBuffer.getColumnNumber());
+    				charBuffer.getColumnNumber(),
+    				filename);
     	}
 
     [\u0000-\uFFFF]     {yybegin(CHAR_END); charBuffer.append(yytext()); }
@@ -273,7 +284,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     		throw new cyr7.exceptions.InvalidCharacterLiteralException(
     			"'" + charBuffer.toString() + "'", 
     			charBuffer.getLineNumber(), 
-    			charBuffer.getColumnNumber());
+    			charBuffer.getColumnNumber(),
+    			filename);
     	} 
 }
 
@@ -290,14 +302,16 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 			throw new cyr7.exceptions.InvalidCharacterLiteralException(
 				"'" + charBuffer.toString() + yytext(), 
 				charBuffer.getLineNumber(), 
-				charBuffer.getColumnNumber());
+				charBuffer.getColumnNumber(),
+				filename);
 		}
 	<<EOF>>
 	   {
             throw new cyr7.exceptions.NonTerminatingCharacterException(
                 charBuffer.toString(),
                 charBuffer.getLineNumber(),
-                charBuffer.getColumnNumber());
+                charBuffer.getColumnNumber(),
+                filename);
 	   }
 }
 
@@ -307,7 +321,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 			yybegin(YYINITIAL);
 			throw new cyr7.exceptions.MultiLineStringException(
 				stringBuffer.getLineNumber(), 
-				stringBuffer.getColumnNumber()); 
+				stringBuffer.getColumnNumber(),
+				filename); 
 		}
 		
     \"                  
@@ -331,7 +346,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     		throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
     			yytext(), 
     			yyline, 
-    			yycolumn);
+    			yycolumn,
+    			filename);
     	}
     	    
     <<EOF>> 
@@ -339,7 +355,8 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
             throw new cyr7.exceptions.NonTerminatingStringException(
                 stringBuffer.toString(),
                 stringBuffer.getLineNumber(),
-                stringBuffer.getColumnNumber());
+                stringBuffer.getColumnNumber(),
+                filename);
         }
         
     .    {stringBuffer.append(yytext()); }
@@ -351,6 +368,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
         throw new cyr7.exceptions.InvalidTokenException(
             yytext(),
             yyline,
-            yycolumn
+            yycolumn,
+            filename
         );
     }

@@ -11,22 +11,22 @@ import java.io.Writer;
 
 public class TypeCheckUtil {
     
-    public static void typeCheck(Reader reader, Writer writer, 
+    public static void typeCheck(Reader reader, Writer writer, String filename, 
             IxiFileOpener opener) throws Exception {
         try {
-            Node node = ParserUtil.parseNode(reader, false);
+            Node node = ParserUtil.parseNode(reader, filename, false);
             node.accept(new TypeCheckVisitor(opener));
             writer.append("Valid Xi Program").append(System.lineSeparator());
         } catch (ParserException e) {
-            printErrorToStdOut(ErrorType.Parser, "", 
+            printErrorToStdOut(ErrorType.Parser, e.filename, 
                     e.line, e.column, e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         } catch (SemanticException e) {
-            printErrorToStdOut(ErrorType.Semantic, null, e.line, e.col, 
+            printErrorToStdOut(ErrorType.Semantic, e.filename, e.line, e.col, 
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         } catch (LexerException e) {
-            printErrorToStdOut(ErrorType.Lexer, null, e.line, e.col, 
+            printErrorToStdOut(ErrorType.Lexer, e.filename, e.line, e.col, 
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
         }

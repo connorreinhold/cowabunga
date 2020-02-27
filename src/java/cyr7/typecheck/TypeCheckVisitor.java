@@ -143,13 +143,16 @@ public class TypeCheckVisitor extends
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(UseNode n) {
         try {
             Reader reader = fileOpener.openIxiLibraryFile(n.interfaceName);
-            IxiProgramNode interfaceNode = (IxiProgramNode) ParserUtil.parseNode(reader, true);
+            IxiProgramNode interfaceNode = 
+                    (IxiProgramNode) ParserUtil.parseNode(reader, 
+                            n.interfaceName + ".ixi", true);
             interfaceNode.accept(this);
             return OneOfThree.ofThird(Optional.empty());
         } catch(ParserException e) {
             throw new SemanticParserException(e);
         } catch(IOException e) {
-            throw new InterfaceFileNotFoundException(n.interfaceName, n.getLocation().get());
+            throw new InterfaceFileNotFoundException(n.interfaceName, 
+                    n.getLocation().get());
         } catch(Exception e) {
             throw new SemanticParserException(e, n.getLocation().get());
         }

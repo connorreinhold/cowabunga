@@ -14,8 +14,8 @@ public class InvalidStringEscapeCharacterException extends LexerException {
             String.join(", ", validEscapes));
 
     public InvalidStringEscapeCharacterException(String c, int line,
-            int column) {
+            int column, String filename) {
         super(String.format("Illegal character constant: %s %s.",
-                c, validEscapeMsg), line, column);
+                c, validEscapeMsg), line, column, filename);
     }
 }

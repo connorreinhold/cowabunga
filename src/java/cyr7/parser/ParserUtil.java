@@ -15,10 +15,11 @@ import java.io.Writer;
 
 public class ParserUtil {
 
-    public static void parse(Reader reader, Writer writer, boolean isIXI) 
+    public static void parse(Reader reader, Writer writer, String filename, 
+            boolean isIXI) 
             throws Exception {
         ScannerBuffer lexer = new ScannerBuffer(
-                            new MultiFileLexer(reader, isIXI));
+                            new MultiFileLexer(reader, filename, isIXI));
 
         try {
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
@@ -31,8 +32,10 @@ public class ParserUtil {
         }
     }
 
-    public static Node parseNode(Reader reader, boolean isIxi) throws Exception {
-        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, isIxi));
+    public static Node parseNode(Reader reader, String filename, boolean isIxi) 
+            throws Exception {
+        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader, 
+                filename, isIxi));
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
         return (Node) p.parse().value;
     }
