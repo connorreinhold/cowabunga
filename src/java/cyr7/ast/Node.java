@@ -1,5 +1,7 @@
 package cyr7.ast;
 
+import cyr7.exceptions.LexerException;
+import cyr7.exceptions.ParserException;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 

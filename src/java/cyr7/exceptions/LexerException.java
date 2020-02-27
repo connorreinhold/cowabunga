@@ -1,6 +1,6 @@
 package cyr7.exceptions;
 
-public class LexerException extends Exception {
+public class LexerException extends RuntimeException {
 
     /**
      *

@@ -7,6 +7,11 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
+/**
+ * Represents LHS expressions, such as a[0]
+ * @author ayang
+ *
+ */
 public final class ArrayAssignNode extends AbstractNode implements AssignNode {
 
     public final AssignNode child;

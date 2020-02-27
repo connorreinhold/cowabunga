@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class ParserException extends Exception {
+public class ParserException extends RuntimeException {
 
     /**
      * 

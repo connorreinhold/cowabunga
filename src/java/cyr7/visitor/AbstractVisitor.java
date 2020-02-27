@@ -14,6 +14,8 @@ import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.exceptions.LexerException;
+import cyr7.exceptions.ParserException;
 
 public abstract class AbstractVisitor<T> {
 
