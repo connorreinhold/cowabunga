@@ -1,3 +1,5 @@
+// Should pass type-check
+
 use io;
 
 main() {
@@ -17,6 +19,7 @@ theta(z: int): int, int {
 bar() {
 }
 
+// Give python all of the whitelines :)
 python() {
           
    

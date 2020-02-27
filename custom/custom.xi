@@ -1,4 +1,4 @@
-
+// Should pass typecheck
 main(): int {
   a: int[] = "Hello" + " " + "World"
   b: int[] = {1,24,6,} + {3,5,7} + {};
