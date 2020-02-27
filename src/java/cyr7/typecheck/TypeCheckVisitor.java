@@ -20,7 +20,6 @@ import cyr7.semantics.*;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
 
-import java.io.IOException;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -29,7 +28,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class TypeCheckVisitor extends
+class TypeCheckVisitor extends
     AbstractVisitor<OneOfThree<ExpandedType, ResultType, Optional<Void>>> {
 
     /**
@@ -64,7 +63,7 @@ public class TypeCheckVisitor extends
     /**
      * Initialize typecheck visitor with given Context {@code initialContext}.
      */
-    public TypeCheckVisitor(IxiFileOpener fileOpener) {
+    TypeCheckVisitor(IxiFileOpener fileOpener) {
         this.context = new HashMapStackContext();
         this.fileOpener = fileOpener;
         this.interfaceFuncDecls = new HashMap<>();
@@ -127,7 +126,7 @@ public class TypeCheckVisitor extends
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(IxiProgramNode n) {
         n.functionDeclarations.forEach(header -> {
             FunctionType functionType = functionTypeOf(header);
-
+            
             if (interfaceFuncDecls.containsKey(header.identifier)
                 && !interfaceFuncDecls.get(header.identifier).equals(functionType)) {
                 throw new DuplicateIdentifierException(header.identifier, header.getLocation().get());

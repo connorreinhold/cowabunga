@@ -2,12 +2,15 @@ package cyr7.semantics;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import cyr7.util.Util;
 
 public class ExpandedType implements AnyType {
     
+
+
     final public static ExpandedType boolType = 
                 new ExpandedType(OrdinaryType.boolType);
     final public static ExpandedType intType = 
@@ -21,6 +24,22 @@ public class ExpandedType implements AnyType {
     final public static ExpandedType voidArrayType =
             new ExpandedType(OrdinaryType.voidArray);
     
+    @Override
+    public int hashCode() {
+        return Objects.hash(types);
+    }
+    
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof ExpandedType)) {
+            return false;
+        }
+        ExpandedType other = (ExpandedType) obj;
+        return Objects.equals(types, other.types);
+    }
     
     @Override
     public String toString() {
