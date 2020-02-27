@@ -2,7 +2,7 @@ package cyr7.semantics;
 
 public abstract class OrdinaryType {
     
-    public enum Type {
+    enum Type {
         // OrdinaryType.Type.UNIT and OrdinaryType.Type are to be distinct
         // from ResultType.VOID and ResultType.UNIT.
         INT, BOOL, ARRAY, VOID, UNIT;
