@@ -9,20 +9,20 @@ import cyr7.util.Util;
 
 public class ExpandedType implements AnyType {
     
-
-
+    
+    
     final public static ExpandedType boolType = 
-                new ExpandedType(OrdinaryType.boolType);
+            new ExpandedType(PrimitiveType.boolDefault);
     final public static ExpandedType intType = 
-            new ExpandedType(OrdinaryType.intType);
+            new ExpandedType(PrimitiveType.intDefault);
     final public static ExpandedType unitExpandedType = 
             new ExpandedType();
     final public static ExpandedType unitOrdinaryType = 
-            new ExpandedType(OrdinaryType.unitType);
-    final public static ExpandedType voidOrdinaryType = 
-            new ExpandedType(OrdinaryType.voidType);
+            new ExpandedType(UnitType.unitValue);
+    final public static ExpandedType voidOrdinaryType =  // NO_UCD (test only)
+            new ExpandedType(VoidType.voidValue);
     final public static ExpandedType voidArrayType =
-            new ExpandedType(OrdinaryType.voidArray);
+            new ExpandedType(ArrayType.voidArrayDefault);
     
     @Override
     public int hashCode() {
@@ -55,8 +55,8 @@ public class ExpandedType implements AnyType {
             final StringBuffer buffer = new StringBuffer("(");
             buffer.append(
                     String.join(", ", this.types.stream()
-                                                .map(t -> t.toString())
-                                                .collect(Collectors.toList())));
+                            .map(t -> t.toString())
+                            .collect(Collectors.toList())));
             buffer.append(")");
             return buffer.toString();
         }
@@ -87,7 +87,7 @@ public class ExpandedType implements AnyType {
         this.types = Util.immutableCopy(types);
     }
     
-    enum Type {
+    private enum Type {
         ORDINARY, TUPLE, UNIT;
     }
     
@@ -150,7 +150,7 @@ public class ExpandedType implements AnyType {
     public boolean isArray() {
         return this.isOrdinary() && this.getOrdinaryType().isArray();
     }
-   
+    
     
     public OrdinaryType getOrdinaryType() {
         assert this.isOrdinary();
@@ -159,13 +159,13 @@ public class ExpandedType implements AnyType {
     
     public OrdinaryType getInnerArrayType() {
         if (this.isVoid()) {
-            return OrdinaryType.voidType;
+            return VoidType.voidValue;
         } else {
             assert this.isArray();
             return ((ArrayType)this.getOrdinaryType()).child;
         }
     }
-
+    
     
     public boolean isTuple() {
         return this.types.size() >= 2;
@@ -174,11 +174,11 @@ public class ExpandedType implements AnyType {
     public boolean isUnit() {
         return this.types.isEmpty();
     }
-        
+    
     public boolean isSubtypeOfInt() {
         return this.isASubtypeOf(ExpandedType.intType);
     }
-
+    
     public boolean isVoid() {
         return this.isOrdinary() && this.getOrdinaryType().isVoid();
     }
@@ -186,10 +186,10 @@ public class ExpandedType implements AnyType {
     public boolean isSubtypeOfArray() {
         return this.isVoid() || this.isArray();
     }
-
+    
     public boolean isSubtypeOfBool() {
         return this.isASubtypeOf(ExpandedType.boolType);
     }
-
+    
     
 }

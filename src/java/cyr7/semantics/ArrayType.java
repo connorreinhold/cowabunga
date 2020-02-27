@@ -1,16 +1,18 @@
 package cyr7.semantics;
 
 public class ArrayType extends OrdinaryType {
-
+    
+    public final static ArrayType voidArrayDefault = 
+            new ArrayType(VoidType.voidValue);
     /**
      * May be a primitive type or another array.
      */
-    public final OrdinaryType child;
-
+    final OrdinaryType child;
+    
     public ArrayType(OrdinaryType child) {
         this.child = child;
     }
-
+    
     @Override
     public Type getType() {
         return Type.ARRAY;
@@ -20,7 +22,7 @@ public class ArrayType extends OrdinaryType {
     public String toString() {
         return child.toString() + "[]";
     }
-
+    
     @Override
     public boolean equals(Object o) {
         if (o instanceof ArrayType) {
@@ -28,7 +30,7 @@ public class ArrayType extends OrdinaryType {
         }
         return false;
     }
-
+    
     @Override
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
         if (expectedSupertype.isUnit()) {
@@ -39,5 +41,5 @@ public class ArrayType extends OrdinaryType {
         }
         return false;
     }
-
+    
 }

@@ -19,6 +19,7 @@ import cyr7.semantics.ExpandedType;
 import cyr7.semantics.FunctionType;
 import cyr7.semantics.HashMapStackContext;
 import cyr7.semantics.OrdinaryType;
+import cyr7.semantics.PrimitiveType;
 import cyr7.semantics.ResultType;
 import cyr7.typecheck.TypeCheckVisitor;
 import cyr7.util.OneOfThree;
@@ -65,7 +66,7 @@ class TestTypeCheckVisitorStmt {
         
         visitor.context.addFn("factorize", new FunctionType(ExpandedType.intType, 
                 new ExpandedType(
-                        List.of(OrdinaryType.intType, OrdinaryType.intType))));
+                        List.of(PrimitiveType.intDefault, PrimitiveType.intDefault))));
         node = new ExprStmtNode(loc, 
                 new FunctionCallExprNode(loc, "factorize", 
                         List.of(new LiteralIntExprNode(loc, "1000"))));
@@ -110,7 +111,7 @@ class TestTypeCheckVisitorStmt {
     void testAssignmentStmtNode() {
         context = new HashMapStackContext();
         visitor = new TypeCheckVisitor(null);
-        visitor.context.addVar("cash", OrdinaryType.intType);
+        visitor.context.addVar("cash", PrimitiveType.intDefault);
         
         node = new AssignmentStmtNode(loc, 
                 new VariableAccessExprNode(loc, "cash"),
@@ -144,7 +145,7 @@ class TestTypeCheckVisitorStmt {
         visitor.context.addFn("generate", new FunctionType(
                 ExpandedType.unitExpandedType, 
                 new ExpandedType(
-                        List.of(OrdinaryType.intType, OrdinaryType.boolType))));
+                        List.of(PrimitiveType.intDefault, PrimitiveType.boolDefault))));
 
         
         node = new MultiAssignStmtNode(loc,
@@ -298,8 +299,8 @@ class TestTypeCheckVisitorStmt {
 
         
         visitor.context.addFn("python", new FunctionType(ExpandedType.unitExpandedType,
-                new ExpandedType(List.of(OrdinaryType.intType, 
-                        OrdinaryType.boolType))));
+                new ExpandedType(List.of(PrimitiveType.intDefault, 
+                        PrimitiveType.boolDefault))));
         node = new ProcedureStmtNode(loc, 
                 new FunctionCallExprNode(loc, "python", List.of()));
         assertThrows(SemanticException.class, () -> node.accept(visitor));
@@ -328,7 +329,7 @@ class TestTypeCheckVisitorStmt {
         context = new HashMapStackContext();
         visitor = new TypeCheckVisitor(null);
         visitor.context.addRet(new ExpandedType(List.of(
-                OrdinaryType.intType, OrdinaryType.boolType
+                PrimitiveType.intDefault, PrimitiveType.boolDefault
                 )));
         node = new ReturnStmtNode(loc, 
                 List.of(
@@ -357,7 +358,7 @@ class TestTypeCheckVisitorStmt {
         context = new HashMapStackContext();
         visitor = new TypeCheckVisitor(null);
         visitor.context.addRet(new ExpandedType(List.of(
-                OrdinaryType.intType, OrdinaryType.boolType
+                PrimitiveType.intDefault, PrimitiveType.boolDefault
                 )));
         node = new ReturnStmtNode(loc, 
                 List.of(new LiteralIntExprNode(loc, "0")));

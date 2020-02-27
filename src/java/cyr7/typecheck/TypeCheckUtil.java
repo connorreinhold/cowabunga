@@ -31,14 +31,14 @@ public class TypeCheckUtil {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
     }
-
+    
     private static void printErrorToStdOut(ErrorType type, String filename, 
             int line, int col, String msg) {
         System.out.println(
                 String.format("%s error beginning at %s:%d:%d: %s", 
                         type, filename, line, col, msg));
     }
-
+    
     protected static enum ErrorType {
         Lexical, Semantic, Syntax;
     }    

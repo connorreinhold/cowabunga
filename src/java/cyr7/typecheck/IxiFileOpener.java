@@ -9,7 +9,7 @@ import java.io.Reader;
  */
 @FunctionalInterface
 public interface IxiFileOpener {
-
+    
     /**
      * Retrieves the interface found relative to the directory path of
      * libpath, or the current directory if libpath was not specified in the
@@ -21,5 +21,5 @@ public interface IxiFileOpener {
      * the specified libpath (or current directory if not specified) in the CLI.
      */
     Reader openIxiLibraryFile(String name) throws IOException;
-
+    
 }

@@ -2,7 +2,11 @@ package cyr7.semantics;
 
 public final class PrimitiveType extends OrdinaryType {
     
-    final private Type type;
+    private final Type type;
+    public final static PrimitiveType intDefault = 
+            new PrimitiveType(Type.INT);
+    public final static PrimitiveType boolDefault = 
+            new PrimitiveType(Type.BOOL);
     
     protected PrimitiveType(Type type) {
         assert type != Type.ARRAY;
@@ -26,10 +30,10 @@ public final class PrimitiveType extends OrdinaryType {
         }
         return false;
     }
-
+    
     @Override
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
         return expectedSupertype.isUnit() || 
-                    this.type == expectedSupertype.getType();
+                this.type == expectedSupertype.getType();
     }
 }
