@@ -8,8 +8,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 /**
  * Represents a character literal, Ex: [contents] ='r'
  */
-public final class LiteralCharExprNode extends AbstractNode 
-                                                implements ExprNode {
+public final class LiteralCharExprNode extends AbstractNode
+    implements ExprNode {
 
     public final String contents;
 

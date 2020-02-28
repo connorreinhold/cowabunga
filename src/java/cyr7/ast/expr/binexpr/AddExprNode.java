@@ -10,7 +10,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public final class AddExprNode extends BinExprNode {
 
     public AddExprNode(Location location, ExprNode left,
-            ExprNode right) {
+                       ExprNode right) {
         super(location, left, right);
     }
 
@@ -24,7 +24,7 @@ public final class AddExprNode extends BinExprNode {
         if (o instanceof AddExprNode) {
             AddExprNode oNode = (AddExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

@@ -2,9 +2,11 @@ package cyr7.semantics;
 
 public final class UnitType extends OrdinaryType {
     // The wildcard _ is a unit type, i.e. a supertype of every type.
-    
-    protected UnitType() {}
-    
+    public final static UnitType unitValue = new UnitType();
+
+    private UnitType() {
+    }
+
     @Override
     public Type getType() {
         return Type.UNIT;
@@ -14,7 +16,7 @@ public final class UnitType extends OrdinaryType {
     public String toString() {
         return "unit";
     }
-    
+
     /**
      * The only type that is a supertype of Unit is Unit itself.
      * <p>

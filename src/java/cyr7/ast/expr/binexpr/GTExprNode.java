@@ -23,7 +23,7 @@ public final class GTExprNode extends BinExprNode {
         if (o instanceof GTExprNode) {
             GTExprNode oNode = (GTExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

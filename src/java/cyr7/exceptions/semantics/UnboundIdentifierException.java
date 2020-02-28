@@ -5,7 +5,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class UnboundIdentifierException extends SemanticException {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 557039212300917232L;
 

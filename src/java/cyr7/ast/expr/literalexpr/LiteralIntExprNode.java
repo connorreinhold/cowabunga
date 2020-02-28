@@ -31,7 +31,7 @@ public final class LiteralIntExprNode extends AbstractNode implements ExprNode {
             LiteralIntExprNode oNode = (LiteralIntExprNode) o;
             return this.contents.equals(oNode.contents);
         }
-        return false;    
+        return false;
     }
 
 }

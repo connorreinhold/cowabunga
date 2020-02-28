@@ -25,7 +25,7 @@ public final class HighMultExprNode extends BinExprNode {
         if (o instanceof HighMultExprNode) {
             HighMultExprNode oNode = (HighMultExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

@@ -24,7 +24,7 @@ public final class RemExprNode extends BinExprNode {
         if (o instanceof RemExprNode) {
             RemExprNode oNode = (RemExprNode) o;
             return this.left.equals(oNode.left)
-                    && this.right.equals(oNode.right);
+                && this.right.equals(oNode.right);
         }
         return false;
     }

@@ -71,7 +71,7 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain()\n");
-        parser = new XiParser(new MultiFileLexer(prgm, true), new ComplexSymbolFactory());
+        parser = new XiParser(new MultiFileLexer(prgm, "", true), new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
 
@@ -88,7 +88,7 @@ class TestInterfaceFiles {
         expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain()\ntrial()\nrun()\n"
                 + "halt()stop()terminate()kill()");
-        parser = new XiParser(new MultiFileLexer(prgm, true),
+        parser = new XiParser(new MultiFileLexer(prgm, "", true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -129,7 +129,7 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain(b: int[], c: int[][][], d: bool)\n");
-        parser = new XiParser(new MultiFileLexer(prgm, true), new ComplexSymbolFactory());
+        parser = new XiParser(new MultiFileLexer(prgm, "", true), new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
     }
@@ -155,8 +155,8 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain(): int\n");
-        MyLexer lex = new MultiFileLexer(prgm, true);
-        parser = new XiParser(new MultiFileLexer(prgm, true),
+        MyLexer lex = new MultiFileLexer(prgm, "", true);
+        parser = new XiParser(new MultiFileLexer(prgm, "", true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -177,7 +177,7 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain(): int, bool, int, bool, bool, bool\n");
-        parser = new XiParser(new MultiFileLexer(prgm, true),
+        parser = new XiParser(new MultiFileLexer(prgm, "", true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -186,8 +186,8 @@ class TestInterfaceFiles {
         returnTypes.clear();
         Integer[] arrayDimensions = new Integer[]{
                 Integer.MAX_VALUE >>> 20,
-                Integer.MAX_VALUE >>> 19,
-                Integer.MAX_VALUE >>> 18,
+                Integer.MAX_VALUE >>> 21,
+                Integer.MAX_VALUE >>> 22,
         };
 
         for (int d: arrayDimensions) {
@@ -203,9 +203,10 @@ class TestInterfaceFiles {
         functions.add(function);
         expected = new IxiProgramNode(null, functions);
         String prgmString = "main():" + Arrays.stream(arrayDimensions)
-            .map(d -> "int" + "[]".repeat(Math.max(0, d))).collect(Collectors.joining(", "));
+            .map(d -> "int" + "[]".repeat(Math.max(0, d)))
+            .collect(Collectors.joining(", "));
         prgm = new StringReader(prgmString);
-        parser = new XiParser(new MultiFileLexer(prgm, true),
+        parser = new XiParser(new MultiFileLexer(prgm, "", true),
                 new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);
@@ -270,7 +271,7 @@ class TestInterfaceFiles {
         expected = new IxiProgramNode(null, functions);
         prgm = new StringReader("\nmain(b: int[], c: int[][][], d: bool): "
                 + "int[], bool, int[][][][][], bool, bool, bool[][][]\n");
-        parser = new XiParser(new MultiFileLexer(prgm, true), 
+        parser = new XiParser(new MultiFileLexer(prgm, "", true), 
                     new ComplexSymbolFactory());
         tree = parser.parse().value;
         assertEquals(tree, expected);

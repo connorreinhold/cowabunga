@@ -10,14 +10,14 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * Represents a Variable Declaration, with a String [identifier] and a type [typeExpr] of the initialized
  * variable
  */
-public final class VarDeclNode extends AbstractNode 
+public final class VarDeclNode extends AbstractNode
                                 implements StmtNode, ExprNode {
 
     public final String identifier;
 
     public final TypeExprNode typeExpr;
 
-    public VarDeclNode(Location location, String identifier, 
+    public VarDeclNode(Location location, String identifier,
                                 TypeExprNode typeExpr) {
         super(location);
 

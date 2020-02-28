@@ -18,13 +18,13 @@ public class TestReturnStatement {
         try {
             ParserFactory.parseStatement("return ;;");
         } catch (UnexpectedTokenException e) {
-            assertEquals(9, e.column.get());
+            assertEquals(9, e.column);
         }
 
         try {
             ParserFactory.parseStatement("return 1 + 2;;");
         } catch (UnexpectedTokenException e) {
-            assertEquals(14, e.column.get());
+            assertEquals(14, e.column);
         }
     }
 

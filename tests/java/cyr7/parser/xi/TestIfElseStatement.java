@@ -5,7 +5,6 @@ import cyr7.ast.expr.binexpr.LTExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.stmt.*;
-import cyr7.ast.stmt.assign.ExprAssignNode;
 import cyr7.exceptions.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
@@ -145,11 +144,7 @@ public class TestIfElseStatement {
                 )
             ),
             new AssignmentStmtNode(
-                null,
-                new ExprAssignNode(
-                    null,
-                    new VariableAccessExprNode(null, "b")
-                ),
+                null, new VariableAccessExprNode(null, "b"),
                 new SubExprNode(
                     null,
                     new VariableAccessExprNode(
@@ -165,10 +160,9 @@ public class TestIfElseStatement {
             Optional.of(
                 new AssignmentStmtNode(
                     null,
-                    new ExprAssignNode(
-                        null,
-                        new VariableAccessExprNode(null, "a")
-                    ),
+                    
+                    new VariableAccessExprNode(null, "a"),
+                    
                     new SubExprNode(
                         null,
                         new VariableAccessExprNode(

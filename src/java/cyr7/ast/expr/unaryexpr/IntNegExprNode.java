@@ -10,7 +10,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public final class IntNegExprNode extends UnaryExprNode {
 
     public IntNegExprNode(Location location,
-            ExprNode expr) {
+                          ExprNode expr) {
         super(location, expr);
     }
 

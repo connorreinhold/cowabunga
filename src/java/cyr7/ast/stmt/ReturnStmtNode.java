@@ -9,7 +9,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 import java.util.List;
 
 /**
- * Represents a return statement in a block, containing a potentially empty list [exprs] of ExprNodes
+ * Represents a return statement in a block, containing a potentially empty
+ * list [exprs] of ExprNodes
  */
 public final class ReturnStmtNode extends AbstractNode implements StmtNode {
 
@@ -29,7 +30,7 @@ public final class ReturnStmtNode extends AbstractNode implements StmtNode {
 
     public boolean equals(Object o) {
         if (o instanceof ReturnStmtNode) {
-            ReturnStmtNode oNode = (ReturnStmtNode)o;
+            ReturnStmtNode oNode = (ReturnStmtNode) o;
             return this.exprs.equals(oNode.exprs);
         }
         return false;
