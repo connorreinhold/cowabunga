@@ -30,9 +30,9 @@ public class GenericAddType extends OrdinaryType {
 
     @Override
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
-        return expectedSupertype.isUnit() &&
-                expectedSupertype.isArray() &&
-                expectedSupertype.isInt() &&
+        return expectedSupertype.isUnit() ||
+                expectedSupertype.isArray() ||
+                expectedSupertype.isInt() ||
                 expectedSupertype.isGenericAdd();
     }
 }
