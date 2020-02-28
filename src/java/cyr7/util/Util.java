@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 public final class Util {
-    
+
     /**
      * Replace whitespace characters that were escaped by the lexer back into
      * their escaped form.
@@ -25,21 +25,22 @@ public final class Util {
             case '\r': sb.append("\\r"); break;
             case '\f': sb.append("\\f"); break;
             case '\\':  sb.append("\\\\"); break;
+            case '\'': sb.append("\\'"); break;
             case '"':  sb.append("\\\""); break;
             default: sb.append(s.charAt(i));
             }
         return sb.toString();
     }
-    
-    
-    
+
+
+
     /**
      * Replace whitespace characters that were escaped by the lexer back into
      * their escaped form. There is a different rule for printing double-quotes
      * in a character in contrast to printing double-quotes inside a string.
      * Double-quotes will not be escaped when printing as a character.
      *
-     * For example: {@code unescapeCharacterString("\t")`} 
+     * For example: {@code unescapeCharacterString("\t")`}
      * is a literal backslash and character 't'
      *
      * Requires: {@code s} is the String value of a Character symbol.
@@ -61,12 +62,12 @@ public final class Util {
             }
         return sb.toString();
     }
-    
-    
+
+
     public static <T> List<T> immutableCopy(List<T> list) {
         return Collections.unmodifiableList(new ArrayList<>(list));
     }
-    
+
     private Util() { }
-    
+
 }
