@@ -1,5 +1,10 @@
 package cyr7.parser;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
 import cyr7.exceptions.LexerException;
@@ -8,17 +13,12 @@ import cyr7.lexer.MultiFileLexer;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
-
 public class ParserUtil {
 
     public static void parse(Reader reader, Writer writer, String filename,
             boolean isIXI) throws IOException {
         ScannerBuffer lexer = new ScannerBuffer(
-                            new MultiFileLexer(reader, filename, isIXI));
+                new MultiFileLexer(reader, filename, isIXI));
 
         try {
             XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
