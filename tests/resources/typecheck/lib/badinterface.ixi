@@ -1,0 +1,2 @@
+method1(a:int) : bool
+method1(a:int) : int

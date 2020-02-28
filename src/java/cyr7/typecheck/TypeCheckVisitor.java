@@ -82,7 +82,7 @@ import cyr7.semantics.UnitType;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
 
-class TypeCheckVisitor extends
+public class TypeCheckVisitor extends
     AbstractVisitor<OneOfThree<ExpandedType, ResultType, Optional<Void>>> {
 
     /**
@@ -118,7 +118,7 @@ class TypeCheckVisitor extends
     /**
      * Initialize typecheck visitor with given Context {@code initialContext}.
      */
-    TypeCheckVisitor(IxiFileOpener fileOpener) {
+    public TypeCheckVisitor(IxiFileOpener fileOpener) {
         this.context = new HashMapStackContext();
         this.fileOpener = fileOpener;
         this.interfaceFuncDecls = new HashMap<>();
@@ -207,6 +207,7 @@ class TypeCheckVisitor extends
         } catch (ParserException | LexerException | SemanticException e) {
             throw e;
         } catch (Exception e) {
+            e.printStackTrace();
             throw new InterfaceFileNotFoundException(n.interfaceName,
                 n.getLocation().get());
         }
