@@ -1,0 +1,3 @@
+// I/O support
+
+oink(a:int[], b: int): bool[]
