@@ -618,6 +618,10 @@ class TypeCheckVisitor extends
         ExpandedType left = n.left.accept(this).assertFirst();
         ExpandedType right = n.right.accept(this).assertFirst();
 
+        if (left.isVoid() && right.isVoid()) {
+            return OneOfThree.ofFirst(ExpandedType.genericAddType);
+        }
+
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
             Optional<ExpandedType> supertype = supertypeOf(left, right);
             if (supertype.isPresent()) {
