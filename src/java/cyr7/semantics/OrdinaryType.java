@@ -5,7 +5,7 @@ public abstract class OrdinaryType {
     enum Type {
         // OrdinaryType.Type.UNIT and OrdinaryType.Type are to be distinct
         // from ResultType.VOID and ResultType.UNIT.
-        INT, BOOL, ARRAY, VOID, UNIT;
+        INT, BOOL, ARRAY, VOID, UNIT, GENERIC_ADD;
     }
 
     public abstract Type getType();
@@ -28,6 +28,10 @@ public abstract class OrdinaryType {
 
     public boolean isArray() {
         return this.getType() == Type.ARRAY;
+    }
+
+    public boolean isGenericAdd() {
+        return this.getType() == Type.GENERIC_ADD;
     }
 
     public abstract boolean isSubtypeOf(OrdinaryType expectedSupertype);

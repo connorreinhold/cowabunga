@@ -15,7 +15,7 @@ public final class VoidType extends OrdinaryType {
 
     @Override
     public String toString() {
-        return "Any";
+        return "void";
     }
 
     /**

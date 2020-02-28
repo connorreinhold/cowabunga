@@ -182,6 +182,54 @@ class TestEdgeCases {
     }
 
     @Test
+    void testAdding() {
+        String good1 = create.apply("main() { "
+                + "i: int = {}[0] + {}[0]; "
+                + "r: bool = i < 3;}");
+        String good2 = create.apply("main() { "
+                + "i: int = (2 + {}[0]) + 5; }");
+        String good3 = create.apply("main() { "
+                + "i: int = ({}[0] + 2) + 5; }");
+        String good4 = create.apply("main() { "
+                + "i: int[] = ({}[0] + {2}) + {5}; }");
+        String good5 = create.apply("main() { "
+                + "i: int[] = ({}[0] + {}); }");
+        String good6 = create.apply("main() { "
+                + "i: int = ({}[0] + \"\"[0]); }");
+        String good7 = create.apply("main() { "
+                + "i: int = ({}[0] + {}[0]); }");
+        String good8 = create.apply("main() { "
+                + "i: bool = {}[0] + {}[0] == {}; }");
+        String good9 = create.apply("main() { "
+                + "i: bool = {}[0] + {}[0] == {1, 2, 4}; }");
+        String good10 = create.apply("main() { "
+                + "i: bool = {}[0] + {}[0] == 32; }");
+
+        String bad1 = create.apply("main() { i: int[] = {}[0] + {}[0]; "
+                + "r: bool = i < 3; }");
+        String bad2 = create.apply("main() { "
+                + "i: bool = ({}[0] + {}[0]) & true; }");
+        String bad3 = create.apply("main() { "
+                + "i: int = ({}[0] + {}); }");
+
+        assertDoesNotThrow(() -> test(good1));
+        assertDoesNotThrow(() -> test(good2));
+        assertDoesNotThrow(() -> test(good3));
+        assertDoesNotThrow(() -> test(good4));
+        assertDoesNotThrow(() -> test(good5));
+        assertDoesNotThrow(() -> test(good6));
+        assertDoesNotThrow(() -> test(good7));
+        assertDoesNotThrow(() -> test(good8));
+        assertDoesNotThrow(() -> test(good9));
+        assertDoesNotThrow(() -> test(good10));
+
+        assertThrows(SemanticException.class, () -> test(bad1));
+        assertThrows(SemanticException.class, () -> test(bad2));
+        assertThrows(SemanticException.class, () -> test(bad3));
+
+    }
+
+    @Test
     void returnBlock() {
         String bad1 = create.apply("main() { if (true) return else return}");
         assertThrows(ParserException.class, () -> test(bad1));

@@ -1,11 +1,11 @@
 package cyr7.semantics;
 
-import cyr7.util.Util;
-
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import cyr7.util.Util;
 
 public final class ExpandedType implements AnyType {
 
@@ -19,6 +19,8 @@ public final class ExpandedType implements AnyType {
         new ExpandedType(UnitType.unitValue);
     final public static ExpandedType voidOrdinaryType =
         new ExpandedType(VoidType.voidValue);
+    final public static ExpandedType genericAddType =
+            new ExpandedType(GenericAddType.value);
     final public static ExpandedType voidArrayType =
         new ExpandedType(ArrayType.voidArrayDefault);
 
@@ -45,7 +47,7 @@ public final class ExpandedType implements AnyType {
             return "()";
         } else if (this.isOrdinary()) {
             if (this.equals(voidArrayType)) {
-                return "array";
+                return "void[]";
             } else {
                 return this.getOrdinaryType().toString();
             }
@@ -184,6 +186,10 @@ public final class ExpandedType implements AnyType {
 
     public boolean isVoid() {
         return this.isOrdinary() && this.getOrdinaryType().isVoid();
+    }
+
+    public boolean isGenericAdd() {
+        return this.isOrdinary() && this.getOrdinaryType().isGenericAdd();
     }
 
     public boolean isSubtypeOfArray() {

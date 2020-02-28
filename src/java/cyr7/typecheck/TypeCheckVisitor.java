@@ -82,7 +82,7 @@ import cyr7.semantics.UnitType;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
 
-public class TypeCheckVisitor extends
+class TypeCheckVisitor extends
     AbstractVisitor<OneOfThree<ExpandedType, ResultType, Optional<Void>>> {
 
     /**
@@ -118,7 +118,7 @@ public class TypeCheckVisitor extends
     /**
      * Initialize typecheck visitor with given Context {@code initialContext}.
      */
-    public TypeCheckVisitor(IxiFileOpener fileOpener) {
+    TypeCheckVisitor(IxiFileOpener fileOpener) {
         this.context = new HashMapStackContext();
         this.fileOpener = fileOpener;
         this.interfaceFuncDecls = new HashMap<>();
@@ -311,7 +311,7 @@ public class TypeCheckVisitor extends
             StmtNode stmt = stmtIterator.next();
             ResultType type = stmt.accept(this).assertSecond();
             if (stmtIterator.hasNext() && type == ResultType.VOID) {
-                throw new EarlyReturnException(n.getLocation().get());
+                throw new EarlyReturnException(stmt.getLocation().get());
             } else if (!stmtIterator.hasNext()) {
                 context.pop();
                 return OneOfThree.ofSecond(type);
@@ -618,6 +618,10 @@ public class TypeCheckVisitor extends
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(AddExprNode n) {
         ExpandedType left = n.left.accept(this).assertFirst();
         ExpandedType right = n.right.accept(this).assertFirst();
+
+        if (left.isVoid() && right.isVoid()) {
+            return OneOfThree.ofFirst(ExpandedType.genericAddType);
+        }
 
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
             Optional<ExpandedType> supertype = supertypeOf(left, right);

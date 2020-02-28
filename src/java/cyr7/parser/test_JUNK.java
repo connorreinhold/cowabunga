@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 
-import cyr7.typecheck.TypeCheckVisitor;
-
 public class test_JUNK {
 
     public static void main(String[] args) {
@@ -15,11 +13,12 @@ public class test_JUNK {
                     new FileInputStream(
                             "./tests/resources/parser/testjunk.xi")));
 
-            ParserUtil.parseNode(reader, "testjunk.xi", false)
-                    .accept(new TypeCheckVisitor(null));
-            
-            System.out.println("Accepted!");
-
+            /*
+             * ParserUtil.parseNode(reader, "testjunk.xi", false) .accept(new
+             * TypeCheckVisitor(null));
+             * 
+             * System.out.println("Accepted!");
+             */
             /*
              * ScannerBuffer lexer = new ScannerBuffer(new
              * MultiFileLexer(reader, false));
