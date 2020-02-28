@@ -118,6 +118,11 @@ class TestEdgeCases {
     void assignToFunction() {
         String good1 = create.apply("main() { empty()[0] = 12;}");
         String good2 = create.apply("main() { i: int = empty()[0];}");
+        String good3 = "f(a: int[]): int[] {" + "b: int[] = a; return b } "
+                + "main() { x: int[] = { 1, 2, 3, 4 }\n" + "   f(x)[0] = 42\n"
+                + "   println(unparseInt(x[0])); }"
+                + " unparseInt(i: int): int[] { return \"\" }"
+                + " println(s: int[]) { }";
 
         String parseBad1 = create.apply("main() { {}[0] = true;}");
         String parseBad2 = create.apply("main() { (empty())[0] = true;}");
@@ -128,6 +133,7 @@ class TestEdgeCases {
 
         assertDoesNotThrow(() -> test(good1));
         assertDoesNotThrow(() -> test(good2));
+        assertDoesNotThrow(() -> test(good3));
 
         assertThrows(ParserException.class, () -> test(parseBad1));
         assertThrows(ParserException.class, () -> test(parseBad2));
@@ -155,12 +161,14 @@ class TestEdgeCases {
         String semanticBad2 = create.apply("main() { return length({}); }");
         String parseBad3 = create.apply("main(): int { return length(); }");
         String semanticBad4 = create.apply("main(): int { return length(2); }");
-        String semanticBad5 = create.apply("main(): int { return length(true); }");
+        String semanticBad5 = create.apply(
+                "main(): int { return length(true); }");
 
         String good1 = create.apply("main() { _ = length({1,4,6,7}); }");
-        String good2 = create.apply("main(): int { return length({1,4,6,7}); }");
-        String good3 = create.apply("main(): int { return length({}[0][0][0][0]); }");
-
+        String good2 = create.apply(
+                "main(): int { return length({1,4,6,7}); }");
+        String good3 = create.apply(
+                "main(): int { return length({}[0][0][0][0]); }");
 
         assertThrows(ParserException.class, () -> test(parseBad1));
         assertThrows(SemanticException.class, () -> test(semanticBad2));
@@ -172,4 +180,11 @@ class TestEdgeCases {
         assertDoesNotThrow(() -> test(good2));
         assertDoesNotThrow(() -> test(good3));
     }
+
+    @Test
+    void returnBlock() {
+        String bad1 = create.apply("main() { if (true) return else return}");
+        assertThrows(ParserException.class, () -> test(bad1));
+    }
+
 }
