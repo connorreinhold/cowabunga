@@ -4,7 +4,7 @@ public class GenericAddType extends OrdinaryType {
 
     @Override
     public String toString() {
-        return "(int | Void [])";
+        return "(int | void[])";
     }
 
     final public static GenericAddType value = new GenericAddType();

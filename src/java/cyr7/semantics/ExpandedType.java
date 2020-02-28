@@ -47,7 +47,7 @@ public final class ExpandedType implements AnyType {
             return "()";
         } else if (this.isOrdinary()) {
             if (this.equals(voidArrayType)) {
-                return "array";
+                return "void[]";
             } else {
                 return this.getOrdinaryType().toString();
             }
