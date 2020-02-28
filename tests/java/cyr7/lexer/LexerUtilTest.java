@@ -84,7 +84,7 @@ public class LexerUtilTest {
         // "\t''\""
         MyLexer lexer = LexerFactory.make("\"\\t\\''\\\"\"");
         ComplexSymbol token = lexer.next_token();
-        assertEquals("1:1 string \\t''\\\"", LexerUtil.fullDescription(token));
+        assertEquals("1:1 string \\t\\'\\'\\\"", LexerUtil.fullDescription(token));
 
         lexer = LexerFactory.make("'\\''");
         token = lexer.next_token();
