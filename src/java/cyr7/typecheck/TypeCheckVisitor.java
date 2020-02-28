@@ -1,25 +1,5 @@
 package cyr7.typecheck;
 
-import cyr7.ast.VarDeclNode;
-import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.access.ArrayAccessExprNode;
-import cyr7.ast.expr.access.VariableAccessExprNode;
-import cyr7.ast.expr.binexpr.*;
-import cyr7.ast.expr.literalexpr.*;
-import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
-import cyr7.ast.expr.unaryexpr.IntNegExprNode;
-import cyr7.ast.stmt.*;
-import cyr7.ast.toplevel.*;
-import cyr7.ast.type.PrimitiveTypeNode;
-import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.exceptions.LexerException;
-import cyr7.exceptions.ParserException;
-import cyr7.exceptions.semantics.*;
-import cyr7.parser.ParserUtil;
-import cyr7.semantics.*;
-import cyr7.util.OneOfThree;
-import cyr7.visitor.AbstractVisitor;
-
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -27,6 +7,80 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
+import cyr7.ast.expr.access.VariableAccessExprNode;
+import cyr7.ast.expr.binexpr.AddExprNode;
+import cyr7.ast.expr.binexpr.AndExprNode;
+import cyr7.ast.expr.binexpr.BinExprNode;
+import cyr7.ast.expr.binexpr.DivExprNode;
+import cyr7.ast.expr.binexpr.EqualsExprNode;
+import cyr7.ast.expr.binexpr.GTEExprNode;
+import cyr7.ast.expr.binexpr.GTExprNode;
+import cyr7.ast.expr.binexpr.HighMultExprNode;
+import cyr7.ast.expr.binexpr.LTEExprNode;
+import cyr7.ast.expr.binexpr.LTExprNode;
+import cyr7.ast.expr.binexpr.MultExprNode;
+import cyr7.ast.expr.binexpr.NotEqualsExprNode;
+import cyr7.ast.expr.binexpr.OrExprNode;
+import cyr7.ast.expr.binexpr.RemExprNode;
+import cyr7.ast.expr.binexpr.SubExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
+import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
+import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
+import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
+import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
+import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
+import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.stmt.ArrayDeclStmtNode;
+import cyr7.ast.stmt.AssignmentStmtNode;
+import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.ExprStmtNode;
+import cyr7.ast.stmt.IfElseStmtNode;
+import cyr7.ast.stmt.MultiAssignStmtNode;
+import cyr7.ast.stmt.ProcedureStmtNode;
+import cyr7.ast.stmt.ReturnStmtNode;
+import cyr7.ast.stmt.StmtNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.stmt.VarInitStmtNode;
+import cyr7.ast.stmt.WhileStmtNode;
+import cyr7.ast.toplevel.FunctionDeclNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
+import cyr7.ast.toplevel.IxiProgramNode;
+import cyr7.ast.toplevel.UseNode;
+import cyr7.ast.toplevel.XiProgramNode;
+import cyr7.ast.type.PrimitiveTypeNode;
+import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.exceptions.LexerException;
+import cyr7.exceptions.ParserException;
+import cyr7.exceptions.semantics.DuplicateIdentifierException;
+import cyr7.exceptions.semantics.EarlyReturnException;
+import cyr7.exceptions.semantics.ExpectedFunctionException;
+import cyr7.exceptions.semantics.InterfaceFileNotFoundException;
+import cyr7.exceptions.semantics.InvalidArgumentException;
+import cyr7.exceptions.semantics.InvalidReturnValueException;
+import cyr7.exceptions.semantics.MissingReturnException;
+import cyr7.exceptions.semantics.OrdinaryTypeExpectedException;
+import cyr7.exceptions.semantics.ReturnValueInUnitFunctionException;
+import cyr7.exceptions.semantics.SemanticException;
+import cyr7.exceptions.semantics.TypeMismatchException;
+import cyr7.exceptions.semantics.UnboundIdentifierException;
+import cyr7.exceptions.semantics.UncomparableValuesException;
+import cyr7.exceptions.semantics.UnsummableValuesException;
+import cyr7.parser.ParserUtil;
+import cyr7.semantics.ArrayType;
+import cyr7.semantics.Context;
+import cyr7.semantics.ExpandedType;
+import cyr7.semantics.FunctionType;
+import cyr7.semantics.HashMapStackContext;
+import cyr7.semantics.OrdinaryType;
+import cyr7.semantics.PrimitiveType;
+import cyr7.semantics.ResultType;
+import cyr7.semantics.UnitType;
+import cyr7.util.OneOfThree;
+import cyr7.visitor.AbstractVisitor;
 
 class TypeCheckVisitor extends
     AbstractVisitor<OneOfThree<ExpandedType, ResultType, Optional<Void>>> {
@@ -349,7 +403,7 @@ class TypeCheckVisitor extends
             .map(e -> {
                 ExpandedType t = e.accept(this).assertFirst();
                 if (!t.isOrdinary()) {
-                    new InvalidReturnValueException(e.getLocation().get());
+                    throw new InvalidReturnValueException(e.getLocation().get());
                 }
                 return t.getOrdinaryType();
             }).collect(Collectors.toList()));
