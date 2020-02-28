@@ -1,5 +1,12 @@
 package cyr7.semantics;
 
+/**
+ * {@code GenericAddType} is the type of an addition operation when the two
+ * operands are both void types. Addition must result in either an integer or
+ * an array. {@code GenericAddType} is a subtype of integer, an array, and unit.
+ * @author ayang
+ *
+ */
 public class GenericAddType extends OrdinaryType {
 
     @Override
@@ -23,15 +30,9 @@ public class GenericAddType extends OrdinaryType {
 
     @Override
     public boolean isSubtypeOf(OrdinaryType expectedSupertype) {
-        if (expectedSupertype.isUnit()) {
-            return true;
-        }
-        if (expectedSupertype.isArray()) {
-            return true;
-        }
-        if (expectedSupertype.isInt()) {
-            return true;
-        }
-        return false;
+        return expectedSupertype.isUnit() &&
+                expectedSupertype.isArray() &&
+                expectedSupertype.isInt() &&
+                expectedSupertype.isGenericAdd();
     }
 }
