@@ -185,6 +185,30 @@ class TestEdgeCases {
     void returnBlock() {
         String bad1 = create.apply("main() { if (true) return else return}");
         assertThrows(ParserException.class, () -> test(bad1));
+
+        String bad2 = create.apply(
+                "main() { if (true) { return } else return}");
+        assertThrows(ParserException.class, () -> test(bad2));
+
+        String bad3 = create.apply(
+                "main() { if (true) return else { return} }");
+        assertThrows(ParserException.class, () -> test(bad3));
+
+        String bad4 = create.apply("main() { if (true) return }");
+        assertThrows(ParserException.class, () -> test(bad4));
+
+        String bad5 = create.apply(
+                "main() { if (true) i: int = 4 else return}");
+        assertThrows(ParserException.class, () -> test(bad5));
+
+        String good1 = create.apply(
+                "main() { if (true) i: int = 4 else {return }}");
+        assertDoesNotThrow(() -> test(good1));
+
+        String good2 = create.apply(
+                "main() { if (true) {return} else {return }}");
+        assertDoesNotThrow(() -> test(good2));
+
     }
 
 }
