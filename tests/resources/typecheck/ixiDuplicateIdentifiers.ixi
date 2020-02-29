@@ -1,0 +1,4 @@
+hello(a:int)
+bello(b:int)
+cello(c:int)
+cello(c:int, d:int[])

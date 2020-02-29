@@ -1,0 +1,6 @@
+person(): int
+hello(a:int[], b: int): int, bool
+helz(a:int[], b: int, c: bool, d: int[]): int, bool
+geegegee()
+geegegee()
+gee(a:bool)
