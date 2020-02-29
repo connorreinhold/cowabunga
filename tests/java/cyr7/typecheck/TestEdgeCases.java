@@ -236,6 +236,8 @@ class TestEdgeCases {
                 + "i: bool = ({}[0] + {}[0]) & true; }");
         String bad3 = create.apply("main() { "
                 + "i: int = ({}[0] + {}); }");
+        String bad4 = create.apply("main() { "
+                + "i: int = ({}[0] & {}[0]) + 3; }");
 
         assertDoesNotThrow(() -> test(good1));
         assertDoesNotThrow(() -> test(good2));
@@ -253,6 +255,7 @@ class TestEdgeCases {
         assertThrows(SemanticException.class, () -> test(bad1));
         assertThrows(SemanticException.class, () -> test(bad2));
         assertThrows(SemanticException.class, () -> test(bad3));
+        assertThrows(SemanticException.class, () -> test(bad4));
 
     }
 
