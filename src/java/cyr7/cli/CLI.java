@@ -1,13 +1,28 @@
 package cyr7.cli;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
+
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.TypeCheckUtil;
-import org.apache.commons.cli.*;
-
-import java.io.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class CLI {
 
@@ -311,7 +326,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output, filename,
+                    TypeCheckUtil.typeCheck(input, output, filename, isIXI,
                         ixiFilename -> getLibraryReader(ixiFilename + ".ixi")
                     );
                 } catch (Exception e) {
