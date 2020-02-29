@@ -229,6 +229,18 @@ class TestEdgeCases {
                 + "i: int[] = ({}[0] + {}[0]) + {32}; }");
         String good12 = create.apply("main() { "
                 + "i: int = length({}[0] + {}[0]); }");
+        String good13 = create.apply("main() { "
+                + "i: int = ({}[0] + {}[0])[0]; }");
+        String good14 = create.apply("main() { "
+                + "i: int = (({}[0] + {}[0])[0][0] + {}[0])[0]; }");
+        String good15 = create.apply("main() { "
+                + "i: int = {}[0] + {}[0] + {}[0]; }");
+        String good16 = create.apply("main() { "
+                + "i: int[] = {}[0] + {}[0] + {}[0]; }");
+        String good17 = create.apply("main() { "
+                + "i: int[] = {{}[0] + {}[0] + {}[0]}; }");
+        String good18 = create.apply("main() { "
+                + "i: int[] = \"Hello\" + {}[0] + {}[0] + {}[0] + \"World\"; }");
 
         String bad1 = create.apply("main() { i: int[] = {}[0] + {}[0]; "
                 + "r: bool = i < 3; }");
@@ -238,6 +250,8 @@ class TestEdgeCases {
                 + "i: int = ({}[0] + {}); }");
         String bad4 = create.apply("main() { "
                 + "i: int = ({}[0] & {}[0]) + 3; }");
+        String bad5 = create.apply("main() { "
+                + "i: bool[] = {{}[0] + {}[0] + {}[0]}; }");
 
         assertDoesNotThrow(() -> test(good1));
         assertDoesNotThrow(() -> test(good2));
@@ -251,12 +265,18 @@ class TestEdgeCases {
         assertDoesNotThrow(() -> test(good10));
         assertDoesNotThrow(() -> test(good11));
         assertDoesNotThrow(() -> test(good12));
+        assertDoesNotThrow(() -> test(good13));
+        assertDoesNotThrow(() -> test(good14));
+        assertDoesNotThrow(() -> test(good15));
+        assertDoesNotThrow(() -> test(good16));
+        assertDoesNotThrow(() -> test(good17));
+        assertDoesNotThrow(() -> test(good18));
 
         assertThrows(SemanticException.class, () -> test(bad1));
         assertThrows(SemanticException.class, () -> test(bad2));
         assertThrows(SemanticException.class, () -> test(bad3));
         assertThrows(SemanticException.class, () -> test(bad4));
-
+        assertThrows(SemanticException.class, () -> test(bad5));
     }
 
     @Test

@@ -165,6 +165,8 @@ public final class ExpandedType implements AnyType {
     public OrdinaryType getInnerArrayType() {
         if (this.isVoid()) {
             return VoidType.voidValue;
+        } if (this.isGenericAdd()) {
+            return VoidType.voidValue;
         } else {
             assert this.isArray();
             return ((ArrayType) this.getOrdinaryType()).child;
