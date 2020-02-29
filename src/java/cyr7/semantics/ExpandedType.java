@@ -193,7 +193,7 @@ public final class ExpandedType implements AnyType {
     }
 
     public boolean isSubtypeOfArray() {
-        return this.isVoid() || this.isArray();
+        return this.isVoid() || this.isGenericAdd() || this.isArray();
     }
 
     public boolean isSubtypeOfBool() {

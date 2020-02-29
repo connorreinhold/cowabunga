@@ -18,6 +18,19 @@ class TestEdgeCases {
             + "h(i: int): int {return 0} p(i: int, j: int) {} "
             + "empty(): int[] {return {}; }";
 
+    /**
+     * Creates a program string with pre-defined functions.
+     * <p>
+     * f: () -> int, int
+     * <p>
+     * g: () -> ()
+     * <p>
+     * h: int -> int
+     * <p>
+     * p: int, int -> ()
+     * <p>
+     * empty: () -> int[]
+     */
     Function<String, String> create = s -> funcs + "\n " + s;
 
     void test(String prgm) throws Exception {
@@ -145,14 +158,22 @@ class TestEdgeCases {
 
     @Test
     void multipleSameParamNames() {
+        String good1 = create.apply("main1(i: int) { } main2(i: int) { }"
+                + " main3(i: bool) { }");
+        String good2 = create.apply("main1(i: int, j:bool) { } main2(i: int) { }"
+                + " main3(i: bool) { }");
+
         String semanticBad1 = create.apply("main(i: int, i: bool) { }");
         String semanticBad2 = create.apply("main(i: int, i: int) { }");
-        String good1 = create.apply("main1(i: int) { } main2(i: int) { }"
+        String semanticBad3 = create.apply("main1(i: int, j:bool, i:bool) { } "
+                + "main2(i: int) { }"
                 + " main3(i: bool) { }");
 
         assertDoesNotThrow(() -> test(good1));
+        assertDoesNotThrow(() -> test(good2));
         assertThrows(SemanticException.class, () -> test(semanticBad1));
         assertThrows(SemanticException.class, () -> test(semanticBad2));
+        assertThrows(SemanticException.class, () -> test(semanticBad3));
     }
 
     @Test
@@ -204,6 +225,10 @@ class TestEdgeCases {
                 + "i: bool = {}[0] + {}[0] == {1, 2, 4}; }");
         String good10 = create.apply("main() { "
                 + "i: bool = {}[0] + {}[0] == 32; }");
+        String good11 = create.apply("main() { "
+                + "i: int[] = ({}[0] + {}[0]) + {32}; }");
+        String good12 = create.apply("main() { "
+                + "i: int = length({}[0] + {}[0]); }");
 
         String bad1 = create.apply("main() { i: int[] = {}[0] + {}[0]; "
                 + "r: bool = i < 3; }");
@@ -222,6 +247,8 @@ class TestEdgeCases {
         assertDoesNotThrow(() -> test(good8));
         assertDoesNotThrow(() -> test(good9));
         assertDoesNotThrow(() -> test(good10));
+        assertDoesNotThrow(() -> test(good11));
+        assertDoesNotThrow(() -> test(good12));
 
         assertThrows(SemanticException.class, () -> test(bad1));
         assertThrows(SemanticException.class, () -> test(bad2));
