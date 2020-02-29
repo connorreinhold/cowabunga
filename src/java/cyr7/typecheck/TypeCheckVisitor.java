@@ -1,13 +1,5 @@
 package cyr7.typecheck;
 
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
@@ -81,6 +73,14 @@ import cyr7.semantics.ResultType;
 import cyr7.semantics.UnitType;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
+
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 class TypeCheckVisitor extends
     AbstractVisitor<OneOfThree<ExpandedType, ResultType, Optional<Void>>> {
@@ -207,7 +207,6 @@ class TypeCheckVisitor extends
         } catch (ParserException | LexerException | SemanticException e) {
             throw e;
         } catch (Exception e) {
-            e.printStackTrace();
             throw new InterfaceFileNotFoundException(n.interfaceName,
                 n.getLocation().get());
         }
