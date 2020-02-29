@@ -227,6 +227,8 @@ class TestEdgeCases {
                 + "i: bool = {}[0] + {}[0] == 32; }");
         String good11 = create.apply("main() { "
                 + "i: int[] = ({}[0] + {}[0]) + {32}; }");
+        String good12 = create.apply("main() { "
+                + "i: int = length({}[0] + {}[0]); }");
 
         String bad1 = create.apply("main() { i: int[] = {}[0] + {}[0]; "
                 + "r: bool = i < 3; }");
@@ -246,6 +248,7 @@ class TestEdgeCases {
         assertDoesNotThrow(() -> test(good9));
         assertDoesNotThrow(() -> test(good10));
         assertDoesNotThrow(() -> test(good11));
+        assertDoesNotThrow(() -> test(good12));
 
         assertThrows(SemanticException.class, () -> test(bad1));
         assertThrows(SemanticException.class, () -> test(bad2));
