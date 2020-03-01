@@ -61,7 +61,9 @@ class TestEdgeCases {
     }
 
     @Test
-    void cannotReturnNonOrdinary() {
+    void tupleAndUnitTypesDoNotWrap() {
+
+        // Nonordinary expressions in return types.
         String p1 = create.apply("main(): int, int { return f(); }");
         String p2 = create.apply("main(): int, int, int { return 2, f(); }");
         String p3 = create.apply("main() { return g(); }");
@@ -69,28 +71,27 @@ class TestEdgeCases {
         assertThrows(SemanticException.class, () -> test(p1));
         assertThrows(SemanticException.class, () -> test(p2));
         assertThrows(SemanticException.class, () -> test(p3));
-    }
 
-    @Test
-    void createArrayOfNonOrdinary() {
-        String p1 = create.apply("main() { i: int[] = {f()}; }");
-        String p2 = create.apply("main() { i: int[] = {g()}; }");
-        String p3 = create.apply("main() { i: int[] = {h(1)}; }");
+        // Nonordinary expressions as array elements
+        String p4 = create.apply("main() { i: int[] = {f()}; }");
+        String p5 = create.apply("main() { i: int[] = {g()}; }");
+        String p6 = create.apply("main() { i: int[] = {h(1)}; }");
 
-        assertThrows(SemanticException.class, () -> test(p1));
-        assertThrows(SemanticException.class, () -> test(p2));
-        assertDoesNotThrow(() -> test(p3));
-    }
+        assertThrows(SemanticException.class, () -> test(p4));
+        assertThrows(SemanticException.class, () -> test(p5));
+        assertDoesNotThrow(() -> test(p6));
 
-    @Test
-    void nonOrdinaryArguments() {
-        String p1 = create.apply("main() { p(f()); }");
-        String p2 = create.apply("main() { g(g()); }");
-        String p3 = create.apply("main() { p(1, 3); }");
+        // Nonordinary expressions in function calls
+        String p7 = create.apply("main() { p(f()); }");
+        String p8 = create.apply("main() { g(g()); }");
+        String p9 = create.apply("main() { p(1, 3); }");
 
-        assertThrows(SemanticException.class, () -> test(p1));
-        assertThrows(SemanticException.class, () -> test(p2));
-        assertDoesNotThrow(() -> test(p3));
+        assertThrows(SemanticException.class, () -> test(p7));
+        assertThrows(SemanticException.class, () -> test(p8));
+        assertDoesNotThrow(() -> test(p9));
+
+        String p10 = create.apply("main() {return main()}");
+        assertThrows(SemanticException.class, () -> test(p10));
     }
 
     @Test
@@ -131,11 +132,6 @@ class TestEdgeCases {
     void assignToFunction() {
         String good1 = create.apply("main() { empty()[0] = 12;}");
         String good2 = create.apply("main() { i: int = empty()[0];}");
-        String good3 = "f(a: int[]): int[] {" + "b: int[] = a; return b } "
-                + "main() { x: int[] = { 1, 2, 3, 4 }\n" + "   f(x)[0] = 42\n"
-                + "   println(unparseInt(x[0])); }"
-                + " unparseInt(i: int): int[] { return \"\" }"
-                + " println(s: int[]) { }";
 
         String parseBad1 = create.apply("main() { {}[0] = true;}");
         String parseBad2 = create.apply("main() { (empty())[0] = true;}");
@@ -146,7 +142,6 @@ class TestEdgeCases {
 
         assertDoesNotThrow(() -> test(good1));
         assertDoesNotThrow(() -> test(good2));
-        assertDoesNotThrow(() -> test(good3));
 
         assertThrows(ParserException.class, () -> test(parseBad1));
         assertThrows(ParserException.class, () -> test(parseBad2));
@@ -202,6 +197,9 @@ class TestEdgeCases {
         assertDoesNotThrow(() -> test(good3));
     }
 
+    /**
+     * Test cases for when a void type value is used in addition.
+     */
     @Test
     void testAdding() {
         String good1 = create.apply("main() { "
@@ -306,6 +304,105 @@ class TestEdgeCases {
         String good2 = create.apply(
                 "main() { if (true) {return} else {return }}");
         assertDoesNotThrow(() -> test(good2));
+
+        String good3 = create.apply("main() {"
+                + "{{{return; }}}"
+                + "}");
+        assertDoesNotThrow(() -> test(good3));
+    }
+
+
+    @Test
+    void blockTests() {
+        String good1 = create.apply("main(): int[] {"
+                + "{}{}{}{}{}{}{}{}{}{} return {1,2,3};"
+                + "}");
+        assertDoesNotThrow(() -> test(good1));
+
+        String good2 = create.apply("main(): int[] {"
+                + "{}{}{}let: int = 12{}{}{}{}{}{return {let}}"
+                + "}");
+        assertDoesNotThrow(() -> test(good2));
+
+
+        String bad1 = create.apply("main(): int[] {"
+                + "{}{}{}let: int = 12{}{}{}{}{return {let}}{}"
+                + "}");
+        assertThrows(SemanticException.class, () -> test(bad1));
+    }
+
+    @Test
+    void sameLineAssign() {
+        String bad1 = create.apply("main() { i: int = i; }");
+        assertThrows(SemanticException.class, () -> test(bad1));
+
+        String bad2 = create.apply("main() : int {"
+                + "return i: int;"
+                + "}");
+        assertThrows(ParserException.class, () -> test(bad2));
+    }
+
+
+    /**
+     * These are test cases created based on posts/responses made by other
+     * students/course staff on the CS4120 Piazza.
+     * <p>
+     * Each test program is named in the form p[num], where [num] is the
+     * post number on Piazza.
+     */
+    @Test
+    void piazzaExamplePrograms() {
+        String p194 = "main() { f(g()) }\n" +
+                "f(a:int, b: int) { }\n" +
+                "g(): int, int { return 1, 1 }";
+        assertThrows(SemanticException.class, () -> test(p194));
+
+
+        String p190 = "foo() { }\n" +
+                "bar() { x:int = foo() }";
+        assertThrows(SemanticException.class, () -> test(p190));
+
+
+        String p186 = "main() {\n" +
+                "  if (true) return\n" +
+                "  a:int = 2\n" +
+                "}";
+        // Because return statement is not the last statement in a block.
+        assertThrows(ParserException.class, () -> test(p186));
+
+
+        String p187 = "f(a: int[]) : int[] {\n" +
+                "  b: int[] = a\n" +
+                "  return b\n" +
+                "}\n" +
+                "main() {\n" +
+                "   x: int[] = { 1, 2, 3, 4 }\n" +
+                "   f(x)[0] = 42\n" +
+                "   println(unparseInt(x[0]))\n" +
+                "}\n\n" +
+                "unparseInt(i: int): int[] { return \"\" }" +
+                "println(s: int[]) { return; }";
+        assertDoesNotThrow(() -> test(p187));
+
+        String p185 = "foo1 (a: int) {}\n" +
+                "foo2 (a: int) {}";
+        assertDoesNotThrow(() -> test(p185));
+
+
+        String p179 = "foo(){\n" +
+                "   a:int[][] = {}[0][0][0][0][0][0][0][0][0][0][0]\n" +
+                "}";
+        assertDoesNotThrow(() -> test(p179));
+
+        String p176 = "main() { x: int[]; x = {1,}\n" +
+                "x = {1,2,3,} }";
+        assertDoesNotThrow(() -> test(p176));
+
+        String p175 = "f() : int {\n" +
+                "  { return 5 }\n" +
+                "  c: int = 5\n" +
+                "}";
+        assertThrows(SemanticException.class, () -> test(p175));
 
     }
 
