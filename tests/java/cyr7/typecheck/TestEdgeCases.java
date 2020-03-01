@@ -239,6 +239,19 @@ class TestEdgeCases {
                 + "i: int[] = {{}[0] + {}[0] + {}[0]}; }");
         String good18 = create.apply("main() { "
                 + "i: int[] = \"Hello\" + {}[0] + {}[0] + {}[0] + \"World\"; }");
+        String good19 = create.apply("main() { "
+                + "p({}[0] + {}[0], ({}[0] + {}[0])/2);}");
+        String good20 = create.apply("main() { "
+                + "a: bool = ({}[0] + {}[0]) == 12 }");
+        String good21 = create.apply("main(i: int[]) { "
+                + "main({}[0] + {}[0]) }");
+        String good22 = create.apply("main(i: int[]) { "
+                + "a: bool = ({}[0] + {}[0]) < 12; }");
+        String good23 = create.apply("main(i: int[]) { "
+                + "a: bool = length({}[0] + {}[0]) < 12; }");
+        String good24 = create.apply("main(i: int[]): int[] { "
+                + "return main({}[0] + {}[0]);}");
+
 
         String bad1 = create.apply("main() { i: int[] = {}[0] + {}[0]; "
                 + "r: bool = i < 3; }");
@@ -269,6 +282,13 @@ class TestEdgeCases {
         assertDoesNotThrow(() -> test(good16));
         assertDoesNotThrow(() -> test(good17));
         assertDoesNotThrow(() -> test(good18));
+        assertDoesNotThrow(() -> test(good18));
+        assertDoesNotThrow(() -> test(good19));
+        assertDoesNotThrow(() -> test(good20));
+        assertDoesNotThrow(() -> test(good21));
+        assertDoesNotThrow(() -> test(good22));
+        assertDoesNotThrow(() -> test(good23));
+        assertDoesNotThrow(() -> test(good24));
 
         assertThrows(SemanticException.class, () -> test(bad1));
         assertThrows(SemanticException.class, () -> test(bad2));
@@ -329,6 +349,23 @@ class TestEdgeCases {
                 + "{}{}{}let: int = 12{}{}{}{}{return {let}}{}"
                 + "}");
         assertThrows(SemanticException.class, () -> test(bad1));
+
+        // i becomes out of scope.
+        String bad2 = create.apply("main() : int {"
+                + " {i: int = 4;}"
+                + "i = 12; return i; }");
+        assertThrows(SemanticException.class, () -> test(bad2));
+
+        // i gets declared in an accessible scope.
+        String bad3 = create.apply("main() : int {"
+                + "i: int; {i: int = 4;}"
+                + "i = 12; return i; }");
+        assertThrows(SemanticException.class, () -> test(bad3));
+
+        // Try not to confuse arrays with statement blocks
+        String bad4 = create.apply("main() : int {"
+                + "i: int[] = {return h(45)}}");
+        assertThrows(ParserException.class, () -> test(bad4));
     }
 
     @Test
@@ -403,6 +440,18 @@ class TestEdgeCases {
                 "  c: int = 5\n" +
                 "}";
         assertThrows(SemanticException.class, () -> test(p175));
+
+    }
+
+
+    @Test
+    void useFunction() {
+        String p1 = "main(i: int) { i: int = 12;}";
+        assertThrows(SemanticException.class, () -> test(p1));
+
+        String p2 = "i(i: int) { i = 12;}";
+        assertThrows(SemanticException.class, () -> test(p2));
+
 
     }
 
