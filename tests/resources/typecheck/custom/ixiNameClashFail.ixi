@@ -1,0 +1,4 @@
+whatever(): int
+whatever2(): int
+whatever3(): int
+whatever2(): bool

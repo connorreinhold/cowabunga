@@ -362,7 +362,11 @@ class TypeCheckVisitor extends
 
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(MultiAssignStmtNode n) {
+        // The initializer must be type-checked before the variable declaration
+        // since otherwise it would be possible to do recursive variable
+        // declarations
         ExpandedType types = n.initializer.accept(this).assertFirst();
+
         List<Optional<VarDeclNode>> varDecls = n.varDecls;
         ExpandedType declTypes = new ExpandedType(varDecls.stream().map(v -> {
             if (v.isEmpty()) {
@@ -425,9 +429,11 @@ class TypeCheckVisitor extends
 
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(VarInitStmtNode n) {
-        VarDeclNode varDecl = n.varDecl;
-        ExpandedType varDeclType = varDecl.accept(this).assertFirst();
+        // The initializer must be type-checked before the variable declaration
+        // since otherwise it would be possible to do recursive variable
+        // declarations
         ExpandedType initializedType = n.initializer.accept(this).assertFirst();
+        ExpandedType varDeclType = n.varDecl.accept(this).assertFirst();
 
         if (!initializedType.isOrdinary()) {
             throw new OrdinaryTypeExpectedException(
