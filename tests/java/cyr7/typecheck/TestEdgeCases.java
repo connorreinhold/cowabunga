@@ -50,14 +50,25 @@ class TestEdgeCases {
     }
 
     @Test
-    void assignNonFunctionToWildcard() {
+    void assignToWildcard() {
         String p1 = create.apply("main() { _ = 12; }");
         String p2 = create.apply("main() { _ = {2, 34, 5}; }");
         String p3 = create.apply("main() { _ = h(3); }");
+        String p4 = create.apply("main() { _ = (h(3)); }");
+        String p5 = create.apply("main() { _ = (h(3) + h(3)); }");
+        String p6 = create.apply("main() { _ = f(); }");
+        String p7 = create.apply("main() { _ = g(); }");
 
         assertThrows(SemanticException.class, () -> test(p1));
         assertThrows(SemanticException.class, () -> test(p2));
         assertDoesNotThrow(() -> test(p3));
+        assertDoesNotThrow(() -> test(p4));
+
+        // Because RHS is a sum, not a function call.
+        assertThrows(SemanticException.class, () -> test(p5));
+
+        assertThrows(SemanticException.class, () -> test(p6));
+        assertThrows(SemanticException.class, () -> test(p7));
     }
 
     @Test
