@@ -1,6 +1,7 @@
 package cyr7.ir;
 
 import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -43,10 +44,14 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.*;
 import cyr7.visitor.AbstractVisitor;
 
 public class AstToIrVisitor extends AbstractVisitor<IRNode> {
+    public IRExpr visit(ExprNode n) {
+        return this.visit(n);
+    }
+
     @Override
     public IRNode visit(FunctionDeclNode n) {
         return null;
@@ -159,72 +164,84 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
 
     @Override
     public IRNode visit(AddExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.ADD, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(AndExprNode n) {
+        /*
+        return new IRESeq(new IRSeq(
+                new IRMove(new IRTemp("f"), new IRConst(0)),
+                new IRCJump(),
+                new IRLabel(),
+                new IRCJump(),
+                new IRLabel(),
+                new IRMove(new IRTemp(), new IRConst(1)),
+                new IRLabel()),
+                new IRTemp()
+        ));
+        */
         return null;
     }
 
     @Override
     public IRNode visit(DivExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.DIV, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(EqualsExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.EQ, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(GTEExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.GEQ, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(GTExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.GT, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(HighMultExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.HMUL, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(LTEExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.LEQ, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(LTExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.LT, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(MultExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.MUL, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(NotEqualsExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.NEQ, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(OrExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.OR, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(RemExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.MOD, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
     public IRNode visit(SubExprNode n) {
-        return null;
+        return new IRBinOp(IRBinOp.OpType.SUB, this.visit(n.left), this.visit(n.right));
     }
 
     @Override
@@ -234,23 +251,21 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
 
     @Override
     public IRNode visit(LiteralBoolExprNode n) {
-        return null;
+        return new IRConst(n.contents? 1:0);
     }
 
     @Override
     public IRNode visit(LiteralCharExprNode n) {
-        return null;
+        return new IRConst(n.contents.charAt(0));
     }
 
     @Override
     public IRNode visit(LiteralIntExprNode n) {
-        return null;
+        return new IRConst(Integer.parseInt(n.contents));
     }
 
     @Override
-    public IRNode visit(LiteralStringExprNode n) {
-        return null;
-    }
+    public IRNode visit(LiteralStringExprNode n) { return null; }
 
     @Override
     public IRNode visit(BoolNegExprNode n) {
