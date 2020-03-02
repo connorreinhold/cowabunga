@@ -44,7 +44,16 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ir.nodes.*;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRCJump;
+import cyr7.ir.nodes.IRConst;
+import cyr7.ir.nodes.IRESeq;
+import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRLabel;
+import cyr7.ir.nodes.IRMove;
+import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.AbstractVisitor;
 
 public class AstToIrVisitor extends AbstractVisitor<IRNode> {
@@ -58,11 +67,11 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
     }
 
     private String newLabel() {
-        return String.format("_l%d", (labelcounter++));
+        return String.format("_l%d", (this.labelCounter++));
     }
 
     private String newTemp() {
-        return String.format("_t%d", (tempcounter++));
+        return String.format("_t%d", (this.tempCounter++));
     }
 
     public IRExpr visit(ExprNode n) {
@@ -181,7 +190,8 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
 
     @Override
     public IRNode visit(AddExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.ADD, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.ADD, this.visit(n.left),
+                this.visit(n.right));
     }
 
     @Override
@@ -191,17 +201,11 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
         String l2 = newLabel();
         String l3 = newLabel();
 
-        return new IRESeq(
-                new IRSeq(
-                    new IRMove(new IRTemp(x), new IRConst(0)),
-                    new IRCJump(visit(n.left) , l1, l3),
-                    new IRLabel(l1),
-                    new IRCJump(visit(n.right), l2, l3),
-                    new IRLabel(l2),
-                    new IRMove(new IRTemp(x), new IRConst(1)),
-                    new IRLabel(l3)),
+        return new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
+                new IRCJump(visit(n.left), l1, l3), new IRLabel(l1),
+                new IRCJump(visit(n.right), l2, l3), new IRLabel(l2),
+                new IRMove(new IRTemp(x), new IRConst(1)), new IRLabel(l3)),
                 new IRTemp(x));
-        ));
     }
 
     @Override
@@ -256,17 +260,11 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
         String l2 = newLabel();
         String l3 = newLabel();
 
-        return new IRESeq(
-                new IRSeq(
-                    new IRMove(new IRTemp(x), new IRConst(1)),
-                    new IRCJump(visit(n.left) , l3, l1),
-                    new IRLabel(l1),
-                    new IRCJump(visit(n.right), l3, l2),
-                    new IRLabel(l2),
-                    new IRMove(new IRTemp(x), new IRConst(0)),
-                    new IRLabel(l3)),
+        return new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
+                new IRCJump(visit(n.left), l3, l1), new IRLabel(l1),
+                new IRCJump(visit(n.right), l3, l2), new IRLabel(l2),
+                new IRMove(new IRTemp(x), new IRConst(0)), new IRLabel(l3)),
                 new IRTemp(x));
-        ));
     }
 
     @Override
@@ -286,7 +284,7 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
 
     @Override
     public IRNode visit(LiteralBoolExprNode n) {
-        return new IRConst(n.contents? 1:0);
+        return new IRConst(n.contents ? 1 : 0);
     }
 
     @Override
@@ -296,11 +294,13 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
 
     @Override
     public IRNode visit(LiteralIntExprNode n) {
-        return new IRConst(Integer.parseInt(n.contents));
+        return new IRConst(Long.parseLong(n.contents));
     }
 
     @Override
-    public IRNode visit(LiteralStringExprNode n) { return null; }
+    public IRNode visit(LiteralStringExprNode n) {
+        return null;
+    }
 
     @Override
     public IRNode visit(BoolNegExprNode n) {
