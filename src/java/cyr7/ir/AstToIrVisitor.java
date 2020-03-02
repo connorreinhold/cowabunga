@@ -48,6 +48,23 @@ import cyr7.ir.nodes.*;
 import cyr7.visitor.AbstractVisitor;
 
 public class AstToIrVisitor extends AbstractVisitor<IRNode> {
+
+    private int labelCounter;
+    private int tempCounter;
+
+    public AstToIrVisitor() {
+        this.labelCounter = 0;
+        this.tempCounter = 0;
+    }
+
+    private String newLabel() {
+        return String.format("_l%d", (labelcounter++));
+    }
+
+    private String newTemp() {
+        return String.format("_t%d", (tempcounter++));
+    }
+
     public IRExpr visit(ExprNode n) {
         return this.visit(n);
     }
@@ -169,79 +186,97 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
 
     @Override
     public IRNode visit(AndExprNode n) {
-        /*
-        return new IRESeq(new IRSeq(
-                new IRMove(new IRTemp("f"), new IRConst(0)),
-                new IRCJump(),
-                new IRLabel(),
-                new IRCJump(),
-                new IRLabel(),
-                new IRMove(new IRTemp(), new IRConst(1)),
-                new IRLabel()),
-                new IRTemp()
+        String x = newTemp();
+        String l1 = newLabel();
+        String l2 = newLabel();
+        String l3 = newLabel();
+
+        return new IRESeq(
+                new IRSeq(
+                    new IRMove(new IRTemp(x), new IRConst(0)),
+                    new IRCJump(visit(n.left) , l1, l3),
+                    new IRLabel(l1),
+                    new IRCJump(visit(n.right), l2, l3),
+                    new IRLabel(l2),
+                    new IRMove(new IRTemp(x), new IRConst(1)),
+                    new IRLabel(l3)),
+                new IRTemp(x));
         ));
-        */
-        return null;
     }
 
     @Override
     public IRNode visit(DivExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.DIV, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.DIV, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(EqualsExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.EQ, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.EQ, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(GTEExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.GEQ, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.GEQ, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(GTExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.GT, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.GT, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(HighMultExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.HMUL, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.HMUL, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(LTEExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.LEQ, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.LEQ, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(LTExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.LT, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.LT, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(MultExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.MUL, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.MUL, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(NotEqualsExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.NEQ, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.NEQ, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(OrExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.OR, this.visit(n.left), this.visit(n.right));
+        String x = newTemp();
+        String l1 = newLabel();
+        String l2 = newLabel();
+        String l3 = newLabel();
+
+        return new IRESeq(
+                new IRSeq(
+                    new IRMove(new IRTemp(x), new IRConst(1)),
+                    new IRCJump(visit(n.left) , l3, l1),
+                    new IRLabel(l1),
+                    new IRCJump(visit(n.right), l3, l2),
+                    new IRLabel(l2),
+                    new IRMove(new IRTemp(x), new IRConst(0)),
+                    new IRLabel(l3)),
+                new IRTemp(x));
+        ));
     }
 
     @Override
     public IRNode visit(RemExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.MOD, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.MOD, visit(n.left), visit(n.right));
     }
 
     @Override
     public IRNode visit(SubExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.SUB, this.visit(n.left), this.visit(n.right));
+        return new IRBinOp(IRBinOp.OpType.SUB, visit(n.left), visit(n.right));
     }
 
     @Override
