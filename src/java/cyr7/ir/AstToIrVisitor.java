@@ -58,15 +58,19 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
     }
 
     private String newLabel() {
-        return String.format("_l%d", (labelcounter++));
+        return String.format("_l%d", (labelCounter++));
     }
 
     private String newTemp() {
-        return String.format("_t%d", (tempcounter++));
+        return String.format("_t%d", (tempCounter++));
     }
 
-    public IRExpr visit(ExprNode n) {
-        return this.visit(n);
+    public IRNode visit(ExprNode n) {
+        if (n instanceof AddExprNode) {
+            return visit((AddExprNode) n);
+        } else if (n instanceof AndExprNode) {
+            return visit((AndExprNode) n);
+        }
     }
 
     @Override
