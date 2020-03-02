@@ -55,6 +55,7 @@ import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.exceptions.LexerException;
 import cyr7.exceptions.ParserException;
+import cyr7.exceptions.semantics.ArrayTypeExpectedException;
 import cyr7.exceptions.semantics.DuplicateIdentifierException;
 import cyr7.exceptions.semantics.EarlyReturnException;
 import cyr7.exceptions.semantics.ExpectedFunctionException;
@@ -125,6 +126,15 @@ class TypeCheckVisitor extends
     }
 
     // Top Level
+
+    /**
+     * Type-checks the body of a function declaration.
+     *
+     * Side effects: this method has no side effects.
+     *
+     * @param n
+     * @return An empty optional
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(FunctionDeclNode n) {
         ExpandedType outputTypes =
@@ -144,6 +154,14 @@ class TypeCheckVisitor extends
         return OneOfThree.ofThird(Optional.empty());
     }
 
+    /**
+     * Returns the function type of a function header.
+     *
+     * Side effects: this method has no side effects
+     *
+     * @param n
+     * @return The type of n
+     */
     private FunctionType functionTypeOf(FunctionHeaderDeclNode n) {
         ExpandedType input = new ExpandedType(n.args.stream().map(v -> {
             ExpandedType t = v.typeExpr.accept(this).assertFirst();
@@ -161,7 +179,14 @@ class TypeCheckVisitor extends
     }
 
     /**
-     * Only call this from XiProgramNode
+     * Side effects: this method adds the mapping [n.identifier -> typeOf(n)] to
+     * the context at the current stack level.
+     *
+     * @param n
+     * @throws DuplicateIdentifierException if n.identifier exists within the
+     * context, or if an interface declares a function with the same name and
+     * conflicting type.
+     * @return
      */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(FunctionHeaderDeclNode n) {
@@ -180,6 +205,15 @@ class TypeCheckVisitor extends
         return OneOfThree.ofFirst(functionType.output);
     }
 
+    /**
+     * Type check an Ixi program by visiting each function declaration.
+     *
+     * Side effects: this method adds to {@code interfaceFuncDecls} a mapping
+     * [header.identifier -> functionType]
+     *
+     * @param n
+     * @return Nothing
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(IxiProgramNode n) {
         n.functionDeclarations.forEach(header -> {
@@ -196,6 +230,16 @@ class TypeCheckVisitor extends
         return OneOfThree.ofThird(Optional.empty());
     }
 
+    /**
+     * Type check a use node by type checking the ixi file associated with the
+     * use node.
+     *
+     * Side effects: this method adds function mappings to
+     * {@code interfaceFuncDecls}
+     *
+     * @param n
+     * @return Nothing
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(UseNode n) {
         try {
@@ -213,6 +257,13 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Side effect: this adds a variable declaration [n -> typeOf(n)] to the
+     * context
+     *
+     * @param n
+     * @return The type of the variable declaration
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(VarDeclNode n) {
         if (context.contains(n.identifier)) {
@@ -224,6 +275,18 @@ class TypeCheckVisitor extends
         return OneOfThree.ofFirst(type);
     }
 
+    /**
+     * Type check an Xi Program Node.
+     *
+     * 1. Type-check use declarations
+     * 2. Perform a first pass over function headers
+     * 3. Type-check
+     *
+     * Side effects: this method adds the length function to the context.
+     *
+     * @param n
+     * @return Nothing
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(XiProgramNode n) {
         context.addFn("length", new FunctionType(
@@ -231,13 +294,22 @@ class TypeCheckVisitor extends
                 new ArrayType(UnitType.unitValue)),
             ExpandedType.intType));
 
+        // Type check use statements
         n.uses.forEach(use -> use.accept(this));
+
+        // Perform a first pass over function headers. If a function declaration
+        // in the xi file conflicts with a function declaration in the ixi file,
+        // the exception will be thrown here.
         n.functions.forEach(decl -> decl.header.accept(this));
 
+        // There are no conflicting function headers. We add the interface
+        // functions to the context so that we can use them when type-checking
+        // the body of functions
         for (var funcDecl : interfaceFuncDecls.entrySet()) {
             context.addFn(funcDecl.getKey(), funcDecl.getValue());
         }
 
+        // Type check the body of each function
         n.functions.forEach(decl -> decl.accept(this));
 
         return OneOfThree.ofThird(Optional.empty());
@@ -245,6 +317,14 @@ class TypeCheckVisitor extends
 
     // Type
 
+    /**
+     * Returns the type of n
+     *
+     * Side effects: this method is pure
+     *
+     * @param n
+     * @return
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(PrimitiveTypeNode n) {
         switch (n.type) {
@@ -252,10 +332,20 @@ class TypeCheckVisitor extends
                 return OneOfThree.ofFirst(ExpandedType.boolType);
             case INT:
                 return OneOfThree.ofFirst(ExpandedType.intType);
+            default:
+                // fallback
+                return OneOfThree.ofFirst(ExpandedType.intType);
         }
-        return null;
     }
 
+    /**
+     * Return the type of n
+     *
+     * Side effects: this method is pure
+     *
+     * @param n
+     * @return
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(TypeExprArrayNode n) {
         ExpandedType type = n.child.accept(this).assertFirst();
@@ -267,13 +357,23 @@ class TypeCheckVisitor extends
                     n.size.get().getLocation().get());
             }
         }
-        assert type.isOrdinary();
+
+        if (!type.isOrdinary()) {
+            throw new OrdinaryTypeExpectedException(n.getLocation().get());
+        }
 
         return OneOfThree.ofFirst(
             new ExpandedType(new ArrayType(type.getOrdinaryType())));
     }
 
     // Statement
+
+    /**
+     * Side effects: this method adds [n.identifier -> typeOf(n)] to the context
+     *
+     * @param n
+     * @return Unit Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ArrayDeclStmtNode n) {
         if (context.contains(n.identifier)) {
@@ -283,13 +383,20 @@ class TypeCheckVisitor extends
 
         ExpandedType expectedArray = n.type.accept(this).assertFirst();
 
-        assert expectedArray.isArray();
-        assert expectedArray.isOrdinary();
+        if (!expectedArray.isArray()) {
+            throw new ArrayTypeExpectedException(n.getLocation().get());
+        }
 
         context.addVar(n.identifier, expectedArray.getOrdinaryType());
         return OneOfThree.ofSecond(ResultType.UNIT);
     }
 
+    /**
+     * Side effects: This method has no side effects
+     *
+     * @param n
+     * @return Unit Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(AssignmentStmtNode n) {
         ExpandedType lhsType = n.lhs.accept(this).assertFirst();
@@ -303,6 +410,12 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Side effects: This method has no side effects
+     *
+     * @param n
+     * @return Unit Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(BlockStmtNode n) {
         context.push();
@@ -321,13 +434,27 @@ class TypeCheckVisitor extends
         return OneOfThree.ofSecond(ResultType.UNIT);
     }
 
+    /**
+     * Typecheck a statement of the form:
+     *
+     * `_ = 4;`
+     *
+     * Side effects: This method has no side effects
+     *
+     * @param n
+     * @return Unit Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ExprStmtNode n) {
         ExpandedType type = n.expr.accept(this).assertFirst();
+
         if (!(n.expr instanceof FunctionCallExprNode)) {
             throw new ExpectedFunctionException(n.expr.getLocation().get());
         }
+
         if (type.isOrdinary()) {
+            // The type of a function call expr node is the return type of the
+            // function. (view page 3 of types.pdf)
             return OneOfThree.ofSecond(ResultType.UNIT);
         } else {
             throw new TypeMismatchException(type,
@@ -335,6 +462,12 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Side effects: This method has no side effects
+     *
+     * @param n
+     * @return The least upper bound of the two sub block.
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(IfElseStmtNode n) {
         context.push();
@@ -361,6 +494,13 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Side effects: This method adds [n.identifier -> typeOf(n)] to the context
+     * for each variable declared.
+     *
+     * @param n
+     * @return Unit Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(MultiAssignStmtNode n) {
         // The initializer must be type-checked before the variable declaration
@@ -376,6 +516,7 @@ class TypeCheckVisitor extends
                 return v.get().accept(this).assertFirst().getOrdinaryType();
             }
         }).collect(Collectors.toList()));
+
         if (types.isASubtypeOf(declTypes)) {
             return OneOfThree.ofSecond(ResultType.UNIT);
         } else {
@@ -384,6 +525,12 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Side effects: This method has no side effects.
+     *
+     * @param n
+     * @return Unit Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ProcedureStmtNode n) {
         ExpandedType type = n.procedureCall.accept(this).assertFirst();
@@ -395,14 +542,21 @@ class TypeCheckVisitor extends
         }
     }
 
-
+    /**
+     * Side effects: This method has no side effects.
+     *
+     * @param n
+     * @return Void Statement Type
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(ReturnStmtNode n) {
         Optional<ExpandedType> maybeTypes = context.getRet();
         assert maybeTypes.isPresent();
+
         if (maybeTypes.get().isUnit() && !n.exprs.isEmpty()) {
             throw new ReturnValueInUnitFunctionException(n.getLocation().get());
         }
+
         ExpandedType expected = maybeTypes.get();
         ExpandedType exprType = new ExpandedType(n.exprs.stream()
             .map(e -> {
@@ -412,7 +566,6 @@ class TypeCheckVisitor extends
                 }
                 return t.getOrdinaryType();
             }).collect(Collectors.toList()));
-        ;
 
         if (exprType.isASubtypeOf(expected)) {
             return OneOfThree.ofSecond(ResultType.VOID);
@@ -422,18 +575,33 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Side effects: this method adds a mapping [n.identifier -> typeOf(n)] to
+     * the context.
+     *
+     * @param n
+     * @return
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(VarDeclStmtNode n) {
         n.varDecl.accept(this);
         return OneOfThree.ofSecond(ResultType.UNIT);
     }
 
+    /**
+     * Side effects: this method adds a mapping [n.identifier -> typeOf(n)] to
+     * the context.
+     *
+     * @param n
+     * @return
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(VarInitStmtNode n) {
         // The initializer must be type-checked before the variable declaration
         // since otherwise it would be possible to do recursive variable
         // declarations
         ExpandedType initializedType = n.initializer.accept(this).assertFirst();
+
         ExpandedType varDeclType = n.varDecl.accept(this).assertFirst();
 
         if (!initializedType.isOrdinary()) {
@@ -450,6 +618,12 @@ class TypeCheckVisitor extends
         }
     }
 
+    /**
+     * Type checks a while statement node
+     *
+     * @param n
+     * @return A statement node
+     */
     @Override
     public OneOfThree<ExpandedType, ResultType, Optional<Void>> visit(WhileStmtNode n) {
         ExpandedType guardType = n.guard.accept(this).assertFirst();
@@ -474,8 +648,7 @@ class TypeCheckVisitor extends
             return OneOfThree.ofFirst(
                 new ExpandedType(ArrayType.voidArrayDefault));
         }
-        // arrayType is the supertype of the first 0...i array values
-        Optional<ExpandedType> arrayType = Optional.empty();
+
         List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
             ExpandedType type = e.accept(this).assertFirst();
             if (!type.isOrdinary()) {
@@ -485,6 +658,8 @@ class TypeCheckVisitor extends
             return type;
         }).collect(Collectors.toList());
 
+        // arrayType is the supertype of the first 0...i array values
+        Optional<ExpandedType> arrayType = Optional.empty();
 
         int index = 0;
         for (ExpandedType t : arrayTypes) {
@@ -506,7 +681,11 @@ class TypeCheckVisitor extends
         }
 
         assert arrayType.isPresent();
-        assert arrayType.get().isOrdinary();
+
+        if (!arrayType.get().isOrdinary()) {
+            throw new OrdinaryTypeExpectedException(n.getLocation().get());
+        }
+
         OrdinaryType elementType = arrayType.get().getOrdinaryType();
         return OneOfThree.ofFirst(new ExpandedType(new ArrayType(elementType)));
     }
@@ -538,7 +717,6 @@ class TypeCheckVisitor extends
                 inputTypes, n.getLocation().get());
         }
     }
-
 
     /**
      * Typechecks an integer binary operation expression, e.g. 9 + 10.
