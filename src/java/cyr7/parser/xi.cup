@@ -16,7 +16,7 @@ import cyr7.ast.expr.unaryexpr.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.stmt.*;
 import cyr7.ast.type.*;
-import cyr7.exceptions.*;
+import cyr7.exceptions.parser.*;
 import cyr7.lexer.LexerUtil;
 import cyr7.lexer.MyLexer;
 import java.util.List;
