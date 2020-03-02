@@ -61,6 +61,7 @@ import cyr7.exceptions.semantics.EarlyReturnException;
 import cyr7.exceptions.semantics.ExpectedFunctionException;
 import cyr7.exceptions.semantics.InterfaceFileNotFoundException;
 import cyr7.exceptions.semantics.InvalidArgumentException;
+import cyr7.exceptions.semantics.InvalidInterfaceException;
 import cyr7.exceptions.semantics.InvalidReturnValueException;
 import cyr7.exceptions.semantics.MissingReturnException;
 import cyr7.exceptions.semantics.OrdinaryTypeExpectedException;
@@ -249,8 +250,15 @@ class TypeCheckVisitor extends
                     n.interfaceName + ".ixi", true);
             interfaceNode.accept(this);
             return OneOfThree.ofThird(Optional.empty());
-        } catch (ParserException | LexerException | SemanticException e) {
-            throw e;
+        } catch (ParserException e) {
+            throw new InvalidInterfaceException(e, n.getLocation()
+                                                    .get());
+        } catch (LexerException e) {
+            throw new InvalidInterfaceException(e, n.getLocation()
+                                                    .get());
+        } catch (SemanticException e) {
+            throw new InvalidInterfaceException(e, n.getLocation()
+                                                    .get());
         } catch (Exception e) {
             throw new InterfaceFileNotFoundException(n.interfaceName,
                 n.getLocation().get());
