@@ -472,6 +472,9 @@ class TestEdgeCases {
 
     @Test
     void interfaceFileTest() {
+        // As stated in the documentation, and based on type-checking rules
+        // it is fine to have multiple identifiers with the same name in the
+        // arguments.
         String i1 = "main(i: int, i: int)";
         assertDoesNotThrow(() -> testInterface(i1));
 
