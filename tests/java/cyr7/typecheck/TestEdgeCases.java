@@ -38,6 +38,11 @@ class TestEdgeCases {
                   .accept(new TypeCheckVisitor(null));
     }
 
+    void testInterface(String prgm) throws Exception {
+        ParserUtil.parseNode(new StringReader(prgm), "test.ixi", true)
+                  .accept(new TypeCheckVisitor(null));
+    }
+
     @Test
     void testArrayInit() {
         String p1 = create.apply("main() { i: int[true]; }");
@@ -462,8 +467,16 @@ class TestEdgeCases {
 
         String p2 = "i(i: int) { i = 12;}";
         assertThrows(SemanticException.class, () -> test(p2));
+    }
 
 
+    @Test
+    void interfaceFileTest() {
+        String i1 = "main(i: int, i: int)";
+        assertDoesNotThrow(() -> testInterface(i1));
+
+        String i2 = "main(i: int, i: int, i: int)";
+        assertDoesNotThrow(() -> testInterface(i2));
     }
 
 }
