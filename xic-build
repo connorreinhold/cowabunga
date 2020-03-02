@@ -5,7 +5,7 @@
 
 make cowabunga
 
-gradle assemble
+gradle assemble --no-daemon
 
 echo "Compiler built: $(dirname $(readlink -f $0))"
 
