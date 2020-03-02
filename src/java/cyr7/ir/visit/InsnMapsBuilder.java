@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import cyr7.ir.IRNode;
+import cyr7.ir.nodes.IRNode;
 
 public class InsnMapsBuilder extends IRVisitor {
     private Map<String, Long> nameToIndex;

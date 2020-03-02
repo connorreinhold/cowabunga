@@ -5,7 +5,7 @@ import cyr7.ast.expr.binexpr.LTExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.stmt.*;
-import cyr7.exceptions.UnexpectedTokenException;
+import cyr7.exceptions.parser.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 

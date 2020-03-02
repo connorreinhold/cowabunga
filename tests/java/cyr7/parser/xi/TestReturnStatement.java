@@ -3,7 +3,7 @@ package cyr7.parser.xi;
 import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.stmt.ReturnStmtNode;
 import cyr7.ast.stmt.StmtNode;
-import cyr7.exceptions.UnexpectedTokenException;
+import cyr7.exceptions.parser.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 

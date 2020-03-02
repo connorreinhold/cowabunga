@@ -1,13 +1,10 @@
 package cyr7.parser.xi;
 
 import cyr7.ast.toplevel.XiProgramNode;
-import cyr7.exceptions.LexerIntegerOverflowException;
-import cyr7.exceptions.ParserException;
+import cyr7.exceptions.parser.ParserException;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
-
-import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;

@@ -2,11 +2,11 @@ package cyr7.parser.xi;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import cyr7.exceptions.ParserIntegerOverflowException;
+import cyr7.exceptions.parser.ParserIntegerOverflowException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 
-import cyr7.exceptions.LexerIntegerOverflowException;
+import cyr7.exceptions.lexer.LexerIntegerOverflowException;
 import cyr7.parser.XiParser;
 
 class TestIntegerOverflow {

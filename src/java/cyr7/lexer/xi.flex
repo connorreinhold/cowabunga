@@ -20,7 +20,7 @@ import java.math.BigInteger;
 %column
 
 %yylexthrow{
-   cyr7.exceptions.LexerException
+   cyr7.exceptions.lexer.LexerException
 %yylexthrow}
 
 %{
@@ -174,7 +174,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
             } else if (result == 0) { // n == maxInteger
                 return symbol(sym.INT_MAX);
             } else { // n > maxInteger
-                throw new cyr7.exceptions.LexerIntegerOverflowException(
+                throw new cyr7.exceptions.lexer.LexerIntegerOverflowException(
                                     num, yyline, yycolumn, filename);
             }
         }
@@ -228,7 +228,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     
     .               
        { 
-          throw new cyr7.exceptions.InvalidTokenException(yytext(), 
+          throw new cyr7.exceptions.lexer.InvalidTokenException(yytext(),
                                               yyline, 
                                               yycolumn,
                                               filename); 
@@ -245,7 +245,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     {Newline}         
        {
           yybegin(YYINITIAL);
-          throw new cyr7.exceptions.MultiLineCharacterException(
+          throw new cyr7.exceptions.lexer.MultiLineCharacterException(
                 charBuffer.getLineNumber(), 
                 charBuffer.getColumnNumber(),
                 filename); 
@@ -254,7 +254,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \'               
        {
           yybegin(YYINITIAL);
-          throw new cyr7.exceptions.InvalidCharacterLiteralException(
+          throw new cyr7.exceptions.lexer.InvalidCharacterLiteralException(
                 "''", 
                 charBuffer.getLineNumber(), 
                 charBuffer.getColumnNumber(),
@@ -281,7 +281,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\[^]            
        {
           yybegin(YYINITIAL);
-          throw new cyr7.exceptions.InvalidCharacterLiteralException(
+          throw new cyr7.exceptions.lexer.InvalidCharacterLiteralException(
              "'" + charBuffer.toString() + "'", 
              charBuffer.getLineNumber(), 
              charBuffer.getColumnNumber(),
@@ -299,7 +299,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
    [^\']      
       {
          yybegin(YYINITIAL); 
-         throw new cyr7.exceptions.InvalidCharacterLiteralException(
+         throw new cyr7.exceptions.lexer.InvalidCharacterLiteralException(
             "'" + charBuffer.toString() + yytext(), 
             charBuffer.getLineNumber(), 
             charBuffer.getColumnNumber(),
@@ -307,7 +307,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
       }
    <<EOF>>
       {
-            throw new cyr7.exceptions.NonTerminatingCharacterException(
+            throw new cyr7.exceptions.lexer.NonTerminatingCharacterException(
                 charBuffer.toString(),
                 charBuffer.getLineNumber(),
                 charBuffer.getColumnNumber(),
@@ -319,7 +319,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
    {Newline}            
       {
          yybegin(YYINITIAL);
-         throw new cyr7.exceptions.MultiLineStringException(
+         throw new cyr7.exceptions.lexer.MultiLineStringException(
             stringBuffer.getLineNumber(), 
             stringBuffer.getColumnNumber(),
             filename); 
@@ -343,7 +343,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
             // Invalid Escape Characters
     \\[^]            
        {
-          throw new cyr7.exceptions.InvalidStringEscapeCharacterException(
+          throw new cyr7.exceptions.lexer.InvalidStringEscapeCharacterException(
              yytext(), 
              yyline, 
              yycolumn,
@@ -352,7 +352,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
            
     <<EOF>> 
         {
-            throw new cyr7.exceptions.NonTerminatingStringException(
+            throw new cyr7.exceptions.lexer.NonTerminatingStringException(
                 stringBuffer.toString(),
                 stringBuffer.getLineNumber(),
                 stringBuffer.getColumnNumber(),
@@ -365,7 +365,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 <<EOF>>  { return symbol(sym.EOF);}
 [^]
     {
-        throw new cyr7.exceptions.InvalidTokenException(
+        throw new cyr7.exceptions.lexer.InvalidTokenException(
             yytext(),
             yyline,
             yycolumn,

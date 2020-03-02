@@ -1,6 +1,10 @@
 package cyr7.semantics;
 
 import cyr7.exceptions.UnbalancedPushPopException;
+import cyr7.semantics.context.Context;
+import cyr7.semantics.types.ArrayType;
+import cyr7.semantics.types.OrdinaryType;
+import cyr7.semantics.types.PrimitiveType;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -9,7 +13,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 public abstract class TestContext {
 
-    private final Optional<OrdinaryType> INT = 
+    private final Optional<OrdinaryType> INT =
                                     Optional.of(PrimitiveType.intDefault);
     private final Optional<OrdinaryType> BOOL = 
                                     Optional.of(PrimitiveType.boolDefault);

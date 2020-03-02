@@ -3,12 +3,12 @@ package cyr7.lexer;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
-import cyr7.exceptions.InvalidCharacterLiteralException;
-import cyr7.exceptions.InvalidStringEscapeCharacterException;
-import cyr7.exceptions.InvalidTokenException;
-import cyr7.exceptions.LexerIntegerOverflowException;
-import cyr7.exceptions.MultiLineCharacterException;
-import cyr7.exceptions.MultiLineStringException;
+import cyr7.exceptions.lexer.InvalidCharacterLiteralException;
+import cyr7.exceptions.lexer.InvalidStringEscapeCharacterException;
+import cyr7.exceptions.lexer.InvalidTokenException;
+import cyr7.exceptions.lexer.LexerIntegerOverflowException;
+import cyr7.exceptions.lexer.MultiLineCharacterException;
+import cyr7.exceptions.lexer.MultiLineStringException;
 import cyr7.parser.sym;
 
 import static org.junit.jupiter.api.Assertions.*;

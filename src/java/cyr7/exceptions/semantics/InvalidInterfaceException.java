@@ -1,8 +1,8 @@
 package cyr7.exceptions.semantics;
 
 import cyr7.exceptions.ErrorType;
-import cyr7.exceptions.LexerException;
-import cyr7.exceptions.ParserException;
+import cyr7.exceptions.lexer.LexerException;
+import cyr7.exceptions.parser.ParserException;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class InvalidInterfaceException extends SemanticException {

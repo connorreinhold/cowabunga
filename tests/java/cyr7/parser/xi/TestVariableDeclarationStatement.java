@@ -10,8 +10,8 @@ import cyr7.ast.stmt.*;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.exceptions.ParserException;
-import cyr7.exceptions.UnexpectedTokenException;
+import cyr7.exceptions.parser.ParserException;
+import cyr7.exceptions.parser.UnexpectedTokenException;
 import cyr7.parser.util.ParserFactory;
 import org.junit.jupiter.api.Test;
 

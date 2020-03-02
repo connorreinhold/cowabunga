@@ -7,7 +7,7 @@ import java.io.StringReader;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.exceptions.LexerException;
+import cyr7.exceptions.lexer.LexerException;
 import cyr7.parser.sym;
 import cyr7.util.Util;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;

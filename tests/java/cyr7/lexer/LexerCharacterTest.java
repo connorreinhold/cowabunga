@@ -1,15 +1,12 @@
 package cyr7.lexer;
 
-import cyr7.exceptions.InvalidCharacterLiteralException;
-import cyr7.exceptions.LexerException;
+import cyr7.exceptions.lexer.InvalidCharacterLiteralException;
 import cyr7.parser.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.io.IOException;
 
 public class LexerCharacterTest {
 

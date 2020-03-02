@@ -1,11 +1,7 @@
 package cyr7.lexer;
 
-import java_cup.runtime.ComplexSymbolFactory;
-
-import java.io.IOException;
 import java.io.StringReader;
 
-import cyr7.exceptions.LexerException;
 public class LexerFactory {
 
     static public MyLexer make(String contents) throws Exception {

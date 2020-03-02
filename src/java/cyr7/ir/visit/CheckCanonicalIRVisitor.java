@@ -1,6 +1,6 @@
 package cyr7.ir.visit;
 
-import cyr7.ir.IRNode;
+import cyr7.ir.nodes.IRNode;
 
 public class CheckCanonicalIRVisitor extends AggregateVisitor<Boolean> {
 

@@ -17,7 +17,7 @@ import cyr7.ast.type.TypeExprNode;
 import cyr7.ast.type.PrimitiveEnum;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.exceptions.ParserException;
+import cyr7.exceptions.parser.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.parser.XiParser;
 import cyr7.parser.util.ParserFactory;

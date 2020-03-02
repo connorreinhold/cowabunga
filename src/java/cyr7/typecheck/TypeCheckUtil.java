@@ -1,14 +1,14 @@
 package cyr7.typecheck;
 
-import java.io.Reader;
-import java.io.Writer;
-
 import cyr7.exceptions.ErrorType;
-import cyr7.exceptions.LexerException;
-import cyr7.exceptions.ParserException;
+import cyr7.exceptions.lexer.LexerException;
+import cyr7.exceptions.parser.ParserException;
 import cyr7.exceptions.semantics.InvalidInterfaceException;
 import cyr7.exceptions.semantics.SemanticException;
 import cyr7.parser.ParserUtil;
+
+import java.io.Reader;
+import java.io.Writer;
 
 public class TypeCheckUtil {
 

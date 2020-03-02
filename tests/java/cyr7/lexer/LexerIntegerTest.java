@@ -1,6 +1,6 @@
 package cyr7.lexer;
 
-import cyr7.exceptions.LexerIntegerOverflowException;
+import cyr7.exceptions.lexer.LexerIntegerOverflowException;
 import cyr7.parser.sym;
 import java_cup.runtime.Symbol;
 import org.junit.jupiter.api.Test;

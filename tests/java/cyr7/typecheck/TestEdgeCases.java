@@ -8,7 +8,7 @@ import java.util.function.Function;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.exceptions.ParserException;
+import cyr7.exceptions.parser.ParserException;
 import cyr7.exceptions.semantics.SemanticException;
 import cyr7.parser.ParserUtil;
 

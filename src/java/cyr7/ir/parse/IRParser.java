@@ -5,12 +5,12 @@
 
 package cyr7.ir.parse;
 
-import cyr7.ir.IRBinOp;
-import cyr7.ir.IRCompUnit;
-import cyr7.ir.IRExpr;
-import cyr7.ir.IRFuncDecl;
-import cyr7.ir.IRNodeFactory;
-import cyr7.ir.IRStmt;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRFuncDecl;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRStmt;
 import java_cup.runtime.ComplexSymbolFactory;
 import java.util.ArrayList;
 import java.util.Collections;

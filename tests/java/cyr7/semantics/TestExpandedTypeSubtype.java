@@ -4,6 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
+import cyr7.semantics.types.ArrayType;
+import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.OrdinaryType;
+import cyr7.semantics.types.PrimitiveType;
+import cyr7.semantics.types.UnitType;
+import cyr7.semantics.types.VoidType;
 import org.junit.jupiter.api.Test;
 
 class TestExpandedTypeSubtype {
@@ -23,7 +29,7 @@ class TestExpandedTypeSubtype {
         assertFalse(ExpandedType.unitExpandedType.isASubtypeOf(
                 new ExpandedType(new ArrayType(PrimitiveType.boolDefault))));
         assertFalse(ExpandedType.unitExpandedType.isASubtypeOf(
-                new ExpandedType(new ArrayType(VoidType.voidValue))));    
+                new ExpandedType(new ArrayType(VoidType.voidValue))));
         
         
         assertTrue(ExpandedType.unitExpandedType.isUnit());

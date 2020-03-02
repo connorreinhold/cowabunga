@@ -1,13 +1,5 @@
 package cyr7.typecheck;
 
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
@@ -53,8 +45,8 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.exceptions.LexerException;
-import cyr7.exceptions.ParserException;
+import cyr7.exceptions.lexer.LexerException;
+import cyr7.exceptions.parser.ParserException;
 import cyr7.exceptions.semantics.ArrayTypeExpectedException;
 import cyr7.exceptions.semantics.DuplicateIdentifierException;
 import cyr7.exceptions.semantics.EarlyReturnException;
@@ -72,17 +64,25 @@ import cyr7.exceptions.semantics.UnboundIdentifierException;
 import cyr7.exceptions.semantics.UncomparableValuesException;
 import cyr7.exceptions.semantics.UnsummableValuesException;
 import cyr7.parser.ParserUtil;
-import cyr7.semantics.ArrayType;
-import cyr7.semantics.Context;
-import cyr7.semantics.ExpandedType;
-import cyr7.semantics.FunctionType;
-import cyr7.semantics.HashMapStackContext;
-import cyr7.semantics.OrdinaryType;
-import cyr7.semantics.PrimitiveType;
-import cyr7.semantics.ResultType;
-import cyr7.semantics.UnitType;
+import cyr7.semantics.context.Context;
+import cyr7.semantics.context.HashMapStackContext;
+import cyr7.semantics.types.ArrayType;
+import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.FunctionType;
+import cyr7.semantics.types.OrdinaryType;
+import cyr7.semantics.types.PrimitiveType;
+import cyr7.semantics.types.ResultType;
+import cyr7.semantics.types.UnitType;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
+
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 class TypeCheckVisitor extends
     AbstractVisitor<OneOfThree<ExpandedType, ResultType, Optional<Void>>> {

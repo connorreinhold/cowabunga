@@ -2,7 +2,7 @@ package cyr7.ir.visit;
 
 import edu.cornell.cs.cs4120.util.Copy;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import cyr7.ir.IRNode;
+import cyr7.ir.nodes.IRNode;
 
 public abstract class AggregateVisitor<T> implements Copy<AggregateVisitor<T>> {
 

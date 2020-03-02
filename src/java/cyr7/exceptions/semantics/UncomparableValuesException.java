@@ -1,6 +1,6 @@
 package cyr7.exceptions.semantics;
 
-import cyr7.semantics.ExpandedType;
+import cyr7.semantics.types.ExpandedType;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class UncomparableValuesException extends SemanticException {
