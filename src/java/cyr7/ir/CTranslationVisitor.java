@@ -49,9 +49,10 @@ import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRStmt;
 import cyr7.visitor.AbstractVisitor;
 
-public final class CTranslationVisitor extends AbstractVisitor<IRSeq> {
+public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     private final IdGenerator generator;
     private final String tLabel, fLabel;
@@ -63,7 +64,7 @@ public final class CTranslationVisitor extends AbstractVisitor<IRSeq> {
     }
 
     @Override
-    public IRSeq visit(AndExprNode n) {
+    public IRStmt visit(AndExprNode n) {
         String tPrime = generator.newLabel();
         return new IRSeq(
             n.left.accept(new CTranslationVisitor(generator, tPrime, tLabel)),
@@ -72,12 +73,12 @@ public final class CTranslationVisitor extends AbstractVisitor<IRSeq> {
     }
 
     @Override
-    public IRSeq visit(BoolNegExprNode n) {
+    public IRStmt visit(BoolNegExprNode n) {
         return n.accept(new CTranslationVisitor(generator, fLabel, tLabel));
     }
 
     @Override
-    public IRSeq visit(OrExprNode n) {
+    public IRStmt visit(OrExprNode n) {
         String fPrime = generator.newLabel();
         return new IRSeq(
             n.left.accept(new CTranslationVisitor(generator, tLabel, fPrime)),
@@ -87,212 +88,212 @@ public final class CTranslationVisitor extends AbstractVisitor<IRSeq> {
     }
 
     @Override
-    public IRSeq visit(LiteralBoolExprNode n) {
+    public IRStmt visit(LiteralBoolExprNode n) {
         IRName name = new IRName(n.contents ? tLabel : fLabel);
-        return new IRSeq(new IRJump(name));
+        return new IRJump(name);
     }
 
     // General
 
-    private IRSeq cjump(ExprNode n) {
-        return new IRSeq(new IRCJump(n.accept(new AstToIrVisitor()).assertFirst(), tLabel, fLabel));
+    private IRStmt cjump(ExprNode n) {
+        return new IRCJump(n.accept(new AstToIrVisitor()).assertFirst(), tLabel, fLabel);
     }
 
     @Override
-    public IRSeq visit(FunctionCallExprNode n) {
+    public IRStmt visit(FunctionCallExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(ArrayAccessExprNode n) {
+    public IRStmt visit(ArrayAccessExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(VariableAccessExprNode n) {
+    public IRStmt visit(VariableAccessExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(AddExprNode n) {
+    public IRStmt visit(AddExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(DivExprNode n) {
+    public IRStmt visit(DivExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(EqualsExprNode n) {
+    public IRStmt visit(EqualsExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(GTEExprNode n) {
+    public IRStmt visit(GTEExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(GTExprNode n) {
+    public IRStmt visit(GTExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(HighMultExprNode n) {
+    public IRStmt visit(HighMultExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(LTEExprNode n) {
+    public IRStmt visit(LTEExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(LTExprNode n) {
+    public IRStmt visit(LTExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(MultExprNode n) {
+    public IRStmt visit(MultExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(NotEqualsExprNode n) {
+    public IRStmt visit(NotEqualsExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(RemExprNode n) {
+    public IRStmt visit(RemExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(SubExprNode n) {
+    public IRStmt visit(SubExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(LiteralArrayExprNode n) {
+    public IRStmt visit(LiteralArrayExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(LiteralCharExprNode n) {
+    public IRStmt visit(LiteralCharExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(LiteralIntExprNode n) {
+    public IRStmt visit(LiteralIntExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(LiteralStringExprNode n) {
+    public IRStmt visit(LiteralStringExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public IRSeq visit(IntNegExprNode n) {
+    public IRStmt visit(IntNegExprNode n) {
         return cjump(n);
     }
 
     // Unsupported
 
     @Override
-    public IRSeq visit(FunctionDeclNode n) {
+    public IRStmt visit(FunctionDeclNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(FunctionHeaderDeclNode n) {
+    public IRStmt visit(FunctionHeaderDeclNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(IxiProgramNode n) {
+    public IRStmt visit(IxiProgramNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(UseNode n) {
+    public IRStmt visit(UseNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(VarDeclNode n) {
+    public IRStmt visit(VarDeclNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(XiProgramNode n) {
+    public IRStmt visit(XiProgramNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(PrimitiveTypeNode n) {
+    public IRStmt visit(PrimitiveTypeNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(TypeExprArrayNode n) {
+    public IRStmt visit(TypeExprArrayNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(ArrayDeclStmtNode n) {
+    public IRStmt visit(ArrayDeclStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(AssignmentStmtNode n) {
+    public IRStmt visit(AssignmentStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(BlockStmtNode n) {
+    public IRStmt visit(BlockStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(ExprStmtNode n) {
+    public IRStmt visit(ExprStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(IfElseStmtNode n) {
+    public IRStmt visit(IfElseStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(MultiAssignStmtNode n) {
+    public IRStmt visit(MultiAssignStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(ProcedureStmtNode n) {
+    public IRStmt visit(ProcedureStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(ReturnStmtNode n) {
+    public IRStmt visit(ReturnStmtNode n) {
         throw new UnsupportedOperationException();
 
     }
 
     @Override
-    public IRSeq visit(VarDeclStmtNode n) {
+    public IRStmt visit(VarDeclStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(VarInitStmtNode n) {
+    public IRStmt visit(VarInitStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public IRSeq visit(WhileStmtNode n) {
+    public IRStmt visit(WhileStmtNode n) {
         throw new UnsupportedOperationException();
     }
 

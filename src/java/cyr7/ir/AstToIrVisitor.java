@@ -58,7 +58,7 @@ import cyr7.visitor.AbstractVisitor;
 
 public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
-    private final IdGenerator generator = new IdGenerator();
+    private final IdGenerator generator = new DefaultIdGenerator();
 
     public AstToIrVisitor() {
     }
@@ -197,8 +197,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String l2 = generator.newLabel();
         String l3 = generator.newLabel();
 
-        IRSeq left = n.left.accept(new CTranslationVisitor(generator, l1, l3));
-        IRSeq right = n.right.accept(new CTranslationVisitor(generator, l2, l3));
+        IRStmt left = n.left.accept(new CTranslationVisitor(generator, l1, l3));
+        IRStmt right = n.right.accept(new CTranslationVisitor(generator, l2, l3));
 
         return OneOfTwo.ofFirst(
             new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
@@ -260,8 +260,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String l2 = generator.newLabel();
         String l3 = generator.newLabel();
 
-        IRSeq left = n.left.accept(new CTranslationVisitor(generator, l3, l1));
-        IRSeq right = n.right.accept(new CTranslationVisitor(generator, l3, l2));
+        IRStmt left = n.left.accept(new CTranslationVisitor(generator, l3, l1));
+        IRStmt right = n.right.accept(new CTranslationVisitor(generator, l3, l2));
 
         return OneOfTwo.ofFirst(
             new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
