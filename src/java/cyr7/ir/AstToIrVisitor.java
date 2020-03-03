@@ -45,7 +45,6 @@ import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.nodes.IRBinOp;
-import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExpr;
@@ -197,14 +196,16 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String l1 = generator.newLabel();
         String l2 = generator.newLabel();
         String l3 = generator.newLabel();
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
+
+        IRSeq left = n.left.accept(new CTranslationVisitor(generator, l1, l3));
+        IRSeq right = n.right.accept(new CTranslationVisitor(generator, l2, l3));
+
         return OneOfTwo.ofFirst(
-                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
-                        new IRCJump(left, l1, l3), new IRLabel(l1),
-                        new IRCJump(right, l2, l3), new IRLabel(l2),
-                        new IRMove(new IRTemp(x), new IRConst(1)),
-                        new IRLabel(l3)), new IRTemp(x)));
+            new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
+                left, new IRLabel(l1),
+                right, new IRLabel(l2),
+                new IRMove(new IRTemp(x), new IRConst(1)),
+                new IRLabel(l3)), new IRTemp(x)));
     }
 
     @Override
@@ -259,15 +260,15 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String l2 = generator.newLabel();
         String l3 = generator.newLabel();
 
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
+        IRSeq left = n.left.accept(new CTranslationVisitor(generator, l3, l1));
+        IRSeq right = n.right.accept(new CTranslationVisitor(generator, l3, l2));
 
         return OneOfTwo.ofFirst(
-                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
-                        new IRCJump(left, l3, l1), new IRLabel(l1),
-                        new IRCJump(right, l3, l2), new IRLabel(l2),
-                        new IRMove(new IRTemp(x), new IRConst(0)),
-                        new IRLabel(l3)), new IRTemp(x)));
+            new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
+                left, new IRLabel(l1),
+                right, new IRLabel(l2),
+                new IRMove(new IRTemp(x), new IRConst(0)),
+                new IRLabel(l3)), new IRTemp(x)));
     }
 
     @Override
