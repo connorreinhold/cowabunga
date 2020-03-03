@@ -1,7 +1,6 @@
 package cyr7.ir;
 
 import cyr7.ast.VarDeclNode;
-import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -48,14 +47,16 @@ import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
+import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMove;
-import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
-public class AstToIrVisitor extends AbstractVisitor<IRNode> {
+public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     private int labelCounter;
     private int tempCounter;
@@ -73,245 +74,266 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
         return String.format("_t%d", (tempCounter++));
     }
 
-    public IRNode visit(ExprNode n) {
-        if (n instanceof AddExprNode) {
-            return visit((AddExprNode) n);
-        } else if (n instanceof AndExprNode) {
-            return visit((AndExprNode) n);
-        }
-    }
-
     @Override
-    public IRNode visit(FunctionDeclNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(FunctionDeclNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(FunctionHeaderDeclNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(FunctionHeaderDeclNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(IxiProgramNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(IxiProgramNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(UseNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(UseNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(VarDeclNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(VarDeclNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(XiProgramNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(XiProgramNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(PrimitiveTypeNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(PrimitiveTypeNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(TypeExprArrayNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(TypeExprArrayNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(ArrayDeclStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(ArrayDeclStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(AssignmentStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(AssignmentStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(BlockStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(BlockStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(ExprStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(ExprStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(IfElseStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(IfElseStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(MultiAssignStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(MultiAssignStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(ProcedureStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(ProcedureStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(ReturnStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(VarDeclStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(VarDeclStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(VarInitStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(VarInitStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(WhileStmtNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(WhileStmtNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(FunctionCallExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(FunctionCallExprNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(ArrayAccessExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(ArrayAccessExprNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(VariableAccessExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(VariableAccessExprNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(AddExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.ADD, this.visit(n.left),
-                this.visit(n.right));
+    public OneOfTwo<IRExpr, IRStmt> visit(AddExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.ADD, left, right));
     }
 
     @Override
-    public IRNode visit(AndExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(AndExprNode n) {
+        String x = newTemp();
+        String l1 = newLabel();
+        String l2 = newLabel();
+        String l3 = newLabel();
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(
+                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
+                        new IRCJump(left, l1, l3), new IRLabel(l1),
+                        new IRCJump(right, l2, l3), new IRLabel(l2),
+                        new IRMove(new IRTemp(x), new IRConst(1)),
+                        new IRLabel(l3)), new IRTemp(x)));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(DivExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.DIV, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(EqualsExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.EQ, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(GTEExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.GEQ, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(GTExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.GT, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(HighMultExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.HMUL, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(LTEExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.LEQ, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(LTExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.LT, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(MultExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.MUL, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(NotEqualsExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.NEQ, left, right));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(OrExprNode n) {
         String x = newTemp();
         String l1 = newLabel();
         String l2 = newLabel();
         String l3 = newLabel();
 
-        return new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
-                new IRCJump(visit(n.left), l1, l3), new IRLabel(l1),
-                new IRCJump(visit(n.right), l2, l3), new IRLabel(l2),
-                new IRMove(new IRTemp(x), new IRConst(1)), new IRLabel(l3)),
-                new IRTemp(x));
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+
+        return OneOfTwo.ofFirst(
+                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
+                        new IRCJump(left, l3, l1), new IRLabel(l1),
+                        new IRCJump(right, l3, l2), new IRLabel(l2),
+                        new IRMove(new IRTemp(x), new IRConst(0)),
+                        new IRLabel(l3)), new IRTemp(x)));
     }
 
     @Override
-    public IRNode visit(DivExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.DIV, visit(n.left), visit(n.right));
+    public OneOfTwo<IRExpr, IRStmt> visit(RemExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.MOD, left, right));
     }
 
     @Override
-    public IRNode visit(EqualsExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.EQ, visit(n.left), visit(n.right));
+    public OneOfTwo<IRExpr, IRStmt> visit(SubExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.SUB, left, right));
     }
 
     @Override
-    public IRNode visit(GTEExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.GEQ, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(GTExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.GT, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(HighMultExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.HMUL, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(LTEExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.LEQ, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(LTExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.LT, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(MultExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.MUL, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(NotEqualsExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.NEQ, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(OrExprNode n) {
-        String x = newTemp();
-        String l1 = newLabel();
-        String l2 = newLabel();
-        String l3 = newLabel();
-
-        return new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
-                new IRCJump(visit(n.left), l3, l1), new IRLabel(l1),
-                new IRCJump(visit(n.right), l3, l2), new IRLabel(l2),
-                new IRMove(new IRTemp(x), new IRConst(0)), new IRLabel(l3)),
-                new IRTemp(x));
-    }
-
-    @Override
-    public IRNode visit(RemExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.MOD, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(SubExprNode n) {
-        return new IRBinOp(IRBinOp.OpType.SUB, visit(n.left), visit(n.right));
-    }
-
-    @Override
-    public IRNode visit(LiteralArrayExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(LiteralArrayExprNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(LiteralBoolExprNode n) {
-        return new IRConst(n.contents ? 1 : 0);
+    public OneOfTwo<IRExpr, IRStmt> visit(LiteralBoolExprNode n) {
+        return OneOfTwo.ofFirst(new IRConst(n.contents ? 1 : 0));
     }
 
     @Override
-    public IRNode visit(LiteralCharExprNode n) {
-        return new IRConst(n.contents.charAt(0));
+    public OneOfTwo<IRExpr, IRStmt> visit(LiteralCharExprNode n) {
+        return OneOfTwo.ofFirst(new IRConst(n.contents.charAt(0)));
     }
 
     @Override
-    public IRNode visit(LiteralIntExprNode n) {
-        return new IRConst(Long.parseLong(n.contents));
+    public OneOfTwo<IRExpr, IRStmt> visit(LiteralIntExprNode n) {
+        return OneOfTwo.ofFirst(new IRConst(Long.parseLong(n.contents)));
     }
 
     @Override
-    public IRNode visit(LiteralStringExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(LiteralStringExprNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(BoolNegExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(BoolNegExprNode n) {
         return null;
     }
 
     @Override
-    public IRNode visit(IntNegExprNode n) {
+    public OneOfTwo<IRExpr, IRStmt> visit(IntNegExprNode n) {
         return null;
     }
 }

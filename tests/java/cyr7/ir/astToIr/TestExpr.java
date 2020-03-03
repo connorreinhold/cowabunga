@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
-import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
@@ -56,11 +55,10 @@ class TestExpr {
                 new LiteralIntExprNode(null, "5"));
 
         IRNode result = IRFactory.parseAst(astNode);
-        System.out.println(result);
         long expectedResult = 10;
         assertEquals(expectedResult, IRFactory.testExpr(result));
 
-        astNode = new SubExprNode(null, new LiteralIntExprNode(null, "5"),
+        astNode = new AddExprNode(null, new LiteralIntExprNode(null, "5"),
                 new LiteralIntExprNode(null, "5"));
 
         result = IRFactory.parseAst(astNode);

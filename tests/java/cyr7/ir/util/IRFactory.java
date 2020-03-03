@@ -14,10 +14,11 @@ import cyr7.ir.nodes.IRStmt;
 public class IRFactory {
     public static IRNode parseAst(AbstractNode astNode) {
         AstToIrVisitor visitor = new AstToIrVisitor();
-        IRNode result = astNode.accept(visitor);
+        // not what we want eventually
+        IRNode result = astNode.accept(visitor).assertFirst();
         return result;
     }
-    
+
     public static long testExpr(IRNode irNode) {
         IRExpr expr = (IRExpr) irNode;
         IRStmt bBody = new IRSeq(new IRReturn(expr));
