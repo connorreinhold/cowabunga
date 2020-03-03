@@ -1,9 +1,5 @@
 package cyr7.ir.astToIr;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import org.junit.jupiter.api.Test;
-
 import cyr7.ast.AbstractNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
@@ -12,6 +8,9 @@ import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.util.IRFactory;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestExpr {
 
@@ -33,7 +32,7 @@ class TestExpr {
         assertEquals(expectedResult, IRFactory.testExpr(result));
     }
 
-    // @Test
+    @Test
     void testUnaryOps() {
         AbstractNode astNode = new BoolNegExprNode(null,
                 new LiteralBoolExprNode(null, true));

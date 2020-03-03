@@ -6,6 +6,7 @@ import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.binexpr.AndExprNode;
+import cyr7.ast.expr.binexpr.BinExprNode;
 import cyr7.ast.expr.binexpr.DivExprNode;
 import cyr7.ast.expr.binexpr.EqualsExprNode;
 import cyr7.ast.expr.binexpr.GTEExprNode;
@@ -74,6 +75,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         return String.format("_t%d", (tempCounter++));
     }
 
+    // Top Level
+
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionDeclNode n) {
         return null;
@@ -113,6 +116,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public OneOfTwo<IRExpr, IRStmt> visit(TypeExprArrayNode n) {
         return null;
     }
+
+    // Statements
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ArrayDeclStmtNode n) {
@@ -169,6 +174,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         return null;
     }
 
+    // Expressions
+
+    private OneOfTwo<IRExpr, IRStmt> binOp(IRBinOp.OpType opType, BinExprNode n) {
+        IRExpr left = n.left.accept(this).assertFirst();
+        IRExpr right = n.right.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(opType, left, right));
+    }
+
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionCallExprNode n) {
         return null;
@@ -186,9 +199,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AddExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.ADD, left, right));
+        return binOp(IRBinOp.OpType.ADD, n);
     }
 
     @Override
@@ -209,65 +220,47 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(DivExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.DIV, left, right));
+        return binOp(IRBinOp.OpType.DIV, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(EqualsExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.EQ, left, right));
+        return binOp(IRBinOp.OpType.EQ, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(GTEExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.GEQ, left, right));
+        return binOp(IRBinOp.OpType.GEQ, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(GTExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.GT, left, right));
+        return binOp(IRBinOp.OpType.GT, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(HighMultExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.HMUL, left, right));
+        return binOp(IRBinOp.OpType.HMUL, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LTEExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.LEQ, left, right));
+        return binOp(IRBinOp.OpType.LEQ, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LTExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.LT, left, right));
+        return binOp(IRBinOp.OpType.LT, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(MultExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.MUL, left, right));
+        return binOp(IRBinOp.OpType.MUL, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(NotEqualsExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.NEQ, left, right));
+        return binOp(IRBinOp.OpType.NEQ, n);
     }
 
     @Override
@@ -290,16 +283,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(RemExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.MOD, left, right));
+        return binOp(IRBinOp.OpType.MOD, n);
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(SubExprNode n) {
-        IRExpr left = n.left.accept(this).assertFirst();
-        IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.SUB, left, right));
+        return binOp(IRBinOp.OpType.SUB, n);
     }
 
     @Override
