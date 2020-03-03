@@ -14,6 +14,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestArrayAccessExpr {
@@ -22,9 +24,9 @@ public class TestArrayAccessExpr {
     void testFunctionCallArrayAccess() throws Exception {
         ExprNode parsed = ParserFactory.parseExpr("f()[0]");
         ExprNode expected = new ArrayAccessExprNode(
-            null,
-            new FunctionCallExprNode(null, "f", List.of()),
-            new LiteralIntExprNode(null, "0")
+            LOC,
+            new FunctionCallExprNode(LOC, "f", List.of()),
+            new LiteralIntExprNode(LOC, "0")
         );
         assertEquals(expected, parsed);
     }
@@ -32,32 +34,32 @@ public class TestArrayAccessExpr {
     @Test
     void testArrayAccessPrecedence() throws Exception {
         ExprNode parsed = ParserFactory.parseExpr("5 + a[0]");
-        ExprNode expected = new AddExprNode(null,
-            new LiteralIntExprNode(null, "5"),
-            new ArrayAccessExprNode(null,
-                new VariableAccessExprNode(null, "a"),
-                new LiteralIntExprNode(null, "0")
+        ExprNode expected = new AddExprNode(LOC,
+            new LiteralIntExprNode(LOC, "5"),
+            new ArrayAccessExprNode(LOC,
+                new VariableAccessExprNode(LOC, "a"),
+                new LiteralIntExprNode(LOC, "0")
             )
         );
         assertEquals(expected, parsed);
 
         parsed = ParserFactory.parseExpr("5 * a[0]");
-        expected = new MultExprNode(null,
-            new LiteralIntExprNode(null, "5"),
-            new ArrayAccessExprNode(null,
-                new VariableAccessExprNode(null, "a"),
-                new LiteralIntExprNode(null, "0")
+        expected = new MultExprNode(LOC,
+            new LiteralIntExprNode(LOC, "5"),
+            new ArrayAccessExprNode(LOC,
+                new VariableAccessExprNode(LOC, "a"),
+                new LiteralIntExprNode(LOC, "0")
             )
         );
         assertEquals(expected, parsed);
 
         parsed = ParserFactory.parseExpr("5 + -a[0]");
-        expected = new AddExprNode(null,
-            new LiteralIntExprNode(null, "5"),
-            new IntNegExprNode(null,
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
-                    new LiteralIntExprNode(null, "0")
+        expected = new AddExprNode(LOC,
+            new LiteralIntExprNode(LOC, "5"),
+            new IntNegExprNode(LOC,
+                new ArrayAccessExprNode(LOC,
+                    new VariableAccessExprNode(LOC, "a"),
+                    new LiteralIntExprNode(LOC, "0")
                 )
             )
         );
@@ -67,38 +69,38 @@ public class TestArrayAccessExpr {
     @Test
     void testArrayLiteralAccess() throws Exception {
         ExprNode parsed = ParserFactory.parseExpr("{1, 3, 5,}[7]");
-        ExprNode expected = new ArrayAccessExprNode(null,
-            new LiteralArrayExprNode(null, List.of(
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "3"),
-                new LiteralIntExprNode(null, "5")
+        ExprNode expected = new ArrayAccessExprNode(LOC,
+            new LiteralArrayExprNode(LOC, List.of(
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "3"),
+                new LiteralIntExprNode(LOC, "5")
             )),
-            new LiteralIntExprNode(null, "7")
+            new LiteralIntExprNode(LOC, "7")
         );
         assertEquals(expected, parsed);
 
         parsed = ParserFactory.parseExpr(
             "{ {f()}[h()], {1}[0], {1,2}[2]} [g()]");
-        expected = new ArrayAccessExprNode(null,
-            new LiteralArrayExprNode(null, List.of(
-                new ArrayAccessExprNode(null,
-                    new LiteralArrayExprNode(null, List.of(
-                        new FunctionCallExprNode(null, "f", List.of())
+        expected = new ArrayAccessExprNode(LOC,
+            new LiteralArrayExprNode(LOC, List.of(
+                new ArrayAccessExprNode(LOC,
+                    new LiteralArrayExprNode(LOC, List.of(
+                        new FunctionCallExprNode(LOC, "f", List.of())
                     )),
-                    new FunctionCallExprNode(null, "h", List.of())),
-                new ArrayAccessExprNode(null,
-                    new LiteralArrayExprNode(null, List.of(
-                        new LiteralIntExprNode(null, "1")
+                    new FunctionCallExprNode(LOC, "h", List.of())),
+                new ArrayAccessExprNode(LOC,
+                    new LiteralArrayExprNode(LOC, List.of(
+                        new LiteralIntExprNode(LOC, "1")
                     )),
-                    new LiteralIntExprNode(null, "0")),
-                new ArrayAccessExprNode(null,
-                    new LiteralArrayExprNode(null, List.of(
-                        new LiteralIntExprNode(null, "1"),
-                        new LiteralIntExprNode(null, "2")
+                    new LiteralIntExprNode(LOC, "0")),
+                new ArrayAccessExprNode(LOC,
+                    new LiteralArrayExprNode(LOC, List.of(
+                        new LiteralIntExprNode(LOC, "1"),
+                        new LiteralIntExprNode(LOC, "2")
                     )),
-                    new LiteralIntExprNode(null, "2"))
+                    new LiteralIntExprNode(LOC, "2"))
             )),
-            new FunctionCallExprNode(null, "g", List.of())
+            new FunctionCallExprNode(LOC, "g", List.of())
         );
         assertEquals(expected, parsed);
     }

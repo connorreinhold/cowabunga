@@ -10,23 +10,25 @@ import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 public class TestImmutable {
 
     @Test
     void testImmutable() {
-        XiProgramNode programNode = new XiProgramNode(null, new LinkedList<>(), new LinkedList<>());
+        XiProgramNode programNode = new XiProgramNode(LOC, new LinkedList<>(), new LinkedList<>());
         assertThrows(UnsupportedOperationException.class,
             () -> programNode.functions.add(
             new FunctionDeclNode(
-                null,
+                LOC,
                 new FunctionHeaderDeclNode(
-                    null,
+                    LOC,
                     "whatever",
                     new LinkedList<>(),
                     new LinkedList<>()
                 ),
                 new BlockStmtNode(
-                    null,
+                    LOC,
                     new LinkedList<>()
                 )
             )

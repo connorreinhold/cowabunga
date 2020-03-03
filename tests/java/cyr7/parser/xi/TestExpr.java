@@ -4,8 +4,25 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
-import cyr7.ast.expr.binexpr.*;
-import cyr7.ast.expr.literalexpr.*;
+import cyr7.ast.expr.binexpr.AddExprNode;
+import cyr7.ast.expr.binexpr.AndExprNode;
+import cyr7.ast.expr.binexpr.DivExprNode;
+import cyr7.ast.expr.binexpr.EqualsExprNode;
+import cyr7.ast.expr.binexpr.GTEExprNode;
+import cyr7.ast.expr.binexpr.GTExprNode;
+import cyr7.ast.expr.binexpr.HighMultExprNode;
+import cyr7.ast.expr.binexpr.LTEExprNode;
+import cyr7.ast.expr.binexpr.LTExprNode;
+import cyr7.ast.expr.binexpr.MultExprNode;
+import cyr7.ast.expr.binexpr.NotEqualsExprNode;
+import cyr7.ast.expr.binexpr.OrExprNode;
+import cyr7.ast.expr.binexpr.RemExprNode;
+import cyr7.ast.expr.binexpr.SubExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
+import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
+import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
+import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
+import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.exceptions.lexer.LexerIntegerOverflowException;
@@ -20,73 +37,75 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 class TestExpr {
 
     @Test
     void testIntOperations() throws Exception {
         String expr = "-1 + 1";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new AddExprNode(null,
-            new IntNegExprNode(null,
-                new LiteralIntExprNode(null, "1")),
-            new LiteralIntExprNode(null, "1")
+        ExprNode expected = new AddExprNode(LOC,
+            new IntNegExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1")),
+            new LiteralIntExprNode(LOC, "1")
         );
         assertEquals(parsed, expected);
 
         expr = "1 + 2 + 3";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new AddExprNode(null,
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "2")),
-            new LiteralIntExprNode(null, "3")
+        expected = new AddExprNode(LOC,
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "2")),
+            new LiteralIntExprNode(LOC, "3")
         );
         assertEquals(parsed, expected);
 
         expr = "1 + (2 + 3)";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new AddExprNode(null,
-            new LiteralIntExprNode(null, "1"),
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "2"),
-                new LiteralIntExprNode(null, "3"))
+        expected = new AddExprNode(LOC,
+            new LiteralIntExprNode(LOC, "1"),
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "2"),
+                new LiteralIntExprNode(LOC, "3"))
         );
         assertEquals(parsed, expected);
 
         expr = "1 / (2 * 3 / 4)";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new DivExprNode(null,
-            new LiteralIntExprNode(null, "1"),
-            new DivExprNode(null,
-                new MultExprNode(null,
-                    new LiteralIntExprNode(null, "2"),
-                    new LiteralIntExprNode(null, "3")),
-                new LiteralIntExprNode(null, "4"))
+        expected = new DivExprNode(LOC,
+            new LiteralIntExprNode(LOC, "1"),
+            new DivExprNode(LOC,
+                new MultExprNode(LOC,
+                    new LiteralIntExprNode(LOC, "2"),
+                    new LiteralIntExprNode(LOC, "3")),
+                new LiteralIntExprNode(LOC, "4"))
         );
         assertEquals(parsed, expected);
 
         expr = "1 *>> 2 + 3 / 4";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new AddExprNode(null,
-            new HighMultExprNode(null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "2")),
-            new DivExprNode(null,
-                new LiteralIntExprNode(null, "3"),
-                new LiteralIntExprNode(null, "4"))
+        expected = new AddExprNode(LOC,
+            new HighMultExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "2")),
+            new DivExprNode(LOC,
+                new LiteralIntExprNode(LOC, "3"),
+                new LiteralIntExprNode(LOC, "4"))
         );
 
         expr = "0 - -3 / 4 % 5";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new SubExprNode(null,
-            new LiteralIntExprNode(null, "0"),
-            new RemExprNode(null,
-                new DivExprNode(null,
-                    new IntNegExprNode(null,
-                        new LiteralIntExprNode(null, "3")),
-                    new LiteralIntExprNode(null, "4")
+        expected = new SubExprNode(LOC,
+            new LiteralIntExprNode(LOC, "0"),
+            new RemExprNode(LOC,
+                new DivExprNode(LOC,
+                    new IntNegExprNode(LOC,
+                        new LiteralIntExprNode(LOC, "3")),
+                    new LiteralIntExprNode(LOC, "4")
                 ),
-                new LiteralIntExprNode(null, "5"))
+                new LiteralIntExprNode(LOC, "5"))
         );
 
         assertEquals(parsed, expected);
@@ -97,55 +116,55 @@ class TestExpr {
     void testIntComparators() throws Exception {
         String expr = "-1 > 1";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new GTExprNode(null,
-            new IntNegExprNode(null,
-                new LiteralIntExprNode(null, "1")),
-            new LiteralIntExprNode(null, "1")
+        ExprNode expected = new GTExprNode(LOC,
+            new IntNegExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1")),
+            new LiteralIntExprNode(LOC, "1")
         );
         assertEquals(parsed, expected);
 
 
         expr = "-2 < 1 + 1";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new LTExprNode(null,
-            new IntNegExprNode(null,
-                new LiteralIntExprNode(null, "2")),
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "1"))
+        expected = new LTExprNode(LOC,
+            new IntNegExprNode(LOC,
+                new LiteralIntExprNode(LOC, "2")),
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "1"))
         );
         assertEquals(parsed, expected);
 
         expr = "2 + function() >= 1 % 1";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new GTEExprNode(null,
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "2"),
-                new FunctionCallExprNode(null,
+        expected = new GTEExprNode(LOC,
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "2"),
+                new FunctionCallExprNode(LOC,
                     "hello",
                     new LinkedList<>())),
-            new RemExprNode(null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "1"))
+            new RemExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "1"))
         );
 
         expr = "(4 *>> 6) <= 1 + 1";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new LTEExprNode(null,
-            new HighMultExprNode(null,
-                new LiteralIntExprNode(null, "4"),
-                new LiteralIntExprNode(null, "6")),
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "1"))
+        expected = new LTEExprNode(LOC,
+            new HighMultExprNode(LOC,
+                new LiteralIntExprNode(LOC, "4"),
+                new LiteralIntExprNode(LOC, "6")),
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "1"))
         );
         assertEquals(parsed, expected);
 
         expr = "3 != hello()";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new NotEqualsExprNode(null,
-            new LiteralIntExprNode(null, "3"),
-            new FunctionCallExprNode(null,
+        expected = new NotEqualsExprNode(LOC,
+            new LiteralIntExprNode(LOC, "3"),
+            new FunctionCallExprNode(LOC,
                 "hello",
                 new LinkedList<>())
         );
@@ -153,10 +172,10 @@ class TestExpr {
 
         expr = "-4 == hello()";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new EqualsExprNode(null,
-            new IntNegExprNode(null,
-                new LiteralIntExprNode(null, "4")),
-            new FunctionCallExprNode(null,
+        expected = new EqualsExprNode(LOC,
+            new IntNegExprNode(LOC,
+                new LiteralIntExprNode(LOC, "4")),
+            new FunctionCallExprNode(LOC,
                 "hello",
                 new LinkedList<>())
         );
@@ -167,34 +186,34 @@ class TestExpr {
     void testBoolOperations() throws Exception {
         String expr = "true | false & true";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new OrExprNode(null,
-            new LiteralBoolExprNode(null, true),
-            new AndExprNode(null,
-                new LiteralBoolExprNode(null, false),
-                new LiteralBoolExprNode(null, true)
+        ExprNode expected = new OrExprNode(LOC,
+            new LiteralBoolExprNode(LOC, true),
+            new AndExprNode(LOC,
+                new LiteralBoolExprNode(LOC, false),
+                new LiteralBoolExprNode(LOC, true)
             )
         );
         assertEquals(parsed, expected);
 
         expr = "true | false | true";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new OrExprNode(null,
-            new OrExprNode(null,
-                new LiteralBoolExprNode(null, true),
-                new LiteralBoolExprNode(null, false)
+        expected = new OrExprNode(LOC,
+            new OrExprNode(LOC,
+                new LiteralBoolExprNode(LOC, true),
+                new LiteralBoolExprNode(LOC, false)
             ),
-            new LiteralBoolExprNode(null, true)
+            new LiteralBoolExprNode(LOC, true)
         );
         assertEquals(parsed, expected);
 
         expr = "(true | false) & true";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new AndExprNode(null,
-            new OrExprNode(null,
-                new LiteralBoolExprNode(null, true),
-                new LiteralBoolExprNode(null, false)
+        expected = new AndExprNode(LOC,
+            new OrExprNode(LOC,
+                new LiteralBoolExprNode(LOC, true),
+                new LiteralBoolExprNode(LOC, false)
             ),
-            new LiteralBoolExprNode(null, true)
+            new LiteralBoolExprNode(LOC, true)
         );
         assertEquals(parsed, expected);
     }
@@ -204,43 +223,43 @@ class TestExpr {
         String expr = "true == false & true";
         ExprNode parsed = ParserFactory.parseExpr(expr);
         ExprNode expected =
-            new AndExprNode(null,
-                new EqualsExprNode(null,
-                    new LiteralBoolExprNode(null, true),
-                    new LiteralBoolExprNode(null, false)),
-                new LiteralBoolExprNode(null, true)
+            new AndExprNode(LOC,
+                new EqualsExprNode(LOC,
+                    new LiteralBoolExprNode(LOC, true),
+                    new LiteralBoolExprNode(LOC, false)),
+                new LiteralBoolExprNode(LOC, true)
             );
         assertEquals(parsed, expected);
 
         expr = "true | false != true";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new OrExprNode(null,
-            new LiteralBoolExprNode(null, true),
-            new NotEqualsExprNode(null,
-                new LiteralBoolExprNode(null, false),
-                new LiteralBoolExprNode(null, true)
+        expected = new OrExprNode(LOC,
+            new LiteralBoolExprNode(LOC, true),
+            new NotEqualsExprNode(LOC,
+                new LiteralBoolExprNode(LOC, false),
+                new LiteralBoolExprNode(LOC, true)
             )
         );
         assertEquals(parsed, expected);
 
         expr = "(true | false) != !true";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new NotEqualsExprNode(null,
-            new OrExprNode(null,
-                new LiteralBoolExprNode(null, true),
-                new LiteralBoolExprNode(null, false)
+        expected = new NotEqualsExprNode(LOC,
+            new OrExprNode(LOC,
+                new LiteralBoolExprNode(LOC, true),
+                new LiteralBoolExprNode(LOC, false)
             ),
-            new BoolNegExprNode(null,
-                new LiteralBoolExprNode(null, true))
+            new BoolNegExprNode(LOC,
+                new LiteralBoolExprNode(LOC, true))
         );
         assertEquals(parsed, expected);
 
         expr = "!!!true";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new BoolNegExprNode(null,
-            new BoolNegExprNode(null,
-                new BoolNegExprNode(null,
-                    new LiteralBoolExprNode(null, true)))
+        expected = new BoolNegExprNode(LOC,
+            new BoolNegExprNode(LOC,
+                new BoolNegExprNode(LOC,
+                    new LiteralBoolExprNode(LOC, true)))
         );
         assertEquals(parsed, expected);
     }
@@ -250,41 +269,41 @@ class TestExpr {
         String expr = "a + b";
         ExprNode parsed = ParserFactory.parseExpr(expr);
         ExprNode expected =
-            new AddExprNode(null,
-                new VariableAccessExprNode(null, "a"),
-                new VariableAccessExprNode(null, "b")
+            new AddExprNode(LOC,
+                new VariableAccessExprNode(LOC, "a"),
+                new VariableAccessExprNode(LOC, "b")
             );
         assertEquals(parsed, expected);
 
         expr = "a[2][3][4]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new ArrayAccessExprNode(null,
-            new ArrayAccessExprNode(null,
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
-                    new LiteralIntExprNode(null, "2")),
-                new LiteralIntExprNode(null, "3")),
-            new LiteralIntExprNode(null, "4"));
+        expected = new ArrayAccessExprNode(LOC,
+            new ArrayAccessExprNode(LOC,
+                new ArrayAccessExprNode(LOC,
+                    new VariableAccessExprNode(LOC, "a"),
+                    new LiteralIntExprNode(LOC, "2")),
+                new LiteralIntExprNode(LOC, "3")),
+            new LiteralIntExprNode(LOC, "4"));
         assertEquals(parsed, expected);
 
         expr = "abcdefghij[2+2]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new ArrayAccessExprNode(null,
-            new VariableAccessExprNode(null, "abcdefghij"),
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "2"),
-                new LiteralIntExprNode(null, "2")));
+        expected = new ArrayAccessExprNode(LOC,
+            new VariableAccessExprNode(LOC, "abcdefghij"),
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "2"),
+                new LiteralIntExprNode(LOC, "2")));
         assertEquals(parsed, expected);
 
         expr = "length(a[2+b])";
         parsed = ParserFactory.parseExpr(expr);
         LinkedList<ExprNode> params = new LinkedList<>();
-        params.add(new ArrayAccessExprNode(null,
-            new VariableAccessExprNode(null, "a"),
-            new AddExprNode(null,
-                new LiteralIntExprNode(null, "2"),
-                new VariableAccessExprNode(null, "b"))));
-        expected = new FunctionCallExprNode(null, "length", params);
+        params.add(new ArrayAccessExprNode(LOC,
+            new VariableAccessExprNode(LOC, "a"),
+            new AddExprNode(LOC,
+                new LiteralIntExprNode(LOC, "2"),
+                new VariableAccessExprNode(LOC, "b"))));
+        expected = new FunctionCallExprNode(LOC, "length", params);
 
         assertEquals(parsed, expected);
     }
@@ -293,32 +312,32 @@ class TestExpr {
     void testFunctionCalls() throws Exception {
         String expr = "hello('a', b, 3, a[4], \"hello\")";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new FunctionCallExprNode(null,
+        ExprNode expected = new FunctionCallExprNode(LOC,
             "hello",
-            List.of(new LiteralCharExprNode(null, "a"),
-                new VariableAccessExprNode(null, "b"),
-                new LiteralIntExprNode(null, "3"),
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
-                    new LiteralIntExprNode(null, "4")),
-                new LiteralStringExprNode(null, "hello")));
+            List.of(new LiteralCharExprNode(LOC, "a"),
+                new VariableAccessExprNode(LOC, "b"),
+                new LiteralIntExprNode(LOC, "3"),
+                new ArrayAccessExprNode(LOC,
+                    new VariableAccessExprNode(LOC, "a"),
+                    new LiteralIntExprNode(LOC, "4")),
+                new LiteralStringExprNode(LOC, "hello")));
         assertEquals(parsed, expected);
 
         expr = "a(b + 4) + b[a] *>> a[b+a]";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new AddExprNode(null,
-            new FunctionCallExprNode(null,
-                "a", List.of(new AddExprNode(null,
-                new VariableAccessExprNode(null, "b"),
-                new LiteralIntExprNode(null, "4")))),
-            new HighMultExprNode(null, new ArrayAccessExprNode(null,
-                new VariableAccessExprNode(null, "b"),
-                new VariableAccessExprNode(null, "a")),
-                new ArrayAccessExprNode(null,
-                    new VariableAccessExprNode(null, "a"),
-                    new AddExprNode(null,
-                        new VariableAccessExprNode(null, "b"),
-                        new VariableAccessExprNode(null, "a")))));
+        expected = new AddExprNode(LOC,
+            new FunctionCallExprNode(LOC,
+                "a", List.of(new AddExprNode(LOC,
+                new VariableAccessExprNode(LOC, "b"),
+                new LiteralIntExprNode(LOC, "4")))),
+            new HighMultExprNode(LOC, new ArrayAccessExprNode(LOC,
+                new VariableAccessExprNode(LOC, "b"),
+                new VariableAccessExprNode(LOC, "a")),
+                new ArrayAccessExprNode(LOC,
+                    new VariableAccessExprNode(LOC, "a"),
+                    new AddExprNode(LOC,
+                        new VariableAccessExprNode(LOC, "b"),
+                        new VariableAccessExprNode(LOC, "a")))));
         ParserUtil.printSExpr(parsed);
         ParserUtil.printSExpr(expected);
         assertEquals(parsed, expected);
@@ -329,12 +348,12 @@ class TestExpr {
     void testMisc() throws Exception {
         String expr = "{1,2,3,4,5}";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new LiteralArrayExprNode(null, List.of(
-            new LiteralIntExprNode(null, "1"),
-            new LiteralIntExprNode(null, "2"),
-            new LiteralIntExprNode(null, "3"),
-            new LiteralIntExprNode(null, "4"),
-            new LiteralIntExprNode(null, "5")
+        ExprNode expected = new LiteralArrayExprNode(LOC, List.of(
+            new LiteralIntExprNode(LOC, "1"),
+            new LiteralIntExprNode(LOC, "2"),
+            new LiteralIntExprNode(LOC, "3"),
+            new LiteralIntExprNode(LOC, "4"),
+            new LiteralIntExprNode(LOC, "5")
         ));
         assertEquals(parsed, expected);
     }
@@ -343,13 +362,13 @@ class TestExpr {
     void testMaxInt() throws Exception {
         String expr = "9223372036854775807";
         ExprNode parsed = ParserFactory.parseExpr(expr);
-        ExprNode expected = new LiteralIntExprNode(null, expr);
+        ExprNode expected = new LiteralIntExprNode(LOC, expr);
         assertEquals(parsed, expected);
         
         expr = "-9223372036854775808";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new IntNegExprNode(null, 
-                new LiteralIntExprNode(null, "9223372036854775808"));
+        expected = new IntNegExprNode(LOC, 
+                new LiteralIntExprNode(LOC, "9223372036854775808"));
         assertEquals(parsed, expected);
         
         final String largeExpr = "9223372036854775808";

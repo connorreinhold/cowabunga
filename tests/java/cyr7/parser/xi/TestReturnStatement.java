@@ -11,6 +11,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 public class TestReturnStatement {
 
     @Test
@@ -33,28 +35,28 @@ public class TestReturnStatement {
         StmtNode statement =
             ParserFactory.parseStatement("return x").get(0);
         assertEquals(new ReturnStmtNode(
-            null,
+            LOC,
             List.of(
-                new VariableAccessExprNode(null, "x")
+                new VariableAccessExprNode(LOC, "x")
             )
         ), statement);
 
         statement =
             ParserFactory.parseStatement("return x;").get(0);
         assertEquals(new ReturnStmtNode(
-            null,
+            LOC,
             List.of(
-                new VariableAccessExprNode(null, "x")
+                new VariableAccessExprNode(LOC, "x")
             )
         ), statement);
 
         statement =
             ParserFactory.parseStatement("return x, y;").get(0);
         assertEquals(new ReturnStmtNode(
-            null,
+            LOC,
             List.of(
-                new VariableAccessExprNode(null, "x"),
-                new VariableAccessExprNode(null, "y")
+                new VariableAccessExprNode(LOC, "x"),
+                new VariableAccessExprNode(LOC, "y")
             )
         ),statement);
     }

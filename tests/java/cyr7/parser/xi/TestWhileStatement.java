@@ -14,35 +14,36 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static cyr7.parser.util.ParserFactory.LOC;
 
 public class TestWhileStatement {
 
     @Test
     void testSingleLineWhileStatement() throws Exception {
         StmtNode expected = new WhileStmtNode(
-            null,
+            LOC,
             new LTExprNode(
-                null,
+                LOC,
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "a"
                 ),
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "b"
                 )
             ),
             new AssignmentStmtNode(
-                null,
-                new VariableAccessExprNode(null, "a"),
+                LOC,
+                new VariableAccessExprNode(LOC, "a"),
                 new AddExprNode(
-                    null,
+                    LOC,
                     new VariableAccessExprNode(
-                        null,
+                        LOC,
                         "a"
                     ),
                     new LiteralIntExprNode(
-                        null,
+                        LOC,
                         "1"
                     )
                 )
@@ -61,32 +62,32 @@ public class TestWhileStatement {
         StmtNode statement = ParserFactory
                 .parseStatement("while (a < b) { a = a + 1; }; ").get(0);
         assertEquals(statement, new WhileStmtNode(
-                null,
+                LOC,
             new LTExprNode(
-                null,
+                LOC,
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "a"
                 ),
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "b"
                 )
             ),
             new BlockStmtNode(
-                null,
+                LOC,
                 List.of(
                     new AssignmentStmtNode(
-                        null,
-                        new VariableAccessExprNode(null, "a"),
+                        LOC,
+                        new VariableAccessExprNode(LOC, "a"),
                         new AddExprNode(
-                            null,
+                            LOC,
                             new VariableAccessExprNode(
-                                null,
+                                LOC,
                                 "a"
                             ),
                             new LiteralIntExprNode(
-                                null,
+                                LOC,
                                 "1"
                             )
                         )
@@ -113,15 +114,15 @@ public class TestWhileStatement {
         StmtNode statement =
             ParserFactory.parseStatement("while b { return 0; }").get(0);
         assertEquals(new WhileStmtNode(
-            null,
-            new VariableAccessExprNode(null, "b"),
+            LOC,
+            new VariableAccessExprNode(LOC, "b"),
             new BlockStmtNode(
-                null,
+                LOC,
                 List.of(
                     new ReturnStmtNode(
-                        null,
+                        LOC,
                         List.of(
-                            new LiteralIntExprNode(null, "0")
+                            new LiteralIntExprNode(LOC, "0")
                         )
                     )
                 )
@@ -133,20 +134,20 @@ public class TestWhileStatement {
                 "while c { b = true return 0 }"
             ).get(0);
         assertEquals(new WhileStmtNode(
-            null,
-            new VariableAccessExprNode(null, "c"),
+            LOC,
+            new VariableAccessExprNode(LOC, "c"),
             new BlockStmtNode(
-                null,
+                LOC,
                 List.of(
                     new AssignmentStmtNode(
-                        null,
-                        new VariableAccessExprNode(null, "b"),
-                    new LiteralBoolExprNode(null, true)
+                        LOC,
+                        new VariableAccessExprNode(LOC, "b"),
+                    new LiteralBoolExprNode(LOC, true)
                     ),
                     new ReturnStmtNode(
-                        null,
+                        LOC,
                         List.of(
-                            new LiteralIntExprNode(null, "0")
+                            new LiteralIntExprNode(LOC, "0")
                         )
                     )
                 )

@@ -23,7 +23,7 @@ import java.io.PrintWriter;
 import java.io.Writer;
 import java.util.Optional;
 
-public final class SExpVisitor extends AbstractVisitor<Void> {
+public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
 
     private final SExpPrinter printer;
 
@@ -36,12 +36,12 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize() {
         flush();
     }
 
     @Override
-    public Void visit(FunctionDeclNode n) {
+    public Optional<Void> visit(FunctionDeclNode n) {
         printer.startList();
 
         printer.printAtom(n.header.identifier);
@@ -62,11 +62,11 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(FunctionHeaderDeclNode n) {
+    public Optional<Void> visit(FunctionHeaderDeclNode n) {
         printer.startUnifiedList();
 
         printer.printAtom(n.identifier);
@@ -84,11 +84,11 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
         printer.endList();
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(IxiProgramNode n) {
+    public Optional<Void> visit(IxiProgramNode n) {
         printer.startList();
         printer.printAtom("");
         printer.startUnifiedList();
@@ -99,31 +99,31 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
         printer.printAtom("");
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(UseNode n) {
+    public Optional<Void> visit(UseNode n) {
         printer.startList();
         printer.printAtom("use");
         printer.printAtom(n.interfaceName);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(VarDeclNode n) {
+    public Optional<Void> visit(VarDeclNode n) {
         printer.startList();
         printer.printAtom(n.identifier);
         n.typeExpr.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(XiProgramNode n) {
+    public Optional<Void> visit(XiProgramNode n) {
         printer.startList();
 
         printer.startUnifiedList();
@@ -140,18 +140,18 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(PrimitiveTypeNode n) {
+    public Optional<Void> visit(PrimitiveTypeNode n) {
         printer.printAtom(n.type.toString().toLowerCase());
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(TypeExprArrayNode n) {
+    public Optional<Void> visit(TypeExprArrayNode n) {
         printer.startList();
 
         printer.printAtom("[]");
@@ -162,34 +162,34 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     /* ---- ASSIGN ---- */
 
     @Override
-    public Void visit(ArrayDeclStmtNode n) {
+    public Optional<Void> visit(ArrayDeclStmtNode n) {
         printer.startList();
         printer.printAtom(n.identifier);
         n.type.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(AssignmentStmtNode n) {
+    public Optional<Void> visit(AssignmentStmtNode n) {
         printer.startList();
         printer.printAtom("=");
         n.lhs.accept(this);
         n.rhs.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(BlockStmtNode n) {
+    public Optional<Void> visit(BlockStmtNode n) {
         printer.startList();
 
         for (StmtNode statement : n.statements) {
@@ -198,33 +198,33 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(ExprStmtNode n) {
+    public Optional<Void> visit(ExprStmtNode n) {
         printer.startList();
         printer.printAtom("=");
         printer.printAtom("_");
         n.expr.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(IfElseStmtNode n) {
+    public Optional<Void> visit(IfElseStmtNode n) {
         printer.startList();
         printer.printAtom("if");
         n.guard.accept(this);
         n.ifBlock.accept(this);
         n.elseBlock.ifPresent(stmtNode -> stmtNode.accept(this));
         printer.endList();
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(MultiAssignStmtNode n) {
+    public Optional<Void> visit(MultiAssignStmtNode n) {
         printer.startList();
 
         printer.printAtom("=");
@@ -242,18 +242,18 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
         n.initializer.accept(this);
 
         printer.endList();
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(ProcedureStmtNode n) {
+    public Optional<Void> visit(ProcedureStmtNode n) {
         n.procedureCall.accept(this);
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(ReturnStmtNode n) {
+    public Optional<Void> visit(ReturnStmtNode n) {
         printer.startList();
         printer.printAtom("return");
         for (ExprNode expr : n.exprs) {
@@ -261,51 +261,51 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
         }
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(VarDeclStmtNode n) {
+    public Optional<Void> visit(VarDeclStmtNode n) {
         n.varDecl.accept(this);
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(VarInitStmtNode n) {
+    public Optional<Void> visit(VarInitStmtNode n) {
         printer.startList();
         printer.printAtom("=");
         n.varDecl.accept(this);
         n.initializer.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(WhileStmtNode n) {
+    public Optional<Void> visit(WhileStmtNode n) {
         printer.startList();
         printer.printAtom("while");
         n.guard.accept(this);
         n.block.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LiteralArrayExprNode n) {
+    public Optional<Void> visit(LiteralArrayExprNode n) {
         printer.startList();
         for (ExprNode e : n.arrayVals) {
             e.accept(this);
         }
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(FunctionCallExprNode n) {
+    public Optional<Void> visit(FunctionCallExprNode n) {
         printer.startList();
 
         printer.printAtom(n.identifier);
@@ -316,159 +316,161 @@ public final class SExpVisitor extends AbstractVisitor<Void> {
 
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(AddExprNode n) {
+    public Optional<Void> visit(AddExprNode n) {
         printBinExpr("+", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(AndExprNode n) {
+    public Optional<Void> visit(AndExprNode n) {
         printBinExpr("&", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(DivExprNode n) {
+    public Optional<Void> visit(DivExprNode n) {
         printBinExpr("/", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(EqualsExprNode n) {
+    public Optional<Void> visit(EqualsExprNode n) {
         printBinExpr("==", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(GTEExprNode n) {
+    public Optional<Void> visit(GTEExprNode n) {
         printBinExpr(">=", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(GTExprNode n) {
+    public Optional<Void> visit(GTExprNode n) {
         printBinExpr(">", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(HighMultExprNode n) {
+    public Optional<Void> visit(HighMultExprNode n) {
         printBinExpr("*>>", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LTEExprNode n) {
+    public Optional<Void> visit(LTEExprNode n) {
         printBinExpr("<=", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LTExprNode n) {
+    public Optional<Void> visit(LTExprNode n) {
         printBinExpr("<", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(MultExprNode n) {
+    public Optional<Void> visit(MultExprNode n) {
         printBinExpr("*", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(NotEqualsExprNode n) {
+    public Optional<Void> visit(NotEqualsExprNode n) {
         printBinExpr("!=", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(OrExprNode n) {
+    public Optional<Void> visit(OrExprNode n) {
         printBinExpr("|", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(RemExprNode n) {
+    public Optional<Void> visit(RemExprNode n) {
         printBinExpr("%", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(SubExprNode n) {
+    public Optional<Void> visit(SubExprNode n) {
         printBinExpr("-", n);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LiteralBoolExprNode n) {
+    public Optional<Void> visit(LiteralBoolExprNode n) {
         printer.printAtom(String.valueOf(n.contents));
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LiteralCharExprNode n) {
+    public Optional<Void> visit(LiteralCharExprNode n) {
         printer.printAtom("'" + Util.unescapeCharacterString(n.contents) + "'");
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LiteralIntExprNode n) {
+    public Optional<Void> visit(LiteralIntExprNode n) {
         printer.printAtom(n.contents);
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(LiteralStringExprNode n) {
+    public Optional<Void> visit(LiteralStringExprNode n) {
         printer.printAtom("\"" + Util.unescapeString(n.contents) + "\"");
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(BoolNegExprNode n) {
+    public Optional<Void> visit(BoolNegExprNode n) {
         printer.startList();
         printer.printAtom("!");
         n.expr.accept(this);
         printer.endList();
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(IntNegExprNode n) {
+    public Optional<Void> visit(IntNegExprNode n) {
         printer.startList();
         printer.printAtom("-");
         n.expr.accept(this);
         printer.endList();
-        return null;
+        return Optional.empty();
     }
 
-    private void printBinExpr(String symbol, BinExprNode n) {
+    private Optional<Void> printBinExpr(String symbol, BinExprNode n) {
         printer.startList();
         printer.printAtom(symbol);
         n.left.accept(this);
         n.right.accept(this);
         printer.endList();
+
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(ArrayAccessExprNode n) {
+    public Optional<Void> visit(ArrayAccessExprNode n) {
         printer.startList();
         printer.printAtom("[]");
         n.child.accept(this);
         n.index.accept(this);
         printer.endList();
 
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(VariableAccessExprNode n) {
+    public Optional<Void> visit(VariableAccessExprNode n) {
         printer.printAtom(n.identifier);
 
-        return null;
+        return Optional.empty();
     }
 
 }

@@ -40,7 +40,7 @@ public abstract class TypeExprNode extends AbstractNode {
         Collections.reverse(dimensionList);
         for (Optional<ExprNode> e : dimensionList) {
             node = new TypeExprArrayNode(
-                primitive.getLocation().orElse(null), node, e);
+                primitive.getLocation(), node, e);
         }
         return (TypeExprArrayNode) node;
     }
