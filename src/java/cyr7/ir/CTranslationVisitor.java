@@ -48,14 +48,10 @@ import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRName;
-import cyr7.ir.nodes.IRNode;
-import cyr7.util.Util;
+import cyr7.ir.nodes.IRSeq;
 import cyr7.visitor.AbstractVisitor;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public final class CTranslationVisitor extends AbstractVisitor<List<IRNode>> {
+public final class CTranslationVisitor extends AbstractVisitor<IRSeq> {
 
     private final IdGenerator generator;
     private final String tLabel, fLabel;
@@ -67,237 +63,236 @@ public final class CTranslationVisitor extends AbstractVisitor<List<IRNode>> {
     }
 
     @Override
-    public List<IRNode> visit(AndExprNode n) {
+    public IRSeq visit(AndExprNode n) {
         String tPrime = generator.newLabel();
-        List<IRNode> list = new ArrayList<>();
-        list.addAll(n.left.accept(new CTranslationVisitor(generator, tPrime, tLabel)));
-        list.add(new IRLabel(tPrime));
-        list.addAll(n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
-        return Util.immutableCopy(list);
+        return new IRSeq(
+            n.left.accept(new CTranslationVisitor(generator, tPrime, tLabel)),
+            new IRLabel(tPrime),
+            n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
     }
 
     @Override
-    public List<IRNode> visit(BoolNegExprNode n) {
+    public IRSeq visit(BoolNegExprNode n) {
         return n.accept(new CTranslationVisitor(generator, fLabel, tLabel));
     }
 
     @Override
-    public List<IRNode> visit(OrExprNode n) {
+    public IRSeq visit(OrExprNode n) {
         String fPrime = generator.newLabel();
-        List<IRNode> list = new ArrayList<>();
-        list.addAll(n.left.accept(new CTranslationVisitor(generator, tLabel, fPrime)));
-        list.add(new IRLabel(fPrime));
-        list.addAll(n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
-        return Util.immutableCopy(list);
+        return new IRSeq(
+            n.left.accept(new CTranslationVisitor(generator, tLabel, fPrime)),
+            new IRLabel(fPrime),
+            n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel))
+        );
     }
 
     @Override
-    public List<IRNode> visit(LiteralBoolExprNode n) {
+    public IRSeq visit(LiteralBoolExprNode n) {
         IRName name = new IRName(n.contents ? tLabel : fLabel);
-        return List.of(new IRJump(name));
+        return new IRSeq(new IRJump(name));
     }
 
     // General
 
-    private List<IRNode> cjump(ExprNode n) {
-        return List.of(new IRCJump(n.accept(new AstToIrVisitor()).assertFirst(), tLabel, fLabel));
+    private IRSeq cjump(ExprNode n) {
+        return new IRSeq(new IRCJump(n.accept(new AstToIrVisitor()).assertFirst(), tLabel, fLabel));
     }
 
     @Override
-    public List<IRNode> visit(FunctionCallExprNode n) {
+    public IRSeq visit(FunctionCallExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(ArrayAccessExprNode n) {
+    public IRSeq visit(ArrayAccessExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(VariableAccessExprNode n) {
+    public IRSeq visit(VariableAccessExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(AddExprNode n) {
+    public IRSeq visit(AddExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(DivExprNode n) {
+    public IRSeq visit(DivExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(EqualsExprNode n) {
+    public IRSeq visit(EqualsExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(GTEExprNode n) {
+    public IRSeq visit(GTEExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(GTExprNode n) {
+    public IRSeq visit(GTExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(HighMultExprNode n) {
+    public IRSeq visit(HighMultExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(LTEExprNode n) {
+    public IRSeq visit(LTEExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(LTExprNode n) {
+    public IRSeq visit(LTExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(MultExprNode n) {
+    public IRSeq visit(MultExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(NotEqualsExprNode n) {
+    public IRSeq visit(NotEqualsExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(RemExprNode n) {
+    public IRSeq visit(RemExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(SubExprNode n) {
+    public IRSeq visit(SubExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(LiteralArrayExprNode n) {
+    public IRSeq visit(LiteralArrayExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(LiteralCharExprNode n) {
+    public IRSeq visit(LiteralCharExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(LiteralIntExprNode n) {
+    public IRSeq visit(LiteralIntExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(LiteralStringExprNode n) {
+    public IRSeq visit(LiteralStringExprNode n) {
         return cjump(n);
     }
 
     @Override
-    public List<IRNode> visit(IntNegExprNode n) {
+    public IRSeq visit(IntNegExprNode n) {
         return cjump(n);
     }
 
     // Unsupported
 
     @Override
-    public List<IRNode> visit(FunctionDeclNode n) {
+    public IRSeq visit(FunctionDeclNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(FunctionHeaderDeclNode n) {
+    public IRSeq visit(FunctionHeaderDeclNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(IxiProgramNode n) {
+    public IRSeq visit(IxiProgramNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(UseNode n) {
+    public IRSeq visit(UseNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(VarDeclNode n) {
+    public IRSeq visit(VarDeclNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(XiProgramNode n) {
+    public IRSeq visit(XiProgramNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(PrimitiveTypeNode n) {
+    public IRSeq visit(PrimitiveTypeNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(TypeExprArrayNode n) {
+    public IRSeq visit(TypeExprArrayNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(ArrayDeclStmtNode n) {
+    public IRSeq visit(ArrayDeclStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(AssignmentStmtNode n) {
+    public IRSeq visit(AssignmentStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(BlockStmtNode n) {
+    public IRSeq visit(BlockStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(ExprStmtNode n) {
+    public IRSeq visit(ExprStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(IfElseStmtNode n) {
+    public IRSeq visit(IfElseStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(MultiAssignStmtNode n) {
+    public IRSeq visit(MultiAssignStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(ProcedureStmtNode n) {
+    public IRSeq visit(ProcedureStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(ReturnStmtNode n) {
+    public IRSeq visit(ReturnStmtNode n) {
         throw new UnsupportedOperationException();
 
     }
 
     @Override
-    public List<IRNode> visit(VarDeclStmtNode n) {
+    public IRSeq visit(VarDeclStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(VarInitStmtNode n) {
+    public IRSeq visit(VarInitStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public List<IRNode> visit(WhileStmtNode n) {
+    public IRSeq visit(WhileStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
