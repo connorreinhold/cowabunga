@@ -451,6 +451,8 @@ public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
         n.left.accept(this);
         n.right.accept(this);
         printer.endList();
+
+        return Optional.empty();
     }
 
     @Override
