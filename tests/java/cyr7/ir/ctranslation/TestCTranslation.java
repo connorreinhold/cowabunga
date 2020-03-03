@@ -2,19 +2,31 @@ package cyr7.ir.ctranslation;
 
 import cyr7.C;
 import cyr7.ast.Node;
+import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.AndExprNode;
+import cyr7.ast.expr.binexpr.OrExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
+import cyr7.ast.toplevel.FunctionDeclNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
 import cyr7.ir.CTranslationVisitor;
+import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
+import cyr7.ir.nodes.IRCJump;
+import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import org.junit.jupiter.api.Test;
 
+import java.awt.*;
+import java.util.List;
+
 import static cyr7.ir.util.IRTest.assertEq;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestCTranslation {
 
@@ -47,7 +59,7 @@ public class TestCTranslation {
     }
 
     @Test
-    void testAnd() {
+    void testAndLiterals() {
         LookaheadIdGenerator generator = new LookaheadIdGenerator();
         String t = generator.newLabel();
         String f = generator.newLabel();
@@ -62,6 +74,159 @@ public class TestCTranslation {
             new IRLabel(l1),
             new IRJump(new IRName(f))
         );
+        assertEq(
+            expected,
+            node.accept(new CTranslationVisitor(generator, t, f))
+        );
+    }
+
+    @Test
+    void testNestedAnd() {
+        LookaheadIdGenerator generator = new LookaheadIdGenerator();
+        String t = generator.newLabel();
+        String f = generator.newLabel();
+        String l2 = generator.peekLabel(0);
+        String l3 = generator.peekLabel(1);
+        String l4 = generator.peekLabel(2);
+
+        // (true & false) & (true & true)
+        Node node = new AndExprNode(C.LOC,
+            new AndExprNode(C.LOC,
+                new LiteralBoolExprNode(C.LOC, true),
+                new LiteralBoolExprNode(C.LOC, false)
+            ),
+            new AndExprNode(C.LOC,
+                new LiteralBoolExprNode(C.LOC, true),
+                new LiteralBoolExprNode(C.LOC, true)
+            )
+        );
+        IRStmt expected = new IRSeq(
+            new IRSeq(
+                new IRJump(new IRName(l3)),
+                new IRLabel(l3),
+                new IRJump(new IRName(f))
+            ),
+            new IRLabel(l2),
+            new IRSeq(
+                new IRJump(new IRName(l4)),
+                new IRLabel(l4),
+                new IRJump(new IRName(t))
+            )
+        );
+        assertEq(
+            expected,
+            node.accept(new CTranslationVisitor(generator, t, f))
+        );
+    }
+
+    @Test
+    void testOrLiteral() {
+        LookaheadIdGenerator generator = new LookaheadIdGenerator();
+        String t = generator.newLabel();
+        String f = generator.newLabel();
+        String l1 = generator.peekLabel(0);
+
+        Node node = new OrExprNode(C.LOC,
+            new LiteralBoolExprNode(C.LOC, true),
+            new LiteralBoolExprNode(C.LOC, false)
+        );
+        IRStmt expected = new IRSeq(
+            new IRJump(new IRName(t)),
+            new IRLabel(l1),
+            new IRJump(new IRName(f))
+        );
+        assertEq(
+            expected,
+            node.accept(new CTranslationVisitor(generator, t, f))
+        );
+    }
+
+    @Test
+    void testNestedOr() {
+        LookaheadIdGenerator generator = new LookaheadIdGenerator();
+        String t = generator.newLabel();
+        String f = generator.newLabel();
+        String l2 = generator.peekLabel(0);
+        String l3 = generator.peekLabel(1);
+        String l4 = generator.peekLabel(2);
+
+        // (false | true) | (true | false)
+        Node node = new OrExprNode(C.LOC,
+            new OrExprNode(C.LOC,
+                new LiteralBoolExprNode(C.LOC, false),
+                new LiteralBoolExprNode(C.LOC, true)
+            ),
+            new OrExprNode(C.LOC,
+                new LiteralBoolExprNode(C.LOC, true),
+                new LiteralBoolExprNode(C.LOC, false)
+            )
+        );
+        IRStmt expected = new IRSeq(
+            new IRSeq(
+                new IRJump(new IRName(l3)),
+                new IRLabel(l3),
+                new IRJump(new IRName(t))
+            ),
+            new IRLabel(l2),
+            new IRSeq(
+                new IRJump(new IRName(t)),
+                new IRLabel(l4),
+                new IRJump(new IRName(f))
+            )
+        );
+        assertEq(
+            expected,
+            node.accept(new CTranslationVisitor(generator, t, f))
+        );
+    }
+
+    @Test
+    void testOrNestingAnd() {
+        LookaheadIdGenerator generator = new LookaheadIdGenerator();
+        String t = generator.newLabel();
+        String f = generator.newLabel();
+        String l2 = generator.peekLabel(0);
+        String l3 = generator.peekLabel(1);
+        String l4 = generator.peekLabel(2);
+
+        // (f() & g()) | (h() & i())
+        Node node = new OrExprNode(C.LOC,
+            new AndExprNode(C.LOC,
+                new FunctionCallExprNode(C.LOC, "f", List.of()),
+                new FunctionCallExprNode(C.LOC, "g", List.of())
+            ),
+            new AndExprNode(C.LOC,
+                new FunctionCallExprNode(C.LOC, "h", List.of()),
+                new FunctionCallExprNode(C.LOC, "i", List.of())
+            )
+        );
+        IRNode expected = new IRSeq(
+            new IRSeq(
+                new IRCJump(new IRCall(new IRName("f")), l3, l2),
+                new IRLabel(l3),
+                new IRCJump(new IRCall(new IRName("g")), t, l2)
+            ),
+            new IRLabel(l2),
+            new IRSeq(
+                new IRCJump(new IRCall(new IRName("h")), l4, f),
+                new IRLabel(l4),
+                new IRCJump(new IRCall(new IRName("i")), t, f)
+            )
+        );
+        assertEq(
+            expected,
+            node.accept(new CTranslationVisitor(generator, t, f))
+        );
+    }
+
+    @Test
+    void testFunctionCall() {
+        LookaheadIdGenerator generator = new LookaheadIdGenerator();
+        String t = generator.newLabel();
+        String f = generator.newLabel();
+
+        Node node = new FunctionCallExprNode(C.LOC, "f", List.of());
+        IRNode expected = new IRCJump(new IRCall(new IRName("f")), t, f);
         assertEq(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))

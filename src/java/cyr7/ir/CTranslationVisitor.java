@@ -67,7 +67,7 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
     public IRStmt visit(AndExprNode n) {
         String tPrime = generator.newLabel();
         return new IRSeq(
-            n.left.accept(new CTranslationVisitor(generator, tPrime, tLabel)),
+            n.left.accept(new CTranslationVisitor(generator, tPrime, fLabel)),
             new IRLabel(tPrime),
             n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
     }
