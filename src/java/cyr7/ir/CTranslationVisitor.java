@@ -205,97 +205,98 @@ public class CTranslationVisitor extends AbstractVisitor<List<IRNode>> {
 
     @Override
     public List<IRNode> visit(FunctionDeclNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(FunctionHeaderDeclNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(IxiProgramNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(UseNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(VarDeclNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(XiProgramNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(PrimitiveTypeNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(TypeExprArrayNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(ArrayDeclStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(AssignmentStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(BlockStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(ExprStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(IfElseStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(MultiAssignStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(ProcedureStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(ReturnStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
+
     }
 
     @Override
     public List<IRNode> visit(VarDeclStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(VarInitStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public List<IRNode> visit(WhileStmtNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
 }
