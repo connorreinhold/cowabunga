@@ -12,6 +12,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 
 public class IRFactory {
+
     public static IRNode parseAst(AbstractNode astNode) {
         AstToIrVisitor visitor = new AstToIrVisitor();
         // not what we want eventually
