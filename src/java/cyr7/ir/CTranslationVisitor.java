@@ -44,6 +44,7 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRName;
@@ -54,51 +55,52 @@ import cyr7.visitor.AbstractVisitor;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CTranslationVisitor extends AbstractVisitor<List<IRNode>> {
+public final class CTranslationVisitor extends AbstractVisitor<List<IRNode>> {
 
-    private final IRLabel tLabel, fLabel;
+    private final IdGenerator generator;
+    private final String tLabel, fLabel;
 
-    public CTranslationVisitor(IRLabel tLabel, IRLabel fLabel) {
+    public CTranslationVisitor(IdGenerator generator, String tLabel, String fLabel) {
+        this.generator = generator;
         this.tLabel = tLabel;
         this.fLabel = fLabel;
     }
 
     @Override
     public List<IRNode> visit(AndExprNode n) {
-        IRLabel tPrime = LabelGenerator.nextLabel();
+        String tPrime = generator.newLabel();
         List<IRNode> list = new ArrayList<>();
-        list.addAll(n.left.accept(new CTranslationVisitor(tPrime, fLabel)));
-        list.add(tPrime);
-        list.addAll(n.right.accept(new CTranslationVisitor(tLabel, fLabel)));
+        list.addAll(n.left.accept(new CTranslationVisitor(generator, tPrime, tLabel)));
+        list.add(new IRLabel(tPrime));
+        list.addAll(n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
         return Util.immutableCopy(list);
     }
 
     @Override
     public List<IRNode> visit(BoolNegExprNode n) {
-        return n.accept(new CTranslationVisitor(fLabel, tLabel));
+        return n.accept(new CTranslationVisitor(generator, fLabel, tLabel));
     }
 
     @Override
     public List<IRNode> visit(OrExprNode n) {
-        IRLabel fPrime = LabelGenerator.nextLabel();
+        String fPrime = generator.newLabel();
         List<IRNode> list = new ArrayList<>();
-        list.addAll(n.left.accept(new CTranslationVisitor(tLabel, fPrime)));
-        list.add(fPrime);
-        list.addAll(n.right.accept(new CTranslationVisitor(tLabel, fLabel)));
+        list.addAll(n.left.accept(new CTranslationVisitor(generator, tLabel, fPrime)));
+        list.add(new IRLabel(fPrime));
+        list.addAll(n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
         return Util.immutableCopy(list);
     }
 
     @Override
     public List<IRNode> visit(LiteralBoolExprNode n) {
-        IRName name = new IRName(n.contents ? tLabel.name() : fLabel.name());
+        IRName name = new IRName(n.contents ? tLabel : fLabel);
         return List.of(new IRJump(name));
     }
 
     // General
 
     private List<IRNode> cjump(ExprNode n) {
-        return null;
-//        return List.of(new IRCJump(n.accept(new AstToIrVisitor()), tLabel, fLabel));
+        return List.of(new IRCJump(n.accept(new AstToIrVisitor()).assertFirst(), tLabel, fLabel));
     }
 
     @Override

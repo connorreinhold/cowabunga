@@ -59,20 +59,9 @@ import cyr7.visitor.AbstractVisitor;
 
 public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
-    private int labelCounter;
-    private int tempCounter;
+    private final IdGenerator generator = new IdGenerator();
 
     public AstToIrVisitor() {
-        this.labelCounter = 0;
-        this.tempCounter = 0;
-    }
-
-    private String newLabel() {
-        return String.format("_l%d", (labelCounter++));
-    }
-
-    private String newTemp() {
-        return String.format("_t%d", (tempCounter++));
     }
 
     // Top Level
@@ -204,10 +193,10 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AndExprNode n) {
-        String x = newTemp();
-        String l1 = newLabel();
-        String l2 = newLabel();
-        String l3 = newLabel();
+        String x = generator.newTemp();
+        String l1 = generator.newLabel();
+        String l2 = generator.newLabel();
+        String l3 = generator.newLabel();
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
         return OneOfTwo.ofFirst(
@@ -265,10 +254,10 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(OrExprNode n) {
-        String x = newTemp();
-        String l1 = newLabel();
-        String l2 = newLabel();
-        String l3 = newLabel();
+        String x = generator.newTemp();
+        String l1 = generator.newLabel();
+        String l2 = generator.newLabel();
+        String l3 = generator.newLabel();
 
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
