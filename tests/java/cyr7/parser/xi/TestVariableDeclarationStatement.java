@@ -21,6 +21,8 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 public class TestVariableDeclarationStatement {
 
     @Test
@@ -28,17 +30,17 @@ public class TestVariableDeclarationStatement {
         StmtNode statement =
             ParserFactory.parseStatement("a: int = x").get(0);
         assertEquals(new VarInitStmtNode(
-            null,
+            LOC,
             new VarDeclNode(
-                null,
+                LOC,
                 "a",
                 new PrimitiveTypeNode(
-                    null,
+                    LOC,
                     PrimitiveEnum.INT
                 )
             ),
             new VariableAccessExprNode(
-                null,
+                LOC,
                 "x"
             )
         ), statement);
@@ -46,16 +48,16 @@ public class TestVariableDeclarationStatement {
         statement =
             ParserFactory.parseStatement("b: int[][] = x").get(0);
         assertEquals(new VarInitStmtNode(
-            null,
+            LOC,
             new VarDeclNode(
-                null,
+                LOC,
                 "b",
                 new TypeExprArrayNode(
-                    null,
+                    LOC,
                     new TypeExprArrayNode(
-                        null,
+                        LOC,
                         new PrimitiveTypeNode(
-                            null,
+                            LOC,
                             PrimitiveEnum.INT
                         ),
                         Optional.empty()
@@ -64,30 +66,30 @@ public class TestVariableDeclarationStatement {
                 )
             ),
             new VariableAccessExprNode(
-                null,
+                LOC,
                 "x"
             )
         ), statement);
 
         statement = ParserFactory.parseStatement("i: int = c[3];").get(0);
         assertEquals(statement, new VarInitStmtNode(
-            null,
+            LOC,
             new VarDeclNode(
-                null,
+                LOC,
                 "i",
                 new PrimitiveTypeNode(
-                    null,
+                    LOC,
                     PrimitiveEnum.INT
                 )
             ),
             new ArrayAccessExprNode(
-                null,
+                LOC,
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "c"
                 ),
                 new LiteralIntExprNode(
-                    null,
+                    LOC,
                     "3"
                 )
             )
@@ -99,12 +101,12 @@ public class TestVariableDeclarationStatement {
         StmtNode statement =
             ParserFactory.parseStatement("z: int").get(0);
         assertEquals(new VarDeclStmtNode(
-            null,
+            LOC,
             new VarDeclNode(
-                null,
+                LOC,
                 "z",
                 new PrimitiveTypeNode(
-                    null,
+                    LOC,
                     PrimitiveEnum.INT
                 )
             )
@@ -113,16 +115,16 @@ public class TestVariableDeclarationStatement {
         statement =
             ParserFactory.parseStatement("c: bool[][]").get(0);
         assertEquals(new VarDeclStmtNode(
-            null,
+            LOC,
             new VarDeclNode(
-                null,
+                LOC,
                 "c",
                 new TypeExprArrayNode(
-                    null,
+                    LOC,
                     new TypeExprArrayNode(
-                        null,
+                        LOC,
                         new PrimitiveTypeNode(
-                            null,
+                            LOC,
                             PrimitiveEnum.BOOL
                         ),
                         Optional.empty()
@@ -155,31 +157,31 @@ public class TestVariableDeclarationStatement {
         StmtNode statement =
             ParserFactory.parseStatement("a: int, b: bool = function()").get(0);
         assertEquals(statement, new MultiAssignStmtNode(
-            null,
+            LOC,
             List.of(
                 Optional.of(
                     new VarDeclNode(
-                        null,
+                        LOC,
                         "a",
                         new PrimitiveTypeNode(
-                            null,
+                            LOC,
                             PrimitiveEnum.INT
                         )
                     )
                 ),
                 Optional.of(
                     new VarDeclNode(
-                        null,
+                        LOC,
                         "b",
                         new PrimitiveTypeNode(
-                            null,
+                            LOC,
                             PrimitiveEnum.BOOL
                         )
                     )
                 )
             ),
             new FunctionCallExprNode(
-                null,
+                LOC,
                 "function",
                 List.of()
             )
@@ -188,14 +190,14 @@ public class TestVariableDeclarationStatement {
         statement =
             ParserFactory.parseStatement("a: int, _ = f()").get(0);
         assertEquals(statement, new MultiAssignStmtNode(
-            null,
+            LOC,
             List.of(
                 Optional.of(
                     new VarDeclNode(
-                        null,
+                        LOC,
                         "a",
                         new PrimitiveTypeNode(
-                            null,
+                            LOC,
                             PrimitiveEnum.INT
                         )
                     )
@@ -203,7 +205,7 @@ public class TestVariableDeclarationStatement {
                 Optional.empty()
             ),
             new FunctionCallExprNode(
-                null,
+                LOC,
                 "f",
                 List.of()
             )
@@ -212,13 +214,13 @@ public class TestVariableDeclarationStatement {
         statement =
             ParserFactory.parseStatement("_, _ = f()").get(0);
         assertEquals(statement, new MultiAssignStmtNode(
-            null,
+            LOC,
             List.of(
                 Optional.empty(),
                 Optional.empty()
             ),
             new FunctionCallExprNode(
-                null,
+                LOC,
                 "f",
                 List.of()
             )
@@ -248,17 +250,17 @@ public class TestVariableDeclarationStatement {
         StmtNode statement =
             ParserFactory.parseStatement("a: int[5]").get(0);
         assertEquals(statement, new ArrayDeclStmtNode(
-            null,
+            LOC,
             "a",
             new TypeExprArrayNode(
-                null,
+                LOC,
                 new PrimitiveTypeNode(
-                    null,
+                    LOC,
                     PrimitiveEnum.INT
                 ),
                 Optional.of(
                     new LiteralIntExprNode(
-                        null,
+                        LOC,
                         "5"
                     )
                 )
@@ -268,21 +270,21 @@ public class TestVariableDeclarationStatement {
         statement =
             ParserFactory.parseStatement("a: int[5][]").get(0);
         assertEquals(statement, new ArrayDeclStmtNode(
-            null,
+            LOC,
             "a",
             new TypeExprArrayNode(
-                null,
+                LOC,
                 new TypeExprArrayNode(
-                    null,
+                    LOC,
                     new PrimitiveTypeNode(
-                        null,
+                        LOC,
                         PrimitiveEnum.INT
                     ),
                     Optional.empty()
                 ),
                 Optional.of(
                     new LiteralIntExprNode(
-                        null,
+                        LOC,
                         "5"
                     )
                 )
@@ -292,25 +294,25 @@ public class TestVariableDeclarationStatement {
         statement =
             ParserFactory.parseStatement("a: int[5 + i][4 + j]").get(0);
         assertEquals(statement, new ArrayDeclStmtNode(
-            null,
+            LOC,
             "a",
             new TypeExprArrayNode(
-                null,
+                LOC,
                 new TypeExprArrayNode(
-                    null,
+                    LOC,
                     new PrimitiveTypeNode(
-                        null,
+                        LOC,
                         PrimitiveEnum.INT
                     ),
                     Optional.of(
                         new AddExprNode(
-                            null,
+                            LOC,
                             new LiteralIntExprNode(
-                                null,
+                                LOC,
                                 "4"
                             ),
                             new VariableAccessExprNode(
-                                null,
+                                LOC,
                                 "j"
                             )
                         )
@@ -318,13 +320,13 @@ public class TestVariableDeclarationStatement {
                 ),
                 Optional.of(
                     new AddExprNode(
-                        null,
+                        LOC,
                         new LiteralIntExprNode(
-                            null,
+                            LOC,
                             "5"
                         ),
                         new VariableAccessExprNode(
-                            null,
+                            LOC,
                             "i"
                         )
                     )

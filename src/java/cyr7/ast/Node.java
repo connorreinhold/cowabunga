@@ -3,11 +3,9 @@ package cyr7.ast;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-import java.util.Optional;
-
 public interface Node {
 
-    Optional<Location> getLocation();
+    Location getLocation();
 
     boolean equals(Object o);
 

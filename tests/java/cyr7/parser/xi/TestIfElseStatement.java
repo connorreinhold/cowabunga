@@ -16,29 +16,31 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 public class TestIfElseStatement {
 
     @Test
     void testIfElseAndReturnInteraction() throws Exception {
         StmtNode statement = ParserFactory.parseStatement("return").get(0);
-        assertEquals(statement, new ReturnStmtNode(null, new LinkedList<>()));
+        assertEquals(statement, new ReturnStmtNode(LOC, new LinkedList<>()));
 
         statement =
             ParserFactory.parseStatement("if false { return false } else { " +
                 "return true }").get(0);
         assertEquals(statement, new IfElseStmtNode(
-            null,
+            LOC,
             new LiteralBoolExprNode(
-                null,
+                LOC,
                 false),
             new BlockStmtNode(
-                null,
+                LOC,
                 List.of(
                     new ReturnStmtNode(
-                        null,
+                        LOC,
                         List.of(
                             new LiteralBoolExprNode(
-                                null,
+                                LOC,
                                 false
                             )
                         )
@@ -47,13 +49,13 @@ public class TestIfElseStatement {
             ),
             Optional.of(
                 new BlockStmtNode(
-                    null,
+                    LOC,
                     List.of(
                         new ReturnStmtNode(
-                            null,
+                            LOC,
                             List.of(
                                 new LiteralBoolExprNode(
-                                    null,
+                                    LOC,
                                     true
                                 )
                             )
@@ -68,19 +70,19 @@ public class TestIfElseStatement {
                 "if false { return false } return true"
             );
         assertEquals(statements.get(0), new IfElseStmtNode(
-            null,
+            LOC,
             new LiteralBoolExprNode(
-                null,
+                LOC,
                 false
             ),
             new BlockStmtNode(
-                null,
+                LOC,
                 List.of(
                     new ReturnStmtNode(
-                        null,
+                        LOC,
                         List.of(
                             new LiteralBoolExprNode(
-                                null,
+                                LOC,
                                 false
                             )
                         )
@@ -89,10 +91,10 @@ public class TestIfElseStatement {
             Optional.empty()
         ));
         assertEquals(statements.get(1), new ReturnStmtNode(
-            null,
+            LOC,
             List.of(
                 new LiteralBoolExprNode(
-                    null,
+                    LOC,
                     true
                 )
             )
@@ -114,13 +116,13 @@ public class TestIfElseStatement {
         StmtNode statement = ParserFactory.parseStatement("if (true) { " +
             "return; };").get(0);
         assertEquals(new IfElseStmtNode(
-            null,
-            new LiteralBoolExprNode(null, true),
+            LOC,
+            new LiteralBoolExprNode(LOC, true),
             new BlockStmtNode(
-                null,
+                LOC,
                 List.of(
                     new ReturnStmtNode(
-                        null,
+                        LOC,
                         List.of()
                     )
                 )
@@ -131,46 +133,46 @@ public class TestIfElseStatement {
         statement = ParserFactory.parseStatement("if (a < b) b = b - a; else " +
             "a = a - b;").get(0);
         assertEquals(new IfElseStmtNode(
-            null,
+            LOC,
             new LTExprNode(
-                null,
+                LOC,
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "a"
                 ),
                 new VariableAccessExprNode(
-                    null,
+                    LOC,
                     "b"
                 )
             ),
             new AssignmentStmtNode(
-                null, new VariableAccessExprNode(null, "b"),
+                LOC, new VariableAccessExprNode(LOC, "b"),
                 new SubExprNode(
-                    null,
+                    LOC,
                     new VariableAccessExprNode(
-                        null,
+                        LOC,
                         "b"
                     ),
                     new VariableAccessExprNode(
-                        null,
+                        LOC,
                         "a"
                     )
                 )
             ),
             Optional.of(
                 new AssignmentStmtNode(
-                    null,
+                    LOC,
                     
-                    new VariableAccessExprNode(null, "a"),
+                    new VariableAccessExprNode(LOC, "a"),
                     
                     new SubExprNode(
-                        null,
+                        LOC,
                         new VariableAccessExprNode(
-                            null,
+                            LOC,
                             "a"
                         ),
                         new VariableAccessExprNode(
-                            null,
+                            LOC,
                             "b"
                         )
                     )

@@ -20,6 +20,8 @@ import java.util.LinkedList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 class TestFunctionDeclarations {
 
     XiProgramNode expected;
@@ -33,25 +35,21 @@ class TestFunctionDeclarations {
         LinkedList<FunctionDeclNode> funcs = new LinkedList<>();
         LinkedList<TypeExprNode> retTypes = new LinkedList<>();
         LinkedList<ExprNode> retExpr = new LinkedList<>();
-        retExpr.add(new LiteralIntExprNode(null, "0"));
-        StmtNode stmt = new ReturnStmtNode(null, retExpr);
+        retExpr.add(new LiteralIntExprNode(LOC, "0"));
+        StmtNode stmt = new ReturnStmtNode(LOC, retExpr);
         LinkedList<StmtNode> stmts = new LinkedList<>();
         stmts.add(stmt);
-        BlockStmtNode block = new BlockStmtNode(null, stmts);
-        Collections.addAll(retTypes, 
-                new TypeExprNode[] {
-                    new PrimitiveTypeNode(null, PrimitiveEnum.INT)
-                });
+        BlockStmtNode block = new BlockStmtNode(LOC, stmts);
+        Collections.addAll(retTypes,
+            new PrimitiveTypeNode(LOC, PrimitiveEnum.INT));
         
         Collections.addAll(
-                funcs, new FunctionDeclNode[]{
-                        new FunctionDeclNode(null,
-                                new FunctionHeaderDeclNode(null, "main",
-                                        new LinkedList<>(),
-                                        retTypes),
-                                block)
-        });
-        expected = new XiProgramNode(null, new LinkedList<>(), funcs);
+                funcs, new FunctionDeclNode(LOC,
+                        new FunctionHeaderDeclNode(LOC, "main",
+                                new LinkedList<>(),
+                                retTypes),
+                        block));
+        expected = new XiProgramNode(LOC, new LinkedList<>(), funcs);
         parser = ParserFactory.make(program, false);
         tree = parser.parse().value;
         assertEquals(expected, tree);    

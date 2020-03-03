@@ -9,18 +9,20 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 public class TestOperators {
 
     @Test
     void testAddMul() throws Exception {
         ExprNode expr = ParserFactory.parseExpr("1 + 2 * 3");
         assertEquals(expr, new AddExprNode(
-            null,
-            new LiteralIntExprNode(null, "1"),
+            LOC,
+            new LiteralIntExprNode(LOC, "1"),
             new MultExprNode(
-                null,
-                new LiteralIntExprNode(null, "2"),
-                new LiteralIntExprNode(null, "3")
+                LOC,
+                new LiteralIntExprNode(LOC, "2"),
+                new LiteralIntExprNode(LOC, "3")
             )
         ));
     }
@@ -29,13 +31,13 @@ public class TestOperators {
     void testAddLeftAssociative() throws Exception {
         ExprNode expr = ParserFactory.parseExpr("1 + 2 + 3");
         assertEquals(expr, new AddExprNode(
-            null,
+            LOC,
             new AddExprNode(
-                null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "2")
+                LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "2")
             ),
-            new LiteralIntExprNode(null, "3")
+            new LiteralIntExprNode(LOC, "3")
         ));
     }
 
@@ -43,13 +45,13 @@ public class TestOperators {
     void testAddMulParenthesis() throws Exception {
         ExprNode expr = ParserFactory.parseExpr("(1 + 2) * 3");
         assertEquals(expr, new MultExprNode(
-            null,
+            LOC,
             new AddExprNode(
-                null,
-                new LiteralIntExprNode(null, "1"),
-                new LiteralIntExprNode(null, "2")
+                LOC,
+                new LiteralIntExprNode(LOC, "1"),
+                new LiteralIntExprNode(LOC, "2")
             ),
-            new LiteralIntExprNode(null, "3")
+            new LiteralIntExprNode(LOC, "3")
         ));
     }
 

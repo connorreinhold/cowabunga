@@ -12,6 +12,8 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+
 public class TestBlockStatement {
 
     @Test
@@ -21,23 +23,23 @@ public class TestBlockStatement {
                 .parseStatement("{ { }; { return }; return };")
                 .get(0);
         assertEquals(statement, new BlockStmtNode(
-            null,
+            LOC,
             List.of(
                 new BlockStmtNode(
-                    null,
+                    LOC,
                     List.of()
                 ),
                 new BlockStmtNode(
-                    null,
+                    LOC,
                     List.of(
                         new ReturnStmtNode(
-                            null,
+                            LOC,
                             List.of()
                         )
                     )
                 ),
                 new ReturnStmtNode(
-                    null,
+                    LOC,
                     List.of()
                 )
             )
@@ -45,16 +47,16 @@ public class TestBlockStatement {
 
         statement = ParserFactory.parseStatement("{ while x { }; };").get(0);
         assertEquals(statement, new BlockStmtNode(
-            null,
+            LOC,
             List.of(
                 new WhileStmtNode(
-                    null,
+                    LOC,
                     new VariableAccessExprNode(
-                        null,
+                        LOC,
                         "x"
                     ),
                     new BlockStmtNode(
-                        null,
+                        LOC,
                         List.of()
                     )
                 )

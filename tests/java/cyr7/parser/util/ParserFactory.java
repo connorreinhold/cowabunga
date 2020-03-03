@@ -1,18 +1,20 @@
 package cyr7.parser.util;
 
-import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.stmt.StmtNode;
 import cyr7.ast.stmt.VarInitStmtNode;
-import java_cup.runtime.ComplexSymbolFactory;
-
-import java.io.StringReader;
-import java.util.List;
-
+import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.lexer.MultiFileLexer;
 import cyr7.lexer.MyLexer;
 import cyr7.parser.XiParser;
+import java_cup.runtime.ComplexSymbolFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.io.StringReader;
+import java.util.List;
 public class ParserFactory {
+
+    public static final Location LOC = new Location(1, 1);
 
     static public XiParser make(String contents, boolean isIxi)
             throws Exception {
