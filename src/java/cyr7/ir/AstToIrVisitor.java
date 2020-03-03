@@ -48,7 +48,6 @@ import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
-import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRNode;
@@ -67,15 +66,19 @@ public class AstToIrVisitor extends AbstractVisitor<IRNode> {
     }
 
     private String newLabel() {
-        return String.format("_l%d", (this.labelCounter++));
+        return String.format("_l%d", (labelCounter++));
     }
 
     private String newTemp() {
-        return String.format("_t%d", (this.tempCounter++));
+        return String.format("_t%d", (tempCounter++));
     }
 
-    public IRExpr visit(ExprNode n) {
-        return this.visit(n);
+    public IRNode visit(ExprNode n) {
+        if (n instanceof AddExprNode) {
+            return visit((AddExprNode) n);
+        } else if (n instanceof AndExprNode) {
+            return visit((AndExprNode) n);
+        }
     }
 
     @Override
