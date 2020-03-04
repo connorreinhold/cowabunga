@@ -13,10 +13,17 @@ import cyr7.ir.nodes.IRStmt;
 
 public class IRFactory {
 
-    public static IRNode parseAst(AbstractNode astNode) {
+    public static IRNode parseAstExpr(AbstractNode astNode) {
         AstToIrVisitor visitor = new AstToIrVisitor();
         // not what we want eventually
         IRNode result = astNode.accept(visitor).assertFirst();
+        return result;
+    }
+
+    public static IRNode parseAstStmt(AbstractNode astNode) {
+        AstToIrVisitor visitor = new AstToIrVisitor();
+        // not what we want eventually
+        IRNode result = astNode.accept(visitor).assertSecond();
         return result;
     }
 
@@ -29,5 +36,16 @@ public class IRFactory {
 
         IRSimulator sim = new IRSimulator(compUnit);
         return sim.call("function");
+    }
+
+    public static long testStmts(IRStmt irStmts) {
+        IRStmt bBody = irStmts;
+        IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
+        IRCompUnit compUnit = new IRCompUnit("test");
+        compUnit.appendFunc(bFunc);
+
+        IRSimulator sim = new IRSimulator(compUnit);
+        return sim.call("function");
+
     }
 }
