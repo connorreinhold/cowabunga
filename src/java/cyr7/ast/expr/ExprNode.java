@@ -16,4 +16,9 @@ public interface ExprNode extends Node {
 
     void setType(ExpandedType t);
 
+    default ExprNode typed(ExpandedType t) {
+        setType(t);
+        return this;
+    }
+
 }

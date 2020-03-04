@@ -47,12 +47,8 @@ import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.visitor.AbstractVisitor;
 import cyr7.visitor.PostOrderReduceTraversal;
 
-public class AstInvariantVisitor extends AbstractVisitor<Boolean>
+class AstInvariantVisitor extends AbstractVisitor<Boolean>
     implements PostOrderReduceTraversal.ReduceVisitor<Boolean> {
-
-    public static boolean satisfiesInvariants(Node n) {
-        return new PostOrderReduceTraversal<>(new AstInvariantVisitor()).traverse(n);
-    }
 
     @Override
     public Boolean unit() {

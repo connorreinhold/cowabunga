@@ -23,4 +23,5 @@ public abstract class AbstractExprNode extends AbstractNode implements ExprNode 
     public void setType(ExpandedType t) {
         this.type = t;
     }
+
 }

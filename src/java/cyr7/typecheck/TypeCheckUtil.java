@@ -19,7 +19,7 @@ public class TypeCheckUtil {
         try {
             Node result = ParserUtil.parseNode(reader, filename, isIXI);
             result.accept(new TypeCheckVisitor(opener));
-            assert AstInvariantVisitor.satisfiesInvariants(result);
+            assert satisfiesInvariants(result);
             writer.append("Valid Xi Program").append(System.lineSeparator());
         } catch (InvalidInterfaceException e) {
             printErrorToStdOut(e.getInterfaceErrorType(),
@@ -58,6 +58,21 @@ public class TypeCheckUtil {
         System.out.println(
                 String.format("%s error beginning at %s:%d:%d: %s",
                         type, filename, line, col, msg));
+    }
+
+    /**
+     * Typechecks an Xi Program node. Interface files are completely discarded
+     * by this method.
+     *
+     * @param n
+     */
+    public static void typecheck(Node n) {
+        n.accept(new TypeCheckVisitor(ixiFilename -> Reader.nullReader()));
+        assert satisfiesInvariants(n);
+    }
+
+    public static boolean satisfiesInvariants(Node n) {
+        return new PostOrderReduceTraversal<>(new AstInvariantVisitor()).traverse(n);
     }
 
 }
