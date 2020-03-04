@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -77,6 +78,34 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public AstToIrVisitor() {
     }
 
+    private String functionName(String n, List<ExprNode> paramTypes,
+            ExpandedType returnType) {
+        String name = "_I" + n.replace("_", "__") + "_";
+        List<String> params = new ArrayList<>();
+        paramTypes.forEach(t -> params.add(typeIdentifier(t.getType())));
+        return name + typeIdentifier(returnType) + String.join("", params);
+    }
+
+    private String typeIdentifier(ExpandedType t) {
+        if (t.isSubtypeOfInt()) {
+            return "i";
+        } else if (t.isSubtypeOfBool()) {
+            return "b";
+        } else if (t.isUnit()) {
+            return "p";
+        } else if (t.isSubtypeOfArray()) {
+            return "a"
+                    + typeIdentifier(new ExpandedType(t.getInnerArrayType()));
+        } else if (t.isTuple()) {
+            List<String> types = new ArrayList<>();
+            t.getTypes().forEach(
+                    type -> types.add(typeIdentifier(new ExpandedType(type))));
+            return "t" + t.getTypes().size() + String.join("", types);
+        } else {
+            throw new IllegalArgumentException("invalid type for function");
+        }
+    }
+
     // Top Level
 
     @Override
@@ -123,7 +152,21 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ArrayDeclStmtNode n) {
-        return null;
+        String memBlock = generator.newTemp();
+        String pointerStart = generator.newTemp();
+        List<IRStmt> commands = new ArrayList<IRStmt>();
+        if (n.type.size.isPresent()) {
+            IRExpr size = n.type.size.get().accept(this).assertFirst();
+            IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
+                    new IRBinOp(OpType.ADD, size, new IRConst(1)));
+
+            IRExpr memLoc = new IRCall(new IRName("_xi_alloc"), spaceNeeded);
+            commands.add(new IRMove(new IRTemp(memBlock), memLoc));
+            commands.add(new IRMove(new IRMem(new IRTemp(memBlock)), size));
+            commands.add(new IRMove(new IRTemp(pointerStart), new IRBinOp(
+                    OpType.ADD, new IRTemp(memBlock), new IRConst(8))));
+        }
+        return OneOfTwo.ofSecond(new IRSeq(commands));
     }
 
     @Override
@@ -242,7 +285,9 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> params = n.parameters.stream()
                 .map(stmt -> stmt.accept(this).assertFirst())
                 .collect(Collectors.toList());
-        return OneOfTwo.ofFirst(new IRCall(new IRName(n.identifier), params));
+        String encodedName = functionName(n.identifier, n.parameters,
+                n.getType());
+        return OneOfTwo.ofFirst(new IRCall(new IRName(encodedName), params));
     }
 
     @Override
