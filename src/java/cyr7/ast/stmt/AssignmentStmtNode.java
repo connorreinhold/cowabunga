@@ -17,7 +17,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  */
 public final class AssignmentStmtNode extends AbstractNode implements StmtNode {
 
-    // Assign [value] to [node]
+    // Assign [rhs] to [lhs]
     public final ExprNode lhs;
     public final ExprNode rhs;
 

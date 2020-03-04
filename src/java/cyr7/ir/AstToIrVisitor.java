@@ -1,5 +1,10 @@
 package cyr7.ir;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
@@ -47,9 +52,11 @@ import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
+import cyr7.ir.nodes.IRExp;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMove;
+import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
@@ -114,37 +121,70 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AssignmentStmtNode n) {
-        return null;
+        IRExpr rhs = n.rhs.accept(this).assertFirst();
+        IRExpr lhs = n.lhs.accept(this).assertFirst();
+        // TODO: Check if the type of lhs is array or just a singular variable
+        return OneOfTwo.ofSecond(new IRMove(lhs, rhs));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(BlockStmtNode n) {
-        return null;
+        List<IRStmt> stmts = n.statements.stream()
+                .map(stmt -> stmt.accept(this).assertSecond())
+                .collect(Collectors.toList());
+        return OneOfTwo.ofSecond(new IRSeq(stmts));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ExprStmtNode n) {
-        return null;
+        IRExpr e = n.expr.accept(this).assertFirst();
+        return OneOfTwo.ofSecond(new IRExp(e));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(IfElseStmtNode n) {
-        return null;
+        String lt = generator.newLabel();
+        String lf = generator.newLabel();
+        List<IRStmt> commands = new ArrayList<>();
+        commands.add(
+                n.guard.accept(new CTranslationVisitor(generator, lt, lf)));
+        commands.add(new IRLabel(lt));
+        commands.add(n.ifBlock.accept(this).assertSecond());
+        commands.add(new IRLabel(lf));
+        if (n.elseBlock.isPresent()) {
+            commands.add(n.elseBlock.get().accept(this).assertSecond());
+        }
+        return OneOfTwo.ofSecond(new IRSeq(commands));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(MultiAssignStmtNode n) {
-        return null;
+        List<IRStmt> commands = new ArrayList<>();
+        IRExpr functionCall = n.initializer.accept(this).assertFirst();
+        commands.add(new IRExp(functionCall));
+        int retNum = 0;
+        for (Optional<VarDeclNode> var : n.varDecls) {
+            if (var.isPresent()) {
+                commands.add(new IRMove(new IRTemp(var.get().identifier),
+                        new IRTemp(generator.retTemp(retNum))));
+            }
+            retNum++;
+        }
+        return OneOfTwo.ofSecond(new IRSeq(commands));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ProcedureStmtNode n) {
-        return null;
+        return OneOfTwo.ofSecond(
+                new IRExp(n.procedureCall.accept(this).assertFirst()));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
-        return null;
+        List<IRExpr> rets = n.exprs.stream()
+                .map(stmt -> stmt.accept(this).assertFirst())
+                .collect(Collectors.toList());
+        return OneOfTwo.ofSecond(new IRReturn(rets));
     }
 
     @Override
@@ -164,7 +204,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     // Expressions
 
-    private OneOfTwo<IRExpr, IRStmt> binOp(IRBinOp.OpType opType, BinExprNode n) {
+    private OneOfTwo<IRExpr, IRStmt> binOp(IRBinOp.OpType opType,
+            BinExprNode n) {
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
         return OneOfTwo.ofFirst(new IRBinOp(opType, left, right));
@@ -198,14 +239,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String l3 = generator.newLabel();
 
         IRStmt left = n.left.accept(new CTranslationVisitor(generator, l1, l3));
-        IRStmt right = n.right.accept(new CTranslationVisitor(generator, l2, l3));
+        IRStmt right = n.right
+                .accept(new CTranslationVisitor(generator, l2, l3));
 
         return OneOfTwo.ofFirst(
-            new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
-                left, new IRLabel(l1),
-                right, new IRLabel(l2),
-                new IRMove(new IRTemp(x), new IRConst(1)),
-                new IRLabel(l3)), new IRTemp(x)));
+                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
+                        left, new IRLabel(l1), right, new IRLabel(l2),
+                        new IRMove(new IRTemp(x), new IRConst(1)),
+                        new IRLabel(l3)), new IRTemp(x)));
     }
 
     @Override
@@ -261,14 +302,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String l3 = generator.newLabel();
 
         IRStmt left = n.left.accept(new CTranslationVisitor(generator, l3, l1));
-        IRStmt right = n.right.accept(new CTranslationVisitor(generator, l3, l2));
+        IRStmt right = n.right
+                .accept(new CTranslationVisitor(generator, l3, l2));
 
         return OneOfTwo.ofFirst(
-            new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
-                left, new IRLabel(l1),
-                right, new IRLabel(l2),
-                new IRMove(new IRTemp(x), new IRConst(0)),
-                new IRLabel(l3)), new IRTemp(x)));
+                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
+                        left, new IRLabel(l1), right, new IRLabel(l2),
+                        new IRMove(new IRTemp(x), new IRConst(0)),
+                        new IRLabel(l3)), new IRTemp(x)));
     }
 
     @Override
