@@ -1,9 +1,12 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.List;
 
 /**
  * Represents a while statement, with [ExprNode guard] and a [block]
@@ -22,6 +25,11 @@ public final class WhileStmtNode extends AbstractNode implements StmtNode {
         assert block != null;
         this.guard = guard;
         this.block = block;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(guard, block);
     }
 
     @Override

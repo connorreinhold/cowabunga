@@ -1,9 +1,13 @@
 package cyr7.ast.toplevel;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.type.TypeExprNode;
 import cyr7.semantics.types.FunctionType;
@@ -41,6 +45,13 @@ public final class FunctionHeaderDeclNode extends AbstractNode {
     }
 
     @Override
+    public List<Node> getChildren() {
+        return Util.immutableCopy(
+            Stream.concat(args.stream(), returnTypes.stream())
+                .collect(Collectors.toList()));
+    }
+
+    @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
         return visitor.visit(this);
     }
@@ -56,8 +67,8 @@ public final class FunctionHeaderDeclNode extends AbstractNode {
         return false;
     }
 
-    public Optional<FunctionType> getType() {
-        return Optional.ofNullable(type);
+    public FunctionType getType() {
+        return type;
     }
 
     public void setType(FunctionType t) {

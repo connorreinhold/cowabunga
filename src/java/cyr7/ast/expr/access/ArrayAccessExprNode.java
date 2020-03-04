@@ -1,8 +1,10 @@
 package cyr7.ast.expr.access;
 
+import java.util.List;
 import java.util.Objects;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
@@ -21,6 +23,11 @@ public final class ArrayAccessExprNode extends AbstractExprNode {
         super(location);
         this.child = child;
         this.index = index;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(child, index);
     }
 
     @Override

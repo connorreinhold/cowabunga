@@ -14,7 +14,6 @@ import java.util.Optional;
  */
 public abstract class TypeExprNode extends AbstractNode {
 
-
     TypeExprNode(Location location) {
         super(location);
     }
