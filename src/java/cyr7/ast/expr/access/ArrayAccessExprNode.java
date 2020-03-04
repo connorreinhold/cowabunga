@@ -3,6 +3,7 @@ package cyr7.ast.expr.access;
 import java.util.Objects;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -10,7 +11,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 /**
  * An expression of the form {@code a[0] }, {@code f()[0] }, or {@code b[i][j] }
  */
-public final class ArrayAccessExprNode extends AbstractNode implements ExprNode {
+public final class ArrayAccessExprNode extends AbstractExprNode {
 
     public final ExprNode child;
     public final ExprNode index;

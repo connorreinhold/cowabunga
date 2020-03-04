@@ -5,6 +5,7 @@ import cyr7.util.Util;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class ExpandedType {
@@ -23,6 +24,23 @@ public final class ExpandedType {
             new ExpandedType(GenericAddType.value);
     final public static ExpandedType voidArrayType =
         new ExpandedType(ArrayType.voidArrayDefault);
+
+    /**
+     * Returns the supertype of two types, if such a relation exists.
+     *
+     * @return Empty if there is typing relation between {@code left}
+     * and {@code right}.
+     */
+    public static Optional<ExpandedType> supertypeOf(ExpandedType left,
+                                                      ExpandedType right) {
+        if (left.isASubtypeOf(right)) {
+            return Optional.of(right);
+        } else if (right.isASubtypeOf(left)) {
+            return Optional.of(left);
+        } else {
+            return Optional.empty();
+        }
+    }
 
     @Override
     public int hashCode() {

@@ -1,6 +1,7 @@
 package cyr7.ast.expr.literalexpr;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -8,8 +9,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 /**
  * Represents a boolean literal of either true or false
  */
-public final class LiteralBoolExprNode extends AbstractNode
-    implements ExprNode {
+public final class LiteralBoolExprNode extends AbstractExprNode {
     public final boolean contents;
 
     public LiteralBoolExprNode(Location location, boolean contents) {

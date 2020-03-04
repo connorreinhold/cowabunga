@@ -12,7 +12,7 @@ import java.util.List;
  * identifier of the function as well as a list of parameters. Ex: fib(4) would
  * have identifier = fib and parameters = {4}
  */
-public final class FunctionCallExprNode extends AbstractNode implements ExprNode {
+public final class FunctionCallExprNode extends AbstractExprNode {
 
     public final String identifier;
     public final List<ExprNode> parameters;

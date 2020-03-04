@@ -1,6 +1,7 @@
 package cyr7.ast.expr.unaryexpr;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -8,7 +9,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * Superclass to expressions involving one child: -[ExprNode expr] or
  * ![ExprNode expr]
  */
-public abstract class UnaryExprNode extends AbstractNode implements ExprNode {
+public abstract class UnaryExprNode extends AbstractExprNode {
 
     public final ExprNode expr;
 
