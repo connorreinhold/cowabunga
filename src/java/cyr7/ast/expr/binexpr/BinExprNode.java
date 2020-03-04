@@ -1,6 +1,7 @@
 package cyr7.ast.expr.binexpr;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -8,7 +9,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * Node that represents executing some binary operator on [ExprNode left] and
  * [ExprNode right]
  */
-public abstract class BinExprNode extends AbstractNode implements ExprNode {
+public abstract class BinExprNode extends AbstractExprNode {
 
     public final ExprNode left, right;
 

@@ -4,7 +4,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public final class OneOfThree<T, U, V> {
+public class OneOfThree<T, U, V> {
 
     public static <T, U, V> OneOfThree<T, U, V> ofFirst(T first) {
         assert first != null;
@@ -25,7 +25,7 @@ public final class OneOfThree<T, U, V> {
     private final Optional<U> second;
     private final Optional<V> third;
 
-    private OneOfThree(T first, U second, V third) {
+    protected OneOfThree(T first, U second, V third) {
         this.first = Optional.ofNullable(first);
         this.second = Optional.ofNullable(second);
         this.third = Optional.ofNullable(third);
