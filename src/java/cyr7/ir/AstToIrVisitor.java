@@ -189,7 +189,9 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarDeclStmtNode n) {
-        return null;
+        // Initialize it to 0
+        return OneOfTwo.ofSecond(
+                new IRMove(new IRTemp(n.varDecl.identifier), new IRConst(0)));
     }
 
     @Override
