@@ -49,7 +49,21 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ir.nodes.*;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRCJump;
+import cyr7.ir.nodes.IRCall;
+import cyr7.ir.nodes.IRConst;
+import cyr7.ir.nodes.IRESeq;
+import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRJump;
+import cyr7.ir.nodes.IRLabel;
+import cyr7.ir.nodes.IRMove;
+import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRReturn;
+import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRStmt;
+import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -201,11 +215,9 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr grd = n.guard.accept(this).assertFirst();
         IRStmt blk = n.block.accept(this).assertSecond();
 
-        return OneOfTwo.ofSecond(new IRSeq(
-                new IRLabel(lh), new IRCJump(grd, lt, lf),
-                new IRLabel(lt), new IRSeq(blk, new IRJump(new IRName(lh))),
-                new IRLabel(lf)
-        ));
+        return OneOfTwo.ofSecond(new IRSeq(new IRLabel(lh),
+                new IRCJump(grd, lt, lf), new IRLabel(lt),
+                new IRSeq(blk, new IRJump(new IRName(lh))), new IRLabel(lf)));
     }
 
     // Expressions
@@ -219,7 +231,10 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionCallExprNode n) {
-        return null;
+        List<IRExpr> params = n.parameters.stream()
+                .map(stmt -> stmt.accept(this).assertFirst())
+                .collect(Collectors.toList());
+        return OneOfTwo.ofFirst(new IRCall(new IRName(n.identifier), params));
     }
 
     @Override
