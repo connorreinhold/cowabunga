@@ -263,11 +263,11 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String lt = generator.newLabel();
         String lf = generator.newLabel();
 
-        IRExpr grd = n.guard.accept(this).assertFirst();
+        IRStmt grd = n.guard.accept(new CTranslationVisitor(generator, lt, lf));
         IRStmt blk = n.block.accept(this).assertSecond();
 
         return OneOfTwo.ofSecond(new IRSeq(new IRLabel(lh),
-                new IRCJump(grd, lt, lf), new IRLabel(lt),
+                grd, new IRLabel(lt),
                 new IRSeq(blk, new IRJump(new IRName(lh))), new IRLabel(lf)));
     }
 
