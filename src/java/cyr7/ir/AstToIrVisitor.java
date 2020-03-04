@@ -50,6 +50,7 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
+import cyr7.ir.interpret.Configuration;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -157,14 +158,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRStmt> commands = new ArrayList<IRStmt>();
         if (n.type.size.isPresent()) {
             IRExpr size = n.type.size.get().accept(this).assertFirst();
-            IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
+            IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(Configuration.WORD_SIZE),
                     new IRBinOp(OpType.ADD, size, new IRConst(1)));
 
             IRExpr memLoc = new IRCall(new IRName("_xi_alloc"), spaceNeeded);
             commands.add(new IRMove(new IRTemp(memBlock), memLoc));
             commands.add(new IRMove(new IRMem(new IRTemp(memBlock)), size));
             commands.add(new IRMove(new IRTemp(pointerStart), new IRBinOp(
-                    OpType.ADD, new IRTemp(memBlock), new IRConst(8))));
+                    OpType.ADD, new IRTemp(memBlock), new IRConst(Configuration.WORD_SIZE))));
         }
         return OneOfTwo.ofSecond(new IRSeq(commands));
     }
@@ -400,7 +401,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String memBlock = generator.newTemp();
         String pointerStart = generator.newTemp();
         int size = vals.size();
-        IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
+        IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(Configuration.WORD_SIZE),
                 new IRBinOp(OpType.ADD, new IRConst(size), new IRConst(1)));
 
         List<IRStmt> commands = new ArrayList<IRStmt>();
@@ -409,13 +410,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         commands.add(
                 new IRMove(new IRMem(new IRTemp(memBlock)), new IRConst(size)));
         commands.add(new IRMove(new IRTemp(pointerStart),
-                new IRBinOp(OpType.ADD, new IRTemp(memBlock), new IRConst(8))));
+                new IRBinOp(OpType.ADD, new IRTemp(memBlock), new IRConst(Configuration.WORD_SIZE))));
 
         // Setting the values of the indices in memory
         for (int i = 0; i < vals.size(); i++) {
             IRExpr valueLoc = new IRMem(new IRBinOp(OpType.ADD,
                     new IRTemp(pointerStart),
-                    new IRBinOp(OpType.MUL, new IRConst(8), new IRConst(i))));
+                    new IRBinOp(OpType.MUL, new IRConst(Configuration.WORD_SIZE), new IRConst(i))));
             commands.add(new IRMove(valueLoc, vals.get(i)));
         }
         return OneOfTwo.ofFirst(
