@@ -15,8 +15,8 @@ public abstract class AbstractExprNode extends AbstractNode implements ExprNode 
     }
 
     @Override
-    public Optional<ExpandedType> getType() {
-        return Optional.ofNullable(type);
+    public ExpandedType getType() {
+        return type;
     }
 
     @Override

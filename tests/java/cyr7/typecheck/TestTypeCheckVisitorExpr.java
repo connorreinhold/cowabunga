@@ -50,7 +50,7 @@ class TestTypeCheckVisitorExpr {
     Context context;
     TypeCheckVisitor visitor;
     Node node;
-    OneOfThree<ExpandedType, ResultType, Optional<Void>> result;
+    TypeCheckVisitor.Result result;
     Location loc = new Location(0, 0);
     IxiFileOpener opener = null;
 

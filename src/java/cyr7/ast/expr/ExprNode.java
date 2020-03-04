@@ -12,7 +12,7 @@ import java.util.Optional;
  */
 public interface ExprNode extends Node {
 
-    Optional<ExpandedType> getType();
+    ExpandedType getType();
 
     void setType(ExpandedType t);
 
