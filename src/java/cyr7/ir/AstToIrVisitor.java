@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -64,6 +65,8 @@ import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.OrdinaryType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -72,6 +75,31 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     private final IdGenerator generator = new DefaultIdGenerator();
 
     public AstToIrVisitor() {
+    }
+
+    private String functionName(String n, List<ExprNode> paramTypes, ExpandedType returnType) {
+        String name = "_I" + n.replace("_", "__") + "_";
+        List<String> params = new ArrayList<>();
+        paramTypes.forEach(t -> params.add(typeIdentifier(t.getType())));
+        return name + typeIdentifier(returnType) + String.join("", params);
+    }
+
+    private String typeIdentifier(ExpandedType t) {
+        if (t.isSubtypeOfInt()) {
+            return "i";
+        } else if (t.isSubtypeOfBool()) {
+            return "b";
+        } else if (t.isUnit()) {
+            return "p";
+        } else if (t.isSubtypeOfArray()) {
+            return "a" + typeIdentifier(new ExpandedType(t.getInnerArrayType()));
+        } else if (t.isTuple()) {
+            List<String> types = new ArrayList<>();
+            t.getTypes().forEach(type -> types.add(typeIdentifier(new ExpandedType(type))));
+            return "t" + t.getTypes().size() + String.join("", types);
+        } else {
+            throw new IllegalArgumentException("invalid type for function");
+        }
     }
 
     // Top Level
@@ -234,7 +262,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> params = n.parameters.stream()
                 .map(stmt -> stmt.accept(this).assertFirst())
                 .collect(Collectors.toList());
-        return OneOfTwo.ofFirst(new IRCall(new IRName(n.identifier), params));
+        String encodedName = functionName(n.identifier, n.parameters, n.getType());
+        return OneOfTwo.ofFirst(new IRCall(new IRName(encodedName), params));
     }
 
     @Override
