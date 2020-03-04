@@ -349,11 +349,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(BoolNegExprNode n) {
-        return null;
+        IRExpr e = n.expr.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.XOR, new IRConst(1), e));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(IntNegExprNode n) {
-        return null;
+        IRExpr e = n.expr.accept(this).assertFirst();
+        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.SUB, new IRConst(0), e));
     }
 }
