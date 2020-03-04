@@ -50,6 +50,7 @@ import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRConst;
@@ -58,12 +59,14 @@ import cyr7.ir.nodes.IRExp;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
+import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.semantics.types.ExpandedType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -126,9 +129,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AssignmentStmtNode n) {
         IRExpr rhs = n.rhs.accept(this).assertFirst();
-        IRExpr lhs = n.lhs.accept(this).assertFirst();
-        // TODO: Check if the type of lhs is array or just a singular variable
-        return OneOfTwo.ofSecond(new IRMove(lhs, rhs));
+        if (ExpandedType.voidArrayType.isASubtypeOf(n.lhs.getType())) {
+            IRExpr lhs = n.lhs.accept(this).assertFirst();
+            return OneOfTwo.ofSecond(new IRMove(lhs, rhs));
+        } else {
+            VariableAccessExprNode var = (VariableAccessExprNode) n.lhs;
+            return OneOfTwo
+                    .ofSecond(new IRMove(new IRTemp(var.identifier), rhs));
+        }
     }
 
     @Override
@@ -343,9 +351,39 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         return binOp(IRBinOp.OpType.SUB, n);
     }
 
+    public OneOfTwo<IRExpr, IRStmt> visitArr(List<IRExpr> vals) {
+        String memBlock = generator.newTemp();
+        String pointerStart = generator.newTemp();
+        int size = vals.size();
+        IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
+                new IRBinOp(OpType.ADD, new IRConst(size), new IRConst(1)));
+
+        List<IRStmt> commands = new ArrayList<IRStmt>();
+        IRExpr memLoc = new IRCall(new IRName("_xi_alloc"), spaceNeeded);
+        commands.add(new IRMove(new IRTemp(memBlock), memLoc));
+        commands.add(
+                new IRMove(new IRMem(new IRTemp(memBlock)), new IRConst(size)));
+        commands.add(new IRMove(new IRTemp(pointerStart),
+                new IRBinOp(OpType.ADD, new IRTemp(memBlock), new IRConst(8))));
+
+        // Setting the values of the indices in memory
+        for (int i = 0; i < vals.size(); i++) {
+            IRExpr valueLoc = new IRMem(new IRBinOp(OpType.ADD,
+                    new IRTemp(pointerStart),
+                    new IRBinOp(OpType.MUL, new IRConst(8), new IRConst(i))));
+            commands.add(new IRMove(valueLoc, vals.get(i)));
+        }
+        return OneOfTwo.ofFirst(
+                new IRESeq(new IRSeq(commands), new IRTemp(pointerStart)));
+
+    }
+
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LiteralArrayExprNode n) {
-        return null;
+        List<IRExpr> values = n.arrayVals.stream()
+                .map(stmt -> stmt.accept(this).assertFirst())
+                .collect(Collectors.toList());
+        return visitArr(values);
     }
 
     @Override
@@ -365,7 +403,11 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LiteralStringExprNode n) {
-        return null;
+        List<IRExpr> vals = new ArrayList<>();
+        for (char c : n.contents.toCharArray()) {
+            vals.add(new IRConst(c));
+        }
+        return visitArr(vals);
     }
 
     @Override
