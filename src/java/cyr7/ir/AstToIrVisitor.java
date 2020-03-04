@@ -49,17 +49,7 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ir.nodes.IRBinOp;
-import cyr7.ir.nodes.IRConst;
-import cyr7.ir.nodes.IRESeq;
-import cyr7.ir.nodes.IRExp;
-import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRLabel;
-import cyr7.ir.nodes.IRMove;
-import cyr7.ir.nodes.IRReturn;
-import cyr7.ir.nodes.IRSeq;
-import cyr7.ir.nodes.IRStmt;
-import cyr7.ir.nodes.IRTemp;
+import cyr7.ir.nodes.*;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 
@@ -196,12 +186,26 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarInitStmtNode n) {
-        return null;
+        String name = n.varDecl.identifier;
+        IRExpr expr = n.initializer.accept(this).assertFirst();
+
+        return OneOfTwo.ofSecond(new IRMove(new IRTemp(name), expr));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(WhileStmtNode n) {
-        return null;
+        String lh = generator.newLabel();
+        String lt = generator.newLabel();
+        String lf = generator.newLabel();
+
+        IRExpr grd = n.guard.accept(this).assertFirst();
+        IRStmt blk = n.block.accept(this).assertSecond();
+
+        return OneOfTwo.ofSecond(new IRSeq(
+                new IRLabel(lh), new IRCJump(grd, lt, lf),
+                new IRLabel(lt), new IRSeq(blk, new IRJump(new IRName(lh))),
+                new IRLabel(lf)
+        ));
     }
 
     // Expressions
