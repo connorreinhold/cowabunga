@@ -225,7 +225,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VariableAccessExprNode n) {
-        return null;
+        return OneOfTwo.ofFirst(new IRTemp(n.identifier));
     }
 
     @Override
@@ -352,12 +352,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(BoolNegExprNode n) {
         IRExpr e = n.expr.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.XOR, new IRConst(1), e));
+        return OneOfTwo
+                .ofFirst(new IRBinOp(IRBinOp.OpType.XOR, new IRConst(1), e));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(IntNegExprNode n) {
         IRExpr e = n.expr.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(IRBinOp.OpType.SUB, new IRConst(0), e));
+        return OneOfTwo
+                .ofFirst(new IRBinOp(IRBinOp.OpType.SUB, new IRConst(0), e));
     }
 }
