@@ -4,6 +4,7 @@ import java.io.StringReader;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
+import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ir.AstToIrVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRCompUnit;
@@ -33,33 +34,37 @@ public class IRFactory {
     }
 
     public static long testExpr(IRNode irNode) {
-        // needs to be removed
-        IRExpr expr = (IRExpr) irNode;
-        IRStmt bBody = new IRSeq(new IRReturn());
-        IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
-        IRCompUnit compUnit = new IRCompUnit("test");
-        compUnit.appendFunc(bFunc);
-
-        IRSimulator sim = new IRSimulator(compUnit);
-        return sim.call("function");
+//        IRExpr expr = (IRExpr) irNode;
+//        IRStmt bBody = new IRSeq(new IRReturn());
+//        IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
+//        IRCompUnit compUnit = new IRCompUnit("test");
+//        compUnit.appendFunc(bFunc);
+//
+//        IRSimulator sim = new IRSimulator(compUnit);
+//        return sim.call("function");
+        return 0;
     }
 
     public static long testStmts(IRStmt irStmts) {
         // needs to be removed
-        IRStmt bBody = irStmts;
-        IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
-        IRCompUnit compUnit = new IRCompUnit("test");
-        compUnit.appendFunc(bFunc);
-
-        IRSimulator sim = new IRSimulator(compUnit);
-        return sim.call("function");
+//        IRStmt bBody = irStmts;
+//        IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
+//        IRCompUnit compUnit = new IRCompUnit("test");
+//        compUnit.appendFunc(bFunc);
+//
+//        IRSimulator sim = new IRSimulator(compUnit);
+//        return sim.call("function");
+        return 0;
 
     }
 
-    public static long testStatement(String program) {
-        Node node = ParserUtil.parseNode(new StringReader(program), "test",
+    public static long testStatement(String program) throws Exception {
+        XiProgramNode node = (XiProgramNode) ParserUtil.parseNode(new StringReader(program), "test",
                 false);
-        TypeCheckUtil.typeCheck(reader, writer, filename, isIXI, opener);
+        TypeCheckUtil.typecheck(node);
+        IRCompUnit compUnit = new IRCompUnit("test");
+        IRFuncDecl stmt = (IRFuncDecl) node.functions.get(0).accept(new AstToIrVisitor()).assertSecond();
+        compUnit.appendFunc 
     }
 
 }

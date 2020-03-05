@@ -214,24 +214,9 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ArrayDeclStmtNode n) {
-        String memBlock = generator.newTemp();
-        String pointerStart = generator.newTemp();
-        List<IRStmt> commands = new ArrayList<IRStmt>();
-        if (n.type.size.isPresent()) {
-            IRExpr size = n.type.size.get().accept(this).assertFirst();
-            IRExpr spaceNeeded = new IRBinOp(OpType.MUL,
-                    new IRConst(Configuration.WORD_SIZE),
-                    new IRBinOp(OpType.ADD, size, new IRConst(1)));
-
-            IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
-            commands.add(new IRMove(new IRTemp(memBlock), memLoc));
-            commands.add(new IRMove(new IRMem(new IRTemp(memBlock)), size));
-            commands.add(new IRMove(new IRTemp(pointerStart),
-                    new IRBinOp(OpType.ADD, new IRTemp(memBlock),
-                            new IRConst(Configuration.WORD_SIZE))));
-        }
-
-        return OneOfTwo.ofSecond(new IRSeq(commands));
+        IRExpr val = n.type.accept(this).assertFirst();
+        return OneOfTwo
+                .ofSecond(new IRSeq(new IRMove(new IRTemp(n.identifier), val)));
     }
 
     @Override

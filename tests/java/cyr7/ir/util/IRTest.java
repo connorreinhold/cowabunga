@@ -1,8 +1,8 @@
 package cyr7.ir.util;
 
-import cyr7.ir.nodes.IRNode;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import cyr7.ir.nodes.IRNode;
 
 public class IRTest {
 
