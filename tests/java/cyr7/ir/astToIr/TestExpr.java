@@ -75,6 +75,7 @@ class TestExpr {
     void testIntNegExpr() {
         Node node = new IntNegExprNode(C.LOC, new LiteralIntExprNode(C.LOC, "5"));
         IRExpr result = node.accept(new AstToIrVisitor()).assertFirst();
+
     }
 
 }

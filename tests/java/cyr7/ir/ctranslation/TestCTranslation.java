@@ -6,11 +6,7 @@ import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.binexpr.AndExprNode;
 import cyr7.ast.expr.binexpr.OrExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
-import cyr7.ast.toplevel.FunctionDeclNode;
-import cyr7.ast.toplevel.FunctionHeaderDeclNode;
 import cyr7.ir.CTranslationVisitor;
-import cyr7.ir.DefaultIdGenerator;
-import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRJump;
@@ -22,12 +18,9 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.semantics.types.ExpandedType;
 import org.junit.jupiter.api.Test;
 
-import java.awt.*;
 import java.util.List;
 
-import static cyr7.ir.util.IRTest.assertEq;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TestCTranslation {
 
@@ -39,7 +32,7 @@ public class TestCTranslation {
 
         Node node = new LiteralBoolExprNode(C.LOC, true);
         IRStmt expected = new IRJump(new IRName(t));
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -53,7 +46,7 @@ public class TestCTranslation {
 
         Node node = new LiteralBoolExprNode(C.LOC, false);
         IRStmt expected = new IRJump(new IRName(f));
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -75,7 +68,7 @@ public class TestCTranslation {
             new IRLabel(l1),
             new IRJump(new IRName(f))
         );
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -114,7 +107,7 @@ public class TestCTranslation {
                 new IRJump(new IRName(t))
             )
         );
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -136,7 +129,7 @@ public class TestCTranslation {
             new IRLabel(l1),
             new IRJump(new IRName(f))
         );
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -175,7 +168,7 @@ public class TestCTranslation {
                 new IRJump(new IRName(f))
             )
         );
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -214,7 +207,7 @@ public class TestCTranslation {
                 new IRCJump(new IRCall(new IRName("_Ii_b")), t, f)
             )
         );
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
@@ -228,7 +221,7 @@ public class TestCTranslation {
 
         Node node = new FunctionCallExprNode(C.LOC, "f", List.of()).typed(ExpandedType.boolType);
         IRNode expected = new IRCJump(new IRCall(new IRName("_If_b")), t, f);
-        assertEq(
+        assertEquals(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))
         );
