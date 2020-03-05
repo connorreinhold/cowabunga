@@ -1,10 +1,12 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,6 +23,11 @@ public final class BlockStmtNode extends AbstractNode implements StmtNode {
         assert statements != null;
 
         this.statements = Util.immutableCopy(statements);
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return Collections.unmodifiableList(statements);
     }
 
     @Override

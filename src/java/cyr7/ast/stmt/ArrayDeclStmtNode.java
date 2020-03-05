@@ -1,9 +1,12 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.List;
 
 /**
  * A statement of the form
@@ -20,6 +23,11 @@ public final class ArrayDeclStmtNode extends AbstractNode implements StmtNode {
         super(location);
         this.identifier = identifier;
         this.type = type;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(type);
     }
 
     @Override

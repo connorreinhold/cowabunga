@@ -1,9 +1,12 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.List;
 
 /**
  * Represents a call to a procedure [procedureCall], which is a
@@ -20,6 +23,11 @@ public final class ProcedureStmtNode extends AbstractNode implements StmtNode {
         super(location);
         assert procedureCall != null;
         this.procedureCall = procedureCall;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(procedureCall);
     }
 
     @Override

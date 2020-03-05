@@ -1,6 +1,9 @@
 package cyr7.ir.util;
 
+import java.io.StringReader;
+
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ir.AstToIrVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRCompUnit;
@@ -10,6 +13,8 @@ import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
+import cyr7.parser.ParserUtil;
+import cyr7.typecheck.TypeCheckUtil;
 
 public class IRFactory {
 
@@ -28,8 +33,9 @@ public class IRFactory {
     }
 
     public static long testExpr(IRNode irNode) {
+        // needs to be removed
         IRExpr expr = (IRExpr) irNode;
-        IRStmt bBody = new IRSeq(new IRReturn(expr));
+        IRStmt bBody = new IRSeq(new IRReturn());
         IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
         IRCompUnit compUnit = new IRCompUnit("test");
         compUnit.appendFunc(bFunc);
@@ -39,6 +45,7 @@ public class IRFactory {
     }
 
     public static long testStmts(IRStmt irStmts) {
+        // needs to be removed
         IRStmt bBody = irStmts;
         IRFuncDecl bFunc = new IRFuncDecl("function", bBody);
         IRCompUnit compUnit = new IRCompUnit("test");
@@ -48,4 +55,11 @@ public class IRFactory {
         return sim.call("function");
 
     }
+
+    public static long testStatement(String program) {
+        Node node = ParserUtil.parseNode(new StringReader(program), "test",
+                false);
+        TypeCheckUtil.typeCheck(reader, writer, filename, isIXI, opener);
+    }
+
 }

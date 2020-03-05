@@ -8,6 +8,7 @@ import cyr7.semantics.types.ExpandedType;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,6 +29,11 @@ public final class VarDeclNode extends AbstractExprNode implements StmtNode {
 
         this.identifier = identifier;
         this.typeExpr = typeExpr;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(typeExpr);
     }
 
     @Override

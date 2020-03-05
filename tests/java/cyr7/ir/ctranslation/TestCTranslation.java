@@ -19,6 +19,7 @@ import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
+import cyr7.semantics.types.ExpandedType;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -192,25 +193,25 @@ public class TestCTranslation {
         // (f() & g()) | (h() & i())
         Node node = new OrExprNode(C.LOC,
             new AndExprNode(C.LOC,
-                new FunctionCallExprNode(C.LOC, "f", List.of()),
-                new FunctionCallExprNode(C.LOC, "g", List.of())
-            ),
+                new FunctionCallExprNode(C.LOC, "f", List.of()).typed(ExpandedType.boolType),
+                new FunctionCallExprNode(C.LOC, "g", List.of()).typed(ExpandedType.boolType)
+            ).typed(ExpandedType.boolType),
             new AndExprNode(C.LOC,
-                new FunctionCallExprNode(C.LOC, "h", List.of()),
-                new FunctionCallExprNode(C.LOC, "i", List.of())
-            )
-        );
+                new FunctionCallExprNode(C.LOC, "h", List.of()).typed(ExpandedType.boolType),
+                new FunctionCallExprNode(C.LOC, "i", List.of()).typed(ExpandedType.boolType)
+            ).typed(ExpandedType.boolType)
+        ).typed(ExpandedType.boolType);
         IRNode expected = new IRSeq(
             new IRSeq(
-                new IRCJump(new IRCall(new IRName("f")), l3, l2),
+                new IRCJump(new IRCall(new IRName("_If_b")), l3, l2),
                 new IRLabel(l3),
-                new IRCJump(new IRCall(new IRName("g")), t, l2)
+                new IRCJump(new IRCall(new IRName("_Ig_b")), t, l2)
             ),
             new IRLabel(l2),
             new IRSeq(
-                new IRCJump(new IRCall(new IRName("h")), l4, f),
+                new IRCJump(new IRCall(new IRName("_Ih_b")), l4, f),
                 new IRLabel(l4),
-                new IRCJump(new IRCall(new IRName("i")), t, f)
+                new IRCJump(new IRCall(new IRName("_Ii_b")), t, f)
             )
         );
         assertEq(
@@ -225,8 +226,8 @@ public class TestCTranslation {
         String t = generator.newLabel();
         String f = generator.newLabel();
 
-        Node node = new FunctionCallExprNode(C.LOC, "f", List.of());
-        IRNode expected = new IRCJump(new IRCall(new IRName("f")), t, f);
+        Node node = new FunctionCallExprNode(C.LOC, "f", List.of()).typed(ExpandedType.boolType);
+        IRNode expected = new IRCJump(new IRCall(new IRName("_If_b")), t, f);
         assertEq(
             expected,
             node.accept(new CTranslationVisitor(generator, t, f))

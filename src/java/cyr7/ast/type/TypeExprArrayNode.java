@@ -1,9 +1,11 @@
 package cyr7.ast.type;
 
+import cyr7.ast.Node;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -29,6 +31,15 @@ public final class TypeExprArrayNode extends TypeExprNode {
 
         this.child = child;
         this.size = size;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        if (size.isPresent()) {
+            return List.of(child, size.get());
+        } else {
+            return List.of(child);
+        }
     }
 
     @Override

@@ -11,6 +11,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
+import cyr7.ir.nodes.IRCallStmt;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRExp;
@@ -192,10 +193,15 @@ public class IRSimulator {
      *          {@link Configuration#ABSTRACT_RET_PREFIX} index 0
      */
     public long call(ExecutionFrame parent, String name, long... args) {
-        final List<Long> ret;
         // Catch standard library calls.
         if (libraryFunctions.contains(name)) {
-            ret = libraryCall(name, args);
+            final List<Long> ret = libraryCall(name, args);
+            for (int i = 0; i < ret.size(); i++) {
+                parent.put(Configuration.ABSTRACT_RET_PREFIX + i, ret.get(i));
+            }
+            if (ret.size() > 0) {
+                return ret.get(0);
+            }
         } else {
             IRFuncDecl fDecl = compUnit.getFunction(name);
             if (fDecl == null)
@@ -213,17 +219,13 @@ public class IRSimulator {
             // Simulate!
             while (frame.advance()) ;
 
-            ret = frame.rets;
+            boolean returnsOneOrMoreValues = name.charAt(name.lastIndexOf("_") + 1) != 'p';
+            if (returnsOneOrMoreValues) {
+                return frame.get(Configuration.ABSTRACT_RET_PREFIX + 0);
+            }
         }
+        return 0;
 
-        for (int i = 0; i < ret.size(); i++) {
-            parent.put(Configuration.ABSTRACT_RET_PREFIX + i, ret.get(i));
-        }
-        if (ret.size() > 0) {
-            return ret.get(0);
-        } else {
-            return 0;
-        }
     }
 
     /**
@@ -322,7 +324,10 @@ public class IRSimulator {
     }
 
     protected void leave(ExecutionFrame frame) {
-        IRNode insn = frame.getCurrentInsn();
+        interpret(frame, frame.getCurrentInsn());
+    }
+
+    private void interpret(ExecutionFrame frame, IRNode insn) {
         if (insn instanceof IRConst)
             exprStack.pushValue(((IRConst) insn).value());
         else if (insn instanceof IRTemp) {
@@ -446,6 +451,22 @@ public class IRSimulator {
                 throw new InternalCompilerError("Invalid MOVE!");
             }
         }
+        else if (insn instanceof IRCallStmt) {
+            IRCallStmt callStmt = (IRCallStmt) insn;
+            IRCall syntheticCall = new IRCall(callStmt.target(), callStmt.args());
+            interpret(frame, syntheticCall);
+            exprStack.popValue();
+            List<String> collectors = callStmt.collectors();
+            int len = collectors.size();
+            for (int i = 0; i < len; i++) {
+                IRTemp syntheticCollectorTemp = new IRTemp(collectors.get(i));
+                IRTemp syntheticReturnTemp = new IRTemp(Configuration.ABSTRACT_RET_PREFIX + i);
+                interpret(frame, syntheticCollectorTemp);
+                interpret(frame, syntheticReturnTemp);
+                IRMove syntheticMove = new IRMove(syntheticCollectorTemp, syntheticReturnTemp);
+                interpret(frame, syntheticMove);
+            }
+        }
         else if (insn instanceof IRExp) {
             // Discard result.
             exprStack.pop();
@@ -465,16 +486,6 @@ public class IRSimulator {
             if (label != null) frame.setIP(findLabel(label));
         }
         else if (insn instanceof IRReturn) {
-            int argsCount = ((IRReturn) insn).rets().size();
-            // double pass for linear time
-            long rets[] = new long[argsCount];
-            for (int i = argsCount - 1; i >= 0; --i) {
-                rets[i] = exprStack.popValue();
-            }
-            for (int i = 0; i < argsCount; i++) {
-                frame.rets.add(rets[i]);
-            }
-
             frame.setIP(-1);
         }
     }
@@ -498,9 +509,6 @@ public class IRSimulator {
         /** instruction pointer */
         protected long ip;
 
-        /** return values from this frame */
-        protected List<Long> rets;
-
         /** local registers (register name -> value) */
         private Map<String, Long> regs;
 
@@ -508,7 +516,6 @@ public class IRSimulator {
         public ExecutionFrame(long ip) {
             this.ip = ip;
             regs = new HashMap<>();
-            rets = new ArrayList<>();
         }
 
         /**

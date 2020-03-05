@@ -1,9 +1,12 @@
 package cyr7.ast.expr.unaryexpr;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.List;
 
 /**
  * Superclass to expressions involving one child: -[ExprNode expr] or
@@ -19,6 +22,11 @@ public abstract class UnaryExprNode extends AbstractExprNode {
         assert expr != null;
 
         this.expr = expr;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(expr);
     }
 
     public boolean equals(Object o) {
