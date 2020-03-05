@@ -140,12 +140,52 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(PrimitiveTypeNode n) {
-        return null;
+        return OneOfTwo.ofFirst(new IRConst(0));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(TypeExprArrayNode n) {
-        return null;
+        if (n.size.isEmpty()) {
+            return OneOfTwo.ofFirst(new IRConst(0));
+        }
+        String memBlock = generator.newTemp();
+        String arrSize = generator.newTemp();
+        String pointerStart = generator.newTemp();
+        String lh = generator.newLabel();
+        String lt = generator.newLabel();
+        String lf = generator.newLabel();
+
+        List<IRStmt> commands = new ArrayList<IRStmt>();
+
+        IRExpr size = n.size.get().accept(this).assertFirst();
+        commands.add(new IRMove(new IRTemp(arrSize), size));
+
+        IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
+                new IRBinOp(OpType.ADD, new IRTemp(arrSize), new IRConst(1)));
+        IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
+        commands.add(new IRMove(new IRTemp(memBlock), memLoc));
+        commands.add(new IRMove(new IRMem(new IRTemp(memBlock)),
+                new IRTemp(arrSize)));
+        commands.add(new IRMove(new IRTemp(pointerStart),
+                new IRBinOp(OpType.ADD, new IRTemp(memBlock), new IRConst(8))));
+
+        // Iterate through all elements and recursively create child arrays
+        IRExpr grd = new IRBinOp(OpType.GT, new IRTemp(arrSize),
+                new IRConst(0));
+        IRExpr createArray = n.child.accept(this).assertFirst();
+        IRExpr valueLoc = new IRMem(new IRBinOp(OpType.ADD,
+                new IRTemp(pointerStart),
+                new IRBinOp(OpType.MUL, new IRConst(8), new IRTemp(arrSize))));
+        IRStmt blk = new IRSeq(
+                new IRMove(new IRTemp(arrSize),
+                        new IRBinOp(OpType.SUB, new IRTemp(arrSize),
+                                new IRConst(1))),
+                new IRMove(valueLoc, createArray));
+
+        return OneOfTwo.ofFirst(new IRESeq(new IRSeq(new IRLabel(lh),
+                new IRCJump(grd, lt, lf), new IRLabel(lt),
+                new IRSeq(blk, new IRJump(new IRName(lh))), new IRLabel(lf)),
+                new IRTemp(pointerStart)));
     }
 
     // Statements
@@ -160,12 +200,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
                     new IRBinOp(OpType.ADD, size, new IRConst(1)));
 
-            IRExpr memLoc = new IRCall(new IRName("_xi_alloc"), spaceNeeded);
+            IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
             commands.add(new IRMove(new IRTemp(memBlock), memLoc));
             commands.add(new IRMove(new IRMem(new IRTemp(memBlock)), size));
             commands.add(new IRMove(new IRTemp(pointerStart), new IRBinOp(
                     OpType.ADD, new IRTemp(memBlock), new IRConst(8))));
         }
+
         return OneOfTwo.ofSecond(new IRSeq(commands));
     }
 
@@ -292,7 +333,36 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ArrayAccessExprNode n) {
-        return null;
+        String ts = generator.newTemp();
+        String ta = generator.newTemp();
+        String tl = generator.newTemp();
+        String lt = generator.newLabel();
+        String lf = generator.newLabel();
+        List<IRStmt> commands = new ArrayList<IRStmt>();
+
+        IRExpr index = n.index.accept(this).assertFirst();
+        IRExpr arr = n.child.accept(this).assertFirst();
+
+        commands.add(new IRMove(new IRTemp(ts), index));
+        commands.add(new IRMove(new IRTemp(ta), arr));
+
+        IRExpr length = new IRMem(
+                new IRBinOp(OpType.SUB, new IRTemp(ts), new IRConst(8)));
+        commands.add(new IRMove(new IRTemp(tl), length));
+
+        // Check for out of bounds
+        commands.add(new IRCJump(
+                new IRBinOp(OpType.AND,
+                        new IRBinOp(OpType.LEQ, new IRConst(0), new IRTemp(ta)),
+                        new IRBinOp(OpType.LT, new IRTemp(ta), new IRTemp(tl))),
+                lt, lf));
+        commands.add(new IRLabel(lf));
+        commands.add(new IRExp(new IRCall(new IRName("_xi_out_of_bounds"))));
+        commands.add(new IRLabel(lt));
+
+        IRExpr val = new IRMem(new IRBinOp(OpType.ADD, new IRTemp(ta),
+                new IRBinOp(OpType.MUL, new IRTemp(ta), new IRConst(8))));
+        return OneOfTwo.ofFirst(new IRESeq(new IRSeq(commands), val));
     }
 
     @Override
@@ -400,11 +470,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String memBlock = generator.newTemp();
         String pointerStart = generator.newTemp();
         int size = vals.size();
+
         IRExpr spaceNeeded = new IRBinOp(OpType.MUL, new IRConst(8),
                 new IRBinOp(OpType.ADD, new IRConst(size), new IRConst(1)));
 
         List<IRStmt> commands = new ArrayList<IRStmt>();
-        IRExpr memLoc = new IRCall(new IRName("_xi_alloc"), spaceNeeded);
+        IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
         commands.add(new IRMove(new IRTemp(memBlock), memLoc));
         commands.add(
                 new IRMove(new IRMem(new IRTemp(memBlock)), new IRConst(size)));
@@ -420,7 +491,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         }
         return OneOfTwo.ofFirst(
                 new IRESeq(new IRSeq(commands), new IRTemp(pointerStart)));
-
     }
 
     @Override
