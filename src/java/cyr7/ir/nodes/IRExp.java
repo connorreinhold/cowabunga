@@ -4,6 +4,7 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -19,7 +20,8 @@ public class IRExp extends IRStmt {
      *
      * @param expr the expression to be evaluated and result discarded
      */
-    public IRExp(IRExpr expr) {
+    public IRExp(Location location, IRExpr expr) {
+        super(location);
         this.expr = expr;
     }
 

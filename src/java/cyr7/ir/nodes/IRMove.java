@@ -3,6 +3,7 @@ package cyr7.ir.nodes;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -19,7 +20,8 @@ public class IRMove extends IRStmt {
      * @param target the destination of this move
      * @param src the expression whose value is to be moved
      */
-    public IRMove(IRExpr target, IRExpr src) {
+    public IRMove(Location location, IRExpr target, IRExpr src) {
+        super(location);
         this.target = target;
         this.src = src;
     }

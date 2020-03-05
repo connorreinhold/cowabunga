@@ -1,6 +1,7 @@
 package cyr7.ir.nodes;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -15,7 +16,8 @@ public class IRName extends IRExpr_c {
      *
      * @param name name of this memory address
      */
-    public IRName(String name) {
+    public IRName(Location location, String name) {
+        super(location);
         this.name = name;
     }
 

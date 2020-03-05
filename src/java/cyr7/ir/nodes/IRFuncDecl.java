@@ -4,6 +4,7 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -12,7 +13,8 @@ public class IRFuncDecl extends IRNode_c {
     private String name;
     private IRStmt body;
 
-    public IRFuncDecl(String name, IRStmt body) {
+    public IRFuncDecl(Location location, String name, IRStmt body) {
+        super(location);
         this.name = name;
         this.body = body;
     }

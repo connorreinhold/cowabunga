@@ -9,6 +9,7 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a function call
@@ -23,8 +24,8 @@ public class IRCall extends IRExpr_c {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCall(IRExpr target, IRExpr... args) {
-        this(target, Arrays.asList(args));
+    public IRCall(Location location, IRExpr target, IRExpr... args) {
+        this(location, target, Arrays.asList(args));
     }
 
     /**
@@ -32,7 +33,8 @@ public class IRCall extends IRExpr_c {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCall(IRExpr target, List<IRExpr> args) {
+    public IRCall(Location location, IRExpr target, List<IRExpr> args) {
+        super(location);
         this.target = target;
         this.args = args;
     }

@@ -2,6 +2,7 @@ package cyr7.ir.nodes;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.InsnMapsBuilder;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -15,7 +16,8 @@ public class IRLabel extends IRStmt {
      *
      * @param name name of this memory address
      */
-    public IRLabel(String name) {
+    public IRLabel(Location location, String name) {
+        super(location);
         this.name = name;
     }
 

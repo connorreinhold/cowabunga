@@ -67,6 +67,9 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
@@ -74,6 +77,7 @@ import cyr7.ir.nodes.IRTemp;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
@@ -117,7 +121,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         /*
          * List<IRStmt> seq = new ArrayList<>(); seq.add(new
          * IRLabel(functionName(n.header.identifier, n.header.args,
-         * n.header.returnTypes))); IRSeq func = new IRSeq();
+         * n.header.returnTypes))); IRSeq func = make.IRSeq();
          */
         return null;
     }
@@ -139,15 +143,19 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarDeclNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         return OneOfTwo
-                .ofSecond(new IRMove(new IRTemp(n.identifier), new IRConst(0)));
+                .ofSecond(make.IRMove(make.IRTemp(n.identifier), make.IRConst(0)));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(XiProgramNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String file = n.getLocation().getUnit();
         file = file.substring(0, file.lastIndexOf('.'));
-        IRCompUnit program = new IRCompUnit(file);
+        IRCompUnit program = make.IRCompUnit(file);
 
         for (FunctionDeclNode fun : n.functions) {
             program.appendFunc((IRFuncDecl) fun.accept(this).assertFirst());
@@ -158,13 +166,17 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(PrimitiveTypeNode n) {
-        return OneOfTwo.ofFirst(new IRConst(0));
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
+        return OneOfTwo.ofFirst(make.IRConst(0));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(TypeExprArrayNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         if (n.size.isEmpty()) {
-            return OneOfTwo.ofFirst(new IRConst(0));
+            return OneOfTwo.ofFirst(make.IRConst(0));
         }
         String memBlock = generator.newTemp();
         String arrSize = generator.newTemp();
@@ -176,158 +188,180 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRStmt> commands = new ArrayList<IRStmt>();
 
         IRExpr size = n.size.get().accept(this).assertFirst();
-        commands.add(new IRMove(new IRTemp(arrSize), size));
+        commands.add(make.IRMove(make.IRTemp(arrSize), size));
 
-        IRExpr spaceNeeded = new IRBinOp(OpType.MUL,
-                new IRConst(Configuration.WORD_SIZE),
-                new IRBinOp(OpType.ADD, new IRTemp(arrSize), new IRConst(1)));
-        IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
-        commands.add(new IRMove(new IRTemp(memBlock), memLoc));
-        commands.add(new IRMove(new IRMem(new IRTemp(memBlock)),
-                new IRTemp(arrSize)));
-        commands.add(new IRMove(new IRTemp(pointerStart),
-                new IRBinOp(OpType.ADD, new IRTemp(memBlock),
-                        new IRConst(Configuration.WORD_SIZE))));
+        IRExpr spaceNeeded = make.IRBinOp(OpType.MUL,
+                make.IRConst(Configuration.WORD_SIZE),
+                make.IRBinOp(OpType.ADD, make.IRTemp(arrSize), make.IRConst(1)));
+        IRExpr memLoc = make.IRCall(make.IRName("_xi_malloc"), spaceNeeded);
+        commands.add(make.IRMove(make.IRTemp(memBlock), memLoc));
+        commands.add(make.IRMove(make.IRMem(make.IRTemp(memBlock)),
+                make.IRTemp(arrSize)));
+        commands.add(make.IRMove(make.IRTemp(pointerStart),
+                make.IRBinOp(OpType.ADD, make.IRTemp(memBlock),
+                        make.IRConst(Configuration.WORD_SIZE))));
 
         // Iterate through all elements and recursively create child arrays
-        IRExpr grd = new IRBinOp(OpType.GT, new IRTemp(arrSize),
-                new IRConst(0));
+        IRExpr grd = make.IRBinOp(OpType.GT, make.IRTemp(arrSize),
+                make.IRConst(0));
         IRExpr createArray = n.child.accept(this).assertFirst();
-        IRExpr valueLoc = new IRMem(
-                new IRBinOp(OpType.ADD, new IRTemp(pointerStart),
-                        new IRBinOp(OpType.MUL,
-                                new IRConst(Configuration.WORD_SIZE),
-                                new IRTemp(arrSize))));
-        IRStmt blk = new IRSeq(
-                new IRMove(new IRTemp(arrSize),
-                        new IRBinOp(OpType.SUB, new IRTemp(arrSize),
-                                new IRConst(1))),
-                new IRMove(valueLoc, createArray));
+        IRExpr valueLoc = make.IRMem(
+                make.IRBinOp(OpType.ADD, make.IRTemp(pointerStart),
+                        make.IRBinOp(OpType.MUL,
+                                make.IRConst(Configuration.WORD_SIZE),
+                                make.IRTemp(arrSize))));
+        IRStmt blk = make.IRSeq(
+                make.IRMove(make.IRTemp(arrSize),
+                        make.IRBinOp(OpType.SUB, make.IRTemp(arrSize),
+                                make.IRConst(1))),
+                make.IRMove(valueLoc, createArray));
 
-        return OneOfTwo.ofFirst(new IRESeq(new IRSeq(new IRLabel(lh),
-                new IRCJump(grd, lt, lf), new IRLabel(lt),
-                new IRSeq(blk, new IRJump(new IRName(lh))), new IRLabel(lf)),
-                new IRTemp(pointerStart)));
+        return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(make.IRLabel(lh),
+                make.IRCJump(grd, lt, lf), make.IRLabel(lt),
+                make.IRSeq(blk, make.IRJump(make.IRName(lh))), make.IRLabel(lf)),
+                make.IRTemp(pointerStart)));
     }
 
     // Statements
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ArrayDeclStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String memBlock = generator.newTemp();
         String pointerStart = generator.newTemp();
         List<IRStmt> commands = new ArrayList<IRStmt>();
         if (n.type.size.isPresent()) {
             IRExpr size = n.type.size.get().accept(this).assertFirst();
-            IRExpr spaceNeeded = new IRBinOp(OpType.MUL,
-                    new IRConst(Configuration.WORD_SIZE),
-                    new IRBinOp(OpType.ADD, size, new IRConst(1)));
+            IRExpr spaceNeeded = make.IRBinOp(OpType.MUL,
+                    make.IRConst(Configuration.WORD_SIZE),
+                    make.IRBinOp(OpType.ADD, size, make.IRConst(1)));
 
-            IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
-            commands.add(new IRMove(new IRTemp(memBlock), memLoc));
-            commands.add(new IRMove(new IRMem(new IRTemp(memBlock)), size));
-            commands.add(new IRMove(new IRTemp(pointerStart),
-                    new IRBinOp(OpType.ADD, new IRTemp(memBlock),
-                            new IRConst(Configuration.WORD_SIZE))));
+            IRExpr memLoc = make.IRCall(make.IRName("_xi_malloc"), spaceNeeded);
+            commands.add(make.IRMove(make.IRTemp(memBlock), memLoc));
+            commands.add(make.IRMove(make.IRMem(make.IRTemp(memBlock)), size));
+            commands.add(make.IRMove(make.IRTemp(pointerStart),
+                    make.IRBinOp(OpType.ADD, make.IRTemp(memBlock),
+                            make.IRConst(Configuration.WORD_SIZE))));
         }
 
-        return OneOfTwo.ofSecond(new IRSeq(commands));
+        return OneOfTwo.ofSecond(make.IRSeq(commands));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AssignmentStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         IRExpr rhs = n.rhs.accept(this).assertFirst();
         if (ExpandedType.voidArrayType.isASubtypeOf(n.lhs.getType())) {
             IRExpr lhs = n.lhs.accept(this).assertFirst();
-            return OneOfTwo.ofSecond(new IRMove(lhs, rhs));
+            return OneOfTwo.ofSecond(make.IRMove(lhs, rhs));
         } else {
             VariableAccessExprNode var = (VariableAccessExprNode) n.lhs;
             return OneOfTwo
-                    .ofSecond(new IRMove(new IRTemp(var.identifier), rhs));
+                    .ofSecond(make.IRMove(make.IRTemp(var.identifier), rhs));
         }
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(BlockStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         List<IRStmt> stmts = n.statements.stream()
                 .map(stmt -> stmt.accept(this).assertSecond())
                 .collect(Collectors.toList());
-        return OneOfTwo.ofSecond(new IRSeq(stmts));
+        return OneOfTwo.ofSecond(make.IRSeq(stmts));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ExprStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         IRExpr e = n.expr.accept(this).assertFirst();
-        return OneOfTwo.ofSecond(new IRExp(e));
+        return OneOfTwo.ofSecond(make.IRExp(e));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(IfElseStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String lt = generator.newLabel();
         String lf = generator.newLabel();
         List<IRStmt> commands = new ArrayList<>();
         commands.add(
                 n.guard.accept(new CTranslationVisitor(generator, lt, lf)));
-        commands.add(new IRLabel(lt));
+        commands.add(make.IRLabel(lt));
         commands.add(n.ifBlock.accept(this).assertSecond());
-        commands.add(new IRLabel(lf));
+        commands.add(make.IRLabel(lf));
         if (n.elseBlock.isPresent()) {
             commands.add(n.elseBlock.get().accept(this).assertSecond());
         }
-        return OneOfTwo.ofSecond(new IRSeq(commands));
+        return OneOfTwo.ofSecond(make.IRSeq(commands));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(MultiAssignStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         List<IRStmt> commands = new ArrayList<>();
         IRExpr functionCall = n.initializer.accept(this).assertFirst();
-        commands.add(new IRExp(functionCall));
+        commands.add(make.IRExp(functionCall));
         int retNum = 0;
         for (Optional<VarDeclNode> var : n.varDecls) {
             if (var.isPresent()) {
-                commands.add(new IRMove(new IRTemp(var.get().identifier),
-                        new IRTemp(generator.retTemp(retNum))));
+                commands.add(make.IRMove(make.IRTemp(var.get().identifier),
+                        make.IRTemp(generator.retTemp(retNum))));
             }
             retNum++;
         }
-        return OneOfTwo.ofSecond(new IRSeq(commands));
+        return OneOfTwo.ofSecond(make.IRSeq(commands));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ProcedureStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         return OneOfTwo.ofSecond(
-                new IRExp(n.procedureCall.accept(this).assertFirst()));
+                make.IRExp(n.procedureCall.accept(this).assertFirst()));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         AtomicInteger retNum = new AtomicInteger();
         List<IRStmt> rets = n.exprs.stream()
-                .map(stmt -> new IRMove(
-                        new IRTemp("_RET" + retNum.getAndIncrement()),
+                .map(stmt -> make.IRMove(
+                        make.IRTemp("_RET" + retNum.getAndIncrement()),
                         stmt.accept(this).assertFirst()))
                 .collect(Collectors.toList());
-        rets.add(new IRReturn());
-        return OneOfTwo.ofSecond(new IRSeq(rets));
+        rets.add(make.IRReturn());
+        return OneOfTwo.ofSecond(make.IRSeq(rets));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarDeclStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         // Initialize it to 0
         return OneOfTwo.ofSecond(
-                new IRMove(new IRTemp(n.varDecl.identifier), new IRConst(0)));
+                make.IRMove(make.IRTemp(n.varDecl.identifier), make.IRConst(0)));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarInitStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String name = n.varDecl.identifier;
         IRExpr expr = n.initializer.accept(this).assertFirst();
 
-        return OneOfTwo.ofSecond(new IRMove(new IRTemp(name), expr));
+        return OneOfTwo.ofSecond(make.IRMove(make.IRTemp(name), expr));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(WhileStmtNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String lh = generator.newLabel();
         String lt = generator.newLabel();
         String lf = generator.newLabel();
@@ -335,32 +369,38 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRStmt grd = n.guard.accept(new CTranslationVisitor(generator, lt, lf));
         IRStmt blk = n.block.accept(this).assertSecond();
 
-        return OneOfTwo.ofSecond(new IRSeq(new IRLabel(lh), grd,
-                new IRLabel(lt), new IRSeq(blk, new IRJump(new IRName(lh))),
-                new IRLabel(lf)));
+        return OneOfTwo.ofSecond(make.IRSeq(make.IRLabel(lh), grd,
+                make.IRLabel(lt), make.IRSeq(blk, make.IRJump(make.IRName(lh))),
+                make.IRLabel(lf)));
     }
 
     // Expressions
 
     private OneOfTwo<IRExpr, IRStmt> binOp(IRBinOp.OpType opType,
             BinExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
-        return OneOfTwo.ofFirst(new IRBinOp(opType, left, right));
+        return OneOfTwo.ofFirst(make.IRBinOp(opType, left, right));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionCallExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         List<IRExpr> params = n.parameters.stream()
                 .map(stmt -> stmt.accept(this).assertFirst())
                 .collect(Collectors.toList());
         String encodedName = functionName(n.identifier, n.parameters,
                 n.getType());
-        return OneOfTwo.ofFirst(new IRCall(new IRName(encodedName), params));
+        return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ArrayAccessExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String ts = generator.newTemp();
         String ta = generator.newTemp();
         String tl = generator.newTemp();
@@ -371,31 +411,33 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr index = n.index.accept(this).assertFirst();
         IRExpr arr = n.child.accept(this).assertFirst();
 
-        commands.add(new IRMove(new IRTemp(ts), index));
-        commands.add(new IRMove(new IRTemp(ta), arr));
+        commands.add(make.IRMove(make.IRTemp(ts), index));
+        commands.add(make.IRMove(make.IRTemp(ta), arr));
 
-        IRExpr length = new IRMem(
-                new IRBinOp(OpType.SUB, new IRTemp(ts), new IRConst(8)));
-        commands.add(new IRMove(new IRTemp(tl), length));
+        IRExpr length = make.IRMem(
+                make.IRBinOp(OpType.SUB, make.IRTemp(ts), make.IRConst(8)));
+        commands.add(make.IRMove(make.IRTemp(tl), length));
 
         // Check for out of bounds
-        commands.add(new IRCJump(
-                new IRBinOp(OpType.AND,
-                        new IRBinOp(OpType.LEQ, new IRConst(0), new IRTemp(ta)),
-                        new IRBinOp(OpType.LT, new IRTemp(ta), new IRTemp(tl))),
+        commands.add(make.IRCJump(
+                make.IRBinOp(OpType.AND,
+                        make.IRBinOp(OpType.LEQ, make.IRConst(0), make.IRTemp(ta)),
+                        make.IRBinOp(OpType.LT, make.IRTemp(ta), make.IRTemp(tl))),
                 lt, lf));
-        commands.add(new IRLabel(lf));
-        commands.add(new IRExp(new IRCall(new IRName("_xi_out_of_bounds"))));
-        commands.add(new IRLabel(lt));
+        commands.add(make.IRLabel(lf));
+        commands.add(make.IRExp(make.IRCall(make.IRName("_xi_out_of_bounds"))));
+        commands.add(make.IRLabel(lt));
 
-        IRExpr val = new IRMem(new IRBinOp(OpType.ADD, new IRTemp(ta),
-                new IRBinOp(OpType.MUL, new IRTemp(ta), new IRConst(8))));
-        return OneOfTwo.ofFirst(new IRESeq(new IRSeq(commands), val));
+        IRExpr val = make.IRMem(make.IRBinOp(OpType.ADD, make.IRTemp(ta),
+                make.IRBinOp(OpType.MUL, make.IRTemp(ta), make.IRConst(8))));
+        return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(commands), val));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VariableAccessExprNode n) {
-        return OneOfTwo.ofFirst(new IRTemp(n.identifier));
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
+        return OneOfTwo.ofFirst(make.IRTemp(n.identifier));
     }
 
     @Override
@@ -405,6 +447,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AndExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String x = generator.newTemp();
         String l1 = generator.newLabel();
         String l2 = generator.newLabel();
@@ -415,10 +459,10 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                 .accept(new CTranslationVisitor(generator, l2, l3));
 
         return OneOfTwo.ofFirst(
-                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(0)),
-                        left, new IRLabel(l1), right, new IRLabel(l2),
-                        new IRMove(new IRTemp(x), new IRConst(1)),
-                        new IRLabel(l3)), new IRTemp(x)));
+                make.IRESeq(make.IRSeq(make.IRMove(make.IRTemp(x), make.IRConst(0)),
+                        left, make.IRLabel(l1), right, make.IRLabel(l2),
+                        make.IRMove(make.IRTemp(x), make.IRConst(1)),
+                        make.IRLabel(l3)), make.IRTemp(x)));
     }
 
     @Override
@@ -468,6 +512,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(OrExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String x = generator.newTemp();
         String l1 = generator.newLabel();
         String l2 = generator.newLabel();
@@ -478,10 +524,10 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                 .accept(new CTranslationVisitor(generator, l3, l2));
 
         return OneOfTwo.ofFirst(
-                new IRESeq(new IRSeq(new IRMove(new IRTemp(x), new IRConst(1)),
-                        left, new IRLabel(l1), right, new IRLabel(l2),
-                        new IRMove(new IRTemp(x), new IRConst(0)),
-                        new IRLabel(l3)), new IRTemp(x)));
+                make.IRESeq(make.IRSeq(make.IRMove(make.IRTemp(x), make.IRConst(1)),
+                        left, make.IRLabel(l1), right, make.IRLabel(l2),
+                        make.IRMove(make.IRTemp(x), make.IRConst(0)),
+                        make.IRLabel(l3)), make.IRTemp(x)));
     }
 
     @Override
@@ -494,34 +540,36 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         return binOp(IRBinOp.OpType.SUB, n);
     }
 
-    public OneOfTwo<IRExpr, IRStmt> visitArr(List<IRExpr> vals) {
+    public OneOfTwo<IRExpr, IRStmt> visitArr(List<IRExpr> vals, Location location) {
+        IRNodeFactory make = new IRNodeFactory_c(location);
+
         String memBlock = generator.newTemp();
         String pointerStart = generator.newTemp();
         int size = vals.size();
-        IRExpr spaceNeeded = new IRBinOp(OpType.MUL,
-                new IRConst(Configuration.WORD_SIZE),
-                new IRBinOp(OpType.ADD, new IRConst(size), new IRConst(1)));
+        IRExpr spaceNeeded = make.IRBinOp(OpType.MUL,
+                make.IRConst(Configuration.WORD_SIZE),
+                make.IRBinOp(OpType.ADD, make.IRConst(size), make.IRConst(1)));
 
         List<IRStmt> commands = new ArrayList<IRStmt>();
-        IRExpr memLoc = new IRCall(new IRName("_xi_malloc"), spaceNeeded);
-        commands.add(new IRMove(new IRTemp(memBlock), memLoc));
+        IRExpr memLoc = make.IRCall(make.IRName("_xi_malloc"), spaceNeeded);
+        commands.add(make.IRMove(make.IRTemp(memBlock), memLoc));
         commands.add(
-                new IRMove(new IRMem(new IRTemp(memBlock)), new IRConst(size)));
-        commands.add(new IRMove(new IRTemp(pointerStart),
-                new IRBinOp(OpType.ADD, new IRTemp(memBlock),
-                        new IRConst(Configuration.WORD_SIZE))));
+                make.IRMove(make.IRMem(make.IRTemp(memBlock)), make.IRConst(size)));
+        commands.add(make.IRMove(make.IRTemp(pointerStart),
+                make.IRBinOp(OpType.ADD, make.IRTemp(memBlock),
+                        make.IRConst(Configuration.WORD_SIZE))));
 
         // Setting the values of the indices in memory
         for (int i = 0; i < vals.size(); i++) {
-            IRExpr valueLoc = new IRMem(
-                    new IRBinOp(OpType.ADD, new IRTemp(pointerStart),
-                            new IRBinOp(OpType.MUL,
-                                    new IRConst(Configuration.WORD_SIZE),
-                                    new IRConst(i))));
-            commands.add(new IRMove(valueLoc, vals.get(i)));
+            IRExpr valueLoc = make.IRMem(
+                    make.IRBinOp(OpType.ADD, make.IRTemp(pointerStart),
+                            make.IRBinOp(OpType.MUL,
+                                    make.IRConst(Configuration.WORD_SIZE),
+                                    make.IRConst(i))));
+            commands.add(make.IRMove(valueLoc, vals.get(i)));
         }
         return OneOfTwo.ofFirst(
-                new IRESeq(new IRSeq(commands), new IRTemp(pointerStart)));
+                make.IRESeq(make.IRSeq(commands), make.IRTemp(pointerStart)));
     }
 
     @Override
@@ -529,44 +577,56 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> values = n.arrayVals.stream()
                 .map(stmt -> stmt.accept(this).assertFirst())
                 .collect(Collectors.toList());
-        return visitArr(values);
+        return visitArr(values, n.getLocation());
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LiteralBoolExprNode n) {
-        return OneOfTwo.ofFirst(new IRConst(n.contents ? 1 : 0));
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
+        return OneOfTwo.ofFirst(make.IRConst(n.contents ? 1 : 0));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LiteralCharExprNode n) {
-        return OneOfTwo.ofFirst(new IRConst(n.contents.charAt(0)));
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
+        return OneOfTwo.ofFirst(make.IRConst(n.contents.charAt(0)));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LiteralIntExprNode n) {
-        return OneOfTwo.ofFirst(new IRConst(Long.parseLong(n.contents)));
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
+        return OneOfTwo.ofFirst(make.IRConst(Long.parseLong(n.contents)));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(LiteralStringExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         List<IRExpr> vals = new ArrayList<>();
         for (char c : n.contents.toCharArray()) {
-            vals.add(new IRConst(c));
+            vals.add(make.IRConst(c));
         }
-        return visitArr(vals);
+        return visitArr(vals, n.getLocation());
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(BoolNegExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         IRExpr e = n.expr.accept(this).assertFirst();
         return OneOfTwo
-                .ofFirst(new IRBinOp(IRBinOp.OpType.XOR, new IRConst(1), e));
+                .ofFirst(make.IRBinOp(IRBinOp.OpType.XOR, make.IRConst(1), e));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(IntNegExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         IRExpr e = n.expr.accept(this).assertFirst();
         return OneOfTwo
-                .ofFirst(new IRBinOp(IRBinOp.OpType.SUB, new IRConst(0), e));
+                .ofFirst(make.IRBinOp(IRBinOp.OpType.SUB, make.IRConst(0), e));
     }
 }

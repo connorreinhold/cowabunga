@@ -1,6 +1,7 @@
 package cyr7.ir.nodes;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -15,7 +16,8 @@ public class IRConst extends IRExpr_c {
      *
      * @param value value of this constant
      */
-    public IRConst(long value) {
+    public IRConst(Location location, long value) {
+        super(location);
         this.value = value;
     }
 

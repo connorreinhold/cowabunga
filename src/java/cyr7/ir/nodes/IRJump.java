@@ -3,6 +3,7 @@ package cyr7.ir.nodes;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -16,7 +17,8 @@ public class IRJump extends IRStmt {
      *
      * @param expr the destination of the jump
      */
-    public IRJump(IRExpr expr) {
+    public IRJump(Location location, IRExpr expr) {
+        super(location);
         target = expr;
     }
 

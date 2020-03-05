@@ -7,6 +7,7 @@ import java.util.Objects;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a compilation unit
@@ -15,12 +16,14 @@ public class IRCompUnit extends IRStmt {
     private String name;
     private Map<String, IRFuncDecl> functions;
 
-    public IRCompUnit(String name) {
+    public IRCompUnit(Location location, String name) {
+        super(location);
         this.name = name;
         functions = new LinkedHashMap<>();
     }
 
-    public IRCompUnit(String name, Map<String, IRFuncDecl> functions) {
+    public IRCompUnit(Location location, String name, Map<String, IRFuncDecl> functions) {
+        super(location);
         this.name = name;
         this.functions = functions;
     }

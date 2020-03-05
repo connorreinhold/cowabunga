@@ -4,6 +4,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -35,11 +36,12 @@ public class IRMem extends IRExpr_c {
      *
      * @param expr the address of this memory location
      */
-    public IRMem(IRExpr expr) {
-        this(expr, MemType.NORMAL);
+    public IRMem(Location location, IRExpr expr) {
+        this(location, expr, MemType.NORMAL);
     }
 
-    public IRMem(IRExpr expr, MemType memType) {
+    public IRMem(Location location, IRExpr expr, MemType memType) {
+        super(location);
         this.expr = expr;
         this.memType = memType;
     }

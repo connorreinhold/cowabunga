@@ -1,6 +1,7 @@
 package cyr7.ir.nodes;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -15,7 +16,8 @@ public class IRTemp extends IRExpr_c {
      *
      * @param name name of this temporary register
      */
-    public IRTemp(String name) {
+    public IRTemp(Location location, String name) {
+        super(location);
         this.name = name;
     }
 

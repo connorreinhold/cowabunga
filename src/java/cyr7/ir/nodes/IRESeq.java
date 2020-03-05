@@ -4,6 +4,7 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -20,7 +21,8 @@ public class IRESeq extends IRExpr_c {
      * @param stmt IR statement to be evaluated for side effects
      * @param expr IR expression to be evaluated after {@code stmt}
      */
-    public IRESeq(IRStmt stmt, IRExpr expr) {
+    public IRESeq(Location location, IRStmt stmt, IRExpr expr) {
+        super(location);
         this.stmt = stmt;
         this.expr = expr;
     }

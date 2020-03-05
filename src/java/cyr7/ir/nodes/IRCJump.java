@@ -4,6 +4,7 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Objects;
 
@@ -21,8 +22,8 @@ public class IRCJump extends IRStmt {
      * @param trueLabel the destination of the jump if {@code expr} evaluates
      *          to true
      */
-    public IRCJump(IRExpr cond, String trueLabel) {
-        this(cond, trueLabel, null);
+    public IRCJump(Location location, IRExpr cond, String trueLabel) {
+        this(location, cond, trueLabel, null);
     }
 
     /**
@@ -33,7 +34,8 @@ public class IRCJump extends IRStmt {
      * @param falseLabel the destination of the jump if {@code expr} evaluates
      *          to false
      */
-    public IRCJump(IRExpr cond, String trueLabel, String falseLabel) {
+    public IRCJump(Location location, IRExpr cond, String trueLabel, String falseLabel) {
+        super(location);
         this.cond = cond;
         this.trueLabel = trueLabel;
         this.falseLabel = falseLabel;
