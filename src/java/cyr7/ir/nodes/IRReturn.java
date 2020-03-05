@@ -1,8 +1,7 @@
 package cyr7.ir.nodes;
 
+import cyr7.ir.fold.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-import cyr7.ir.visit.AggregateVisitor;
-import cyr7.ir.visit.IRVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /** RETURN statement */
@@ -25,5 +24,10 @@ public class IRReturn extends IRStmt {
     @Override
     public boolean equals(Object obj) {
         return (obj instanceof IRReturn);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }

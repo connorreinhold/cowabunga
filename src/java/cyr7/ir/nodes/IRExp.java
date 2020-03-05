@@ -1,12 +1,13 @@
 package cyr7.ir.nodes;
 
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java.util.Objects;
+
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-
-import java.util.Objects;
 
 /**
  * An intermediate representation for evaluating an expression for side effects,
@@ -75,5 +76,10 @@ public class IRExp extends IRStmt {
     @Override
     public int hashCode() {
         return Objects.hash(expr);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }

@@ -30,15 +30,15 @@ import cyr7.ir.nodes.IRTemp;
  *
  * @param <T>
  */
-public interface IRVisitor<T> {
+public interface MyIRVisitor<T> {
 
     // Expressions
-
-    public T visit(IRConst n);
 
     public T visit(IRBinOp n);
 
     public T visit(IRCall n);
+
+    public T visit(IRConst n);
 
     public T visit(IRESeq n);
 

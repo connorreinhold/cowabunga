@@ -1,13 +1,14 @@
 package cyr7.ir.nodes;
 
-import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java.util.Objects;
+
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.InternalCompilerError;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-
-import java.util.Objects;
 
 /**
  * An intermediate representation for a binary operation
@@ -153,6 +154,11 @@ public class IRBinOp extends IRExpr_c {
     @Override
     public int hashCode() {
         return Objects.hash(type, left, right);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 
 }

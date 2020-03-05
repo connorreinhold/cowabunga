@@ -5,10 +5,11 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
@@ -107,5 +108,10 @@ public class IRCall extends IRExpr_c {
         for (IRExpr arg : args)
             arg.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }

@@ -28,7 +28,7 @@ import cyr7.ir.nodes.IRTemp;
  * @author ayang
  *
  */
-public class ConstFoldVisitor implements IRVisitor<IRNode> {
+public class ConstFoldVisitor implements MyIRVisitor<IRNode> {
 
     @Override
     public IRNode visit(IRBinOp n) {
