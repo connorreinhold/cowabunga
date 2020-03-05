@@ -1,6 +1,6 @@
-package edu.cornell.cs.cs4120.xic.cyr7.ir.parse;
+package cyr7.ir.parse;
 
-import edu.cornell.cs.cs4120.xic.cyr7.ir.*;
+import cyr7.ir.*;
 
 import java_cup.runtime.ComplexSymbolFactory;
 
@@ -20,7 +20,7 @@ parser IRParser {:
 :};
 
 terminal LPAREN, RPAREN;
-terminal MOVE, EXP, SEQ, JUMP, CJUMP, LABEL, RETURN;
+terminal MOVE, CALL_STMT, EXP, SEQ, JUMP, CJUMP, LABEL, RETURN;
 terminal CONST, TEMP, MEM, CALL, NAME, ESEQ;
 terminal ADD, SUB, MUL, HMUL, DIV, MOD, AND, OR, XOR;
 terminal LSHIFT, RSHIFT, ARSHIFT, EQ, NEQ, LT, GT, LEQ, GEQ;
@@ -32,6 +32,7 @@ nonterminal IRCompUnit compunit;
 nonterminal List<IRFuncDecl> funcdecls;
 nonterminal IRFuncDecl funcdecl;
 nonterminal List<IRStmt> stmts;
+nonterminal List<String> collector_list_opt, collector_list;
 nonterminal IRStmt stmt, bare_stmt;
 nonterminal List<IRExpr> exprs_opt, exprs;
 nonterminal String name;
@@ -81,6 +82,9 @@ bare_stmt ::=
     MOVE dest:dest expr:e {:
         RESULT = parser.nf.IRMove(dest, e);
     :}
+    | CALL_STMT collector_list_opt:collectors expr:target exprs_opt:args {:
+        RESULT = parser.nf.IRCallStmt(collectors, target, args);
+    :}
     | EXP expr:e {:
         RESULT = parser.nf.IRExp(e);
     :}
@@ -99,8 +103,8 @@ bare_stmt ::=
     | LABEL name:n {:
         RESULT = parser.nf.IRLabel(n);
     :}
-    | RETURN exprs_opt:args {:
-        RESULT = parser.nf.IRReturn(args);
+    | RETURN {:
+        RESULT = parser.nf.IRReturn();
     :}
 ;
 
@@ -110,6 +114,26 @@ dest ::=
     :}
     | LPAREN MEM expr:e RPAREN {:
         RESULT = parser.nf.IRMem(e);
+    :}
+;
+
+collector_list_opt ::=
+    /* empty */ {:
+        RESULT = Collections.emptyList();
+    :}
+    | collector_list:l {:
+        RESULT = l;
+    :}
+;
+
+collector_list ::=
+    name:n {:
+        RESULT = new LinkedList<>();
+        RESULT.add(n);
+    :}
+    | collector_list:l name:n {:
+        RESULT = l;
+        RESULT.add(n);
     :}
 ;
 

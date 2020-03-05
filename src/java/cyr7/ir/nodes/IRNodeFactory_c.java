@@ -79,6 +79,11 @@ public class IRNodeFactory_c implements IRNodeFactory {
     }
 
     @Override
+    public IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args) {
+        return new IRCallStmt(collectors, target, args);
+    }
+
+    @Override
     public IRMove IRMove(IRExpr target, IRExpr expr) {
         return new IRMove(target, expr);
     }
@@ -89,13 +94,8 @@ public class IRNodeFactory_c implements IRNodeFactory {
     }
 
     @Override
-    public IRReturn IRReturn(List<IRExpr> rets) {
-        return new IRReturn(rets);
-    }
-
-    @Override
-    public IRReturn IRReturn(IRExpr ...rets) {
-        return new IRReturn(rets);
+    public IRReturn IRReturn() {
+        return new IRReturn();
     }
 
     @Override

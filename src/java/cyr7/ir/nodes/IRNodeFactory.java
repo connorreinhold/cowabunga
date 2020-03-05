@@ -85,6 +85,13 @@ public interface IRNodeFactory {
     IRMem IRMem(IRExpr expr);
 
     /**
+     * @param collectors a list of temporary names to assign to.
+     * @param target address of the code for this function call
+     * @param args arguments of this function call
+     */
+    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args);
+
+    /**
      *
      * @param target the destination of this move
      * @param expr the expression whose value is to be moved
@@ -97,15 +104,7 @@ public interface IRNodeFactory {
      */
     IRName IRName(String name);
 
-    /**
-     * @param rets values to return
-     */
-    IRReturn IRReturn(List<IRExpr> rets);
-
-    /**
-     * @param rets values to return
-     */
-    IRReturn IRReturn(IRExpr ...rets);
+    IRReturn IRReturn();
 
     /**
      * @param stmts the statements

@@ -3,6 +3,7 @@ package cyr7.ir;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
@@ -53,7 +54,6 @@ import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.interpret.Configuration;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
@@ -237,10 +237,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
-        List<IRExpr> rets = n.exprs.stream()
-                .map(stmt -> stmt.accept(this).assertFirst())
+        AtomicInteger retNum = new AtomicInteger();
+        List<IRStmt> rets = n.exprs.stream()
+                .map(stmt -> new IRMove(new IRTemp("_RET"+ retNum.getAndIncrement()),
+                        stmt.accept(this).assertFirst()))
                 .collect(Collectors.toList());
-        return OneOfTwo.ofSecond(new IRReturn(rets));
+        rets.add(new IRReturn());
+        return OneOfTwo.ofSecond(new IRSeq(rets));
     }
 
     @Override
