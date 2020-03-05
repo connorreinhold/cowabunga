@@ -56,10 +56,12 @@ import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
+import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExp;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
@@ -112,32 +114,46 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionDeclNode n) {
+        /*
+         * List<IRStmt> seq = new ArrayList<>(); seq.add(new
+         * IRLabel(functionName(n.header.identifier, n.header.args,
+         * n.header.returnTypes))); IRSeq func = new IRSeq();
+         */
         return null;
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionHeaderDeclNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(IxiProgramNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(UseNode n) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarDeclNode n) {
-        return null;
+        return OneOfTwo
+                .ofSecond(new IRMove(new IRTemp(n.identifier), new IRConst(0)));
     }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(XiProgramNode n) {
-        return null;
+        String file = n.getLocation().getUnit();
+        file = file.substring(0, file.lastIndexOf('.'));
+        IRCompUnit program = new IRCompUnit(file);
+
+        for (FunctionDeclNode fun : n.functions) {
+            program.appendFunc((IRFuncDecl) fun.accept(this).assertFirst());
+        }
+
+        return OneOfTwo.ofSecond(program);
     }
 
     @Override
