@@ -2,6 +2,10 @@ package cyr7.ir.astToIr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import cyr7.ast.Node;
+import cyr7.ir.AstToIrVisitor;
+import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRExpr;
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
@@ -65,6 +69,12 @@ class TestExpr {
         result = IRFactory.parseAstExpr(astNode);
         expectedResult = 10;
         assertEquals(expectedResult, IRFactory.testExpr(result));
+    }
+
+    @Test
+    void testIntNegExpr() {
+        Node node = new IntNegExprNode(C.LOC, new LiteralIntExprNode(C.LOC, "5"));
+        IRExpr result = node.accept(new AstToIrVisitor()).assertFirst();
     }
 
 }

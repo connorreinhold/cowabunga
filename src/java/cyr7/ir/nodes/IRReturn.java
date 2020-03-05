@@ -16,4 +16,9 @@ public class IRReturn extends IRStmt {
     public void printSExp(SExpPrinter p) {
         p.printAtom("RETURN");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof IRReturn);
+    }
 }

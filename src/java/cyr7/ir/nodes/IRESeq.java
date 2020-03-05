@@ -5,6 +5,8 @@ import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 
+import java.util.Objects;
+
 /**
  * An intermediate representation for an expression evaluated under side effects
  * ESEQ(stmt, expr)
@@ -67,5 +69,19 @@ public class IRESeq extends IRExpr_c {
         stmt.printSExp(p);
         expr.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRESeq ireSeq = (IRESeq) o;
+        return Objects.equals(stmt, ireSeq.stmt) &&
+            Objects.equals(expr, ireSeq.expr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stmt, expr);
     }
 }

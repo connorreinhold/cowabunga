@@ -2,6 +2,7 @@ package cyr7.ir.nodes;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
@@ -77,5 +78,19 @@ public class IRCompUnit extends IRStmt {
         for (IRFuncDecl func : functions.values())
             func.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCompUnit that = (IRCompUnit) o;
+        return Objects.equals(name, that.name) &&
+            Objects.equals(functions, that.functions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, functions);
     }
 }

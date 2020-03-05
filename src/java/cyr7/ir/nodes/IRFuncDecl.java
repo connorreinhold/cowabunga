@@ -5,6 +5,8 @@ import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
 
+import java.util.Objects;
+
 /** An IR function declaration */
 public class IRFuncDecl extends IRNode_c {
     private String name;
@@ -63,5 +65,19 @@ public class IRFuncDecl extends IRNode_c {
         p.printAtom(name);
         body.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRFuncDecl that = (IRFuncDecl) o;
+        return Objects.equals(name, that.name) &&
+            Objects.equals(body, that.body);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, body);
     }
 }

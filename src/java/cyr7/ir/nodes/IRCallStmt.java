@@ -3,6 +3,7 @@ package cyr7.ir.nodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
@@ -99,5 +100,20 @@ public class IRCallStmt extends IRStmt {
         for (IRExpr arg : args)
             arg.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCallStmt that = (IRCallStmt) o;
+        return Objects.equals(collectors, that.collectors) &&
+            Objects.equals(target, that.target) &&
+            Objects.equals(args, that.args);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(collectors, target, args);
     }
 }

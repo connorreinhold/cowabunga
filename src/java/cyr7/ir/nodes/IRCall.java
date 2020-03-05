@@ -3,6 +3,7 @@ package cyr7.ir.nodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
@@ -80,6 +81,20 @@ public class IRCall extends IRExpr_c {
     @Override
     public boolean isCanonical(CheckCanonicalIRVisitor v) {
         return !v.inExpr();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCall irCall = (IRCall) o;
+        return Objects.equals(target, irCall.target) &&
+            Objects.equals(args, irCall.args);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target, args);
     }
 
     @Override

@@ -4,6 +4,8 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
 
+import java.util.Objects;
+
 /**
  * An intermediate representation for a transfer of control
  */
@@ -49,5 +51,18 @@ public class IRJump extends IRStmt {
         p.printAtom("JUMP");
         target.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRJump irJump = (IRJump) o;
+        return Objects.equals(target, irJump.target);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target);
     }
 }

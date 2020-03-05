@@ -5,6 +5,8 @@ import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 
+import java.util.Objects;
+
 /**
  * An intermediate representation for a conditional transfer of control
  * CJUMP(expr, trueLabel, falseLabel)
@@ -88,5 +90,20 @@ public class IRCJump extends IRStmt {
         p.printAtom(trueLabel);
         if (hasFalseLabel()) p.printAtom(falseLabel);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCJump ircJump = (IRCJump) o;
+        return Objects.equals(cond, ircJump.cond) &&
+            Objects.equals(trueLabel, ircJump.trueLabel) &&
+            Objects.equals(falseLabel, ircJump.falseLabel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cond, trueLabel, falseLabel);
     }
 }

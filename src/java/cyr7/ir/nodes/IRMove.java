@@ -4,6 +4,8 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
 
+import java.util.Objects;
+
 /**
  * An intermediate representation for a move statement
  * MOVE(target, expr)
@@ -61,5 +63,19 @@ public class IRMove extends IRStmt {
         target.printSExp(p);
         src.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRMove irMove = (IRMove) o;
+        return Objects.equals(target, irMove.target) &&
+            Objects.equals(src, irMove.src);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target, src);
     }
 }

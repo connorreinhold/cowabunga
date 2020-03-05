@@ -5,6 +5,8 @@ import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 
+import java.util.Objects;
+
 /**
  * An intermediate representation for evaluating an expression for side effects,
  * discarding the result
@@ -58,5 +60,18 @@ public class IRExp extends IRStmt {
         p.printAtom("EXP");
         expr.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRExp irExp = (IRExp) o;
+        return Objects.equals(expr, irExp.expr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expr);
     }
 }

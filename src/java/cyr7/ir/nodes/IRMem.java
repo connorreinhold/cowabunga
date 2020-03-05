@@ -5,11 +5,14 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
 
+import java.util.Objects;
+
 /**
  * An intermediate representation for a memory location
  * MEM(e)
  */
 public class IRMem extends IRExpr_c {
+
     public enum MemType {
         NORMAL, IMMUTABLE;
 
@@ -76,5 +79,19 @@ public class IRMem extends IRExpr_c {
         p.printAtom(memType.toString());
         expr.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRMem irMem = (IRMem) o;
+        return Objects.equals(expr, irMem.expr) &&
+            memType == irMem.memType;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expr, memType);
     }
 }

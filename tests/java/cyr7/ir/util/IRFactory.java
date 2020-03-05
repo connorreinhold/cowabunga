@@ -56,10 +56,4 @@ public class IRFactory {
 
     }
 
-    public static long testStatement(String program) {
-        Node node = ParserUtil.parseNode(new StringReader(program), "test",
-                false);
-        TypeCheckUtil.typeCheck(reader, writer, filename, isIXI, opener);
-    }
-
 }
