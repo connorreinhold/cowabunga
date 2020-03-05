@@ -44,11 +44,9 @@ import cyr7.ast.toplevel.UseNode;
 import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
-import cyr7.ir.nodes.IRCJump;
-import cyr7.ir.nodes.IRJump;
-import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRName;
-import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.visitor.AbstractVisitor;
 
@@ -65,11 +63,14 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(AndExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
         String tPrime = generator.newLabel();
-        return new IRSeq(
-            n.left.accept(new CTranslationVisitor(generator, tPrime, fLabel)),
-            new IRLabel(tPrime),
-            n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel)));
+        return make.IRSeq(
+                n.left.accept(new CTranslationVisitor(generator, tPrime,
+                        fLabel)),
+                make.IRLabel(tPrime),
+                n.right.accept(new CTranslationVisitor(generator, tLabel,
+                        fLabel)));
     }
 
     @Override
@@ -79,24 +80,29 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(OrExprNode n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
         String fPrime = generator.newLabel();
-        return new IRSeq(
-            n.left.accept(new CTranslationVisitor(generator, tLabel, fPrime)),
-            new IRLabel(fPrime),
-            n.right.accept(new CTranslationVisitor(generator, tLabel, fLabel))
-        );
+        return make.IRSeq(
+                n.left.accept(new CTranslationVisitor(generator, tLabel,
+                        fPrime)),
+                make.IRLabel(fPrime),
+                n.right.accept(new CTranslationVisitor(generator, tLabel,
+                        fLabel)));
     }
 
     @Override
     public IRStmt visit(LiteralBoolExprNode n) {
-        IRName name = new IRName(n.contents ? tLabel : fLabel);
-        return new IRJump(name);
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+        IRName name = make.IRName(n.contents ? tLabel : fLabel);
+        return make.IRJump(name);
     }
 
     // General
 
     private IRStmt cjump(ExprNode n) {
-        return new IRCJump(n.accept(new AstToIrVisitor()).assertFirst(), tLabel, fLabel);
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+        return make.IRCJump(n.accept(new AstToIrVisitor())
+                             .assertFirst(), tLabel, fLabel);
     }
 
     @Override
