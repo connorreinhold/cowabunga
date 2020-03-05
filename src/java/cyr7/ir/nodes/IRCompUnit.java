@@ -2,24 +2,29 @@ package cyr7.ir.nodes;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a compilation unit
  */
-public class IRCompUnit extends IRNode_c {
+public class IRCompUnit extends IRStmt {
     private String name;
     private Map<String, IRFuncDecl> functions;
 
-    public IRCompUnit(String name) {
+    public IRCompUnit(Location location, String name) {
+        super(location);
         this.name = name;
         functions = new LinkedHashMap<>();
     }
 
-    public IRCompUnit(String name, Map<String, IRFuncDecl> functions) {
+    public IRCompUnit(Location location, String name, Map<String, IRFuncDecl> functions) {
+        super(location);
         this.name = name;
         this.functions = functions;
     }
@@ -77,5 +82,24 @@ public class IRCompUnit extends IRNode_c {
         for (IRFuncDecl func : functions.values())
             func.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCompUnit that = (IRCompUnit) o;
+        return Objects.equals(name, that.name) &&
+            Objects.equals(functions, that.functions);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, functions);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }

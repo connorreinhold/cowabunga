@@ -1,13 +1,16 @@
 package cyr7.ast.expr.access;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
+import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.List;
 import java.util.Objects;
 
-public final class VariableAccessExprNode extends AbstractNode implements ExprNode {
+public final class VariableAccessExprNode extends AbstractExprNode {
 
     public final String identifier;
 
@@ -15,6 +18,11 @@ public final class VariableAccessExprNode extends AbstractNode implements ExprNo
         super(location);
         assert id != null;
         this.identifier = id;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of();
     }
 
     @Override

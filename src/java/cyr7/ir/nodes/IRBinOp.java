@@ -1,10 +1,14 @@
 package cyr7.ir.nodes;
 
-import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java.util.Objects;
+
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.InternalCompilerError;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a binary operation
@@ -66,7 +70,8 @@ public class IRBinOp extends IRExpr_c {
     private OpType type;
     private IRExpr left, right;
 
-    public IRBinOp(OpType type, IRExpr left, IRExpr right) {
+    public IRBinOp(Location location, OpType type, IRExpr left, IRExpr right) {
+        super(location);
         this.type = type;
         this.left = left;
         this.right = right;
@@ -136,183 +141,24 @@ public class IRBinOp extends IRExpr_c {
         p.endList();
     }
 
-    // TODO
-//    public IRExpr negate() {
-//        IRBinOp expr = (IRBinOp) copy();
-//        switch (type) {
-//        case LT:
-//            expr.type = OpType.GE;
-//            break;
-//        case GT:
-//            expr.type = OpType.LE;
-//            break;
-//        case LE:
-//            expr.type = OpType.GT;
-//            break;
-//        case GE:
-//            expr.type = OpType.LT;
-//            break;
-//        case ULT:
-//            expr.type = OpType.UGE;
-//            break;
-//        case UGT:
-//            expr.type = OpType.ULE;
-//            break;
-//        case ULE:
-//            expr.type = OpType.UGT;
-//            break;
-//        case UGE:
-//            expr.type = OpType.ULT;
-//            break;
-//        case EQ:
-//            expr.type = OpType.NEQ;
-//            break;
-//        case NEQ:
-//            expr.type = OpType.EQ;
-//            break;
-//        default:
-//            return super.negate();
-//        }
-//        return expr;
-//    }
-//
-//    public IRBinOp swapArgs() {
-//        IRBinOp expr = (IRBinOp) copy();
-//        expr.left = right;
-//        expr.right = left;
-//        switch (type) {
-//        case LT:
-//            expr.type = OpType.GT;
-//            break;
-//        case GT:
-//            expr.type = OpType.LT;
-//            break;
-//        case LE:
-//            expr.type = OpType.GE;
-//            break;
-//        case GE:
-//            expr.type = OpType.LE;
-//            break;
-//        case ULT:
-//            expr.type = OpType.UGT;
-//            break;
-//        case UGT:
-//            expr.type = OpType.ULT;
-//            break;
-//        case ULE:
-//            expr.type = OpType.UGE;
-//            break;
-//        case UGE:
-//            expr.type = OpType.ULE;
-//            break;
-//        case EQ:
-//            expr.type = OpType.EQ;
-//            break;
-//        case NEQ:
-//            expr.type = OpType.NEQ;
-//            break;
-//        case ADD:
-//            expr.type = OpType.ADD;
-//            break;
-//        case MUL:
-//            expr.type = OpType.MUL;
-//            break;
-//        case AND:
-//            expr.type = OpType.AND;
-//            break;
-//        case OR:
-//            expr.type = OpType.OR;
-//            break;
-//        case LOGAND:
-//            expr.type = OpType.LOGAND;
-//            break;
-//        case LOGOR:
-//            expr.type = OpType.LOGOR;
-//            break;
-//        default:
-//            return null;
-//        }
-//        return expr;
-//    }
-//
-//    public boolean isComparison() {
-//        switch (type) {
-//        case EQ:
-//        case NEQ:
-//        case LT:
-//        case GT:
-//        case LE:
-//        case GE:
-//        case ULT:
-//        case UGT:
-//        case ULE:
-//        case UGE:
-//            return true;
-//        default:
-//            return false;
-//        }
-//    }
-//
-//    // eval the value based on op type
-//    public static long eval(OpType opType, long leftVal, long rightVal) {
-//        switch (opType) {
-//        case ADD:
-//            return leftVal + rightVal;
-//        case AND:
-//        case LOGAND:
-//            return leftVal & rightVal;
-//        case DIV:
-//            if (rightVal == 0)
-//                throw new InternalCompilerException("Division by zero "
-//                        + "during constant folding -- please fix your program!");
-//            return leftVal / rightVal;
-//        case EQ:
-//            return leftVal == rightVal ? 1 : 0;
-//        case GE:
-//            return leftVal >= rightVal ? 1 : 0;
-//        case GT:
-//            return leftVal > rightVal ? 1 : 0;
-//        case LE:
-//            return leftVal <= rightVal ? 1 : 0;
-//        case AR_LSHIFT:
-//            return leftVal << rightVal;
-//        case LSHIFT:
-//            return leftVal << rightVal;
-//        case LT:
-//            return leftVal < rightVal ? 1 : 0;
-//        case MOD:
-//            if (rightVal == 0)
-//                throw new InternalCompilerException("Division by zero "
-//                        + "during constant folding -- please fix your program!");
-//            return leftVal % rightVal;
-//        case MUL:
-//            return leftVal * rightVal;
-//        case NEQ:
-//            return leftVal != rightVal ? 1 : 0;
-//        case OR:
-//        case LOGOR:
-//            return leftVal | rightVal;
-//        case AR_RSHIFT:
-//            return leftVal >> rightVal;
-//        case RSHIFT:
-//            return leftVal >>> rightVal;
-//        case SUB:
-//            return leftVal - rightVal;
-//        case XOR:
-//            return leftVal ^ rightVal;
-//        case UGT:
-//            return leftVal > rightVal ^ leftVal < 0 != rightVal < 0 ? 1 : 0;
-//        case ULT:
-//            return leftVal < rightVal ^ leftVal < 0 != rightVal < 0 ? 1 : 0;
-//        case ULE:
-//            return leftVal == rightVal
-//                    || leftVal < rightVal ^ leftVal < 0 != rightVal < 0 ? 1 : 0;
-//        case UGE:
-//            return leftVal == rightVal
-//                    || leftVal > rightVal ^ leftVal < 0 != rightVal < 0 ? 1 : 0;
-//        default:
-//            throw new InternalCompilerException("Unknow op type "
-//                    + opType.toString());
-//        }
-//    }
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRBinOp irBinOp = (IRBinOp) o;
+        return type == irBinOp.type &&
+            Objects.equals(left, irBinOp.left) &&
+            Objects.equals(right, irBinOp.right);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, left, right);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
+    }
+
 }

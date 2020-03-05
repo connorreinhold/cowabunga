@@ -105,7 +105,7 @@ public abstract class AggregateVisitor<T> implements Copy<AggregateVisitor<T>> {
      * @return a clone of v if v == this, or v otherwise
      */
     protected <V extends AggregateVisitor<T>> V copyIfNeeded(V v) {
-        if (v == this) return Copy.Util.copy(v);
+        if (v == this) return Util.copy(v);
         return v;
     }
 

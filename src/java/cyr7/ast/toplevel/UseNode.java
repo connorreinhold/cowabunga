@@ -1,8 +1,11 @@
 package cyr7.ast.toplevel;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
+
+import java.util.List;
 
 /**
  * Represents a single [use] statement at the top of XI files. Contains the
@@ -20,6 +23,11 @@ public final class UseNode extends AbstractNode {
         assert interfaceName != null;
 
         this.interfaceName = interfaceName;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of();
     }
 
     @Override

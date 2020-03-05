@@ -20,10 +20,12 @@ public final class LookaheadIdGenerator implements IdGenerator {
         return String.format("_t%d", num);
     }
 
+    @Override
     public String newLabel() {
         return label(labelCounter++);
     }
 
+    @Override
     public String newTemp() {
         return temp(tempCounter++);
     }
@@ -44,14 +46,24 @@ public final class LookaheadIdGenerator implements IdGenerator {
     /**
      * Peek the next temp with some offset.
      *
-     * peekTemp(0) will return the next temp. peekTemp(1) will return the
-     * temp after that, and so on.
+     * peekTemp(0) will return the next temp. peekTemp(1) will return the temp
+     * after that, and so on.
      *
      * @param offset
      * @return
      */
     public String peekTemp(int offset) {
         return temp(tempCounter + offset);
+    }
+
+    @Override
+    public String retTemp(int num) {
+        return null;
+    }
+
+    @Override
+    public String argTemp(int num) {
+        return null;
     }
 
 }

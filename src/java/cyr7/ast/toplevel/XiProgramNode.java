@@ -1,11 +1,14 @@
 package cyr7.ast.toplevel;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
 
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Represents an XI program, containing a list of use statements and a list
@@ -25,6 +28,11 @@ public final class XiProgramNode extends AbstractNode {
 
         this.uses = Util.immutableCopy(uses);
         this.functions = Util.immutableCopy(functions);
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return Stream.concat(uses.stream(), functions.stream()).collect(Collectors.toList());
     }
 
     @Override

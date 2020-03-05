@@ -1,11 +1,13 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -23,6 +25,11 @@ public final class VarInitStmtNode extends AbstractNode implements StmtNode {
 
         this.varDecl = varDecl;
         this.initializer = expr;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(varDecl, initializer);
     }
 
     @Override

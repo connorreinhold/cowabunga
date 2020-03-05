@@ -1,6 +1,7 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.util.Util;
@@ -9,6 +10,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A statement of the form
@@ -37,6 +40,14 @@ public final class MultiAssignStmtNode extends AbstractNode implements StmtNode 
 
         this.varDecls = Util.immutableCopy(varDecls);
         this.initializer = initializer;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return Stream.concat(
+            varDecls.stream().filter(Optional::isPresent).map(Optional::get),
+            List.of(initializer).stream())
+            .collect(Collectors.toList());
     }
 
     @Override

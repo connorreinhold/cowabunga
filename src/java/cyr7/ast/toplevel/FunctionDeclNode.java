@@ -1,9 +1,12 @@
 package cyr7.ast.toplevel;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory;
+
+import java.util.List;
 
 /**
  * Represents a Function object in XI files with a [header] and function body
@@ -24,6 +27,11 @@ public final class FunctionDeclNode extends AbstractNode {
 
         this.header = header;
         this.block = block;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return List.of(header, block);
     }
 
     @Override

@@ -1,9 +1,13 @@
 package cyr7.ir.nodes;
 
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java.util.Objects;
+
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a conditional transfer of control
@@ -19,8 +23,8 @@ public class IRCJump extends IRStmt {
      * @param trueLabel the destination of the jump if {@code expr} evaluates
      *          to true
      */
-    public IRCJump(IRExpr cond, String trueLabel) {
-        this(cond, trueLabel, null);
+    public IRCJump(Location location, IRExpr cond, String trueLabel) {
+        this(location, cond, trueLabel, null);
     }
 
     /**
@@ -31,7 +35,8 @@ public class IRCJump extends IRStmt {
      * @param falseLabel the destination of the jump if {@code expr} evaluates
      *          to false
      */
-    public IRCJump(IRExpr cond, String trueLabel, String falseLabel) {
+    public IRCJump(Location location, IRExpr cond, String trueLabel, String falseLabel) {
+        super(location);
         this.cond = cond;
         this.trueLabel = trueLabel;
         this.falseLabel = falseLabel;
@@ -88,5 +93,25 @@ public class IRCJump extends IRStmt {
         p.printAtom(trueLabel);
         if (hasFalseLabel()) p.printAtom(falseLabel);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCJump ircJump = (IRCJump) o;
+        return Objects.equals(cond, ircJump.cond) &&
+            Objects.equals(trueLabel, ircJump.trueLabel) &&
+            Objects.equals(falseLabel, ircJump.falseLabel);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(cond, trueLabel, falseLabel);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }

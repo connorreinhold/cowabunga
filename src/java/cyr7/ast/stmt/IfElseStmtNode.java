@@ -1,10 +1,12 @@
 package cyr7.ast.stmt;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -28,6 +30,13 @@ public final class IfElseStmtNode extends AbstractNode implements StmtNode {
         this.guard = guard;
         this.ifBlock = ifBlock;
         this.elseBlock = elseBlock;
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return elseBlock
+            .map(stmtNode -> List.of(guard, ifBlock, stmtNode))
+            .orElseGet(() -> List.of(guard, ifBlock));
     }
 
     @Override

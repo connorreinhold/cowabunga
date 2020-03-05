@@ -1,6 +1,9 @@
 package cyr7.ir.nodes;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.Objects;
 
 /**
  * An intermediate representation for named memory address
@@ -13,7 +16,8 @@ public class IRName extends IRExpr_c {
      *
      * @param name name of this memory address
      */
-    public IRName(String name) {
+    public IRName(Location location, String name) {
+        super(location);
         this.name = name;
     }
 
@@ -32,5 +36,18 @@ public class IRName extends IRExpr_c {
         p.printAtom("NAME");
         p.printAtom(name);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRName irName = (IRName) o;
+        return Objects.equals(name, irName.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name);
     }
 }

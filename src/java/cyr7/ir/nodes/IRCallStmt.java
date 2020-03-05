@@ -13,31 +13,37 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
- * An intermediate representation for a function call
- * CALL(e_target, e_1, ..., e_n)
+ * An intermediate representation for a call statement.
+ * t_1, t_2, _, t_4 = CALL(e_target, e_1, ..., e_n)
  */
-public class IRCall extends IRExpr_c {
+public class IRCallStmt extends IRStmt {
+    protected List<String> collectors;
     protected IRExpr target;
     protected List<IRExpr> args;
 
     /**
-     *
+     * @param collectors a list of temporary names to assign to.
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCall(Location location, IRExpr target, IRExpr... args) {
-        this(location, target, Arrays.asList(args));
+    public IRCallStmt(Location location, List<String> collectors, IRExpr target, IRExpr... args) {
+        this(location, collectors, target, Arrays.asList(args));
     }
 
     /**
-     *
+     * @param collectors a list of temporary names to assign to.
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCall(Location location, IRExpr target, List<IRExpr> args) {
+    public IRCallStmt(Location location, List<String> collectors, IRExpr target, List<IRExpr> args) {
         super(location);
+        this.collectors = collectors;
         this.target = target;
         this.args = args;
+    }
+
+    public List<String> collectors() {
+        return collectors;
     }
 
     public IRExpr target() {
@@ -50,7 +56,7 @@ public class IRCall extends IRExpr_c {
 
     @Override
     public String label() {
-        return "CALL";
+        return "CALL_STMT";
     }
 
     @Override
@@ -67,7 +73,7 @@ public class IRCall extends IRExpr_c {
             results.add(newExpr);
         }
 
-        if (modified) return v.nodeFactory().IRCall(target, results);
+        if (modified) return v.nodeFactory().IRCallStmt(collectors, target, results);
 
         return this;
     }
@@ -87,27 +93,31 @@ public class IRCall extends IRExpr_c {
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        IRCall irCall = (IRCall) o;
-        return Objects.equals(target, irCall.target) &&
-            Objects.equals(args, irCall.args);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(target, args);
-    }
-
-    @Override
     public void printSExp(SExpPrinter p) {
         p.startList();
-        p.printAtom("CALL");
+        p.printAtom("CALL_STMT");
+        for (String collector : collectors) {
+            p.printAtom(collector);
+        }
         target.printSExp(p);
         for (IRExpr arg : args)
             arg.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCallStmt that = (IRCallStmt) o;
+        return Objects.equals(collectors, that.collectors) &&
+            Objects.equals(target, that.target) &&
+            Objects.equals(args, that.args);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(collectors, target, args);
     }
 
     @Override

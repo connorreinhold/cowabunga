@@ -1,33 +1,14 @@
 package cyr7.ir.nodes;
 
+import cyr7.ir.fold.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-import cyr7.ir.visit.AggregateVisitor;
-import cyr7.ir.visit.IRVisitor;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /** RETURN statement */
 public class IRReturn extends IRStmt {
-    protected List<IRExpr> rets;
 
-    /**
-     * @param rets values to return
-     */
-    public IRReturn(IRExpr... rets) {
-        this(Arrays.asList(rets));
-    }
-
-    /**
-     * @param rets values to return
-     */
-    public IRReturn(List<IRExpr> rets) {
-        this.rets = rets;
-    }
-
-    public List<IRExpr> rets() {
-        return rets;
+    public IRReturn(Location location) {
+        super(location);
     }
 
     @Override
@@ -36,36 +17,17 @@ public class IRReturn extends IRStmt {
     }
 
     @Override
-    public IRNode visitChildren(IRVisitor v) {
-        boolean modified = false;
-
-        List<IRExpr> results = new ArrayList<>(rets.size());
-
-        for (IRExpr ret : rets) {
-            IRExpr newExpr = (IRExpr) v.visit(this, ret);
-            if (newExpr != ret) modified = true;
-            results.add(newExpr);
-        }
-
-        if (modified) return v.nodeFactory().IRReturn(results);
-
-        return this;
-    }
-
-    @Override
-    public <T> T aggregateChildren(AggregateVisitor<T> v) {
-        T result = v.unit();
-        for (IRExpr ret : rets)
-            result = v.bind(result, v.visit(ret));
-        return result;
-    }
-
-    @Override
     public void printSExp(SExpPrinter p) {
-        p.startList();
         p.printAtom("RETURN");
-        for (IRExpr ret : rets)
-            ret.printSExp(p);
-        p.endList();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof IRReturn);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }

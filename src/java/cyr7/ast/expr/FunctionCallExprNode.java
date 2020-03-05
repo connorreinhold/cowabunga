@@ -1,10 +1,12 @@
 package cyr7.ast.expr;
 
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,7 +14,7 @@ import java.util.List;
  * identifier of the function as well as a list of parameters. Ex: fib(4) would
  * have identifier = fib and parameters = {4}
  */
-public final class FunctionCallExprNode extends AbstractNode implements ExprNode {
+public final class FunctionCallExprNode extends AbstractExprNode {
 
     public final String identifier;
     public final List<ExprNode> parameters;
@@ -26,6 +28,11 @@ public final class FunctionCallExprNode extends AbstractNode implements ExprNode
 
         this.identifier = id;
         this.parameters = Util.immutableCopy(parameters);
+    }
+
+    @Override
+    public List<Node> getChildren() {
+        return Collections.unmodifiableList(parameters);
     }
 
     @Override

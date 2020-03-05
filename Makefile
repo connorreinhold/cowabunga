@@ -7,17 +7,17 @@ myparser:
 cowabunga: myparser mylexer
 
 test: 
-	./xic-build \
+	./xic-build -ea \
 	&& gradle test \
 	&& cd \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
 	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll
 
 gradle.test:
-	./xic-build && gradle test
+	./xic-build -ea && gradle test
 
 xth.test:
-	./xic-build \
+	./xic-build -ea \
 	&& cd \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
 	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll

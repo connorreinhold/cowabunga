@@ -1,11 +1,13 @@
 package cyr7.ir.nodes;
 
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * A node in an intermediate-representation abstract syntax tree.
@@ -33,9 +35,14 @@ public interface IRNode {
 
     String label();
 
+    <T> T accept(MyIRVisitor<T> v);
+
     /**
      * Print an S-expression representation of this IR node.
      * @param p the S-expression printer
      */
     void printSExp(SExpPrinter p);
+
+    Location location();
+
 }

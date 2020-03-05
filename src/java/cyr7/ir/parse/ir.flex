@@ -1,4 +1,4 @@
-package edu.cornell.cs.cs4120.xic.cyr7.ir.parse;
+package cyr7.ir.parse;
 
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
@@ -101,7 +101,7 @@ WhiteSpace = [ \t\f] | {LineTerminator}
 IdentifierSpecChar = [*'\._\-0-9]
 
 /* Identifiers */
-Identifier = ( {IdentifierSpecChar}* [:jletter:] {IdentifierSpecChar}* )+
+Identifier = ( {IdentifierSpecChar}* [:jletter:] {IdentifierSpecChar}* )+ | _
 
 /* Integer Literals */
 DecimalNumeral = 0 | "-"?[1-9][0-9]*
@@ -120,6 +120,7 @@ DecimalNumeral = 0 | "-"?[1-9][0-9]*
 "CONST"             { return sym("CONST", IRSym.CONST);       }
 "TEMP"              { return sym("TEMP", IRSym.TEMP);         }
 "MEM"               { return sym("MEM", IRSym.MEM);           }
+"CALL_STMT"         { return sym("CALL_STMT", IRSym.CALL_STMT); }
 "CALL"              { return sym("CALL", IRSym.CALL);         }
 "NAME"              { return sym("NAME", IRSym.NAME);         }
 "ESEQ"              { return sym("ESEQ", IRSym.ESEQ);         }

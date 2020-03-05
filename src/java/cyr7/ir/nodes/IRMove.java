@@ -1,8 +1,12 @@
 package cyr7.ir.nodes;
 
-import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java.util.Objects;
+
+import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a move statement
@@ -17,7 +21,8 @@ public class IRMove extends IRStmt {
      * @param target the destination of this move
      * @param src the expression whose value is to be moved
      */
-    public IRMove(IRExpr target, IRExpr src) {
+    public IRMove(Location location, IRExpr target, IRExpr src) {
+        super(location);
         this.target = target;
         this.src = src;
     }
@@ -61,5 +66,24 @@ public class IRMove extends IRStmt {
         target.printSExp(p);
         src.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRMove irMove = (IRMove) o;
+        return Objects.equals(target, irMove.target) &&
+            Objects.equals(src, irMove.src);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(target, src);
+    }
+
+    @Override
+    public <T> T accept(MyIRVisitor<T> v) {
+        return v.visit(this);
     }
 }
