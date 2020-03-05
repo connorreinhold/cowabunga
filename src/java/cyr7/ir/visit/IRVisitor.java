@@ -1,9 +1,9 @@
 package cyr7.ir.visit;
 
-import edu.cornell.cs.cs4120.util.Copy;
-import edu.cornell.cs.cs4120.util.InternalCompilerError;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
+import edu.cornell.cs.cs4120.util.Copy;
+import edu.cornell.cs.cs4120.util.InternalCompilerError;
 
 public abstract class IRVisitor implements Copy<IRVisitor> {
 
@@ -66,9 +66,7 @@ public abstract class IRVisitor implements Copy<IRVisitor> {
      * to perform certain actions, including returning a new Node visitor to be
      * used in the subtree.
      */
-    protected IRVisitor enter(IRNode parent, IRNode n) {
-        return this;
-    }
+    protected abstract IRVisitor enter(IRNode parent, IRNode n);
 
     /**
      * Called after finishing traversal of the subtree rooted at {@code n}.
@@ -91,9 +89,8 @@ public abstract class IRVisitor implements Copy<IRVisitor> {
      *            {@link #enter(IRNode, IRNode)}, or {@code this}.
      */
 
-    protected IRNode leave(IRNode parent, IRNode n, IRNode n_, IRVisitor v_) {
-        return n_;
-    }
+    protected abstract IRNode leave(IRNode parent, IRNode n, IRNode n_,
+            IRVisitor v_);
 
     /**
      * Return a clone of this visitor if the given visitor is this visitor,
