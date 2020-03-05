@@ -1,6 +1,9 @@
 package cyr7.ir.nodes;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.Objects;
 
 /**
  * An intermediate representation for a 64-bit integer constant.
@@ -13,7 +16,8 @@ public class IRConst extends IRExpr_c {
      *
      * @param value value of this constant
      */
-    public IRConst(long value) {
+    public IRConst(Location location, long value) {
+        super(location);
         this.value = value;
     }
 
@@ -42,5 +46,18 @@ public class IRConst extends IRExpr_c {
         p.printAtom("CONST");
         p.printAtom(String.valueOf(value));
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRConst irConst = (IRConst) o;
+        return value == irConst.value;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(value);
     }
 }

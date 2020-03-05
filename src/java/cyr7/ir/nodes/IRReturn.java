@@ -3,9 +3,14 @@ package cyr7.ir.nodes;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /** RETURN statement */
 public class IRReturn extends IRStmt {
+
+    public IRReturn(Location location) {
+        super(location);
+    }
 
     @Override
     public String label() {
@@ -15,5 +20,10 @@ public class IRReturn extends IRStmt {
     @Override
     public void printSExp(SExpPrinter p) {
         p.printAtom("RETURN");
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return (obj instanceof IRReturn);
     }
 }

@@ -4,6 +4,9 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.Objects;
 
 /**
  * An intermediate representation for an expression evaluated under side effects
@@ -18,7 +21,8 @@ public class IRESeq extends IRExpr_c {
      * @param stmt IR statement to be evaluated for side effects
      * @param expr IR expression to be evaluated after {@code stmt}
      */
-    public IRESeq(IRStmt stmt, IRExpr expr) {
+    public IRESeq(Location location, IRStmt stmt, IRExpr expr) {
+        super(location);
         this.stmt = stmt;
         this.expr = expr;
     }
@@ -67,5 +71,19 @@ public class IRESeq extends IRExpr_c {
         stmt.printSExp(p);
         expr.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRESeq ireSeq = (IRESeq) o;
+        return Objects.equals(stmt, ireSeq.stmt) &&
+            Objects.equals(expr, ireSeq.expr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stmt, expr);
     }
 }

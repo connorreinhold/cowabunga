@@ -5,6 +5,9 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.Objects;
 
 /**
  * An intermediate representation for a binary operation
@@ -66,7 +69,8 @@ public class IRBinOp extends IRExpr_c {
     private OpType type;
     private IRExpr left, right;
 
-    public IRBinOp(OpType type, IRExpr left, IRExpr right) {
+    public IRBinOp(Location location, OpType type, IRExpr left, IRExpr right) {
+        super(location);
         this.type = type;
         this.left = left;
         this.right = right;
@@ -134,6 +138,21 @@ public class IRBinOp extends IRExpr_c {
         left.printSExp(p);
         right.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRBinOp irBinOp = (IRBinOp) o;
+        return type == irBinOp.type &&
+            Objects.equals(left, irBinOp.left) &&
+            Objects.equals(right, irBinOp.right);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type, left, right);
     }
 
 }

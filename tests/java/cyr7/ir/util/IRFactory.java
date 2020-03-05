@@ -58,6 +58,7 @@ public class IRFactory {
 
     }
 
+<<<<<<< HEAD
     public static long testStatement(String program) throws Exception {
         XiProgramNode node = (XiProgramNode) ParserUtil.parseNode(new StringReader(program), "test",
                 false);
@@ -67,4 +68,6 @@ public class IRFactory {
         compUnit.appendFunc 
     }
 
+=======
+>>>>>>> 565904765764d9ad2497a7d7686b79ac22899ea9
 }

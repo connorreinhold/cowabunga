@@ -4,6 +4,9 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.Objects;
 
 /**
  * An intermediate representation for evaluating an expression for side effects,
@@ -17,7 +20,8 @@ public class IRExp extends IRStmt {
      *
      * @param expr the expression to be evaluated and result discarded
      */
-    public IRExp(IRExpr expr) {
+    public IRExp(Location location, IRExpr expr) {
+        super(location);
         this.expr = expr;
     }
 
@@ -58,5 +62,18 @@ public class IRExp extends IRStmt {
         p.printAtom("EXP");
         expr.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRExp irExp = (IRExp) o;
+        return Objects.equals(expr, irExp.expr);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(expr);
     }
 }

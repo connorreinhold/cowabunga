@@ -3,11 +3,13 @@ package cyr7.ir.nodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a sequence of statements
@@ -19,8 +21,8 @@ public class IRSeq extends IRStmt {
     /**
      * @param stmts the statements
      */
-    public IRSeq(IRStmt... stmts) {
-        this(Arrays.asList(stmts));
+    public IRSeq(Location location, IRStmt... stmts) {
+        this(location, Arrays.asList(stmts));
     }
 
     /**
@@ -28,7 +30,8 @@ public class IRSeq extends IRStmt {
      * The list should not be modified subsequently.
      * @param stmts the sequence of statements
      */
-    public IRSeq(List<IRStmt> stmts) {
+    public IRSeq(Location location, List<IRStmt> stmts) {
+        super(location);
         this.stmts = stmts;
     }
 
@@ -83,5 +86,18 @@ public class IRSeq extends IRStmt {
         for (IRStmt stmt : stmts)
             stmt.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRSeq irSeq = (IRSeq) o;
+        return Objects.equals(stmts, irSeq.stmts);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(stmts);
     }
 }

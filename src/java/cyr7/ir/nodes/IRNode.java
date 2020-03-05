@@ -6,6 +6,7 @@ import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * A node in an intermediate-representation abstract syntax tree.
@@ -38,4 +39,7 @@ public interface IRNode {
      * @param p the S-expression printer
      */
     void printSExp(SExpPrinter p);
+
+    Location location();
+
 }

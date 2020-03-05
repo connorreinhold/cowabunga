@@ -3,11 +3,13 @@ package cyr7.ir.nodes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * An intermediate representation for a call statement.
@@ -23,8 +25,8 @@ public class IRCallStmt extends IRStmt {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCallStmt(List<String> collectors, IRExpr target, IRExpr... args) {
-        this(collectors, target, Arrays.asList(args));
+    public IRCallStmt(Location location, List<String> collectors, IRExpr target, IRExpr... args) {
+        this(location, collectors, target, Arrays.asList(args));
     }
 
     /**
@@ -32,7 +34,8 @@ public class IRCallStmt extends IRStmt {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args) {
+    public IRCallStmt(Location location, List<String> collectors, IRExpr target, List<IRExpr> args) {
+        super(location);
         this.collectors = collectors;
         this.target = target;
         this.args = args;
@@ -99,5 +102,20 @@ public class IRCallStmt extends IRStmt {
         for (IRExpr arg : args)
             arg.printSExp(p);
         p.endList();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        IRCallStmt that = (IRCallStmt) o;
+        return Objects.equals(collectors, that.collectors) &&
+            Objects.equals(target, that.target) &&
+            Objects.equals(args, that.args);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(collectors, target, args);
     }
 }

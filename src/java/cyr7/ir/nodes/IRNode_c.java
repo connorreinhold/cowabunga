@@ -10,11 +10,19 @@ import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * A node in an intermediate-representation abstract syntax tree.
  */
 public abstract class IRNode_c implements IRNode {
+
+    private final Location location;
+
+    public IRNode_c(Location location) {
+        assert location != null;
+        this.location = location;
+    }
 
     @Override
     public IRNode visitChildren(IRVisitor v) {
@@ -67,5 +75,10 @@ public abstract class IRNode_c implements IRNode {
             printSExp(sp);
         }
         return sw.toString();
+    }
+
+    @Override
+    public Location location() {
+        return this.location;
     }
 }
