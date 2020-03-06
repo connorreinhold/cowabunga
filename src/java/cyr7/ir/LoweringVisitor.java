@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import cyr7.ir.LoweringVisitor.Result;
 import cyr7.ir.fold.MyIRVisitor;
@@ -190,7 +191,10 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCompUnit n) {
-        return null;
+        var functions = n.functions().values();
+        return Result.stmts(functions.stream().flatMap(f -> {
+            return f.accept(this).assertFirst().stream();
+        }).collect(Collectors.toList()));
     }
 
     @Override
