@@ -2,6 +2,7 @@ package cyr7.ir.nodes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
 
@@ -40,6 +41,8 @@ public interface IRNodeFactory {
      *          to false
      */
     IRCJump IRCJump(IRExpr expr, String trueLabel, String falseLabel);
+
+    IRCJump IRCJump(IRExpr expr, String trueLabel, Optional<String> falseLabel);
 
     IRCompUnit IRCompUnit(String name);
 
