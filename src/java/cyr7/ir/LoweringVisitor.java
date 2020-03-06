@@ -1,6 +1,7 @@
 package cyr7.ir;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
@@ -67,11 +68,10 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
+        var leftResult = n.left().accept(this).assertSecond();
+        var rightResult = n.right().accept(this).assertSecond();
+        List<IRStmt> stmts = new ArrayList<>();
         if (binOpCommutes(n.left(), n.right())) {
-            var leftResult = n.left().accept(this).assertSecond();
-            var rightResult = n.right().accept(this).assertSecond();
-
-            List<IRStmt> stmts = new ArrayList<>();
             stmts.addAll(leftResult.part1());
             stmts.addAll(rightResult.part1());
 
@@ -83,10 +83,6 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
         } else {
             String t1 = generator.newTemp();
-            var leftResult = n.left().accept(this).assertSecond();
-            var rightResult = n.right().accept(this).assertSecond();
-
-            List<IRStmt> stmts = new ArrayList<>();
             stmts.addAll(leftResult.part1());
             stmts.add(make.IRMove(
                 make.IRTemp(t1),
@@ -104,7 +100,25 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCall n) {
-        IRNodeFactory make = new IRNodeFactory_c(n.location());
+//        IRNodeFactory make = new IRNodeFactory_c(n.location());
+//
+//        List<IRStmt> stmts = new LinkedList<>();
+//        var iterator = n.args().iterator();
+//
+//        int i = 0;
+//        while (iterator.hasNext()) {
+//            var nextArg = iterator.next();
+//            Result argResult = nextArg.accept(this);
+//            var resultPair = argResult.assertSecond();
+//            stmts.addAll(resultPair.part1());
+//            var argTemp = make.IRTemp(generator.argTemp(i));
+//            stmts.add(make.IRMove(argTemp, resultPair.part2()));
+//            i++;
+//        }
+//
+//        stmts.add(
+//                make.IRCallStmt(List.of(), make.IRName(n.label()), List.of()));
+
 //        String t = generator.newTemp();
 //
 //        List<IRStmt> statements = new ArrayList<>();
@@ -186,7 +200,13 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRFuncDecl n) {
-        return null;
+        IRNodeFactory make = new IRNodeFactory_c(n.location());
+        List<IRStmt> stmts = new LinkedList<>();
+
+        stmts.add(make.IRLabel(n.label()));
+        var body = n.body().accept(this).assertFirst();
+        stmts.addAll(body);
+        return Result.stmts(stmts);
     }
 
     @Override
