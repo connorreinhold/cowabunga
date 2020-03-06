@@ -1,5 +1,8 @@
 package cyr7.ir;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import cyr7.ir.LoweringVisitor.Result;
 import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.nodes.IRBinOp;
@@ -17,7 +20,6 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
-import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRReturn;
@@ -26,9 +28,6 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfTwo;
 import polyglot.util.Pair;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LoweringVisitor implements MyIRVisitor<Result> {
 
@@ -220,18 +219,37 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
             return Result.stmts(stmts);
         } else {
-            String t = generator.newTemp();
-            var targetResult = n.target().accept(this).assertSecond();
-            var sourceResult = n.target().accept(this).assertSecond();
-
+            // Two cases: Target is a temp or a memory location.
             List<IRStmt> stmts = new ArrayList<>();
-            stmts.addAll(targetResult.part1());
-            stmts.add(
-                make.IRMove(
-                    make.IRTemp(t),
-                    targetRes
-                )
-            )
+
+            var target = n.target();
+            var sourceResult = n.source().accept(this).assertSecond();
+            var s2 = sourceResult.part1();
+            var e2 = sourceResult.part2();
+
+            if (target instanceof IRTemp) {
+                // Case 1: [MOVE(t, e_2)]
+                stmts.addAll(s2);
+                stmts.add(make.IRMove(target, e2));
+            } else if (target instanceof IRMem) {
+
+                // Case 2: [MOVE[Mem(e_1), e_2]]
+
+                IRTemp t = make.IRTemp(generator.newTemp());
+                IRMem mem = (IRMem) target;
+                var memExprResult = mem.expr().accept(this).assertSecond();
+
+                var s1 = memExprResult.part1();
+                var e1 = memExprResult.part2();
+
+                stmts.addAll(s1);
+                stmts.add(make.IRMove(t, e1));
+                stmts.addAll(s2);
+                stmts.add(make.IRMove(make.IRMem(t), e2));
+            } else {
+                throw new UnsupportedOperationException();
+            }
+            return Result.stmts(stmts);
         }
     }
 
