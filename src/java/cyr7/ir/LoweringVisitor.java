@@ -52,6 +52,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     }
 
     // source is a
+    // TODO
     private static boolean moveCommutes(IRExpr dest, IRExpr source) {
         return false;
     }
@@ -220,36 +221,11 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
             return Result.stmts(stmts);
         } else {
             // Two cases: Target is a temp or a memory location.
-            List<IRStmt> stmts = new ArrayList<>();
-
+            // Handled by move-handler.
             var target = n.target();
             var sourceResult = n.source().accept(this).assertSecond();
-            var s2 = sourceResult.part1();
-            var e2 = sourceResult.part2();
-
-            if (target instanceof IRTemp) {
-                // Case 1: [MOVE(t, e_2)]
-                stmts.addAll(s2);
-                stmts.add(make.IRMove(target, e2));
-            } else if (target instanceof IRMem) {
-
-                // Case 2: [MOVE[Mem(e_1), e_2]]
-
-                IRTemp t = make.IRTemp(generator.newTemp());
-                IRMem mem = (IRMem) target;
-                var memExprResult = mem.expr().accept(this).assertSecond();
-
-                var s1 = memExprResult.part1();
-                var e1 = memExprResult.part2();
-
-                stmts.addAll(s1);
-                stmts.add(make.IRMove(t, e1));
-                stmts.addAll(s2);
-                stmts.add(make.IRMove(make.IRMem(t), e2));
-            } else {
-                throw new UnsupportedOperationException();
-            }
-            return Result.stmts(stmts);
+            var handler = new MoveHandleVisitor(this, sourceResult);
+            return Result.stmts(target.accept(handler));
         }
     }
 
@@ -261,6 +237,123 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRSeq n) {
         return Result.stmts(n.stmts());
+    }
+
+
+    private class MoveHandleVisitor implements MyIRVisitor<List<IRStmt>> {
+
+        private List<IRStmt> s2;
+        private IRExpr e2;
+        private LoweringVisitor lower;
+        private List<IRStmt> stmts;
+
+        public MoveHandleVisitor(LoweringVisitor visitor,
+                Pair<List<IRStmt>, IRExpr> source) {
+            this.s2 = source.part1();
+            this.e2 = source.part2();
+            this.lower = visitor;
+            this.stmts = new ArrayList<>();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRMem n) {
+            IRNodeFactory make = new IRNodeFactory_c(n.location());
+            IRExpr memInner = n.expr();
+            var exprResult = memInner.accept(lower).assertSecond();
+            var s1 = exprResult.part1();
+            var e1 = exprResult.part2();
+
+            IRTemp t = make.IRTemp(generator.newTemp());
+
+            stmts.addAll(s1);
+            stmts.add(make.IRMove(t, e1));
+            stmts.addAll(s2);
+            stmts.add(make.IRMove(make.IRMem(t), e2));
+            return stmts;
+        }
+
+        @Override
+        public List<IRStmt> visit(IRTemp n) {
+            IRNodeFactory make = new IRNodeFactory_c(n.location());
+            stmts.addAll(s2);
+            stmts.add(make.IRMove(n, e2));
+            return stmts;
+        }
+
+        @Override
+        public List<IRStmt> visit(IRBinOp n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRCall n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRConst n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRESeq n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRName n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRCallStmt n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRCJump n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRCompUnit n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRExp n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRFuncDecl n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRJump n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRLabel n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRMove n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRReturn n) {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public List<IRStmt> visit(IRSeq n) {
+            throw new UnsupportedOperationException();
+        }
     }
 
 
