@@ -222,6 +222,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         } else {
             // Two cases: Target is a temp or a memory location.
             // Handled by move-handler.
+            // If anything else, then there is an error.
             var target = n.target();
             var sourceResult = n.source().accept(this).assertSecond();
             var handler = new MoveHandleVisitor(this, sourceResult);
