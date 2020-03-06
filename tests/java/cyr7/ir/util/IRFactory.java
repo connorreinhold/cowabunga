@@ -1,21 +1,9 @@
 package cyr7.ir.util;
 
-import java.io.StringReader;
-
 import cyr7.ast.AbstractNode;
-import cyr7.ast.Node;
-import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ir.AstToIrVisitor;
-import cyr7.ir.interpret.IRSimulator;
-import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRNode;
-import cyr7.ir.nodes.IRReturn;
-import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
-import cyr7.parser.ParserUtil;
-import cyr7.typecheck.TypeCheckUtil;
 
 public class IRFactory {
 
@@ -58,16 +46,15 @@ public class IRFactory {
 
     }
 
-<<<<<<< HEAD
-    public static long testStatement(String program) throws Exception {
-        XiProgramNode node = (XiProgramNode) ParserUtil.parseNode(new StringReader(program), "test",
-                false);
-        TypeCheckUtil.typecheck(node);
-        IRCompUnit compUnit = new IRCompUnit("test");
-        IRFuncDecl stmt = (IRFuncDecl) node.functions.get(0).accept(new AstToIrVisitor()).assertSecond();
-        compUnit.appendFunc 
-    }
+    // Cannot downcast stmt into IRFuncDecl
+//    public static long testStatement(String program) throws Exception {
+//        XiProgramNode node = (XiProgramNode) ParserUtil.parseNode(new StringReader(program), "test",
+//                false);
+//        TypeCheckUtil.typecheck(node);
+//        IRCompUnit compUnit = new IRCompUnit(null, "test");
+//        IRFuncDecl stmt = node.functions.get(0)
+//                .accept(new AstToIrVisitor()).assertSecond();
+//        compUnit.appendFunc(stmt);
+//    }
 
-=======
->>>>>>> 565904765764d9ad2497a7d7686b79ac22899ea9
 }

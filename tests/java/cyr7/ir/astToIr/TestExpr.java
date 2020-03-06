@@ -3,35 +3,36 @@ package cyr7.ir.astToIr;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
-import cyr7.ast.Node;
-import cyr7.ast.expr.binexpr.OrExprNode;
-import cyr7.ast.expr.binexpr.RemExprNode;
-import cyr7.ast.expr.binexpr.SubExprNode;
-import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
-import cyr7.ir.AstToIrVisitor;
-import cyr7.ir.nodes.IRBinOp;
-import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.ir.nodes.IRConst;
-import cyr7.ir.nodes.IRExp;
-import cyr7.ir.nodes.IRExpr;
-import cyr7.typecheck.TypeCheckUtil;
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
 import cyr7.ast.AbstractNode;
+import cyr7.ast.Node;
 import cyr7.ast.expr.binexpr.AddExprNode;
+import cyr7.ast.expr.binexpr.RemExprNode;
+import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
+import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ir.AstToIrVisitor;
+import cyr7.ir.nodes.IRBinOp.OpType;
+import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.util.IRFactory;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 class TestExpr {
 
     private static void assertEq(IRNode expected, Node toTransform) {
         assertEquals(expected, toTransform.accept(new AstToIrVisitor()).assertFirst());
     }
+
+    private final IRNodeFactory make = new IRNodeFactory_c(
+            new Location(-1, -1));
 
     @Test
     void testLiteral() {
@@ -89,7 +90,8 @@ class TestExpr {
         Node node = new RemExprNode(C.LOC,
             new LiteralIntExprNode(C.LOC, "5"),
             new LiteralIntExprNode(C.LOC, "10"));
-        IRExpr expected = new IRBinOp(OpType.MOD, new IRConst(5), new IRConst(10));
+        IRExpr expected = make.IRBinOp(OpType.MOD, make.IRConst(5),
+                make.IRConst(10));
         assertEq(expected, node);
     }
 
@@ -98,7 +100,8 @@ class TestExpr {
         Node node = new SubExprNode(C.LOC,
             new LiteralIntExprNode(C.LOC, "5"),
             new LiteralIntExprNode(C.LOC, "10"));
-        IRExpr expected = new IRBinOp(OpType.SUB, new IRConst(5), new IRConst(10));
+        IRExpr expected = make.IRBinOp(OpType.SUB, make.IRConst(5),
+                make.IRConst(10));
         assertEq(expected, node);
     }
 
@@ -106,37 +109,37 @@ class TestExpr {
     void testBoolNegExpr() {
         Node node = new BoolNegExprNode(C.LOC,
             new LiteralBoolExprNode(C.LOC, false));
-        IRExpr expected = new IRBinOp(OpType.XOR,
-            new IRConst(1),
-            new IRConst(0));
+        IRExpr expected = make.IRBinOp(OpType.XOR, make.IRConst(1),
+                make.IRConst(0));
         assertEq(expected, node);
     }
 
     @Test
     void testIntNegExpr() {
         Node node = new IntNegExprNode(C.LOC, new LiteralIntExprNode(C.LOC, "5"));
-        IRExpr expected = new IRBinOp(OpType.SUB, new IRConst(0), new IRConst(5));
+        IRExpr expected = make.IRBinOp(OpType.SUB, make.IRConst(0),
+                make.IRConst(5));
         assertEq(expected, node);
     }
 
     @Test
     void testLiteralInt() {
         Node node = new LiteralIntExprNode(C.LOC, "5");
-        IRExpr expected = new IRConst(5);
+        IRExpr expected = make.IRConst(5);
         assertEq(expected, node);
     }
 
     @Test
     void testLiteralBool() {
         Node node = new LiteralBoolExprNode(C.LOC, true);
-        IRExpr expected = new IRConst(1);
+        IRExpr expected = make.IRConst(1);
         assertEq(expected, node);
     }
 
     @Test
     void testLiteralChar() {
         Node node = new LiteralCharExprNode(C.LOC, "x");
-        IRExpr expected = new IRConst(120);
+        IRExpr expected = make.IRConst(120);
         assertEq(expected, node);
     }
 
