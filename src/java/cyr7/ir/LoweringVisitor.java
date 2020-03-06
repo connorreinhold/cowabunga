@@ -2,6 +2,7 @@ package cyr7.ir;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import cyr7.ir.LoweringVisitor.Result;
 import cyr7.ir.fold.MyIRVisitor;
@@ -206,28 +207,8 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRMove n) {
-        IRNodeFactory make = new IRNodeFactory_c(n.location());
-        if (moveCommutes(n.target(), n.source())) {
-            var targetResult = n.target().accept(this).assertSecond();
-            var sourceResult = n.source().accept(this).assertSecond();
-
-            List<IRStmt> stmts = new ArrayList<>();
-            stmts.addAll(targetResult.part1());
-            stmts.addAll(sourceResult.part1());
-            stmts.add(
-                make.IRMove(targetResult.part2(), sourceResult.part2())
-            );
-
-            return Result.stmts(stmts);
-        } else {
-            // Two cases: Target is a temp or a memory location.
-            // Handled by move-handler.
-            // If anything else, then there is an error.
-            var target = n.target();
-            var sourceResult = n.source().accept(this).assertSecond();
-            var handler = new MoveHandleVisitor(this, sourceResult);
-            return Result.stmts(target.accept(handler));
-        }
+        var handler = new MoveHandleVisitor(this);
+        return Result.stmts(n.accept(handler));
     }
 
     @Override
@@ -243,22 +224,45 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     private class MoveHandleVisitor implements MyIRVisitor<List<IRStmt>> {
 
-        private List<IRStmt> s2;
-        private IRExpr e2;
+        private Optional<List<IRStmt>> s2;
+        private Optional<IRExpr> e2;
         private LoweringVisitor lower;
-        private List<IRStmt> stmts;
 
-        public MoveHandleVisitor(LoweringVisitor visitor,
-                Pair<List<IRStmt>, IRExpr> source) {
-            this.s2 = source.part1();
-            this.e2 = source.part2();
+        public MoveHandleVisitor(LoweringVisitor visitor) {
             this.lower = visitor;
-            this.stmts = new ArrayList<>();
+        };
+
+        @Override
+        public List<IRStmt> visit(IRMove n) {
+            IRNodeFactory make = new IRNodeFactory_c(n.location());
+            if (moveCommutes(n.target(), n.source())) {
+                var targetResult = n.target().accept(lower).assertSecond();
+                var sourceResult = n.source().accept(lower).assertSecond();
+
+                List<IRStmt> stmts = new ArrayList<>();
+                stmts.addAll(targetResult.part1());
+                stmts.addAll(sourceResult.part1());
+                stmts.add(make.IRMove(targetResult.part2(),
+                        sourceResult.part2()));
+                return stmts;
+            } else {
+                var sourceResult = n.source().accept(lower).assertSecond();
+
+                this.s2 = Optional.of(sourceResult.part1());
+                this.e2 = Optional.of(sourceResult.part2());
+
+                return n.target().accept(this);
+            }
         }
 
         @Override
         public List<IRStmt> visit(IRMem n) {
+            if (this.s2.isEmpty() || this.e2.isEmpty())
+                throw new UnsupportedOperationException();
+
             IRNodeFactory make = new IRNodeFactory_c(n.location());
+            List<IRStmt> stmts = new ArrayList<>();
+
             IRExpr memInner = n.expr();
             var exprResult = memInner.accept(lower).assertSecond();
             var s1 = exprResult.part1();
@@ -268,16 +272,20 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
             stmts.addAll(s1);
             stmts.add(make.IRMove(t, e1));
-            stmts.addAll(s2);
-            stmts.add(make.IRMove(make.IRMem(t), e2));
+            stmts.addAll(s2.get());
+            stmts.add(make.IRMove(make.IRMem(t), e2.get()));
             return stmts;
         }
 
         @Override
         public List<IRStmt> visit(IRTemp n) {
+            if (this.s2.isEmpty() || this.e2.isEmpty())
+                throw new UnsupportedOperationException();
+
+            List<IRStmt> stmts = new ArrayList<>();
             IRNodeFactory make = new IRNodeFactory_c(n.location());
-            stmts.addAll(s2);
-            stmts.add(make.IRMove(n, e2));
+            stmts.addAll(s2.get());
+            stmts.add(make.IRMove(n, e2.get()));
             return stmts;
         }
 
@@ -338,11 +346,6 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
         @Override
         public List<IRStmt> visit(IRLabel n) {
-            throw new UnsupportedOperationException();
-        }
-
-        @Override
-        public List<IRStmt> visit(IRMove n) {
             throw new UnsupportedOperationException();
         }
 
