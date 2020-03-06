@@ -4,10 +4,15 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
-import java.util.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Set;
+import java.util.Stack;
 
-import edu.cornell.cs.cs4120.util.InternalCompilerError;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -21,15 +26,20 @@ import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.ir.visit.InsnMapsBuilder;
+import edu.cornell.cs.cs4120.util.InternalCompilerError;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.SerialVersionUID;
 
 /**
  * A simple IR interpreter
  */
 public class IRSimulator {
+
     /** compilation unit to be interpreted */
     private IRCompUnit compUnit;
 
@@ -56,6 +66,9 @@ public class IRSimulator {
     protected static int debugLevel = 0;
 
     public static final int DEFAULT_HEAP_SIZE = 10240;
+
+    private final IRNodeFactory make = new IRNodeFactory_c(
+            new Location(-1, -1));
 
     /**
      * Construct an IR interpreter with a default heap size
@@ -219,8 +232,26 @@ public class IRSimulator {
             // Simulate!
             while (frame.advance()) ;
 
-            boolean returnsOneOrMoreValues = name.charAt(name.lastIndexOf("_") + 1) != 'p';
-            if (returnsOneOrMoreValues) {
+            String typeInName = name.substring(name.lastIndexOf("_") + 1);
+            int numReturnVals = 1;
+            if (typeInName.charAt(0) == 'p') {
+                numReturnVals = 0;
+            } else if (typeInName.charAt(0) == 't') {
+                StringBuilder number = new StringBuilder();
+                for (int i = 0; i < typeInName.length()
+                        && Character.isDigit(typeInName.charAt(i)); i++) {
+                    number.append(typeInName.charAt(i));
+                }
+                numReturnVals = Integer.parseInt(number.toString());
+            }
+
+            // Transfer child's return temps to the parent frame, because the
+            // child frame is going away
+            for (int i = 0; i <= numReturnVals; i++) {
+                String currRetTmp = Configuration.ABSTRACT_RET_PREFIX + i;
+                parent.put(currRetTmp, frame.get(currRetTmp));
+            }
+            if (numReturnVals > 0) {
                 return frame.get(Configuration.ABSTRACT_RET_PREFIX + 0);
             }
         }
@@ -453,17 +484,20 @@ public class IRSimulator {
         }
         else if (insn instanceof IRCallStmt) {
             IRCallStmt callStmt = (IRCallStmt) insn;
-            IRCall syntheticCall = new IRCall(callStmt.target(), callStmt.args());
+            IRCall syntheticCall = make.IRCall(callStmt.target(),
+                    callStmt.args());
             interpret(frame, syntheticCall);
             exprStack.popValue();
             List<String> collectors = callStmt.collectors();
             int len = collectors.size();
             for (int i = 0; i < len; i++) {
-                IRTemp syntheticCollectorTemp = new IRTemp(collectors.get(i));
-                IRTemp syntheticReturnTemp = new IRTemp(Configuration.ABSTRACT_RET_PREFIX + i);
+                IRTemp syntheticCollectorTemp = make.IRTemp(collectors.get(i));
+                IRTemp syntheticReturnTemp = make
+                        .IRTemp(Configuration.ABSTRACT_RET_PREFIX + i);
                 interpret(frame, syntheticCollectorTemp);
                 interpret(frame, syntheticReturnTemp);
-                IRMove syntheticMove = new IRMove(syntheticCollectorTemp, syntheticReturnTemp);
+                IRMove syntheticMove = make.IRMove(syntheticCollectorTemp,
+                        syntheticReturnTemp);
                 interpret(frame, syntheticMove);
             }
         }
@@ -511,7 +545,6 @@ public class IRSimulator {
 
         /** local registers (register name -> value) */
         private Map<String, Long> regs;
-
 
         public ExecutionFrame(long ip) {
             this.ip = ip;
