@@ -67,9 +67,14 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
-    private final IdGenerator generator = new DefaultIdGenerator();
+    private final IdGenerator generator;
 
     public AstToIrVisitor() {
+        this(new DefaultIdGenerator());
+    }
+
+    public AstToIrVisitor(IdGenerator generator) {
+        this.generator = generator;
     }
 
     private String functionName(String n, List<ExprNode> paramTypes,
