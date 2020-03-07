@@ -64,77 +64,76 @@ public class ConstFoldVisitor
         if (!n.left().isConstant() || !n.right().isConstant()) {
             return n;
         }
-        final BigInteger l = BigInteger.valueOf(n.left().constant());
-        final BigInteger r = BigInteger.valueOf(n.right().constant());
-        BigInteger value;
+        final long l = n.left().constant();
+        final long r = n.right().constant();
+        long value;
 
         // Copied from staff-given interpreter code.
         switch (n.opType()) {
         case ADD:
-            value = l.add(r);
+            value = l + r;
             break;
         case SUB:
-            value = l.subtract(r);
+            value = l - r;
             break;
         case MUL:
-            value = l.multiply(r);
+            value = l * r;
             break;
         case HMUL:
-            value = l.multiply(r).shiftRight(64);
+            value = BigInteger.valueOf(l).multiply(BigInteger.valueOf(r))
+                    .shiftRight(64).longValue();
             break;
         case DIV:
-            if (r.equals(BigInteger.ZERO))
+            if (r == 0)
                 throw new Trap("Division by zero!");
-            value = l.divide(r);
+            value = l / r;
             break;
         case MOD:
-            if (r.equals(BigInteger.ZERO))
+            if (r == 0)
                 throw new Trap("Division by zero!");
-            value = l.remainder(r);
+            value = l % r;
             break;
         case AND:
-            value = l.and(r);
+            value = l & r;
             break;
         case OR:
-            value = l.or(r);
+            value = l | r;
             break;
         case XOR:
-            value = l.xor(r);
+            value = l ^ r;
             break;
         case LSHIFT:
-            value = BigInteger.valueOf(l.longValue() << r.longValue());
+            value = l << r;
             break;
         case RSHIFT:
-            value = BigInteger.valueOf(l.longValue() >>> r.longValue());
+            value = l >>> r;
             break;
         case ARSHIFT:
-            value = BigInteger.valueOf(l.longValue() >> r.longValue());
+            value = l >> r;
             break;
         case EQ:
-            value = l.equals(r) ? BigInteger.ONE : BigInteger.ZERO;
+            value = l == r ? 1 : 0;
             break;
         case NEQ:
-            value = !l.equals(r) ? BigInteger.ONE : BigInteger.ZERO;
+            value = l != r ? 1 : 0;
             break;
         case LT:
-            value = l.compareTo(r) < 0 ? BigInteger.ONE : BigInteger.ZERO;
+            value = l < r ? 1 : 0;
             break;
         case GT:
-            value = l.compareTo(r) > 0 ? BigInteger.ONE : BigInteger.ZERO;
+            value = l > r ? 1 : 0;
             break;
         case LEQ:
-            value = l.compareTo(r) <= 0 ? BigInteger.ONE : BigInteger.ZERO;
+            value = l <= r ? 1 : 0;
             break;
         case GEQ:
-            value = l.compareTo(r) >= 0 ? BigInteger.ONE : BigInteger.ZERO;
+            value = l >= r ? 1 : 0;
             break;
         default:
             throw new InternalCompilerError("Invalid binary operation");
         }
 
-        BigInteger MAX = new BigInteger("9223372036854775808");
-        long modValue = value.remainder(MAX).longValue();
-        return make.IRConst(modValue);
+        return make.IRConst(value);
     }
 
     // Expressions

@@ -59,40 +59,32 @@ class TestBinop {
     @Test
     void testAdd() {
         OpType type = OpType.ADD;
-        var t1 = pairOf(constant(2), binop(type, 1, 1));
-        var t2 = pairOf(constant(-1),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
-        var t3 = pairOf(constant(0), binop(type, 0, 0));
-        var t4 = pairOf(constant(9223372036854775806L),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
-        var t5 = pairOf(constant(0L), binop(type,
-                -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(constant(2), binop(type, 1, 1)));
+        test(pairOf(constant(-1),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(-2),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
+        test(pairOf(constant(0L),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
+
     }
 
     @Test
     void testSub() {
         OpType type = OpType.SUB;
-        var t1 = pairOf(constant(0), binop(type, 0, 0));
-        var t2 = pairOf(constant(0), binop(type, 1, 1));
-        var t3 = pairOf(constant(-9223372036854775807L),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
-        var t4 = pairOf(constant(0),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
-        var t5 = pairOf(constant(0),
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(0), binop(type, 1, 1)));
+        test(pairOf(constant(1),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
+        test(pairOf(constant(0),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
+        test(pairOf(constant(0),
                 binop(type, -9223372036854775808L,
-                -9223372036854775808L));
+                        -9223372036854775808L)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
+
     }
 
     @Test
@@ -100,215 +92,166 @@ class TestBinop {
         // Numbers crunched via an online calculator
         // https://www.calculator.net/big-number-calculator.html
         OpType type = OpType.MUL;
-        var t1 = pairOf(constant(0), binop(type, 0, 0));
-        var t2 = pairOf(constant(1), binop(type, 1, 1));
-        var t3 = pairOf(constant(9223372036854775807L),
-                binop(type, 1, 9223372036854775807L));
-        var t4 = pairOf(constant(9223372036854775807L),
-                binop(type, 9223372036854775807L, 1));
-        var t5 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
-        var t6 = pairOf(constant(1),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
-        var t7 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(1), binop(type, 1, 1)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
+        test(pairOf(constant(9223372036854775807L),
+                binop(type, 1, 9223372036854775807L)));
+        test(pairOf(constant(9223372036854775807L),
+                binop(type, 9223372036854775807L, 1)));
+
+        test(pairOf(constant(-9223372036854775808L),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
+        test(pairOf(constant(1),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
+        test(pairOf(constant(0),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
+
+
     }
 
     @Test
     void testDiv() {
         OpType type = OpType.DIV;
-        var t1 = pairOf(binop(type, 0, 0), binop(type, 0, 0));
-        var t2 = pairOf(constant(1), binop(type, 1, 1));
+        test(pairOf(binop(type, 0, 0), binop(type, 0, 0)));
+        test(pairOf(constant(1), binop(type, 1, 1)));
 
-        var t3 = pairOf(constant(0),
-                binop(type, 1, 9223372036854775807L));
+        test(pairOf(constant(0), binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(constant(9223372036854775807L),
-                binop(type, 9223372036854775807L, 1));
+        test(pairOf(constant(9223372036854775807L),
+                binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(constant(-1),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(constant(-1),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(constant(1),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(constant(1),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(constant(1),
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(constant(1),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(constant(0), binop(type, 1, -9223372036854775808L));
+        test(pairOf(constant(0), binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(constant(2), binop(type, 21, 9));
+        test(pairOf(constant(2), binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
     void testMod() {
         // When mod,
         OpType type = OpType.MOD;
-        var t1 = pairOf(binop(type, 0, 0), binop(type, 0, 0));
-        var t2 = pairOf(constant(0), binop(type, 1, 1));
+        test(pairOf(binop(type, 0, 0), binop(type, 0, 0)));
+        test(pairOf(constant(0), binop(type, 1, 1)));
 
-        var t3 = pairOf(constant(1), binop(type, 1, 9223372036854775807L));
+        test(pairOf(constant(1), binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(constant(0),
-                binop(type, 9223372036854775807L, 1));
+        test(pairOf(constant(0), binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(constant(-1),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(constant(-1),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(constant(0),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(constant(0),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(constant(0),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(constant(1), binop(type, 1, -9223372036854775808L));
+        test(pairOf(constant(1), binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(constant(3), binop(type, 21, 9));
+        test(pairOf(constant(3), binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
     void testHighMulti() {
         OpType type = OpType.HMUL;
-        var t1 = pairOf(constant(0), binop(type, 0, 0));
-        var t2 = pairOf(constant(0), binop(type, 1, 1));
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(0), binop(type, 1, 1)));
 
-        var t3 = pairOf(constant(0), binop(type, 1, 9223372036854775807L));
+        test(pairOf(constant(0), binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(constant(0), binop(type, 9223372036854775807L, 1));
+        test(pairOf(constant(0), binop(type, 9223372036854775807L, 1)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
+
     }
 
     @Test
     void testAnd() {
         OpType type = OpType.AND;
-        var t1 = pairOf(constant(true), binop(type, true, true));
-        var t2 = pairOf(constant(false), binop(type, false, false));
-        var t3 = pairOf(constant(false), binop(type, false, true));
-        var t4 = pairOf(constant(false), binop(type, true, false));
-        var t5 = pairOf(constant(false),
-                binop(type, binop(type, true, true), constant(false)));
-
-        var t6 = pairOf(constant(false),
-                binop(type, binop(type, true, false), constant(true)));
-
-        var t7 = pairOf(constant(false),
-                binop(type, binop(type, true, false),
-                        binop(type, binop(type, true, true), constant(true))));
-
-        var t8 = pairOf(constant(false), binop(type, binop(type, true, true),
+        test(pairOf(constant(true), binop(type, true, true)));
+        test(pairOf(constant(false), binop(type, false, false)));
+        test(pairOf(constant(false), binop(type, false, true)));
+        test(pairOf(constant(false), binop(type, true, false)));
+        test(pairOf(constant(false),
                 binop(type, binop(type, true, true), constant(false))));
 
-        var t9 = pairOf(constant(true), binop(type, binop(type, true, true),
-                binop(type, binop(type, true, true), constant(true))));
+        test(pairOf(constant(false),
+                binop(type, binop(type, true, false), constant(true))));
+
+        test(pairOf(constant(false),
+                binop(type, binop(type, true, false),
+                        binop(type, binop(type, true, true), constant(true)))));
+
+        test(pairOf(constant(false), binop(type, binop(type, true, true),
+                binop(type, binop(type, true, true), constant(false)))));
+
+        test(pairOf(constant(true), binop(type, binop(type, true, true),
+                binop(type, binop(type, true, true), constant(true)))));
 
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
     void testOr() {
         OpType type = OpType.OR;
-        var t1 = pairOf(constant(true), binop(type, true, true));
-        var t2 = pairOf(constant(false), binop(type, false, false));
-        var t3 = pairOf(constant(true), binop(type, false, true));
-        var t4 = pairOf(constant(true), binop(type, true, false));
-        var t5 = pairOf(constant(true),
-                binop(type, binop(type, true, true), constant(false)));
-
-        var t6 = pairOf(constant(true),
-                binop(type, binop(type, true, false), constant(true)));
-
-        var t7 = pairOf(constant(true), binop(type, binop(type, true, false),
-                binop(type, binop(type, true, true), constant(true))));
-
-        var t8 = pairOf(constant(true), binop(type, binop(type, true, true),
+        test(pairOf(constant(true), binop(type, true, true)));
+        test(pairOf(constant(false), binop(type, false, false)));
+        test(pairOf(constant(true), binop(type, false, true)));
+        test(pairOf(constant(true), binop(type, true, false)));
+        test(pairOf(constant(true),
                 binop(type, binop(type, true, true), constant(false))));
 
-        var t9 = pairOf(constant(false), binop(type, binop(type, false, false),
-                binop(type, binop(type, false, false), constant(false))));
+        test(pairOf(constant(true),
+                binop(type, binop(type, true, false), constant(true))));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+        test(pairOf(constant(true), binop(type, binop(type, true, false),
+                binop(type, binop(type, true, true), constant(true)))));
+
+        test(pairOf(constant(true), binop(type, binop(type, true, true),
+                binop(type, binop(type, true, true), constant(false)))));
+
+        test(pairOf(constant(false), binop(type, binop(type, false, false),
+                binop(type, binop(type, false, false), constant(false)))));
+
+
     }
 
     @Test
     void testXor() {
         OpType type = OpType.XOR;
-        var t1 = pairOf(constant(false), binop(type, true, true));
-        var t2 = pairOf(constant(false), binop(type, false, false));
-        var t3 = pairOf(constant(true), binop(type, false, true));
-        var t4 = pairOf(constant(true), binop(type, true, false));
-        var t5 = pairOf(constant(false),
-                binop(type, binop(type, true, true), constant(false)));
-
-        var t6 = pairOf(constant(false),
-                binop(type, binop(type, true, false), constant(true)));
-
-        var t7 = pairOf(constant(false), binop(type, binop(type, true, false),
-                binop(type, binop(type, true, true), constant(true))));
-
-        var t8 = pairOf(constant(false), binop(type, binop(type, true, true),
+        test(pairOf(constant(false), binop(type, true, true)));
+        test(pairOf(constant(false), binop(type, false, false)));
+        test(pairOf(constant(true), binop(type, false, true)));
+        test(pairOf(constant(true), binop(type, true, false)));
+        test(pairOf(constant(false),
                 binop(type, binop(type, true, true), constant(false))));
 
-        var t9 = pairOf(constant(false), binop(type, binop(type, false, false),
-                binop(type, binop(type, false, false), constant(false))));
+        test(pairOf(constant(false),
+                binop(type, binop(type, true, false), constant(true))));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+        test(pairOf(constant(false), binop(type, binop(type, true, false),
+                binop(type, binop(type, true, true), constant(true)))));
+
+        test(pairOf(constant(false), binop(type, binop(type, true, true),
+                binop(type, binop(type, true, true), constant(false)))));
+
+        test(pairOf(constant(false), binop(type, binop(type, false, false),
+                binop(type, binop(type, false, false), constant(false)))));
+
+
     }
 
     @Test
@@ -317,35 +260,27 @@ class TestBinop {
         final var TRUE = constant(true);
         final var FALSE = constant(false);
 
-        var t1 = pairOf(TRUE, binop(type, 0, 0));
-        var t2 = pairOf(TRUE, binop(type, 1, 1));
+        test(pairOf(TRUE, binop(type, 0, 0)));
+        test(pairOf(TRUE, binop(type, 1, 1)));
 
-        var t3 = pairOf(TRUE, binop(type, 1, 9223372036854775807L));
+        test(pairOf(TRUE, binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(FALSE, binop(type, 9223372036854775807L, 1));
+        test(pairOf(FALSE, binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(TRUE,
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(TRUE,
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(TRUE,
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(TRUE,
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(TRUE,
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(TRUE,
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(FALSE, binop(type, 1, -9223372036854775808L));
+        test(pairOf(FALSE, binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(FALSE, binop(type, 21, 9));
+        test(pairOf(FALSE, binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
@@ -354,35 +289,27 @@ class TestBinop {
         final var TRUE = constant(true);
         final var FALSE = constant(false);
 
-        var t1 = pairOf(TRUE, binop(type, 0, 0));
-        var t2 = pairOf(TRUE, binop(type, 1, 1));
+        test(pairOf(TRUE, binop(type, 0, 0)));
+        test(pairOf(TRUE, binop(type, 1, 1)));
 
-        var t3 = pairOf(FALSE, binop(type, 1, 9223372036854775807L));
+        test(pairOf(FALSE, binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(TRUE, binop(type, 9223372036854775807L, 1));
+        test(pairOf(TRUE, binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(FALSE,
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(FALSE,
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(TRUE,
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(TRUE,
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(TRUE,
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(TRUE,
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(TRUE, binop(type, 1, -9223372036854775808L));
+        test(pairOf(TRUE, binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(TRUE, binop(type, 21, 9));
+        test(pairOf(TRUE, binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
@@ -391,35 +318,27 @@ class TestBinop {
         final var TRUE = constant(true);
         final var FALSE = constant(false);
 
-        var t1 = pairOf(FALSE, binop(type, 0, 0));
-        var t2 = pairOf(FALSE, binop(type, 1, 1));
+        test(pairOf(FALSE, binop(type, 0, 0)));
+        test(pairOf(FALSE, binop(type, 1, 1)));
 
-        var t3 = pairOf(TRUE, binop(type, 1, 9223372036854775807L));
+        test(pairOf(TRUE, binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(FALSE, binop(type, 9223372036854775807L, 1));
+        test(pairOf(FALSE, binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(TRUE,
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(TRUE,
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(FALSE,
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(FALSE,
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(FALSE,
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(FALSE,
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(FALSE, binop(type, 1, -9223372036854775808L));
+        test(pairOf(FALSE, binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(FALSE, binop(type, 21, 9));
+        test(pairOf(FALSE, binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
@@ -428,35 +347,27 @@ class TestBinop {
         final var TRUE = constant(true);
         final var FALSE = constant(false);
 
-        var t1 = pairOf(FALSE, binop(type, 0, 0));
-        var t2 = pairOf(FALSE, binop(type, 1, 1));
+        test(pairOf(FALSE, binop(type, 0, 0)));
+        test(pairOf(FALSE, binop(type, 1, 1)));
 
-        var t3 = pairOf(FALSE, binop(type, 1, 9223372036854775807L));
+        test(pairOf(FALSE, binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(TRUE, binop(type, 9223372036854775807L, 1));
+        test(pairOf(TRUE, binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(FALSE,
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(FALSE,
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(FALSE,
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(FALSE,
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(FALSE,
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(FALSE,
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(TRUE, binop(type, 1, -9223372036854775808L));
+        test(pairOf(TRUE, binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(TRUE, binop(type, 21, 9));
+        test(pairOf(TRUE, binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
@@ -465,35 +376,27 @@ class TestBinop {
         final var TRUE = constant(true);
         final var FALSE = constant(false);
 
-        var t1 = pairOf(TRUE, binop(type, 0, 0));
-        var t2 = pairOf(TRUE, binop(type, 1, 1));
+        test(pairOf(TRUE, binop(type, 0, 0)));
+        test(pairOf(TRUE, binop(type, 1, 1)));
 
-        var t3 = pairOf(FALSE, binop(type, 1, 9223372036854775807L));
+        test(pairOf(FALSE, binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(FALSE, binop(type, 9223372036854775807L, 1));
+        test(pairOf(FALSE, binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(FALSE,
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(FALSE,
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(TRUE,
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(TRUE,
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(TRUE,
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(TRUE,
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(FALSE, binop(type, 1, -9223372036854775808L));
+        test(pairOf(FALSE, binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(FALSE, binop(type, 21, 9));
+        test(pairOf(FALSE, binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
@@ -502,161 +405,129 @@ class TestBinop {
         final var TRUE = constant(true);
         final var FALSE = constant(false);
 
-        var t1 = pairOf(FALSE, binop(type, 0, 0));
-        var t2 = pairOf(FALSE, binop(type, 1, 1));
+        test(pairOf(FALSE, binop(type, 0, 0)));
+        test(pairOf(FALSE, binop(type, 1, 1)));
 
-        var t3 = pairOf(TRUE, binop(type, 1, 9223372036854775807L));
+        test(pairOf(TRUE, binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(TRUE, binop(type, 9223372036854775807L, 1));
+        test(pairOf(TRUE, binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(TRUE,
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(TRUE,
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(FALSE,
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(FALSE,
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(FALSE,
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(FALSE,
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(TRUE, binop(type, 1, -9223372036854775808L));
+        test(pairOf(TRUE, binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(TRUE, binop(type, 21, 9));
+        test(pairOf(TRUE, binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
     @Test
     void testARightShift() {
         OpType type = OpType.ARSHIFT;
-        var t1 = pairOf(constant(0), binop(type, 0, 0));
-        var t2 = pairOf(constant(0), binop(type, 1, 1));
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(0), binop(type, 1, 1)));
 
-        var t3 = pairOf(constant(0), binop(type, 1, 9223372036854775807L));
+        test(pairOf(constant(0), binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(constant(4611686018427387903L),
-                binop(type, 9223372036854775807L, 1));
+        test(pairOf(constant(4611686018427387903L),
+                binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(constant(-1),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(constant(-1),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(constant(0),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(constant(0),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        // Equivalent to shift by 0
+        test(pairOf(constant(-9223372036854775808L),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
         // Equivalent to 1 >> 0 = 1
         // Because -9223372036854775808L mod 2^64 = 0
-        var t8 = pairOf(constant(1), binop(type, 1, -9223372036854775808L));
+        test(pairOf(constant(1), binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(constant(0), binop(type, 21, 9));
+        test(pairOf(constant(0), binop(type, 21, 9)));
 
-        var t10 = pairOf(constant(-4611686018427387904L),
-                binop(type, -9223372036854775808L, 1));
+        test(pairOf(constant(-4611686018427387904L),
+                binop(type, -9223372036854775808L, 1)));
 
-        var t11 = pairOf(constant(-1), binop(type, -1, 1));
+        test(pairOf(constant(-1), binop(type, -1, 1)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
-        test(t10);
-        test(t11);
+
 
     }
 
     @Test
     void testLRightShift() {
         OpType type = OpType.RSHIFT;
-        var t1 = pairOf(constant(0), binop(type, 0, 0));
-        var t2 = pairOf(constant(0), binop(type, 1, 1));
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(0), binop(type, 1, 1)));
 
-        var t3 = pairOf(constant(0), binop(type, 1, 9223372036854775807L));
+        test(pairOf(constant(0), binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(constant(4611686018427387903L),
-                binop(type, 9223372036854775807L, 1));
+        test(pairOf(constant(4611686018427387903L),
+                binop(type, 9223372036854775807L, 1)));
 
-        // Just shifts by 0, because of Java specifications.
-        var t5 = pairOf(constant(1),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        // Just shifts by 63, because of Java specifications.
+        test(pairOf(constant(1),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(constant(0),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        test(pairOf(constant(0),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        // No shift b/c last 6 bits of 2^64 are 0.
+        test(pairOf(constant(-9223372036854775808L),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
         // Equivalent to 1 >> 0 = 1
         // Because -9223372036854775808L mod 2^64 = 0
-        var t8 = pairOf(constant(1), binop(type, 1, -9223372036854775808L));
+        test(pairOf(constant(1), binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(constant(0), binop(type, 21, 9));
+        test(pairOf(constant(0), binop(type, 21, 9)));
 
-        var t10 = pairOf(constant(4611686018427387904L),
-                binop(type, -9223372036854775808L, 1));
+        test(pairOf(constant(4611686018427387904L),
+                binop(type, -9223372036854775808L, 1)));
 
-        var t11 = pairOf(constant(9223372036854775807L), binop(type, -1, 1));
+        test(pairOf(constant(9223372036854775807L), binop(type, -1, 1)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
-        test(t10);
-        test(t11);
+
 
     }
 
     @Test
     void testLeftShift() {
         OpType type = OpType.LSHIFT;
-        var t1 = pairOf(constant(0), binop(type, 0, 0));
-        var t2 = pairOf(constant(2), binop(type, 1, 1));
+        test(pairOf(constant(0), binop(type, 0, 0)));
+        test(pairOf(constant(2), binop(type, 1, 1)));
 
-        var t3 = pairOf(constant(0),
-                binop(type, 1, 9223372036854775807L));
+        test(pairOf(constant(-9223372036854775808L),
+                binop(type, 1, 9223372036854775807L)));
 
-        var t4 = pairOf(constant(-2), binop(type, 9223372036854775807L, 1));
+        // Equivalent to 11111...10 where only the lowest bit is 0.
+        test(pairOf(constant(-2), binop(type, 9223372036854775807L, 1)));
 
-        var t5 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, 9223372036854775807L));
+        test(pairOf(constant(0),
+                binop(type, -9223372036854775808L, 9223372036854775807L)));
 
-        var t6 = pairOf(constant(0),
-                binop(type, 9223372036854775807L, 9223372036854775807L));
+        // Shift to the left 63 bits
+        test(pairOf(constant(-9223372036854775808L),
+                binop(type, 9223372036854775807L, 9223372036854775807L)));
 
-        var t7 = pairOf(constant(0),
-                binop(type, -9223372036854775808L, -9223372036854775808L));
+        test(pairOf(constant(-9223372036854775808L),
+                binop(type, -9223372036854775808L, -9223372036854775808L)));
 
-        var t8 = pairOf(constant(1), binop(type, 1, -9223372036854775808L));
+        test(pairOf(constant(1), binop(type, 1, -9223372036854775808L)));
 
-        var t9 = pairOf(constant(10752), binop(type, 21, 9));
+        test(pairOf(constant(10752), binop(type, 21, 9)));
 
-        test(t1);
-        test(t2);
-        test(t3);
-        test(t4);
-        test(t5);
-        test(t6);
-        test(t7);
-        test(t8);
-        test(t9);
+
     }
 
 }
