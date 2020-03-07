@@ -2,7 +2,9 @@ package cyr7.ir.fold;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -99,6 +101,67 @@ class SubexpressionTest {
         var expected = make.IRSeq(
                 make.IRExp(make.IRConst(1)), make.IRExp(make.IRConst(1)));
         assertEquals(expected, actual.accept(folder).assertSecond());
+        assertEquals(expected, expected.accept(folder).assertSecond());
+    }
+
+    @Test
+    void testCompUnit() {
+
+        List<IRStmt> stmtsOfMain = List.of(
+                make.IRMove(make.IRTemp("t1"),
+                        make.IRBinOp(OpType.ADD, make.IRConst(0),
+                                make.IRConst(1))),
+                make.IRLabel("here"),
+                make.IRExp(
+                        make.IRCall(make.IRName("helper"),
+                                List.of(make.IRBinOp(OpType.ADD,
+                                        make.IRConst(0), make.IRConst(1))))),
+                make.IRReturn());
+        List<IRStmt> stmtsOfHelper = List.of(
+                make.IRMove(
+                        make.IRMem(make.IRBinOp(OpType.MUL, make.IRConst(2),
+                                make.IRConst(4))),
+                        make.IRBinOp(
+                                OpType.ADD, make.IRConst(0), make.IRConst(1))),
+                make.IRLabel("nope"),
+                make.IRExp(
+                        make.IRCall(make.IRName("helper"),
+                                List.of(make.IRBinOp(OpType.ADD,
+                                        make.IRConst(0), make.IRConst(1))))),
+                make.IRReturn());
+
+        List<IRStmt> stmtsOfMainFolded = List.of(
+                make.IRMove(make.IRTemp("t1"), make.IRConst(1)),
+                make.IRLabel("here"),
+                make.IRExp(make.IRCall(make.IRName("helper"),
+                        List.of(make.IRConst(1)))),
+                make.IRReturn());
+
+        List<IRStmt> stmtsOfHelperFolded = List.of(
+                make.IRMove(
+                        make.IRMem(make.IRConst(8)), make.IRConst(1)),
+                make.IRLabel("nope"),
+                make.IRExp(
+                        make.IRCall(make.IRName("helper"),
+                                List.of(make.IRConst(1)))),
+                make.IRReturn());
+
+        Map<String, IRFuncDecl> funcs = new HashMap<>();
+        funcs.put("main", make.IRFuncDecl("main", make.IRSeq(stmtsOfMain)));
+        funcs.put("helper",
+                make.IRFuncDecl("helper", make.IRSeq(stmtsOfHelper)));
+
+        Map<String, IRFuncDecl> funcsFolded = new HashMap<>();
+        funcsFolded.put("main",
+                make.IRFuncDecl("main", make.IRSeq(stmtsOfMainFolded)));
+        funcsFolded.put("helper",
+                make.IRFuncDecl("helper", make.IRSeq(stmtsOfHelperFolded)));
+
+        var actual = make.IRCompUnit("hello", funcs).accept(folder)
+                .assertSecond();
+        var expected = make.IRCompUnit("hello", funcsFolded);
+
+        assertEquals(expected, actual);
         assertEquals(expected, expected.accept(folder).assertSecond());
     }
 }
