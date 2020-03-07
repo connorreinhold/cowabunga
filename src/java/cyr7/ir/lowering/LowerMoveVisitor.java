@@ -29,26 +29,23 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
-class MoveHandleVisitor implements MyIRVisitor<List<IRStmt>> {
+class LowerMoveVisitor implements MyIRVisitor<List<IRStmt>> {
 
     private Optional<List<IRStmt>> s2;
     private Optional<IRExpr> e2;
     private LoweringVisitor lower;
-    private BiFunction<IRExpr, IRExpr, Boolean> commutes;
     private IdGenerator generator;
 
-    public MoveHandleVisitor(LoweringVisitor visitor,
-            BiFunction<IRExpr, IRExpr, Boolean> commutes,
-            IdGenerator generator) {
+    public LowerMoveVisitor(LoweringVisitor visitor,
+                            IdGenerator generator) {
         this.lower = visitor;
-        this.commutes = commutes;
         this.generator = generator;
     };
 
     @Override
     public List<IRStmt> visit(IRMove n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        if (commutes.apply(n.target(), n.source())) {
+        if (lower.commutes(n.target(), n.source())) {
             var targetResult = n.target().accept(lower).assertSecond();
             var sourceResult = n.source().accept(lower).assertSecond();
 

@@ -41,7 +41,7 @@ public class IRNodeFactory_c implements IRNodeFactory {
     }
 
     @Override
-    public cyr7.ir.nodes.IRCJump IRCJump(IRExpr expr, String trueLabel,
+    public IRCJump IRCJump(IRExpr expr, String trueLabel,
             Optional<String> falseLabel) {
         return new IRCJump(location, expr, trueLabel, falseLabel);
     }
