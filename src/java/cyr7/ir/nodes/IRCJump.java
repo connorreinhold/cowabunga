@@ -1,7 +1,6 @@
 package cyr7.ir.nodes;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
@@ -17,20 +16,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class IRCJump extends IRStmt {
     private IRExpr cond;
     private String trueLabel;
-    private Optional<String> falseLabel;
-
-    /**
-     * Construct a CJUMP instruction with fall-through on false.
-     * @param cond the condition for the jump
-     * @param trueLabel the destination of the jump if {@code expr} evaluates
-     *          to true
-     */
-    public IRCJump(Location location, IRExpr cond, String trueLabel) {
-        super(location);
-        this.cond = cond;
-        this.trueLabel = trueLabel;
-        this.falseLabel = Optional.empty();
-    }
+    private String falseLabel;
 
     /**
      *
@@ -41,13 +27,6 @@ public class IRCJump extends IRStmt {
      *          to false
      */
     public IRCJump(Location location, IRExpr cond, String trueLabel, String falseLabel) {
-        super(location);
-        this.cond = cond;
-        this.trueLabel = trueLabel;
-        this.falseLabel = Optional.of(falseLabel);
-    }
-
-    public IRCJump(Location location, IRExpr cond, String trueLabel, Optional<String> falseLabel) {
         super(location);
         this.cond = cond;
         this.trueLabel = trueLabel;
@@ -62,13 +41,10 @@ public class IRCJump extends IRStmt {
         return trueLabel;
     }
 
-    public Optional<String> falseLabel() {
+    public String falseLabel() {
         return falseLabel;
     }
 
-    public boolean hasFalseLabel() {
-        return falseLabel.isPresent();
-    }
 
     @Override
     public String label() {
@@ -83,6 +59,10 @@ public class IRCJump extends IRStmt {
             return v.nodeFactory().IRCJump(expr, trueLabel, falseLabel);
 
         return this;
+    }
+
+    public boolean hasFalseLabel() {
+        return falseLabel != null;
     }
 
     @Override
@@ -103,7 +83,8 @@ public class IRCJump extends IRStmt {
         p.printAtom("CJUMP");
         cond.printSExp(p);
         p.printAtom(trueLabel);
-        falseLabel.ifPresent(p::printAtom);
+        if (hasFalseLabel())
+            p.printAtom(falseLabel);
         p.endList();
     }
 
