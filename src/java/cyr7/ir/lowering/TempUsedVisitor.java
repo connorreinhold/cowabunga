@@ -24,7 +24,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
-class UsedExprVisitor implements MyIRVisitor<Set<IRExpr>> {
+class TempUsedVisitor implements MyIRVisitor<Set<IRExpr>> {
 
     @Override
     public Set<IRExpr> visit(IRBinOp n) {

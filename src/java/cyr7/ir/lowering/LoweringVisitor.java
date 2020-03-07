@@ -110,7 +110,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     }
 
     public Set<IRExpr> setOfUsedExpr(List<IRStmt> stmts) {
-        var visitor = new UsedExprVisitor();
+        var visitor = new TempUsedVisitor();
         return stmts.stream().flatMap(s -> {
             return s.accept(visitor).stream();
         }).collect(Collectors.toSet());
