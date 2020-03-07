@@ -2,7 +2,6 @@ package cyr7.ir.nodes;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
 
@@ -26,9 +25,10 @@ public interface IRNodeFactory {
 
     /**
      * Construct a CJUMP instruction with fall-through on false.
-     * @param expr the condition for the jump
-     * @param trueLabel the destination of the jump if {@code expr} evaluates
-     *          to true
+     * 
+     * @param expr      the condition for the jump
+     * @param trueLabel the destination of the jump if {@code expr} evaluates to
+     *                  true
      */
     IRCJump IRCJump(IRExpr expr, String trueLabel);
 
@@ -41,8 +41,6 @@ public interface IRNodeFactory {
      *          to false
      */
     IRCJump IRCJump(IRExpr expr, String trueLabel, String falseLabel);
-
-    IRCJump IRCJump(IRExpr expr, String trueLabel, Optional<String> falseLabel);
 
     IRCompUnit IRCompUnit(String name);
 

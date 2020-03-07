@@ -2,7 +2,6 @@ package cyr7.ir.nodes;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -32,17 +31,11 @@ public class IRNodeFactory_c implements IRNodeFactory {
 
     @Override
     public IRCJump IRCJump(IRExpr expr, String trueLabel) {
-        return new IRCJump(location, expr, trueLabel);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public IRCJump IRCJump(IRExpr expr, String trueLabel, String falseLabel) {
-        return new IRCJump(location, expr, trueLabel, falseLabel);
-    }
-
-    @Override
-    public IRCJump IRCJump(IRExpr expr, String trueLabel,
-            Optional<String> falseLabel) {
         return new IRCJump(location, expr, trueLabel, falseLabel);
     }
 

@@ -512,7 +512,7 @@ public class IRSimulator {
             long top = exprStack.popValue();
             String label;
             if (top == 0)
-                label = irCJump.falseLabel().get();
+                label = irCJump.falseLabel();
             else if (top == 1)
                 label = irCJump.trueLabel();
             else throw new InternalCompilerError("Invalid value in CJUMP - expected 0/1, got "
