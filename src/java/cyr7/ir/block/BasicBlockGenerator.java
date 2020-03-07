@@ -19,27 +19,27 @@ public class BasicBlockGenerator {
     }
 
     public BasicBlockSet getBlocks() {
-        BasicBlockSet blocks = new BasicBlockSet();
-        List<IRStmt> seq = new LinkedList<>();
+        List<BasicBlock> blocks = new LinkedList<>();
+        List<IRStmt> block = new LinkedList<>();
 
         stmts.stream().forEach(s -> {
             if (s.accept(hasJumps)) {
-                seq.add(s);
-                blocks.add(new BasicBlock(seq));
-                seq.clear();
+                block.add(s);
+                blocks.add(new BasicBlock(block));
+                block.clear();
             } else if (s instanceof IRLabel) {
-                if (!seq.isEmpty())
-                    blocks.add(new BasicBlock(seq));
-                seq.clear();
-                seq.add(s);
+                if (!block.isEmpty())
+                    blocks.add(new BasicBlock(block));
+                block.clear();
+                block.add(s);
             } else {
-                seq.add(s);
+                block.add(s);
             }
         });
-        if (!seq.isEmpty()) {
-            blocks.add(new BasicBlock(seq));
+        if (!block.isEmpty()) {
+            blocks.add(new BasicBlock(block));
         }
-        return blocks;
+        return new BasicBlockSet(blocks);
     }
 
 }

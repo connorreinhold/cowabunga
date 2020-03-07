@@ -1,49 +1,45 @@
 package cyr7.ir.block;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 
 public class BasicBlock {
 
-    private final List<IRStmt> stmts;
-    private final Optional<String> startLabel;
-    private boolean marked;
+    public final List<IRStmt> stmts;
+
+    public final Optional<IRLabel> first;
+    public final IRStmt last;
 
     public BasicBlock(List<IRStmt> stmts) {
-        this.stmts = Collections.unmodifiableList(new ArrayList<>(stmts));
+        this.stmts = new ArrayList<>(stmts);
+
         IRStmt first = this.stmts.get(0);
         if (first instanceof IRLabel) {
-            this.startLabel = Optional.of(((IRLabel) first).name());
+            this.first = Optional.of((IRLabel) first);
         } else {
-            this.startLabel = Optional.empty();
+            this.first = Optional.empty();
         }
-        this.marked = false;
+
+        this.last = this.stmts.get(this.stmts.size() - 1);
     }
 
     public boolean hasStartLabel() {
-        return this.startLabel.isPresent();
+        return this.first.isPresent();
     }
 
-    public List<IRStmt> stmts() {
-        return this.stmts;
-    }
-
-    public void mark() {
-        this.marked = true;
-    }
-
-    public void unmark() {
-        this.marked = false;
-    }
-
-    public boolean isMarked() {
-        return this.marked;
+    /**
+     * Returns a list of labels that can be reached from the end of this block,
+     * such as via a jump statement or conditional jump.
+     *
+     */
+    public List<String> getJumpLabels() {
+        return this.last.accept(LabelsInJumpStmtsVisitor.instance);
     }
 
     @Override

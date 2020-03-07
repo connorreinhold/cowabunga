@@ -190,7 +190,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
             i++;
         }
 
-        stmts.add(make.IRCallStmt(make.IRName(n.label())));
+        stmts.add(make.IRCallStmt(n.target()));
 
         IRTemp t = make.IRTemp(generator.newTemp());
         stmts.add(make.IRMove(t, make.IRTemp(generator.retTemp(0))));
@@ -289,7 +289,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
         List<IRStmt> stmts = new LinkedList<>();
 
-        stmts.add(make.IRLabel(n.label()));
+        stmts.add(make.IRLabel(n.name()));
         var body = n.body().accept(this).assertFirst();
         stmts.addAll(body);
         return Result.stmts(stmts);

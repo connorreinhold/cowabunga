@@ -1,4 +1,6 @@
-package cyr7.ir.lowering;
+package cyr7.ir.block.util;
+
+import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -19,102 +21,90 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
-public class ContainsJumpsStmtVisitor implements MyIRVisitor<Boolean> {
+public class LabelOfFirstStmt implements MyIRVisitor<Optional<String>> {
 
-    public static ContainsJumpsStmtVisitor instance =
-            new ContainsJumpsStmtVisitor();
-
-    /**
-     * Call is not an statement in LIR. Use CallStmt instead.
-     */
     @Override
-    public Boolean visit(IRCall n) {
+    public Optional<String> visit(IRBinOp n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRBinOp n) {
+    public Optional<String> visit(IRCall n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRConst n) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * This is not a statement in LIR
-     */
-    @Override
-    public Boolean visit(IRESeq n) {
+    public Optional<String> visit(IRConst n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRMem n) {
-        return false;
-    }
-
-    @Override
-    public Boolean visit(IRName n) {
-        return false;
-    }
-
-    @Override
-    public Boolean visit(IRTemp n) {
+    public Optional<String> visit(IRESeq n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRCallStmt n) {
-        return true;
-    }
-
-    @Override
-    public Boolean visit(IRCJump n) {
-        return true;
-    }
-
-    @Override
-    public Boolean visit(IRCompUnit n) {
+    public Optional<String> visit(IRMem n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRExp n) {
+    public Optional<String> visit(IRName n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRFuncDecl n) {
+    public Optional<String> visit(IRTemp n) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRJump n) {
-        return true;
+    public Optional<String> visit(IRCallStmt n) {
+        return Optional.empty();
     }
 
     @Override
-    public Boolean visit(IRLabel n) {
-        return false;
+    public Optional<String> visit(IRCJump n) {
+        return Optional.empty();
     }
 
     @Override
-    public Boolean visit(IRMove n) {
-        return false;
+    public Optional<String> visit(IRCompUnit n) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
-    public Boolean visit(IRReturn n) {
-        return true;
+    public Optional<String> visit(IRExp n) {
+        throw new UnsupportedOperationException();
     }
 
-    /**
-     * No Seq in LIR
-     */
     @Override
-    public Boolean visit(IRSeq n) {
+    public Optional<String> visit(IRFuncDecl n) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Optional<String> visit(IRJump n) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> visit(IRLabel n) {
+        return Optional.of(n.name());
+    }
+
+    @Override
+    public Optional<String> visit(IRMove n) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> visit(IRReturn n) {
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<String> visit(IRSeq n) {
         throw new UnsupportedOperationException();
     }
 
