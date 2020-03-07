@@ -12,22 +12,22 @@ import cyr7.ir.nodes.IRStmt;
 public class BasicBlock {
 
     private final List<IRStmt> stmts;
-    private final Optional<IRLabel> label;
+    private final Optional<String> startLabel;
     private boolean marked;
 
     public BasicBlock(List<IRStmt> stmts) {
         this.stmts = Collections.unmodifiableList(new ArrayList<>(stmts));
         IRStmt first = this.stmts.get(0);
         if (first instanceof IRLabel) {
-            this.label = Optional.of((IRLabel) first);
+            this.startLabel = Optional.of(((IRLabel) first).name());
         } else {
-            this.label = Optional.empty();
+            this.startLabel = Optional.empty();
         }
         this.marked = false;
     }
 
-    public boolean hasLabel() {
-        return this.label.isPresent();
+    public boolean hasStartLabel() {
+        return this.startLabel.isPresent();
     }
 
     public List<IRStmt> stmts() {
