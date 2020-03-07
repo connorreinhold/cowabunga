@@ -31,7 +31,7 @@ public class IRNodeFactory_c implements IRNodeFactory {
 
     @Override
     public IRCJump IRCJump(IRExpr expr, String trueLabel) {
-        return new IRCJump(location, expr, trueLabel);
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -88,6 +88,11 @@ public class IRNodeFactory_c implements IRNodeFactory {
     @Override
     public IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args) {
         return new IRCallStmt(location, collectors, target, args);
+    }
+
+    @Override
+    public IRCallStmt IRCallStmt(IRExpr target) {
+        return new IRCallStmt(location, List.of(), target, List.of());
     }
 
     @Override

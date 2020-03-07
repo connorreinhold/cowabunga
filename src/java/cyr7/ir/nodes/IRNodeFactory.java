@@ -25,9 +25,10 @@ public interface IRNodeFactory {
 
     /**
      * Construct a CJUMP instruction with fall-through on false.
-     * @param expr the condition for the jump
-     * @param trueLabel the destination of the jump if {@code expr} evaluates
-     *          to true
+     * 
+     * @param expr      the condition for the jump
+     * @param trueLabel the destination of the jump if {@code expr} evaluates to
+     *                  true
      */
     IRCJump IRCJump(IRExpr expr, String trueLabel);
 
@@ -91,6 +92,8 @@ public interface IRNodeFactory {
      */
     IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args);
 
+    IRCallStmt IRCallStmt(IRExpr target);
+
     /**
      *
      * @param target the destination of this move
@@ -123,4 +126,5 @@ public interface IRNodeFactory {
      * @param name name of this temporary register
      */
     IRTemp IRTemp(String name);
+
 }

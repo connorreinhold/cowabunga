@@ -2,10 +2,10 @@ package cyr7.ir.nodes;
 
 import java.util.Objects;
 
-import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -15,17 +15,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  */
 public class IRCJump extends IRStmt {
     private IRExpr cond;
-    private String trueLabel, falseLabel;
-
-    /**
-     * Construct a CJUMP instruction with fall-through on false.
-     * @param cond the condition for the jump
-     * @param trueLabel the destination of the jump if {@code expr} evaluates
-     *          to true
-     */
-    public IRCJump(Location location, IRExpr cond, String trueLabel) {
-        this(location, cond, trueLabel, null);
-    }
+    private String trueLabel;
+    private String falseLabel;
 
     /**
      *
@@ -54,9 +45,6 @@ public class IRCJump extends IRStmt {
         return falseLabel;
     }
 
-    public boolean hasFalseLabel() {
-        return falseLabel != null;
-    }
 
     @Override
     public String label() {
@@ -71,6 +59,10 @@ public class IRCJump extends IRStmt {
             return v.nodeFactory().IRCJump(expr, trueLabel, falseLabel);
 
         return this;
+    }
+
+    public boolean hasFalseLabel() {
+        return falseLabel != null;
     }
 
     @Override
@@ -91,7 +83,8 @@ public class IRCJump extends IRStmt {
         p.printAtom("CJUMP");
         cond.printSExp(p);
         p.printAtom(trueLabel);
-        if (hasFalseLabel()) p.printAtom(falseLabel);
+        if (hasFalseLabel())
+            p.printAtom(falseLabel);
         p.endList();
     }
 

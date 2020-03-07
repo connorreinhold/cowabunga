@@ -2,8 +2,8 @@ package cyr7.ir.nodes;
 
 import java.util.Objects;
 
-import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 

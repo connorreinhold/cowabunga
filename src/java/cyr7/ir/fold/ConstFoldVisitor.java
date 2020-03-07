@@ -30,6 +30,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
+import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
 
 /**
@@ -63,10 +64,8 @@ public class ConstFoldVisitor
         if (!n.left().isConstant() || !n.right().isConstant()) {
             return n;
         }
-        final long l = n.left()
-                        .constant();
-        final long r = n.right()
-                        .constant();
+        final long l = n.left().constant();
+        final long r = n.right().constant();
         long value;
 
         // Copied from staff-given interpreter code.
@@ -81,10 +80,8 @@ public class ConstFoldVisitor
             value = l * r;
             break;
         case HMUL:
-            value = BigInteger.valueOf(l)
-                               .multiply(BigInteger.valueOf(r))
-                               .shiftRight(64)
-                               .longValue();
+            value = BigInteger.valueOf(l).multiply(BigInteger.valueOf(r))
+                    .shiftRight(64).longValue();
             break;
         case DIV:
             if (r == 0)
@@ -135,6 +132,7 @@ public class ConstFoldVisitor
         default:
             throw new InternalCompilerError("Invalid binary operation");
         }
+
         return make.IRConst(value);
     }
 
@@ -159,7 +157,7 @@ public class ConstFoldVisitor
                             .accept(this)
                             .assertFirst();
         n = make.IRBinOp(n.opType(), leftFold, rightFold);
-        if (n.opType() == OpType.DIV || n.opType() == OpType.MOD
+        if ((n.opType() == OpType.DIV || n.opType() == OpType.MOD)
                 && rightFold.constant() == 0) {
             return OneOfThree.ofFirst(n);
         }
@@ -344,7 +342,7 @@ public class ConstFoldVisitor
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRSeq n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
         List<IRStmt> foldedStmts = n.stmts().stream()
-                .map(s -> n.accept(this).assertSecond())
+                .map(s -> s.accept(this).assertSecond())
                 .collect(Collectors.toList());
         return OneOfThree.ofSecond(make.IRSeq(foldedStmts));
     }
