@@ -1,9 +1,8 @@
 package cyr7.ir.block;
 
-import java.util.HashSet;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
 import cyr7.ir.lowering.JumpableIRVisitor;
 import cyr7.ir.nodes.IRLabel;
@@ -15,27 +14,31 @@ public class BasicBlockGenerator {
     private final JumpableIRVisitor hasJumps;
 
     public BasicBlockGenerator(List<IRStmt> stmts) {
-        this.stmts = stmts;
+        this.stmts = Collections.unmodifiableList(stmts);
         this.hasJumps = new JumpableIRVisitor();
     }
 
-    public Set<BasicBlock> getBlocks() {
-        Set<BasicBlock> blocks = new HashSet<>();
+    public BasicBlockSet getBlocks() {
+        BasicBlockSet blocks = new BasicBlockSet();
         List<IRStmt> seq = new LinkedList<>();
 
         stmts.stream().forEach(s -> {
             if (s.accept(hasJumps)) {
                 seq.add(s);
                 blocks.add(new BasicBlock(seq));
-                stmts.clear();
+                seq.clear();
             } else if (s instanceof IRLabel) {
-                blocks.add(new BasicBlock(seq));
-                stmts.clear();
-                stmts.add(s);
+                if (!seq.isEmpty())
+                    blocks.add(new BasicBlock(seq));
+                seq.clear();
+                seq.add(s);
             } else {
-                stmts.add(s);
+                seq.add(s);
             }
         });
+        if (!seq.isEmpty()) {
+            blocks.add(new BasicBlock(seq));
+        }
         return blocks;
     }
 
