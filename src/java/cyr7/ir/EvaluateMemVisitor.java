@@ -1,6 +1,5 @@
 package cyr7.ir;
 
-import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -18,6 +17,7 @@ import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.visitor.MyIRVisitor;
 
 public class EvaluateMemVisitor implements MyIRVisitor<Boolean> {
 

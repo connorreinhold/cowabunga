@@ -1,4 +1,4 @@
-package cyr7.ir.fold;
+package cyr7.visitor;
 
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;

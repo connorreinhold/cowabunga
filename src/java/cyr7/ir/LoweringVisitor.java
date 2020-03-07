@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.ir.LoweringVisitor.Result;
-import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -31,6 +30,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfTwo;
+import cyr7.visitor.MyIRVisitor;
 import polyglot.util.Pair;
 
 public class LoweringVisitor implements MyIRVisitor<Result> {

@@ -30,6 +30,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
+import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
 
 /**
@@ -63,79 +64,74 @@ public class ConstFoldVisitor
         if (!n.left().isConstant() || !n.right().isConstant()) {
             return n;
         }
-        final long l = n.left()
-                        .constant();
-        final long r = n.right()
-                        .constant();
-        long value;
+        final BigInteger l = BigInteger.valueOf(n.left().constant());
+        final BigInteger r = BigInteger.valueOf(n.right().constant());
+        BigInteger value;
 
         // Copied from staff-given interpreter code.
         switch (n.opType()) {
         case ADD:
-            value = l + r;
+            value = l.add(r);
             break;
         case SUB:
-            value = l - r;
+            value = l.min(r);
             break;
         case MUL:
-            value = l * r;
+            value = l.multiply(r);
             break;
         case HMUL:
-            value = BigInteger.valueOf(l)
-                               .multiply(BigInteger.valueOf(r))
-                               .shiftRight(64)
-                               .longValue();
+            value = l.multiply(r).shiftRight(64);
             break;
         case DIV:
-            if (r == 0)
+            if (r.equals(BigInteger.ZERO))
                 throw new Trap("Division by zero!");
-            value = l / r;
+            value = l.divide(r);
             break;
         case MOD:
-            if (r == 0)
+            if (r.equals(BigInteger.ZERO))
                 throw new Trap("Division by zero!");
-            value = l % r;
+            value = l.mod(r);
             break;
         case AND:
-            value = l & r;
+            value = l.and(r);
             break;
         case OR:
-            value = l | r;
+            value = l.or(r);
             break;
         case XOR:
-            value = l ^ r;
+            value = l.xor(r);
             break;
         case LSHIFT:
-            value = l << r;
+            value = BigInteger.valueOf(l.longValue() << r.longValue());
             break;
         case RSHIFT:
-            value = l >>> r;
+            value = BigInteger.valueOf(l.longValue() >>> r.longValue());
             break;
         case ARSHIFT:
-            value = l >> r;
+            value = BigInteger.valueOf(l.longValue() >> r.longValue());
             break;
         case EQ:
-            value = l == r ? 1 : 0;
+            value = l.equals(r) ? BigInteger.ONE : BigInteger.ZERO;
             break;
         case NEQ:
-            value = l != r ? 1 : 0;
+            value = !l.equals(r) ? BigInteger.ONE : BigInteger.ZERO;
             break;
         case LT:
-            value = l < r ? 1 : 0;
+            value = l.compareTo(r) < 0 ? BigInteger.ONE : BigInteger.ZERO;
             break;
         case GT:
-            value = l > r ? 1 : 0;
+            value = l.compareTo(r) > 0 ? BigInteger.ONE : BigInteger.ZERO;
             break;
         case LEQ:
-            value = l <= r ? 1 : 0;
+            value = l.compareTo(r) <= 0 ? BigInteger.ONE : BigInteger.ZERO;
             break;
         case GEQ:
-            value = l >= r ? 1 : 0;
+            value = l.compareTo(r) >= 0 ? BigInteger.ONE : BigInteger.ZERO;
             break;
         default:
             throw new InternalCompilerError("Invalid binary operation");
         }
-        return make.IRConst(value);
+        return make.IRConst(value.longValue());
     }
 
     // Expressions

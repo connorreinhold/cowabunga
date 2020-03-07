@@ -3,10 +3,10 @@ package cyr7.ir.nodes;
 import java.util.Objects;
 import java.util.Optional;
 
-import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.IRVisitor;
+import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 

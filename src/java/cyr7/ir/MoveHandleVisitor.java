@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
-import cyr7.ir.fold.MyIRVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -27,6 +26,7 @@ import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.visitor.MyIRVisitor;
 
 class MoveHandleVisitor implements MyIRVisitor<List<IRStmt>> {
 
