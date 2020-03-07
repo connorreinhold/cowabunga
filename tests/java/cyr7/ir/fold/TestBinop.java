@@ -46,17 +46,41 @@ class TestBinop {
 
     @Test
     void testAdd() {
-        var t1 = pairOf(constant(2), binop(OpType.ADD, 1, 1));
+        OpType type = OpType.ADD;
+        var t1 = pairOf(constant(2), binop(type, 1, 1));
         var t2 = pairOf(constant(-1),
-                binop(OpType.ADD, -9223372036854775808L, 9223372036854775807L));
-        var t3 = pairOf(constant(0), binop(OpType.ADD, 0, 0));
+                binop(type, -9223372036854775808L, 9223372036854775807L));
+        var t3 = pairOf(constant(0), binop(type, 0, 0));
         var t4 = pairOf(constant(9223372036854775806L),
-                binop(OpType.ADD, 9223372036854775807L, 9223372036854775807L));
+                binop(type, 9223372036854775807L, 9223372036854775807L));
+        var t5 = pairOf(constant(0L), binop(type,
+                -9223372036854775808L, -9223372036854775808L));
 
         test(t1);
         test(t2);
         test(t3);
         test(t4);
+        test(t5);
+    }
+
+    @Test
+    void testSub() {
+        OpType type = OpType.SUB;
+        var t1 = pairOf(constant(0), binop(type, 0, 0));
+        var t2 = pairOf(constant(0), binop(type, 1, 1));
+        var t3 = pairOf(constant(-9223372036854775807L),
+                binop(type, -9223372036854775808L, 9223372036854775807L));
+        var t4 = pairOf(constant(0),
+                binop(type, 9223372036854775807L, 9223372036854775807L));
+        var t5 = pairOf(constant(0),
+                binop(type, -9223372036854775808L,
+                -9223372036854775808L));
+
+        test(t1);
+        test(t2);
+        test(t3);
+        test(t4);
+        test(t5);
     }
 
 }

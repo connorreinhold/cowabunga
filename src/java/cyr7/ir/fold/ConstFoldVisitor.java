@@ -74,7 +74,7 @@ public class ConstFoldVisitor
             value = l.add(r);
             break;
         case SUB:
-            value = l.min(r);
+            value = l.subtract(r);
             break;
         case MUL:
             value = l.multiply(r);
