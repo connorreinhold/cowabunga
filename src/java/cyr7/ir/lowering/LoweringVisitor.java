@@ -36,7 +36,8 @@ import polyglot.util.Pair;
 
 public class LoweringVisitor implements MyIRVisitor<Result> {
 
-    public static class Result extends OneOfTwo<List<IRStmt>, Pair<List<IRStmt>, IRExpr>> {
+    public static class Result
+            extends OneOfTwo<List<IRStmt>, Pair<List<IRStmt>, IRExpr>> {
 
         public static Result stmts(List<IRStmt> statement) {
             return new Result(statement, null);
@@ -61,6 +62,10 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
      * @return
      */
     private boolean commutes(IRExpr e1, IRExpr e2) {
+        var DEBUG = true;
+        if (DEBUG) {
+            return false;
+        }
         var e1Result = e1.accept(this).assertSecond();
         var e2Result = e2.accept(this).assertSecond();
 
@@ -83,10 +88,16 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         return Collections.disjoint(e1UsedExprSet, e2DestSet);
     }
 
+    /**
+     * Returns true if there is a Jump
+     *
+     * @param stmts
+     * @return
+     */
     private boolean containsJumps(List<IRStmt> stmts) {
+        JumpableIRVisitor hasJumps = new JumpableIRVisitor();
         return stmts.stream().reduce(false, (u, s) -> {
-            return (s instanceof IRCJump) || (s instanceof IRJump)
-                    || (s instanceof IRCallStmt);
+            return u || s.accept(hasJumps);
         }, (u, i) -> u && i);
     }
 
@@ -188,7 +199,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRESeq n) {
         List<IRStmt> stmts = new ArrayList<>();
-        stmts.addAll(n.accept(this).assertFirst());
+        stmts.addAll(n.stmt().accept(this).assertFirst());
         var result = n.expr().accept(this).assertSecond();
         stmts.addAll(result.part1());
         return Result.expr(stmts, result.part2());
@@ -227,7 +238,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
             stmts.add(make.IRMove(argTemp, resultPair.part2()));
             i++;
         }
-        stmts.add(make.IRCallStmt(make.IRName(n.label())));
+        stmts.add(make.IRCallStmt(n.target()));
 
         int j = 0;
         var collectors = n.collectors().iterator();
@@ -294,19 +305,22 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     }
 
     @Override
-    public Result visit(IRMove n) {
-        var handler = new MoveHandleVisitor(this, this::commutes, generator);
-        return Result.stmts(n.accept(handler));
-    }
-
-    @Override
     public Result visit(IRReturn n) {
         return Result.stmts(List.of(n));
     }
 
     @Override
+    public Result visit(IRMove n) {
+        var handler = new MoveHandleVisitor(this, this::commutes, generator);
+        return Result.stmts(n.accept(handler));
+    }
+
+
+    @Override
     public Result visit(IRSeq n) {
-        return Result.stmts(n.stmts());
+        return Result.stmts(n.stmts().stream().flatMap(s -> {
+            return s.accept(this).assertFirst().stream();
+        }).collect(Collectors.toList()));
     }
 
 }
