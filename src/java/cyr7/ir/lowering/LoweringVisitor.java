@@ -53,19 +53,29 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     }
 
+    private final boolean commuteOptimizationEnabled;
+    private final IdGenerator generator;
+
+    public LoweringVisitor(IdGenerator generator) {
+        this(generator, true);
+    }
+
+    public LoweringVisitor(IdGenerator generator, boolean commuteOptimizationEnabled) {
+        this.generator = generator;
+        this.commuteOptimizationEnabled = commuteOptimizationEnabled;
+    }
+
+    // Methods
+
     /**
      * Checks if there exists an instruction in {@code e2} that affects
      * {@code e1}. Returns {@code true} if {@code e2} does not {@code e1}.
-     *
-     * @param target
-     * @param source
-     * @return
      */
-    private boolean commutes(IRExpr e1, IRExpr e2) {
-        var DEBUG = true;
-        if (DEBUG) {
+    public boolean commutes(IRExpr e1, IRExpr e2) {
+        if (!commuteOptimizationEnabled) {
             return false;
         }
+
         var e1Result = e1.accept(this).assertSecond();
         var e2Result = e2.accept(this).assertSecond();
 
@@ -78,7 +88,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         // a constant.
         List<IRStmt> e1Stmt = e1Result.part1();
         if (!(this.canDetermineEquality(e2Stmt)
-                && this.canDetermineEquality(e1Stmt))) {
+            && this.canDetermineEquality(e1Stmt))) {
             return false;
         }
 
@@ -95,39 +105,36 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
      * @return
      */
     private boolean containsJumps(List<IRStmt> stmts) {
-        JumpableIRVisitor hasJumps = new JumpableIRVisitor();
-        return stmts.stream().reduce(false, (u, s) -> {
-            return u || s.accept(hasJumps);
-        }, (u, i) -> u && i);
+        ContainsJumpsStmtVisitor hasJumps = new ContainsJumpsStmtVisitor();
+        for (var stmt : stmts) {
+            if (stmt.accept(hasJumps)) {
+                return true;
+            }
+        }
+        return false;
     }
 
-    public Set<IRExpr> setOfDestinations(List<IRStmt> stmts) {
-        return stmts.stream().filter(s -> {
-            return (s instanceof IRMove);
-        }).map(move -> {
-            return ((IRMove) move).target();
-        }).collect(Collectors.toSet());
+    private Set<IRExpr> setOfDestinations(List<IRStmt> stmts) {
+        return stmts.stream()
+            .filter(s -> (s instanceof IRMove))
+            .map(move -> ((IRMove) move).target())
+            .collect(Collectors.toSet());
     }
 
-    public Set<IRExpr> setOfUsedExpr(List<IRStmt> stmts) {
-        var visitor = new UsedExprVisitor();
-        return stmts.stream().flatMap(s -> {
-            return s.accept(visitor).stream();
-        }).collect(Collectors.toSet());
+    private Set<IRExpr> setOfUsedExpr(List<IRStmt> stmts) {
+        var visitor = new TempsAccessedExprVisitor();
+        return stmts.stream()
+            .flatMap(s -> s.accept(visitor).stream())
+            .collect(Collectors.toSet());
     }
 
-    public boolean canDetermineEquality(List<IRStmt> stmts) {
-        var visitor = new EvaluateMemVisitor();
+    private boolean canDetermineEquality(List<IRStmt> stmts) {
+        var visitor = new EvaluatesMemExprVisitor();
         return stmts.stream().reduce(true, (u, s) -> {
             return u && s.accept(visitor).booleanValue();
-        }, (u, i) -> true);
-    }
+        }, (u, i) -> true);    }
 
-    private final IdGenerator generator;
-
-    public LoweringVisitor(IdGenerator generator) {
-        this.generator = generator;
-    }
+    // Visitor
 
     @Override
     public Result visit(IRBinOp n) {
@@ -311,10 +318,9 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRMove n) {
-        var handler = new MoveHandleVisitor(this, this::commutes, generator);
+        var handler = new LowerMoveVisitor(this, generator);
         return Result.stmts(n.accept(handler));
     }
-
 
     @Override
     public Result visit(IRSeq n) {

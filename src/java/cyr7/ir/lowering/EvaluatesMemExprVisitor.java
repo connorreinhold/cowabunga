@@ -19,7 +19,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
-public class EvaluateMemVisitor implements MyIRVisitor<Boolean> {
+public class EvaluatesMemExprVisitor implements MyIRVisitor<Boolean> {
 
     @Override
     public Boolean visit(IRBinOp n) {
