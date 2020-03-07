@@ -94,6 +94,8 @@ public interface IRNodeFactory {
      */
     IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args);
 
+    IRCallStmt IRCallStmt(IRExpr target);
+
     /**
      *
      * @param target the destination of this move

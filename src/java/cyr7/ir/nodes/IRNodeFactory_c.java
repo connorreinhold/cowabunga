@@ -98,6 +98,11 @@ public class IRNodeFactory_c implements IRNodeFactory {
     }
 
     @Override
+    public IRCallStmt IRCallStmt(IRExpr target) {
+        return new IRCallStmt(location, List.of(), target, List.of());
+    }
+
+    @Override
     public IRMove IRMove(IRExpr target, IRExpr expr) {
         return new IRMove(location, target, expr);
     }

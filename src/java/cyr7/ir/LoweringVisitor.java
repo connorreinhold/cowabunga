@@ -150,47 +150,33 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         }
     }
 
+    /**
+     * The output will be a Pair(List of IRStmt, IRExpr)
+     */
     @Override
     public Result visit(IRCall n) {
-//        IRNodeFactory make = new IRNodeFactory_c(n.location());
-//
-//        List<IRStmt> stmts = new LinkedList<>();
-//        var iterator = n.args().iterator();
-//
-//        int i = 0;
-//        while (iterator.hasNext()) {
-//            var nextArg = iterator.next();
-//            Result argResult = nextArg.accept(this);
-//            var resultPair = argResult.assertSecond();
-//            stmts.addAll(resultPair.part1());
-//            var argTemp = make.IRTemp(generator.argTemp(i));
-//            stmts.add(make.IRMove(argTemp, resultPair.part2()));
-//            i++;
-//        }
-//
-//        stmts.add(
-//                make.IRCallStmt(List.of(), make.IRName(n.label()), List.of()));
+        IRNodeFactory make = new IRNodeFactory_c(n.location());
 
-//        String t = generator.newTemp();
-//
-//        List<IRStmt> statements = new ArrayList<>();
-//        for (int i = 0; i < n.args().size(); i++) {
-//            IRExpr arg = n.args().get(i);
-//
-//            String argTemp = generator.argTemp(i);
-//
-//            var result = arg.accept(this).assertSecond();
-//            statements.addAll(result.part1());
-//            statements.add(
-//                make.IRMove(
-//                    make.IRTemp(argTemp),
-//                    result.part2()
-//                )
-//            );
-//        }
+        List<IRStmt> stmts = new LinkedList<>();
+        var iterator = n.args().iterator();
 
-//        return Result.expr(statements, make.IRTemp(t));
-        throw new UnsupportedOperationException();
+        int i = 0;
+        while (iterator.hasNext()) {
+            var nextArg = iterator.next();
+            Result argResult = nextArg.accept(this);
+            var resultPair = argResult.assertSecond();
+            stmts.addAll(resultPair.part1());
+            var argTemp = make.IRTemp(generator.argTemp(i));
+            stmts.add(make.IRMove(argTemp, resultPair.part2()));
+            i++;
+        }
+
+        stmts.add(make.IRCallStmt(make.IRName(n.label())));
+
+        IRTemp t = make.IRTemp(generator.newTemp());
+        stmts.add(make.IRMove(t, make.IRTemp(generator.retTemp(0))));
+
+        return Result.expr(stmts, t);
     }
 
     @Override
@@ -226,7 +212,33 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCallStmt n) {
-        return null;
+        IRNodeFactory make = new IRNodeFactory_c(n.location());
+        List<IRStmt> stmts = new LinkedList<>();
+
+        var iterator = n.args().iterator();
+        int i = 0;
+        while (iterator.hasNext()) {
+            var nextArg = iterator.next();
+            Result argResult = nextArg.accept(this);
+            var resultPair = argResult.assertSecond();
+            stmts.addAll(resultPair.part1());
+            var argTemp = make.IRTemp(generator.argTemp(i));
+            stmts.add(make.IRMove(argTemp, resultPair.part2()));
+            i++;
+        }
+        stmts.add(make.IRCallStmt(make.IRName(n.label())));
+
+        int j = 0;
+        var collectors = n.collectors().iterator();
+        while (collectors.hasNext()) {
+            String nextResult = collectors.next();
+            if (!nextResult.equals("_")) {
+                stmts.add(make.IRMove(make.IRTemp(generator.newTemp()),
+                        make.IRTemp(generator.retTemp(j))));
+            }
+            j++;
+        }
+        return Result.stmts(stmts);
     }
 
     @Override
