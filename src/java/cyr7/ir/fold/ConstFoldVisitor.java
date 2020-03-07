@@ -343,7 +343,7 @@ public class ConstFoldVisitor
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRSeq n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
         List<IRStmt> foldedStmts = n.stmts().stream()
-                .map(s -> n.accept(this).assertSecond())
+                .map(s -> s.accept(this).assertSecond())
                 .collect(Collectors.toList());
         return OneOfThree.ofSecond(make.IRSeq(foldedStmts));
     }
