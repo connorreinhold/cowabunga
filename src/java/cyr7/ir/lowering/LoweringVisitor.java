@@ -53,7 +53,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     }
 
-    private final boolean commuteOptimizationEnabled;
+    private final IRExprCommutableChecker commutability;
     private final IdGenerator generator;
 
     public LoweringVisitor(IdGenerator generator) {
@@ -62,7 +62,8 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     public LoweringVisitor(IdGenerator generator, boolean commuteOptimizationEnabled) {
         this.generator = generator;
-        this.commuteOptimizationEnabled = commuteOptimizationEnabled;
+        this.commutability = new IRExprCommutableChecker(this,
+                commuteOptimizationEnabled);
     }
 
     // Methods
@@ -72,7 +73,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
      * {@code e1}. Returns {@code true} if {@code e2} does not {@code e1}.
      */
     public boolean commutes(IRExpr e1, IRExpr e2) {
-        if (!commuteOptimizationEnabled) {
+        if (!commutability.commutes(e1, e2)) {
             return false;
         }
 
