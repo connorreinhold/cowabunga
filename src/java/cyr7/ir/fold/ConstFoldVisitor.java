@@ -131,7 +131,10 @@ public class ConstFoldVisitor
         default:
             throw new InternalCompilerError("Invalid binary operation");
         }
-        return make.IRConst(value.longValue());
+
+        BigInteger MAX = new BigInteger("9223372036854775808");
+        long modValue = value.remainder(MAX).longValue();
+        return make.IRConst(modValue);
     }
 
     // Expressions
