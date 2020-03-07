@@ -24,7 +24,11 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
+<<<<<<< HEAD:src/java/cyr7/ir/lowering/TempUsedVisitor.java
 class TempUsedVisitor implements MyIRVisitor<Set<IRExpr>> {
+=======
+class TempsAccessedExprVisitor implements MyIRVisitor<Set<IRExpr>> {
+>>>>>>> 1ba4b9a5cdf6848637d32bfb1595c090b61d2c28:src/java/cyr7/ir/lowering/TempsAccessedExprVisitor.java
 
     @Override
     public Set<IRExpr> visit(IRBinOp n) {

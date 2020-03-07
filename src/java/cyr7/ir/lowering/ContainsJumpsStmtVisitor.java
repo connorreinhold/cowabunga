@@ -19,7 +19,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
-public class JumpableIRVisitor implements MyIRVisitor<Boolean> {
+public class ContainsJumpsStmtVisitor implements MyIRVisitor<Boolean> {
 
     /**
      * Call is not an statement in LIR. Use CallStmt instead.
