@@ -90,7 +90,7 @@ public class ConstFoldVisitor
         case MOD:
             if (r.equals(BigInteger.ZERO))
                 throw new Trap("Division by zero!");
-            value = l.mod(r);
+            value = l.remainder(r);
             break;
         case AND:
             value = l.and(r);
@@ -158,7 +158,7 @@ public class ConstFoldVisitor
                             .accept(this)
                             .assertFirst();
         n = make.IRBinOp(n.opType(), leftFold, rightFold);
-        if (n.opType() == OpType.DIV || n.opType() == OpType.MOD
+        if ((n.opType() == OpType.DIV || n.opType() == OpType.MOD)
                 && rightFold.constant() == 0) {
             return OneOfThree.ofFirst(n);
         }
