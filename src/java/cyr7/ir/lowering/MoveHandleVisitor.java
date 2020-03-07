@@ -1,10 +1,11 @@
-package cyr7.ir;
+package cyr7.ir.lowering;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
+import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;

@@ -1,4 +1,4 @@
-package cyr7.ir;
+package cyr7.ir.lowering;
 
 import java.util.Set;
 

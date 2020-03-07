@@ -1,4 +1,4 @@
-package cyr7.ir;
+package cyr7.ir.lowering;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -7,7 +7,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import cyr7.ir.LoweringVisitor.Result;
+import cyr7.ir.IdGenerator;
+import cyr7.ir.lowering.LoweringVisitor.Result;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;

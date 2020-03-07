@@ -1,4 +1,4 @@
-package cyr7.ir;
+package cyr7.ir.lowering;
 
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -37,6 +37,11 @@ public class EvaluateMemVisitor implements MyIRVisitor<Boolean> {
     }
 
     @Override
+    public Boolean visit(IRMem n) {
+        return n.expr().accept(this);
+    }
+
+    @Override
     public Boolean visit(IRCall n) {
         throw new UnsupportedOperationException();
     }
@@ -45,12 +50,6 @@ public class EvaluateMemVisitor implements MyIRVisitor<Boolean> {
     public Boolean visit(IRESeq n) {
         throw new UnsupportedOperationException();
     }
-
-    @Override
-    public Boolean visit(IRMem n) {
-        return n.expr().accept(this);
-    }
-
 
     @Override
     public Boolean visit(IRName n) {
