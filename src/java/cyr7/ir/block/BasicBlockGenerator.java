@@ -4,18 +4,18 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
-import cyr7.ir.lowering.JumpableIRVisitor;
+import cyr7.ir.lowering.ContainsJumpsStmtVisitor;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 
 public class BasicBlockGenerator {
 
     private final List<IRStmt> stmts;
-    private final JumpableIRVisitor hasJumps;
+    private final ContainsJumpsStmtVisitor hasJumps;
 
     public BasicBlockGenerator(List<IRStmt> stmts) {
         this.stmts = Collections.unmodifiableList(stmts);
-        this.hasJumps = new JumpableIRVisitor();
+        this.hasJumps = new ContainsJumpsStmtVisitor();
     }
 
     public BasicBlockSet getBlocks() {
