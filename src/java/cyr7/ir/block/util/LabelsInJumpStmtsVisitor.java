@@ -73,7 +73,7 @@ public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
     @Override
     public List<String> visit(IRCJump n) {
         var setOfLabels = new LinkedList<String>();
-        n.falseLabel().ifPresent(setOfLabels::add);
+        setOfLabels.add(n.falseLabel());
         setOfLabels.add(n.trueLabel());
         return Collections.unmodifiableList(setOfLabels);
     }
@@ -101,7 +101,12 @@ public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
 
     @Override
     public List<String> visit(IRJump n) {
-        return n.target().accept(this);
+        List<String> labels = n.target().accept(this);
+        if (labels.size() > 1) {
+            throw new UnsupportedOperationException(
+                    "Obtained multiple labels" + " for a jump statement.");
+        }
+        return labels;
     }
 
     @Override

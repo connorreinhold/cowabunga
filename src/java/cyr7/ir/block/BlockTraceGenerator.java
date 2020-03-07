@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import cyr7.ir.IdGenerator;
+import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -70,28 +71,12 @@ public class BlockTraceGenerator {
         traces.forEach(trace -> {
             for (int i = 0; i < trace.size(); i++) {
                 BasicBlock b = trace.get(i);
-                IRStmt last = b.last;
+                IRStmt last = b.last();
                 if (i < trace.size() - 1) {
-                    IRNodeFactory make = new IRNodeFactory_c(last.location());
                     BasicBlock nextBlock = trace.get(i + 1);
-                    if (last instanceof IRCJump && nextBlock.hasStartLabel()) {
-                        IRCJump cjump = (IRCJump) last;
-                        if (cjump.hasFalseLabel()) {
-                            String trueLabel = cjump.trueLabel();
-                            String falseLabel = cjump.falseLabel().get();
-                            String startLabel = nextBlock.first.get().name();
-                            if (!startLabel.equals(falseLabel)) {
-                                IRExpr inverted = make.IRBinOp(OpType.XOR,
-                                        make.IRConst(1), cjump.cond());
-                                int size = b.stmts.size();
-                                b.stmts.add(size - 1, make.IRCJump(inverted,
-                                        falseLabel, cjump.trueLabel()));
-                            }
-                        }
-                    } else if (last instanceof IRJump) {
-                        IRJump jump = (IRJump) last;
-                        IRName target = (IRName) jump.target();
-                    }
+                    List<IRStmt> replace = last
+                            .accept(new FinalBlockStmtVisitor(nextBlock));
+                    b.replaceLastStmt(replace);
                 }
             }
         });
@@ -153,74 +138,73 @@ public class BlockTraceGenerator {
         @Override
         public List<IRStmt> visit(IRCJump n) {
             IRNodeFactory make = new IRNodeFactory_c(n.location());
-            if (nextLabel.isEmpty()) {
-                // Need to rewrite CJump
-                var newFalseLabel = nextLabel.get();
-                return List
-                        .of(make.IRCJump(n.cond(), n.trueLabel(),
-                                newFalseLabel),
-                                make.IRLabel(newFalseLabel),
-                                make.IRJump(make.IRName(n.falseLabel().get())));
-            }
-            if (n.hasFalseLabel()) {
-                String trueLabel = n.trueLabel();
-                String falseLabel = n.falseLabel().get();
-
+            String trueLabel = n.trueLabel();
+            String falseLabel = n.falseLabel();
+            if (nextLabel.isPresent()) {
                 if (falseLabel.equals(nextLabel.get())) {
-
+                    return List.of(n);
+                } else if (trueLabel.equals(nextLabel.get())) {
+                    IRExpr inverted = make.IRBinOp(OpType.XOR, make.IRConst(1),
+                            n.cond());
+                    return List
+                            .of(make.IRCJump(inverted, falseLabel, trueLabel));
                 }
+            }
+            var newFalseLabel = generator.newLabel();
+            return List.of(make.IRCJump(n.cond(), n.trueLabel(), newFalseLabel),
+                    make.IRLabel(newFalseLabel),
+                    make.IRJump(make.IRName(n.falseLabel())));
 
+        }
+
+        @Override
+        public List<IRStmt> visit(IRCompUnit n) {
+            throw new UnsupportedOperationException(errorMsg);
+        }
+
+        @Override
+        public List<IRStmt> visit(IRExp n) {
+            throw new UnsupportedOperationException(errorMsg);
+        }
+
+        @Override
+        public List<IRStmt> visit(IRFuncDecl n) {
+            throw new UnsupportedOperationException(errorMsg);
+        }
+
+        @Override
+        public List<IRStmt> visit(IRJump n) {
+            List<String> labels = n.accept(LabelsInJumpStmtsVisitor.instance);
+            if (labels.isEmpty()) {
+                return List.of(n);
+            }
+
+            String label = labels.get(0);
+            if (nextLabel.isPresent() && label.equals(nextLabel.get())) {
+                return List.of();
             } else {
                 return List.of(n);
             }
         }
 
         @Override
-        public List<IRStmt> visit(IRCompUnit n) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<IRStmt> visit(IRExp n) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<IRStmt> visit(IRFuncDecl n) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
-        public List<IRStmt> visit(IRJump n) {
-            // TODO Auto-generated method stub
-            return null;
-        }
-
-        @Override
         public List<IRStmt> visit(IRLabel n) {
-            // TODO Auto-generated method stub
-            return null;
+            return List.of(n);
         }
 
         @Override
         public List<IRStmt> visit(IRMove n) {
-            // TODO Auto-generated method stub
-            return null;
+            return List.of(n);
         }
 
         @Override
         public List<IRStmt> visit(IRReturn n) {
-            // TODO Auto-generated method stub
-            return null;
+            return List.of(n);
         }
 
         @Override
         public List<IRStmt> visit(IRSeq n) {
-            // TODO Auto-generated method stub
-            return null;
+            throw new UnsupportedOperationException(errorMsg);
         }
 
     }

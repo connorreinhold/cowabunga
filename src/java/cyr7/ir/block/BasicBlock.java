@@ -14,7 +14,7 @@ public class BasicBlock {
     public final List<IRStmt> stmts;
 
     public final Optional<IRLabel> first;
-    public final IRStmt last;
+    private IRStmt last;
 
     public BasicBlock(List<IRStmt> stmts) {
         this.stmts = new ArrayList<>(stmts);
@@ -33,6 +33,10 @@ public class BasicBlock {
         return this.first.isPresent();
     }
 
+    public IRStmt last() {
+        return this.last;
+    }
+
     /**
      * Returns a list of labels that can be reached from the end of this block,
      * such as via a jump statement or conditional jump.
@@ -40,6 +44,12 @@ public class BasicBlock {
      */
     public List<String> getJumpLabels() {
         return this.last.accept(LabelsInJumpStmtsVisitor.instance);
+    }
+
+    public void replaceLastStmt(List<IRStmt> replacement) {
+        this.stmts.remove(this.stmts.size() - 1);
+        this.stmts.addAll(replacement);
+        this.last = this.stmts.get(this.stmts.size() - 1);
     }
 
     @Override
