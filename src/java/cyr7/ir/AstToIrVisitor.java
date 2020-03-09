@@ -79,9 +79,9 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     private String functionName(String n, List<ExpandedType> paramTypes,
             ExpandedType returnType) {
         String name = "_I" + n.replace("_", "__") + "_";
-        List<String> params = new ArrayList<>();
-        paramTypes.forEach(t -> params.add(typeIdentifier(t)));
-        return name + typeIdentifier(returnType) + String.join("", params);
+        StringBuffer params = new StringBuffer();
+        paramTypes.forEach(t -> params.append(typeIdentifier(t)));
+        return name + typeIdentifier(returnType) + params.toString();
     }
 
     private String typeIdentifier(ExpandedType t) {
@@ -95,10 +95,11 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             return "a"
                     + typeIdentifier(new ExpandedType(t.getInnerArrayType()));
         } else if (t.isTuple()) {
-            List<String> types = new ArrayList<>();
+            StringBuffer types = new StringBuffer();
             t.getTypes().forEach(
-                    type -> types.add(typeIdentifier(new ExpandedType(type))));
-            return "t" + t.getTypes().size() + String.join("", types);
+                    type -> types
+                            .append(typeIdentifier(new ExpandedType(type))));
+            return "t" + t.getTypes().size() + types.toString();
         } else {
             throw new IllegalArgumentException("invalid type for function");
         }
@@ -141,7 +142,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(VarDeclNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-
         return OneOfTwo.ofSecond(
                 make.IRMove(make.IRTemp(n.identifier), make.IRConst(0)));
     }
