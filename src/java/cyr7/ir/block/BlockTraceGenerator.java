@@ -5,7 +5,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
@@ -35,14 +34,28 @@ import cyr7.visitor.MyIRVisitor;
 
 public class BlockTraceGenerator {
 
+    protected class TraceSet extends HashSet<ArrayList<BasicBlock>> {
+
+        public List<IRStmt> flattenToStmt() {
+            List<IRStmt> stmts = new LinkedList<>();
+            this.forEach(lst -> {
+                lst.forEach(block -> {
+                    stmts.addAll(block.stmts);
+                });
+            });
+            return stmts;
+        }
+
+    }
+
     private final IdGenerator generator;
 
     public BlockTraceGenerator(IdGenerator generator) {
         this.generator = generator;
     }
 
-    public Set<ArrayList<BasicBlock>> getTraces(BasicBlockSet blocks) {
-        Set<ArrayList<BasicBlock>> traces = new HashSet<>();
+    public TraceSet getTraces(BasicBlockSet blocks) {
+        TraceSet traces = new TraceSet();
         blocks.unmarkBlocks();
 
         while (blocks.hasUnmarkedBlock()) {
@@ -67,7 +80,7 @@ public class BlockTraceGenerator {
         return traces;
     }
 
-    private void optimize(Set<ArrayList<BasicBlock>> traces) {
+    private void optimize(TraceSet traces) {
         traces.forEach(trace -> {
             for (int i = 0; i < trace.size(); i++) {
                 BasicBlock b = trace.get(i);

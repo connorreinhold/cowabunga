@@ -81,4 +81,7 @@ public abstract class IRNode_c implements IRNode {
     public Location location() {
         return this.location;
     }
+
+    @Override
+    public abstract int hashCode();
 }

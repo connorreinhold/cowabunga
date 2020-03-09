@@ -1,14 +1,19 @@
 package cyr7.ir.block;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 public class BasicBlockSet extends HashSet<BasicBlock> {
+
+    @Override
+    public String toString() {
+        return Arrays.toString(this.toArray());
+    }
 
     /**
      *
@@ -50,22 +55,31 @@ public class BasicBlockSet extends HashSet<BasicBlock> {
      * @return
      */
     public Optional<BasicBlock> getBlock(String label) {
-        Iterator<BasicBlock> itr = this.unmarkedBlocks.iterator();
-        while (itr.hasNext()) {
-            BasicBlock b = itr.next();
-            var maybeLabel = b.first;
-            if (maybeLabel.isPresent()
-                    && maybeLabel.get().name().equals(label)) {
-                itr.remove();
-                if (itr.hasNext()) {
-                    BasicBlock next = itr.next();
-                    itr.remove();
-                    this.unmarkedBlocks.addLast(next);
-                }
+        BasicBlock b = this.labelToBlock.get(label);
+        if (b == null) {
+            return Optional.empty();
+        } else {
+            if (this.unmarkedBlocks.contains(b)) {
                 return Optional.of(b);
             }
+            return Optional.empty();
         }
-        return Optional.empty();
+//        Iterator<BasicBlock> itr = this.unmarkedBlocks.iterator();
+//        while (itr.hasNext()) {
+//            BasicBlock b = itr.next();
+//            var maybeLabel = b.first;
+//            if (maybeLabel.isPresent()
+//                    && maybeLabel.get().name().equals(label)) {
+//                itr.remove();
+//                if (itr.hasNext()) {
+//                    BasicBlock next = itr.next();
+//                    itr.remove();
+//                    this.unmarkedBlocks.addLast(next);
+//                }
+//                return Optional.of(b);
+//            }
+//        }
+//        return Optional.empty();
     }
 
     public BasicBlock getAnUnmarkedBlock() {
@@ -75,6 +89,5 @@ public class BasicBlockSet extends HashSet<BasicBlock> {
     public boolean hasUnmarkedBlock() {
         return !this.unmarkedBlocks.isEmpty();
     }
-
 
 }

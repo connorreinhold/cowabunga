@@ -11,6 +11,11 @@ import cyr7.ir.nodes.IRStmt;
 
 public class BasicBlock {
 
+    @Override
+    public String toString() {
+        return this.stmts.toString();
+    }
+
     public final List<IRStmt> stmts;
 
     public final Optional<IRLabel> first;
@@ -61,12 +66,13 @@ public class BasicBlock {
             return false;
         }
         BasicBlock other = (BasicBlock) obj;
-        return Objects.equals(stmts, other.stmts);
+        return Objects.equals(first, other.first)
+                && Objects.equals(last, other.last)
+                && Objects.equals(stmts, other.stmts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(stmts);
+        return Objects.hash(first, last, stmts);
     }
-
 }
