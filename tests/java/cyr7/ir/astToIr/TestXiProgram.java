@@ -41,7 +41,7 @@ class TestXiProgram {
                 new MultiFileLexer(new StringReader(prgm), "test.xi", false));
         XiParser parser = new XiParser(lexer, new ComplexSymbolFactory());
         XiProgramNode node = (XiProgramNode) parser.parse().value;
-        TypeCheckUtil.typecheck(node);
+        TypeCheckUtil.typeCheckNoIxiFiles(node);
         // Should be a statement
         IRNode result = node.accept(new AstToIrVisitor()).assertSecond();
         IRFuncDecl downcasted = (IRFuncDecl) result;
@@ -50,15 +50,6 @@ class TestXiProgram {
 
         IRSimulator sim = new IRSimulator(compUnit);
         return sim.call("main");
-    }
-
-
-    @Test
-    void test() {
-        String prgm = "main(): int[] { return 12; }";
-        ParserUtil.parse(new StringReader(prgm), writer, filename, isIXI);
-
-        fail("Not yet implemented");
     }
 
 }

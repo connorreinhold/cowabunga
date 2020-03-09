@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -233,6 +234,9 @@ public class IRSimulator {
             // Transfer child's return temps to the parent frame, because the child frame is going away
             for (int i = 0; i <= numReturnVals; i++) {
                 String currRetTmp = Configuration.ABSTRACT_RET_PREFIX + i;
+                if (debugLevel > 2) {
+                    System.out.println("Returning: " + currRetTmp + ", " + frame.get(currRetTmp));
+                }
                 parent.put(currRetTmp, frame.get(currRetTmp));
             }
             if (numReturnVals > 0) {
@@ -250,6 +254,10 @@ public class IRSimulator {
      *          the pointer to the location of multiple results
      */
     protected List<Long> libraryCall(String name, long[] args) {
+        if (debugLevel > 2) {
+            System.err.println("Calling library function: " + name);
+            System.err.println("Args: " + Arrays.toString(args));
+        }
         final int ws = Configuration.WORD_SIZE;
         final List<Long> ret = new ArrayList<>();
         try {
@@ -427,6 +435,9 @@ public class IRSimulator {
             long args[] = new long[argsCount];
             for (int i = argsCount - 1; i >= 0; --i)
                 args[i] = exprStack.popValue();
+            if (debugLevel > 2) {
+                System.out.println("Arguments: " + Arrays.toString(args));
+            }
             StackItem target = exprStack.pop();
             String targetName;
             if (target.type == StackItem.Kind.NAME)
@@ -441,6 +452,7 @@ public class IRSimulator {
                     + insn + "' (target '" + target.value + "' is unknown)!");
 
             long retVal = call(frame, targetName, args);
+            System.err.println("Return value: " + retVal);
             exprStack.pushValue(retVal);
         }
         else if (insn instanceof IRName) {

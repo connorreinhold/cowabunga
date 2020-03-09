@@ -122,7 +122,7 @@ import java.math.BigInteger;
 
 LineEnd = \n|\r|\r\n
 Whitespace = [ \t\f\r\n]
-Newline = [\n\r(\r\n)]
+Newline = [\r\n]
 Letter = [a-zA-Z]
 Digit = [0-9]
 Identifier = {Letter}({Digit}|{Letter}|_|')*

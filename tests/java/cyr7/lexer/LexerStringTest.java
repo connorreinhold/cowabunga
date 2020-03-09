@@ -111,4 +111,12 @@ public class LexerStringTest {
         assertEquals("", token.value);
     }
 
+    @Test
+    void stringWithParenLexes() throws Exception {
+        MyLexer lexer = LexerFactory.make("\"Ack(2,\""); // ""
+        Symbol token = lexer.next_token();
+        assertEquals(sym.STRING_LITERAL, token.sym);
+        assertEquals("Ack(2,", token.value);
+    }
+
 }

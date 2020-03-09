@@ -1,6 +1,6 @@
 package cyr7.ir.parse;
 
-import cyr7.ir.*;
+import cyr7.ir.nodes.*;
 
 import java_cup.runtime.ComplexSymbolFactory;
 
