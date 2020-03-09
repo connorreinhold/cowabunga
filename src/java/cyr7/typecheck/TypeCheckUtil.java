@@ -60,14 +60,18 @@ public class TypeCheckUtil {
                         type, filename, line, col, msg));
     }
 
+    public static void typeCheckNoIxiFiles(Node n) {
+        typeCheck(n, filename -> Reader.nullReader());
+    }
+
     /**
      * Typechecks an Xi Program node. Interface files are completely discarded
      * by this method.
      *
      * @param n
      */
-    public static void typeCheck(Node n) {
-        n.accept(new TypeCheckVisitor(ixiFilename -> Reader.nullReader()));
+    public static void typeCheck(Node n, IxiFileOpener fileOpener) {
+        n.accept(new TypeCheckVisitor(fileOpener));
         assert satisfiesInvariants(n);
     }
 

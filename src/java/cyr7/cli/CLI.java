@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import cyr7.typecheck.IxiFileOpener;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -337,7 +338,7 @@ public class CLI {
                 case "t":
                     wantsTypechecking = true;
                     break;
-                case "irg":
+                case "ign":
                     wantsIrGen = true;
                     break;
                 case "irn": 
@@ -419,14 +420,14 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
+            IxiFileOpener opener = ixiFilename -> getLibraryReader(ixiFilename + ".ixi");
+
             if (wantsTypechecking) {
                 debugPrint("Typechecking file: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output, filename, isIXI,
-                        ixiFilename -> getLibraryReader(ixiFilename + ".ixi")
-                    );
+                    TypeCheckUtil.typeCheck(input, output, filename, isIXI, opener);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -438,7 +439,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "ir");
-                    IrUtil.irGen(input, output, filename, isIXI);
+                    IrUtil.irGen(input, output, filename, isIXI, opener);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -450,8 +451,9 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "mir_run");
-                    IrUtil.mirRun(input, output, filename, isIXI);
+                    IrUtil.mirRun(input, output, filename, isIXI, opener);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     writer.write(e.getMessage());
                 }
             }
@@ -461,13 +463,11 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "ir_run");
-                    IrUtil.irRun(input, output, filename, isIXI);
+                    IrUtil.irRun(input, output, filename, isIXI, opener);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
             }
-            
-
         }
         writer.flush();
         writer.close();

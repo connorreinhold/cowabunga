@@ -114,8 +114,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRStmt> seq = new ArrayList<>();
         List<ExpandedType> paramTypes = n.header.args.stream()
                 .map(vdn -> vdn.getType()).collect(Collectors.toList());
-        seq.add(make.IRLabel(functionName(n.header.identifier, paramTypes,
-                n.header.getType().output)));
+//        seq.add(make.IRLabel(functionName(n.header.identifier, paramTypes,
+//                n.header.getType().output)));
         seq.add(n.block.accept(this).assertSecond());
 
         if (n.getResultType() == ResultType.UNIT) {
