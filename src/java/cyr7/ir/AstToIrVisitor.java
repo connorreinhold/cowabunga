@@ -384,6 +384,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
+
         return OneOfTwo.ofFirst(make.IRBinOp(opType, left, right));
     }
 
@@ -453,6 +454,131 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         return OneOfTwo.ofFirst(make.IRTemp(n.identifier));
     }
 
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(AddExprNode n) {
+        if (n.getType().isSubtypeOfInt()) {
+            return binOp(IRBinOp.OpType.ADD, n);
+        }
+        assert n.getType().isSubtypeOfArray();
+
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+        List<IRStmt> seq = new ArrayList<>();
+
+        String leftArrAddr = generator.newTemp();
+        String rightArrAddr = generator.newTemp();
+        String leftArrSize = generator.newTemp();
+        String rightArrSize = generator.newTemp();
+        String summedArrSize = generator.newTemp();
+        String summedArrAddr = generator.newTemp();
+
+        seq.add(make.IRMove(make.IRTemp(leftArrAddr), 
+                n.left.accept(this).assertFirst()));
+        seq.add(make.IRMove(make.IRTemp(rightArrAddr),
+                n.right.accept(this).assertFirst()));
+        seq.add(make.IRMove(
+            make.IRTemp(leftArrSize),
+            make.IRMem(
+                make.IRBinOp(OpType.SUB,
+                    make.IRTemp(leftArrAddr),
+                    make.IRConst(8))
+            )));
+        seq.add(make.IRMove(
+            make.IRTemp(rightArrSize),
+            make.IRMem(
+                make.IRBinOp(OpType.SUB,
+                    make.IRTemp(rightArrAddr),
+                    make.IRConst(8))
+            )));
+        seq.add(make.IRMove(
+            make.IRTemp(summedArrSize),
+            make.IRBinOp(OpType.ADD,
+                    make.IRTemp(leftArrSize),
+                    make.IRTemp(rightArrSize))
+            ));
+        seq.add(make.IRMove(
+            make.IRTemp(summedArrAddr),
+            make.IRCall(
+                make.IRName("_xi_malloc"),
+                make.IRBinOp(OpType.MUL,
+                    make.IRBinOp(OpType.ADD,
+                        make.IRTemp(summedArrSize), make.IRConst(1)),
+                    make.IRConst(8))
+            )));
+        seq.add(make.IRMove(make.IRMem((make.IRTemp(summedArrAddr))), make.IRTemp(summedArrSize)));
+        // Move array address pointer to actual start of array
+        seq.add(make.IRMove(make.IRTemp(summedArrAddr),
+            make.IRBinOp(OpType.ADD, make.IRTemp(summedArrAddr), make.IRConst(8))));
+        /**
+         * i = 0;
+         * while (i < leftArr.size) {
+         *      summed[i] = leftArr[i];
+         *      i++;
+         * }
+         * j = 0;
+         * while (j < rightArr.size) {
+         *      summed[leftArr.size + j] = rightArr[j];
+         *      j++;
+         * }
+         */
+
+        String leftSumming = generator.newLabel();
+        String leftBody = generator.newLabel();
+        String i = generator.newTemp();
+        String rightSumming = generator.newLabel();
+        String rightBody = generator.newLabel();
+        String j = generator.newTemp();
+        String exit = generator.newLabel();
+
+        seq.add(make.IRMove(make.IRTemp(i), make.IRConst(0)));
+        seq.add(make.IRLabel(leftSumming));
+        seq.add(make.IRCJump(
+            make.IRBinOp(OpType.LT, make.IRTemp(i), make.IRTemp(leftArrSize)),
+            leftBody,
+            rightSumming));
+        seq.add(make.IRLabel(leftBody));
+        seq.add(make.IRMove(
+            make.IRMem(
+                make.IRBinOp(OpType.ADD,
+                    make.IRTemp(summedArrAddr),
+                    make.IRBinOp(OpType.MUL,
+                        make.IRTemp(i),
+                        make.IRConst(8)))),
+            make.IRBinOp(OpType.ADD,
+                make.IRTemp(leftArrAddr),
+                make.IRBinOp(OpType.MUL,
+                    make.IRTemp(i),
+                    make.IRConst(8)))));
+        seq.add(make.IRMove(make.IRTemp(i), make.IRBinOp(OpType.ADD, make.IRTemp(i), make.IRConst(1))));
+        seq.add(make.IRJump(make.IRName(leftSumming)));
+
+        seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
+        seq.add(make.IRLabel(rightSumming));
+        seq.add(make.IRCJump(
+            make.IRBinOp(OpType.LT, make.IRTemp(j), make.IRTemp(rightArrSize)),
+            rightBody,
+            exit));
+        seq.add(make.IRLabel(rightBody));
+        seq.add(make.IRMove(
+            make.IRMem(
+                make.IRBinOp(OpType.ADD,
+                    make.IRTemp(summedArrAddr),
+                    make.IRBinOp(OpType.MUL,
+                        make.IRBinOp(OpType.ADD,
+                            make.IRTemp(j),
+                            make.IRTemp(leftArrSize)),
+                        make.IRConst(8)))),
+            make.IRBinOp(OpType.ADD,
+                make.IRTemp(rightArrAddr),
+                make.IRBinOp(OpType.MUL,
+                    make.IRTemp(j),
+                    make.IRConst(8)))));
+        seq.add(make.IRMove(make.IRTemp(j), make.IRBinOp(OpType.ADD, make.IRTemp(j), make.IRConst(1))));
+        seq.add(make.IRJump(make.IRName(leftSumming)));
+
+        seq.add(make.IRLabel(exit));
+
+        return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(seq), make.IRTemp(summedArrAddr)));
+    }
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(AndExprNode n) {
@@ -473,11 +599,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                                  make.IRMove(make.IRTemp(t), e2),
                                  make.IRLabel(lf)),
                             make.IRTemp(t)));
-    }
-
-    @Override
-    public OneOfTwo<IRExpr, IRStmt> visit(AddExprNode n) {
-        return binOp(IRBinOp.OpType.ADD, n);
     }
 
     @Override
