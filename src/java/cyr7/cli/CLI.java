@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import cyr7.ir.IrUtil.Configuration;
 import cyr7.typecheck.IxiFileOpener;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -433,15 +434,32 @@ public class CLI {
                 }
                 closeIOStreams(input, output);
             }
-            
+
+            IrUtil.Configuration configuration;
+            if (!optimizationsEnabled) {
+                configuration = new IrUtil.Configuration(false, false);
+            } else {
+                configuration = new IrUtil.Configuration(
+                    cFoldEnabled,
+                    commutativeEnabled
+                );
+            }
+
             if (wantsIrGen) {
                 debugPrint("Generate intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "ir");
-                    IrUtil.irGen(input, output, filename, isIXI, opener);
+                    IrUtil.irGen(
+                        input,
+                        output,
+                        filename,
+                        isIXI,
+                        opener,
+                        configuration
+                    );
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    debugPrint(e);
                     writer.write(e.getMessage());
                 }
                 closeIOStreams(input, output);
@@ -452,8 +470,15 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "mir_run");
-                    IrUtil.mirRun(input, output, filename, isIXI, opener);
+                    IrUtil.mirRun(
+                        input,
+                        output,
+                        filename,
+                        isIXI,
+                        opener
+                    );
                 } catch (Exception e) {
+                    debugPrint(e);
                     writer.write(e.getMessage());
                 }
                 closeIOStreams(input, output);
@@ -464,8 +489,16 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "ir_run");
-                    IrUtil.irRun(input, output, filename, isIXI, opener);
+                    IrUtil.irRun(
+                        input,
+                        output,
+                        filename,
+                        isIXI,
+                        opener,
+                        configuration
+                    );
                 } catch (Exception e) {
+                    debugPrint(e);
                     writer.write(e.getMessage());
                 }
                 closeIOStreams(input, output);
@@ -498,7 +531,6 @@ public class CLI {
         return new BufferedWriter(new FileWriter(dest));
     }
 
-
     private static void closeIOStreams(Reader input, Writer output) {
         if (input != null && output != null) {
             try {
@@ -512,10 +544,15 @@ public class CLI {
         }
     }
 
-
-    private static void debugPrint(Object v) {
+    public static void debugPrint(String v) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + v);
+        }
+    }
+
+    public static void debugPrint(Exception e) {
+        if (debugPrintingEnabled) {
+            e.printStackTrace();
         }
     }
 
