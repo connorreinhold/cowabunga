@@ -48,7 +48,7 @@ public class IRSimulator {
 
     private Set<String> libraryFunctions;
 
-    protected static int debugLevel = 10;
+    protected static int debugLevel = 0;
 
     public static final int DEFAULT_HEAP_SIZE = 10240;
 
@@ -254,8 +254,10 @@ public class IRSimulator {
      *          the pointer to the location of multiple results
      */
     protected List<Long> libraryCall(String name, long[] args) {
-        System.err.println("Calling library function: " + name);
-        System.err.println("Args: " + Arrays.toString(args));
+        if (debugLevel > 2) {
+            System.err.println("Calling library function: " + name);
+            System.err.println("Args: " + Arrays.toString(args));
+        }
         final int ws = Configuration.WORD_SIZE;
         final List<Long> ret = new ArrayList<>();
         try {
