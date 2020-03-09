@@ -107,7 +107,7 @@ public class ContainsJumpsStmtVisitor implements MyIRVisitor<Boolean> {
 
     @Override
     public Boolean visit(IRReturn n) {
-        return true;
+        return false;
     }
 
     /**

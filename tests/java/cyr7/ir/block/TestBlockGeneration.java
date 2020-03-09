@@ -41,6 +41,7 @@ class TestBlockGeneration {
         return new BasicBlock(Arrays.asList(stmts));
     }
 
+
     @Test
     void basicBlockTest() {
         String l1 = "_l1";
@@ -251,4 +252,33 @@ class TestBlockGeneration {
 
         test(expectedBlocks, stmts);
     }
+
+
+
+    @Test
+    void cJumpReorderingTest() {
+        String lt = generate.newLabel();
+        String lf = generate.newLabel();
+        List<IRStmt> stmts = List.of(
+                make.IRCJump(make.IRConst(0), lt, lf),
+                make.IRLabel(lt),
+                make.IRReturn(),
+                make.IRJump(make.IRName("end")),
+                make.IRLabel(lf),
+                make.IRMove(make.IRTemp("_few"), make.IRConst(1)),
+                make.IRLabel("end")
+        );
+
+        Set<BasicBlock> expectedBlocks = createExpectedSet(
+                block(make.IRCJump(make.IRConst(0), lt, lf)),
+                block(make.IRLabel(lt), make.IRReturn(),
+                        make.IRJump(make.IRName("end"))),
+                block(make.IRLabel(lf),
+                        make.IRMove(make.IRTemp("_few"), make.IRConst(1))),
+                block(make.IRLabel("end"))
+        );
+        test(expectedBlocks, stmts);
+
+    }
+
 }

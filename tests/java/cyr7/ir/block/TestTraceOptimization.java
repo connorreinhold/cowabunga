@@ -109,5 +109,39 @@ class TestTraceOptimization {
 
     }
 
+    @Test
+    void cJumpReorderingTest() {
+        String lt = generate.newLabel();
+        String lf = generate.newLabel();
+        List<IRStmt> stmts = List.of(
+                make.IRCJump(make.IRConst(0), lt, lf),
+                make.IRLabel(lt),
+                make.IRReturn(),
+                make.IRJump(make.IRName("end")),
+                make.IRLabel(lf),
+                make.IRMove(make.IRTemp("_few"), make.IRConst(1)),
+                make.IRLabel("end")
+        );
+
+        BasicBlock b1 = block(make.IRCJump(make.IRConst(0), lt, lf));
+        BasicBlock b2 = block(
+                make.IRLabel(lt),
+                make.IRReturn()
+//                make.IRJump(make.IRName("end"))
+        );
+        BasicBlock b3 = block(
+                make.IRLabel(lf),
+                make.IRMove(make.IRTemp("_few"), make.IRConst(1))
+            );
+
+        BasicBlock b4 = block(make.IRLabel("end"));
+
+        TraceSet expected = trace(
+                List.of(new ArrayList<BasicBlock>(List.of(b1, b3)),
+                        new ArrayList<BasicBlock>(List.of(b2, b4))));
+        test(expected, stmts);
+
+    }
+
 
 }
