@@ -437,7 +437,7 @@ public class CLI {
                 debugPrint("Generate intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "mir");
+                    output = getWriter(filename, "ir");
                     IrUtil.irGen(input, output, filename, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -449,7 +449,7 @@ public class CLI {
                 debugPrint("Generate and interpret middle-level intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "mir");
+                    output = getWriter(filename, "mir_run");
                     IrUtil.mirRun(input, output, filename, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -460,7 +460,7 @@ public class CLI {
                 debugPrint("Generate and interpret intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "mir");
+                    output = getWriter(filename, "ir_run");
                     IrUtil.irRun(input, output, filename, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
