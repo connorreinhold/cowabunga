@@ -9,8 +9,12 @@
 /src/java/cyr7/parser/xi/sym.java
 /src/java/cyr7/parser/ixi/IxiParser.java
 /src/java/cyr7/parser/ixi/sym.java
-src/java/cyr7/parser/XiParser.java
-src/java/cyr7/parser/sym.java
+/src/java/cyr7/parser/XiParser.java
+/src/java/cyr7/parser/sym.java
+
+/src/java/cyr7/ir/parse/IRLexer.java
+/src/java/cyr7/ir/parse/IRParser.java
+/src/java/cyr7/ir/parse/IRSym.java
 
 cowabunga.zip
 

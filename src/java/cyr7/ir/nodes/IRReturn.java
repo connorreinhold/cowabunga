@@ -18,7 +18,13 @@ public class IRReturn extends IRStmt {
 
     @Override
     public void printSExp(SExpPrinter p) {
+        p.startList();
         p.printAtom("RETURN");
+
+        // Empty list because the s-exp parser is expecting one
+        p.startList();
+        p.endList();
+        p.endList();
     }
 
     @Override

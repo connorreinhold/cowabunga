@@ -1,5 +1,11 @@
 package cyr7.ir.interpret;
 
+import cyr7.ir.nodes.*;
+import cyr7.ir.visit.InsnMapsBuilder;
+import edu.cornell.cs.cs4120.util.InternalCompilerError;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+import polyglot.util.SerialVersionUID;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -12,28 +18,6 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.Stack;
-
-import cyr7.ir.nodes.IRBinOp;
-import cyr7.ir.nodes.IRCJump;
-import cyr7.ir.nodes.IRCall;
-import cyr7.ir.nodes.IRCallStmt;
-import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRConst;
-import cyr7.ir.nodes.IRExp;
-import cyr7.ir.nodes.IRFuncDecl;
-import cyr7.ir.nodes.IRJump;
-import cyr7.ir.nodes.IRMem;
-import cyr7.ir.nodes.IRMove;
-import cyr7.ir.nodes.IRName;
-import cyr7.ir.nodes.IRNode;
-import cyr7.ir.nodes.IRNodeFactory;
-import cyr7.ir.nodes.IRNodeFactory_c;
-import cyr7.ir.nodes.IRReturn;
-import cyr7.ir.nodes.IRTemp;
-import cyr7.ir.visit.InsnMapsBuilder;
-import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import java_cup.runtime.ComplexSymbolFactory.Location;
-import polyglot.util.SerialVersionUID;
 
 /**
  * A simple IR interpreter
@@ -238,15 +222,15 @@ public class IRSimulator {
                 numReturnVals = 0;
             } else if (typeInName.charAt(0) == 't') {
                 StringBuilder number = new StringBuilder();
-                for (int i = 0; i < typeInName.length()
-                        && Character.isDigit(typeInName.charAt(i)); i++) {
+                for (int i = 1;
+                        i < typeInName.length() && Character.isDigit(typeInName.charAt(i));
+                        i++) {
                     number.append(typeInName.charAt(i));
                 }
                 numReturnVals = Integer.parseInt(number.toString());
             }
 
-            // Transfer child's return temps to the parent frame, because the
-            // child frame is going away
+            // Transfer child's return temps to the parent frame, because the child frame is going away
             for (int i = 0; i <= numReturnVals; i++) {
                 String currRetTmp = Configuration.ABSTRACT_RET_PREFIX + i;
                 parent.put(currRetTmp, frame.get(currRetTmp));

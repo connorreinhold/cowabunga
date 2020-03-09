@@ -30,6 +30,7 @@ import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.util.OneOfThree;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.MyIRVisitor;
 import polyglot.util.Pair;
@@ -37,32 +38,38 @@ import polyglot.util.Pair;
 public class LoweringVisitor implements MyIRVisitor<Result> {
 
     public static class Result
-            extends OneOfTwo<List<IRStmt>, Pair<List<IRStmt>, IRExpr>> {
+            extends OneOfThree<List<IRStmt>, Pair<List<IRStmt>, IRExpr>, IRCompUnit> {
 
         public static Result stmts(List<IRStmt> statement) {
-            return new Result(statement, null);
+            return new Result(statement, null, null);
         }
 
         public static Result expr(List<IRStmt> sideEffects, IRExpr expr) {
-            return new Result(null, new Pair<>(sideEffects, expr));
+            return new Result(null, new Pair<>(sideEffects, expr), null);
+        }
+        
+        public static Result compUnit(IRCompUnit compUnit) {
+            return new Result(null, null, compUnit);
         }
 
-        protected Result(List<IRStmt> stmts, Pair<List<IRStmt>, IRExpr> expr) {
-            super(stmts, expr);
+        protected Result(List<IRStmt> stmts, Pair<List<IRStmt>, IRExpr> expr, IRCompUnit compUnit) {
+            super(stmts, expr, compUnit);
         }
 
     }
 
-    private final boolean commuteOptimizationEnabled;
+    private final IRExprCommutableChecker commutability;
     private final IdGenerator generator;
 
     public LoweringVisitor(IdGenerator generator) {
         this(generator, true);
     }
 
-    public LoweringVisitor(IdGenerator generator, boolean commuteOptimizationEnabled) {
+    public LoweringVisitor(IdGenerator generator,
+            boolean commuteOptimizationEnabled) {
         this.generator = generator;
-        this.commuteOptimizationEnabled = commuteOptimizationEnabled;
+        this.commutability = new IRExprCommutableChecker(this,
+                commuteOptimizationEnabled);
     }
 
     // Methods
@@ -72,7 +79,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
      * {@code e1}. Returns {@code true} if {@code e2} does not {@code e1}.
      */
     public boolean commutes(IRExpr e1, IRExpr e2) {
-        if (!commuteOptimizationEnabled) {
+        if (!commutability.commutes(e1, e2)) {
             return false;
         }
 
@@ -273,10 +280,16 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCompUnit n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.location());
+        IRCompUnit compUnit = make.IRCompUnit(n.name());
         var functions = n.functions().values();
-        return Result.stmts(functions.stream().flatMap(f -> {
-            return f.accept(this).assertFirst().stream();
-        }).collect(Collectors.toList()));
+        for (IRFuncDecl funcDecl : functions) {
+            List<IRStmt> loweredStmts = funcDecl.body().accept(this).assertFirst();
+            IRStmt loweredBody = make.IRSeq(loweredStmts);
+            IRFuncDecl loweredFuncDecl = make.IRFuncDecl(n.name(), loweredBody);
+            compUnit.appendFunc(loweredFuncDecl);
+        }
+        return Result.compUnit(compUnit);
     }
 
     @Override
