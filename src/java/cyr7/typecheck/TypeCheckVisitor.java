@@ -89,8 +89,8 @@ import cyr7.visitor.AbstractVisitor;
 
 final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
 
-    static final class Result
-            extends OneOfThree<ExpandedType, ResultType, Void> {
+
+    static final class Result extends OneOfThree<ExpandedType, ResultType, Void> {
 
         static Result ofExpanded(ExpandedType e) {
             return new Result(e, null);
@@ -104,9 +104,11 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
             return new Result(null, null);
         }
 
-        protected Result(ExpandedType first, ResultType second) {
+        protected Result(ExpandedType first,
+                         ResultType second) {
             super(first, second, null);
         }
+
     }
 
     /**
@@ -153,6 +155,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         });
         context.addRet(outputTypes);
         ResultType type = n.block.accept(this).assertSecond();
+        n.setType(type);
         if (!outputTypes.isUnit() && type.equals(ResultType.UNIT)) {
             throw new MissingReturnException(n.getLocation());
         }

@@ -4,7 +4,13 @@ mylexer:
 myparser:
 	java -jar dependencies/java_cup.jar -locations -parser "XiParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/xi.cup
 
-cowabunga: myparser mylexer
+irlexer:
+	cd src/java/cyr7/ir/parse; rm -f IRLexer.java; jflex ir.flex
+
+irparser:
+	java -jar dependencies/java_cup.jar -locations -parser "IRParser" -symbols "IRSym" -destdir ./src/java/cyr7/ir/parse ./src/java/cyr7/ir/parse/ir.cup
+
+cowabunga: myparser mylexer irlexer irparser
 
 test: 
 	./xic-build -ea \

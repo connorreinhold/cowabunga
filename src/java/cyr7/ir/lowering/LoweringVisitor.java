@@ -65,7 +65,8 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         this(generator, true);
     }
 
-    public LoweringVisitor(IdGenerator generator, boolean commuteOptimizationEnabled) {
+    public LoweringVisitor(IdGenerator generator,
+            boolean commuteOptimizationEnabled) {
         this.generator = generator;
         this.commutability = new IRExprCommutableChecker(this,
                 commuteOptimizationEnabled);
