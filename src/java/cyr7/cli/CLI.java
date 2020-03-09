@@ -20,6 +20,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import cyr7.ir.IrUtil;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.TypeCheckUtil;
@@ -35,9 +36,18 @@ public class CLI {
     final static private CommandLineParser parser = new DefaultParser();
 
     private static boolean debugPrintingEnabled = false;
+    private static boolean optimizationsEnabled = true;
+
+    private static boolean cFoldEnabled = true;
+    private static boolean commutativeEnabled = true;
+    
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
+    private static boolean wantsIrGen = false;
+    private static boolean wantsMirRun = false;
+    private static boolean wantsIrRun = false;
+    
     private static File sourceRoot = new File(".");
     private static File libRoot = new File(".");
     private static File destinationRoot = new File(".");
@@ -84,7 +94,36 @@ public class CLI {
         Option typecheck = Option
             .builder("t")
             .longOpt("typecheck")
-            .desc("Generate output from semantic analysis.")
+            .desc("Generate output from semantic analysis")
+            .hasArg(false)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+        
+        Option irGen = Option
+            .builder("ign")
+            .longOpt("irgen")
+            .desc("Generate intermediate code")
+            .hasArg(false)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+        
+        // For internal testing
+        Option irRun = Option
+            .builder("irn")
+            .longOpt("irrun")
+            .desc("Generate and interpret intermediate code")
+            .hasArg(false)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+        
+        // For internal testing
+        Option mirRun = Option
+            .builder("mrn")
+            .longOpt("mirrun")
+            .desc("Generate and interpret middle-level intermediate code ")
             .hasArg(false)
             .numberOfArgs(0)
             .required(false)
@@ -117,6 +156,38 @@ public class CLI {
             .numberOfArgs(1)
             .required(false)
             .build();
+        
+        Option optimizations = Option
+            .builder("O")
+            .longOpt(null)
+            .desc("Disable optimizations")
+            .hasArg(false)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+        
+        // For internal testing
+        Option cFoldOpt = Option
+            .builder("cfold")
+            .longOpt(null)
+            .desc("Enable constant folding optimizations")
+            .hasArg(false)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+        
+        // For internal testing
+        Option commutativeOpt = Option
+            .builder("commutative")
+            .longOpt(null)
+            .desc("Enable commutative optimizations")
+            .hasArg(false)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
 
         Option version = Option
             .builder("v")
@@ -141,6 +212,12 @@ public class CLI {
             .addOption(lex)
             .addOption(parse)
             .addOption(typecheck)
+            .addOption(irGen)
+            .addOption(irRun)
+            .addOption(mirRun)
+            .addOption(optimizations)
+            .addOption(cFoldOpt)
+            .addOption(commutativeOpt)
             .addOption(source)
             .addOption(libpath)
             .addOption(destination)
@@ -260,9 +337,30 @@ public class CLI {
                 case "t":
                     wantsTypechecking = true;
                     break;
+                case "irg":
+                    wantsIrGen = true;
+                    break;
+                case "irn": 
+                    wantsIrRun = true;
+                    break;
+                case "mrn":
+                    wantsMirRun = true;
+                    break;
                 case "D": {
                     String directory = cmd.getOptionValue("D");
                     destinationRoot = new File(directory);
+                    break;
+                }
+                case "O": {
+                    optimizationsEnabled = false;
+                    break;
+                }
+                case "cfold": {
+                    cFoldEnabled = true;
+                    break;
+                }
+                case "commutative": {
+                    commutativeEnabled = true;
                     break;
                 }
                 case "sourcepath": {
@@ -334,6 +432,42 @@ public class CLI {
                 }
                 closeIOStreams(input, output);
             }
+            
+            if (wantsIrGen) {
+                debugPrint("Generate intermediate code for: " + filename);
+                try {
+                    input = getReader(filename);
+                    output = getWriter(filename, "mir");
+                    IrUtil.irGen(input, output, filename, isIXI);
+                } catch (Exception e) {
+                    writer.write(e.getMessage());
+                }
+                
+            }
+            
+            if (wantsMirRun) {
+                debugPrint("Generate and interpret middle-level intermediate code for: " + filename);
+                try {
+                    input = getReader(filename);
+                    output = getWriter(filename, "mir");
+                    IrUtil.mirRun(input, output, filename, isIXI);
+                } catch (Exception e) {
+                    writer.write(e.getMessage());
+                }
+            }
+            
+            if (wantsIrRun) {
+                debugPrint("Generate and interpret intermediate code for: " + filename);
+                try {
+                    input = getReader(filename);
+                    output = getWriter(filename, "mir");
+                    IrUtil.irRun(input, output, filename, isIXI);
+                } catch (Exception e) {
+                    writer.write(e.getMessage());
+                }
+            }
+            
+
         }
         writer.flush();
         writer.close();

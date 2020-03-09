@@ -66,7 +66,7 @@ public class TypeCheckUtil {
      *
      * @param n
      */
-    public static void typecheck(Node n) {
+    public static void typeCheck(Node n) {
         n.accept(new TypeCheckVisitor(ixiFilename -> Reader.nullReader()));
         assert satisfiesInvariants(n);
     }
