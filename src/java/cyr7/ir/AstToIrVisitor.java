@@ -7,7 +7,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
-import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -52,9 +51,15 @@ import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.interpret.Configuration;
-import cyr7.ir.nodes.*;
+import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
+import cyr7.ir.nodes.IRStmt;
 import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.ResultType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -106,9 +111,15 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
         List<IRStmt> seq = new ArrayList<>();
-        List<ExpandedType> paramTypes = n.header.args.stream().map(vdn -> vdn.getType()).collect(Collectors.toList());
-        seq.add(make.IRLabel(functionName(n.header.identifier, paramTypes, n.header.getType().output)));
+        List<ExpandedType> paramTypes = n.header.args.stream()
+                .map(vdn -> vdn.getType()).collect(Collectors.toList());
+        seq.add(make.IRLabel(functionName(n.header.identifier, paramTypes,
+                n.header.getType().output)));
         seq.add(n.block.accept(this).assertSecond());
+
+        if (n.getResultType() == ResultType.UNIT) {
+            seq.add(make.IRReturn());
+        }
         return OneOfTwo.ofSecond(make.IRSeq(seq));
     }
 
@@ -138,15 +149,17 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(XiProgramNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-
         String file = n.getLocation().getUnit();
         file = file.substring(0, file.lastIndexOf('.'));
         IRCompUnit program = make.IRCompUnit(file);
-
         for (FunctionDeclNode fun : n.functions) {
-            program.appendFunc((IRFuncDecl) fun.accept(this).assertFirst());
+            IRStmt funStmts = fun.accept(this).assertSecond();
+            List<ExpandedType> paramTypes = fun.header.args.stream()
+                    .map(vdn -> vdn.getType()).collect(Collectors.toList());
+            String funcName = this.functionName(fun.header.identifier,
+                    paramTypes, fun.header.getType().output);
+            program.appendFunc(make.IRFuncDecl(funcName, funStmts));
         }
-
         return OneOfTwo.ofSecond(program);
     }
 

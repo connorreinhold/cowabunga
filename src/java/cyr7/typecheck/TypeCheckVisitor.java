@@ -1,5 +1,15 @@
 package cyr7.typecheck;
 
+import static cyr7.semantics.types.ExpandedType.supertypeOf;
+
+import java.io.Reader;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
@@ -76,37 +86,28 @@ import cyr7.semantics.types.ResultType;
 import cyr7.semantics.types.UnitType;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
-import static cyr7.semantics.types.ExpandedType.supertypeOf;
-
-import java.io.Reader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
-    
+
     static final class Result extends OneOfThree<ExpandedType, ResultType, Void> {
-        
+
         static Result ofExpanded(ExpandedType e) {
-            return new Result(e, null); 
+            return new Result(e, null);
         }
-        
+
         static Result ofResult(ResultType r) {
             return new Result(null, r);
         }
-        
+
         static Result ofVoid() {
             return new Result(null, null);
         }
 
-        protected Result(ExpandedType first, 
+        protected Result(ExpandedType first,
                          ResultType second) {
             super(first, second, null);
         }
-        
+
     }
 
     /**
@@ -153,6 +154,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         });
         context.addRet(outputTypes);
         ResultType type = n.block.accept(this).assertSecond();
+        n.setType(type);
         if (!outputTypes.isUnit() && type.equals(ResultType.UNIT)) {
             throw new MissingReturnException(n.getLocation());
         }
@@ -831,7 +833,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
             Optional<ExpandedType> supertype = supertypeOf(left, right);
             if (supertype.isPresent()) {
-                return assignType(n, supertype.get()); 
+                return assignType(n, supertype.get());
             }
         }
         if (left.isSubtypeOfArray() && right.isSubtypeOfArray()) {
