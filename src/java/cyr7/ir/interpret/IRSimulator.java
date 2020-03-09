@@ -452,7 +452,9 @@ public class IRSimulator {
                     + insn + "' (target '" + target.value + "' is unknown)!");
 
             long retVal = call(frame, targetName, args);
-            System.err.println("Return value: " + retVal);
+            if (debugLevel > 2) {
+                System.err.println("Return value: " + retVal);
+            }
             exprStack.pushValue(retVal);
         }
         else if (insn instanceof IRName) {

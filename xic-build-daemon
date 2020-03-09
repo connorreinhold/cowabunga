@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Xi compiler build script
+#
+
+make cowabunga
+
+gradle assemble
+
+echo "Compiler built: $(dirname $(readlink -f $0))"
+
+echo 'java -jar "$(dirname "$(readlink -f "$0")")/build/libs/cowabunga-1.0.jar" "$@"' > xic
+chmod +x xic

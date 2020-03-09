@@ -56,7 +56,6 @@ public class EvaluatesMemExprVisitor implements MyIRVisitor<Boolean> {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public Boolean visit(IRCallStmt n) {
         throw new UnsupportedOperationException();

@@ -13,17 +13,17 @@ irparser:
 cowabunga: myparser mylexer irlexer irparser
 
 test: 
-	./xic-build -ea \
+	./xic-build-daemon -ea \
 	&& gradle test \
 	&& cd \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
 	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll
 
 gradle.test:
-	./xic-build -ea && gradle test
+	./xic-build-daemon -ea && gradle test
 
 xth.test:
-	./xic-build -ea \
+	./xic-build-daemon -ea \
 	&& cd \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
 	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll

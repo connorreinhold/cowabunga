@@ -20,7 +20,29 @@ import java.io.Reader;
 import java.io.Writer;
 
 public class IrUtil {
-    
+
+    public static class Configuration {
+
+        public static Configuration optimizationDisabled() {
+            return new Configuration(true, false, false);
+        }
+
+        public static Configuration specificOptimizations(boolean cFoldEnabled, boolean commutativeEnabled) {
+            return new Configuration(false, cFoldEnabled, commutativeEnabled);
+        }
+
+        public final boolean optimizationDisabled = true;
+
+        public final boolean cFoldEnabled;
+        public final boolean commutativeEnabled;
+
+        private Configuration(boolean optimizationDisabled, boolean cFoldEnabled, boolean commutativeEnabled) {
+            this.cFoldEnabled = cFoldEnabled;
+            this.commutativeEnabled = commutativeEnabled;
+        }
+
+    }
+
     public static void mirRun(Reader reader, Writer writer, String filename,
                               boolean isIXI, IxiFileOpener opener) throws Exception {
         
@@ -29,23 +51,20 @@ public class IrUtil {
         IRCompUnit compUnit = (IRCompUnit) result.accept(new AstToIrVisitor())
                 .assertSecond();
 
-        SExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
-        compUnit.printSExp(printer);
-        printer.flush();
-
         IRSimulator sim = new IRSimulator(compUnit);
-        long retVal = sim.call("_Imain_paai", 0);
+        long retVal = sim.call("_Imain_paai");
         writer.append(String.valueOf(retVal)).append(System.lineSeparator());
     }
     
     public static void irGen(Reader reader, Writer writer, String filename,
-            boolean isIXI, IxiFileOpener fileOpener) throws Exception {
+            boolean isIXI, IxiFileOpener fileOpener, Configuration configuration) throws Exception {
         IRNodeFactory make = new IRNodeFactory_c(new Location(1,1));
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, fileOpener);
         IdGenerator generator = new DefaultIdGenerator();
         IRNode node = result.accept(new AstToIrVisitor(generator))
                 .assertSecond();
+
         IRSeq lowered = make.IRSeq(node.accept(
                 new LoweringVisitor(generator)).assertFirst()); 
         

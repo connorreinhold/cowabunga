@@ -441,9 +441,10 @@ public class CLI {
                     output = getWriter(filename, "ir");
                     IrUtil.irGen(input, output, filename, isIXI, opener);
                 } catch (Exception e) {
+                    e.printStackTrace();
                     writer.write(e.getMessage());
                 }
-                
+                closeIOStreams(input, output);
             }
             
             if (wantsMirRun) {
@@ -453,9 +454,9 @@ public class CLI {
                     output = getWriter(filename, "mir_run");
                     IrUtil.mirRun(input, output, filename, isIXI, opener);
                 } catch (Exception e) {
-                    e.printStackTrace();
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
             }
             
             if (wantsIrRun) {
@@ -467,6 +468,7 @@ public class CLI {
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
+                closeIOStreams(input, output);
             }
         }
         writer.flush();
