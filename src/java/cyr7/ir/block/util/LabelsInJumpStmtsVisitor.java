@@ -57,12 +57,9 @@ public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
         return List.of();
     }
 
-    /**
-     * IRCallStmt is not considered to be a jump statement with a label.
-     */
     @Override
     public List<String> visit(IRCallStmt n) {
-        throw new UnsupportedOperationException();
+        return List.of();
     }
 
     @Override
@@ -72,7 +69,7 @@ public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
 
     @Override
     public List<String> visit(IRCJump n) {
-        var setOfLabels = new LinkedList<String>();
+        List<String> setOfLabels = new LinkedList<>();
         setOfLabels.add(n.falseLabel());
         setOfLabels.add(n.trueLabel());
         return Collections.unmodifiableList(setOfLabels);
@@ -80,7 +77,7 @@ public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
 
     @Override
     public List<String> visit(IRCompUnit n) {
-        return List.of();
+        throw new UnsupportedOperationException();
     }
 
     /**

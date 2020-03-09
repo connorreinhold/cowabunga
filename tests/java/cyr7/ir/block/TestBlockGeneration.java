@@ -26,17 +26,11 @@ class TestBlockGeneration {
 
     void test(Set<BasicBlock> expected, List<IRStmt> actual) {
         BasicBlockGenerator gen = new BasicBlockGenerator(actual);
-        BasicBlockSet blockSet = gen.getBlocks();
+        BasicBlockList blockSet = gen.getBlocks();
         assertEquals(expected.size(), blockSet.size());
-        System.out.println(expected);
-        System.out.println();
-        System.out.println(blockSet);
-        assertEquals(expected, blockSet);
         // Redundant here but just in case.
         blockSet.forEach(b -> assertTrue(expected.contains(b)));
         expected.forEach(b -> assertTrue(blockSet.contains(b)));
-        System.out.println();
-        System.out.println();
     }
 
     private Set<BasicBlock> createExpectedSet(BasicBlock... blocks) {
@@ -136,36 +130,36 @@ class TestBlockGeneration {
     @Test
     void onlyJumpsTest() {
         List<IRStmt> stmts = List.of(
-                make.IRJump(make.IRName("hello")),
-                make.IRJump(make.IRName("hello")),
-                make.IRJump(make.IRName("hello")),
-                make.IRJump(make.IRName("hello")),
-                make.IRJump(make.IRName("hello"))
+                make.IRJump(make.IRName("h")),
+                make.IRJump(make.IRName("e")),
+                make.IRJump(make.IRName("l")),
+                make.IRJump(make.IRName("lo")),
+                make.IRJump(make.IRName("o"))
         );
 
         Set<BasicBlock> expectedBlocks = createExpectedSet(
-                block(make.IRJump(make.IRName("hello"))),
-                block(make.IRJump(make.IRName("hello"))),
-                block(make.IRJump(make.IRName("hello"))),
-                block(make.IRJump(make.IRName("hello"))),
-                block(make.IRJump(make.IRName("hello")))
+                block(make.IRJump(make.IRName("h"))),
+                block(make.IRJump(make.IRName("e"))),
+                block(make.IRJump(make.IRName("l"))),
+                block(make.IRJump(make.IRName("lo"))),
+                block(make.IRJump(make.IRName("o")))
         );
         test(expectedBlocks, stmts);
 
 
         stmts = List.of(
                 make.IRJump(make.IRName("hello")),
-                make.IRJump(make.IRName("hello")),
+                make.IRJump(make.IRName("kello")),
                 make.IRLabel("main"),
                 make.IRJump(make.IRName("jello")),
-                make.IRJump(make.IRName("hello"))
+                make.IRJump(make.IRName("mellow"))
         );
 
         expectedBlocks = createExpectedSet(
                 block(make.IRJump(make.IRName("hello"))),
-                block(make.IRJump(make.IRName("hello"))),
+                block(make.IRJump(make.IRName("kello"))),
                 block(make.IRLabel("main"), make.IRJump(make.IRName("jello"))),
-                block(make.IRJump(make.IRName("hello")))
+                block(make.IRJump(make.IRName("mellow")))
         );
         test(expectedBlocks, stmts);
     }
@@ -193,6 +187,68 @@ class TestBlockGeneration {
                  make.IRCallStmt(make.IRName("print")),
                  make.IRReturn())
         );
+        test(expectedBlocks, stmts);
+    }
+
+    @Test
+    void singleBlockNoLabelTest() {
+        String t = generate.newTemp();
+        String r = generate.newTemp();
+        List<IRStmt> stmts = List.of(
+                make.IRMove(make.IRTemp(t), make.IRConst(123)),
+                make.IRCallStmt(make.IRName("randomString")),
+                make.IRMove(make.IRTemp(r), make.IRTemp(generate.retTemp(0))),
+                make.IRMove(make.IRTemp(generate.argTemp(0)), make.IRTemp(r)),
+                make.IRCallStmt(make.IRName("print")), make.IRReturn());
+
+        Set<BasicBlock> expectedBlocks = createExpectedSet(block(
+                make.IRMove(make.IRTemp(t), make.IRConst(123)),
+                make.IRCallStmt(make.IRName("randomString")),
+                make.IRMove(make.IRTemp(r), make.IRTemp(generate.retTemp(0))),
+                make.IRMove(make.IRTemp(generate.argTemp(0)), make.IRTemp(r)),
+                make.IRCallStmt(make.IRName("print")), make.IRReturn()));
+        test(expectedBlocks, stmts);
+    }
+
+
+    @Test
+    void cJumpTest() {
+        String t = generate.newTemp();
+        String r = generate.newTemp();
+        String lt = generate.newLabel();
+        String lf = generate.newLabel();
+        List<IRStmt> stmts = List.of(
+                make.IRLabel("main"),
+                make.IRMove(make.IRTemp(t), make.IRConst(123)),
+                make.IRCallStmt(make.IRName("randomString")),
+                make.IRMove(make.IRTemp(r), make.IRTemp(generate.retTemp(0))),
+                make.IRMove(make.IRTemp(generate.argTemp(0)), make.IRTemp(r)),
+                make.IRCJump(make.IRConst(1), lt, lf),
+                make.IRLabel(lt),
+                make.IRMove(make.IRTemp(r),
+                        make.IRTemp(generate.retTemp(0))),
+                make.IRCallStmt(make.IRName("print")),
+                make.IRLabel(lf),
+                make.IRReturn()
+        );
+
+        Set<BasicBlock> expectedBlocks = createExpectedSet(
+                block(
+                   make.IRLabel("main"),
+                   make.IRMove(make.IRTemp(t), make.IRConst(123)),
+                   make.IRCallStmt(make.IRName("randomString")),
+                   make.IRMove(make.IRTemp(r), make.IRTemp(generate.retTemp(0))),
+                   make.IRMove(make.IRTemp(generate.argTemp(0)), make.IRTemp(r)),
+                   make.IRCJump(make.IRConst(1), lt, lf)
+                 ),
+                block(make.IRLabel(lt),
+                        make.IRMove(make.IRTemp(r),
+                                make.IRTemp(generate.retTemp(0))),
+                        make.IRCallStmt(make.IRName("print"))),
+                block(
+                        make.IRLabel(lf), make.IRReturn()
+                ));
+
         test(expectedBlocks, stmts);
     }
 }

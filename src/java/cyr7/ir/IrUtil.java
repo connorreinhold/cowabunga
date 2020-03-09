@@ -50,6 +50,8 @@ public class IrUtil {
                 .assertThird();
 
         // TODO: Add optimization conditions
+
+        // Blocks and Traces
         var trace = new TraceOptimizer(lowered, generator);
         IRCompUnit optimized = trace.optimize();
 

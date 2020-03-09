@@ -18,7 +18,7 @@ public class BasicBlockGenerator {
         this.hasJumps = new ContainsJumpsStmtVisitor();
     }
 
-    public BasicBlockSet getBlocks() {
+    public BasicBlockList getBlocks() {
         List<BasicBlock> blocks = new LinkedList<>();
         List<IRStmt> block = new LinkedList<>();
 
@@ -39,7 +39,7 @@ public class BasicBlockGenerator {
         if (!block.isEmpty()) {
             blocks.add(new BasicBlock(block));
         }
-        return new BasicBlockSet(blocks);
+        return new BasicBlockList(blocks);
     }
 
 }

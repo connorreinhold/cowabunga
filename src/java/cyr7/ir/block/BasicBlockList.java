@@ -1,14 +1,15 @@
 package cyr7.ir.block;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class BasicBlockSet extends HashSet<BasicBlock> {
+public class BasicBlockList extends ArrayList<BasicBlock> {
 
     @Override
     public String toString() {
@@ -22,7 +23,8 @@ public class BasicBlockSet extends HashSet<BasicBlock> {
     private LinkedList<BasicBlock> unmarkedBlocks;
     private Map<String, BasicBlock> labelToBlock;
 
-    public BasicBlockSet(List<BasicBlock> blocks) {
+    public BasicBlockList(List<BasicBlock> blocks) {
+        this.ensureCapacity(blocks.size());
         this.addAll(blocks);
         this.unmarkedBlocks = new LinkedList<>(this);
         this.labelToBlock = new HashMap<>();
@@ -55,31 +57,32 @@ public class BasicBlockSet extends HashSet<BasicBlock> {
      * @return
      */
     public Optional<BasicBlock> getBlock(String label) {
-        BasicBlock b = this.labelToBlock.get(label);
-        if (b == null) {
-            return Optional.empty();
-        } else {
-            if (this.unmarkedBlocks.contains(b)) {
-                return Optional.of(b);
-            }
-            return Optional.empty();
-        }
-//        Iterator<BasicBlock> itr = this.unmarkedBlocks.iterator();
-//        while (itr.hasNext()) {
-//            BasicBlock b = itr.next();
-//            var maybeLabel = b.first;
-//            if (maybeLabel.isPresent()
-//                    && maybeLabel.get().name().equals(label)) {
-//                itr.remove();
-//                if (itr.hasNext()) {
-//                    BasicBlock next = itr.next();
-//                    itr.remove();
-//                    this.unmarkedBlocks.addLast(next);
-//                }
+//        BasicBlock b = this.labelToBlock.get(label);
+//        if (b == null) {
+//            return Optional.empty();
+//        } else {
+//            if (this.unmarkedBlocks.contains(b)) {
+//                this.unmarkedBlocks.remove(b);
 //                return Optional.of(b);
 //            }
+//            return Optional.empty();
 //        }
-//        return Optional.empty();
+        Iterator<BasicBlock> itr = this.unmarkedBlocks.iterator();
+        while (itr.hasNext()) {
+            BasicBlock b = itr.next();
+            var maybeLabel = b.first;
+            if (maybeLabel.isPresent()
+                    && maybeLabel.get().name().equals(label)) {
+                itr.remove();
+                if (itr.hasNext()) {
+                    BasicBlock next = itr.next();
+                    itr.remove();
+                    this.unmarkedBlocks.addLast(next);
+                }
+                return Optional.of(b);
+            }
+        }
+        return Optional.empty();
     }
 
     public BasicBlock getAnUnmarkedBlock() {
