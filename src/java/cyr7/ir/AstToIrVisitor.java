@@ -465,16 +465,20 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRStmt> seq = new ArrayList<>();
 
         String leftArrAddr = generator.newTemp();
-        String rightArrAddr = generator.newTemp();
         String leftArrSize = generator.newTemp();
+
+        String rightArrAddr = generator.newTemp();
         String rightArrSize = generator.newTemp();
+
         String summedArrSize = generator.newTemp();
         String summedArrAddr = generator.newTemp();
 
-        seq.add(make.IRMove(make.IRTemp(leftArrAddr), 
+        seq.add(make.IRMove(make.IRTemp(leftArrAddr),
                 n.left.accept(this).assertFirst()));
+
         seq.add(make.IRMove(make.IRTemp(rightArrAddr),
                 n.right.accept(this).assertFirst()));
+
         seq.add(make.IRMove(
             make.IRTemp(leftArrSize),
             make.IRMem(
@@ -495,19 +499,28 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     make.IRTemp(leftArrSize),
                     make.IRTemp(rightArrSize))
             ));
+
+        // Space for concatenated array
         seq.add(make.IRMove(
             make.IRTemp(summedArrAddr),
             make.IRCall(
-                make.IRName("_xi_malloc"),
+                make.IRName("_xi_alloc"),
                 make.IRBinOp(OpType.MUL,
-                    make.IRBinOp(OpType.ADD,
-                        make.IRTemp(summedArrSize), make.IRConst(1)),
-                    make.IRConst(8))
+                        make.IRConst(8),
+                        make.IRBinOp(OpType.ADD,
+                                make.IRTemp(summedArrSize), make.IRConst(1)))
             )));
-        seq.add(make.IRMove(make.IRMem((make.IRTemp(summedArrAddr))), make.IRTemp(summedArrSize)));
+
+        seq.add(make.IRMove(
+                make.IRMem(make.IRTemp(summedArrAddr)),
+                make.IRTemp(summedArrSize)));
         // Move array address pointer to actual start of array
-        seq.add(make.IRMove(make.IRTemp(summedArrAddr),
-            make.IRBinOp(OpType.ADD, make.IRTemp(summedArrAddr), make.IRConst(8))));
+        seq.add(make.IRMove(
+                    make.IRTemp(summedArrAddr),
+                    make.IRBinOp(OpType.ADD,
+                        make.IRTemp(summedArrAddr),
+                        make.IRConst(8))));
+
         /**
          * i = 0;
          * while (i < leftArr.size) {
@@ -537,24 +550,32 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             rightSumming));
         seq.add(make.IRLabel(leftBody));
         seq.add(make.IRMove(
-            make.IRMem(
+                make.IRMem(
+                        make.IRBinOp(OpType.ADD,
+                                make.IRTemp(summedArrAddr),
+                                make.IRBinOp(OpType.MUL,
+                                        make.IRTemp(i),
+                                        make.IRConst(8)))),
                 make.IRBinOp(OpType.ADD,
-                    make.IRTemp(summedArrAddr),
-                    make.IRBinOp(OpType.MUL,
-                        make.IRTemp(i),
-                        make.IRConst(8)))),
-            make.IRBinOp(OpType.ADD,
-                make.IRTemp(leftArrAddr),
-                make.IRBinOp(OpType.MUL,
+                        make.IRTemp(leftArrAddr),
+                        make.IRBinOp(OpType.MUL,
+                                make.IRTemp(i),
+                                make.IRConst(8)))));
+        // i++
+        seq.add(make.IRMove(
                     make.IRTemp(i),
-                    make.IRConst(8)))));
-        seq.add(make.IRMove(make.IRTemp(i), make.IRBinOp(OpType.ADD, make.IRTemp(i), make.IRConst(1))));
+                    make.IRBinOp(OpType.ADD,
+                            make.IRTemp(i),
+                            make.IRConst(1))));
+
         seq.add(make.IRJump(make.IRName(leftSumming)));
+
 
         seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
         seq.add(make.IRLabel(rightSumming));
         seq.add(make.IRCJump(
-            make.IRBinOp(OpType.LT, make.IRTemp(j), make.IRTemp(rightArrSize)),
+                make.IRBinOp(OpType.LT, make.IRTemp(j),
+                        make.IRTemp(rightArrSize)),
             rightBody,
             exit));
         seq.add(make.IRLabel(rightBody));
@@ -572,12 +593,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                 make.IRBinOp(OpType.MUL,
                     make.IRTemp(j),
                     make.IRConst(8)))));
-        seq.add(make.IRMove(make.IRTemp(j), make.IRBinOp(OpType.ADD, make.IRTemp(j), make.IRConst(1))));
+        seq.add(make.IRMove(make.IRTemp(j),
+                make.IRBinOp(OpType.ADD, make.IRTemp(j), make.IRConst(1))));
         seq.add(make.IRJump(make.IRName(leftSumming)));
 
         seq.add(make.IRLabel(exit));
-
-        return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(seq), make.IRTemp(summedArrAddr)));
+        return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(seq), 
+                make.IRTemp(summedArrAddr)));
     }
 
     @Override
@@ -699,7 +721,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         List<IRStmt> commands = new ArrayList<IRStmt>();
 
-        IRExpr memLoc = make.IRCall(make.IRName("_xi_malloc"), spaceNeeded);
+        IRExpr memLoc = make.IRCall(make.IRName("_xi_alloc"), spaceNeeded);
 
         commands.add(make.IRMove(make.IRTemp(memBlockStart), memLoc));
         commands.add(make.IRMove(make.IRMem(make.IRTemp(memBlockStart)),
