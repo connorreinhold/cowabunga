@@ -112,10 +112,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
         List<IRStmt> seq = new ArrayList<>();
-        List<ExpandedType> paramTypes = n.header.args.stream()
-                .map(vdn -> vdn.getType()).collect(Collectors.toList());
-//        seq.add(make.IRLabel(functionName(n.header.identifier, paramTypes,
-//                n.header.getType().output)));
+        for (int i = 0; i < n.header.args.size(); i++) {
+            VarDeclNode node = n.header.args.get(i);
+            seq.add(
+                make.IRMove(
+                    make.IRTemp(node.identifier),
+                    make.IRTemp(generator.argTemp(i))));
+        }
         seq.add(n.block.accept(this).assertSecond());
 
         if (n.getResultType() == ResultType.UNIT) {
