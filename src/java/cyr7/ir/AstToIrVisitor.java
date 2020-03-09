@@ -52,14 +52,8 @@ import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.interpret.Configuration;
-import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.*;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRFuncDecl;
-import cyr7.ir.nodes.IRNodeFactory;
-import cyr7.ir.nodes.IRNodeFactory_c;
-import cyr7.ir.nodes.IRStmt;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
@@ -77,11 +71,11 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         this.generator = generator;
     }
 
-    private String functionName(String n, List<ExprNode> paramTypes,
+    private String functionName(String n, List<ExpandedType> paramTypes,
             ExpandedType returnType) {
         String name = "_I" + n.replace("_", "__") + "_";
         List<String> params = new ArrayList<>();
-        paramTypes.forEach(t -> params.add(typeIdentifier(t.getType())));
+        paramTypes.forEach(t -> params.add(typeIdentifier(t)));
         return name + typeIdentifier(returnType) + String.join("", params);
     }
 
@@ -109,12 +103,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(FunctionDeclNode n) {
-        /*
-         * List<IRStmt> seq = new ArrayList<>(); seq.add(new
-         * IRLabel(functionName(n.header.identifier, n.header.args,
-         * n.header.returnTypes))); IRSeq func = make.IRSeq();
-         */
-        return null;
+        IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
+        List<IRStmt> seq = new ArrayList<>();
+        List<ExpandedType> paramTypes = n.header.args.stream().map(vdn -> vdn.getType()).collect(Collectors.toList());
+        seq.add(make.IRLabel(functionName(n.header.identifier, paramTypes, n.header.getType().output)));
+        seq.add(n.block.accept(this).assertSecond());
+        return OneOfTwo.ofSecond(make.IRSeq(seq));
     }
 
     @Override
@@ -389,8 +384,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> params = n.parameters.stream()
                 .map(stmt -> stmt.accept(this).assertFirst())
                 .collect(Collectors.toList());
-        String encodedName = functionName(n.identifier, n.parameters,
-                n.getType());
+        List<ExpandedType> paramTypes = n.parameters.stream().map(vdn -> vdn.getType()).collect(Collectors.toList());
+        String encodedName = functionName(n.identifier, paramTypes, n.getType());
         return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params));
     }
 
