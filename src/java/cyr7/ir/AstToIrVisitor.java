@@ -152,8 +152,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(XiProgramNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
+
         String file = n.getLocation().getUnit();
-        file = file.substring(0, file.lastIndexOf('.'));
+        int dotIndex = file.lastIndexOf('.');
+        if (dotIndex != -1) {
+            file = file.substring(0, file.lastIndexOf('.'));
+        }
+
         IRCompUnit program = make.IRCompUnit(file);
         for (FunctionDeclNode fun : n.functions) {
             IRStmt funStmts = fun.accept(this).assertSecond();

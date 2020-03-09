@@ -40,6 +40,7 @@ public class IrUtil {
 
         IRNode constFolded = compUnit;
 
+        CLI.debugPrint("Constant Folding Enabled: " + configuration.cFoldEnabled);
         if (configuration.cFoldEnabled) {
             constFolded =
                 compUnit.accept(new ConstFoldVisitor()).assertSecond();
@@ -50,8 +51,9 @@ public class IrUtil {
             new LoweringVisitor(generator, configuration.commutativeEnabled))
             .assertThird();
 
-        CLI.debugPrint("Const Folded? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
-        CLI.debugPrint("Canonical? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
+
+        CLI.debugPrint("Actually Const Folded? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
+        CLI.debugPrint("Actually Canonical? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
 
         return lowered;
     }

@@ -171,9 +171,9 @@ public class CLI {
         
         // For internal testing
         Option cFoldOpt = Option
-            .builder("cfold")
+            .builder("cfolddisabled")
             .longOpt(null)
-            .desc("Enable constant folding optimizations")
+            .desc("Disable constant folding optimizations")
             .hasArg(false)
             .argName(null)
             .numberOfArgs(0)
@@ -182,9 +182,9 @@ public class CLI {
         
         // For internal testing
         Option commutativeOpt = Option
-            .builder("commutative")
+            .builder("commutativedisabled")
             .longOpt(null)
-            .desc("Enable commutative optimizations")
+            .desc("Disable commutative optimizations")
             .hasArg(false)
             .argName(null)
             .numberOfArgs(0)
@@ -357,12 +357,12 @@ public class CLI {
                     optimizationsEnabled = false;
                     break;
                 }
-                case "cfold": {
-                    cFoldEnabled = true;
+                case "cfolddisabled": {
+                    cFoldEnabled = false;
                     break;
                 }
-                case "commutative": {
-                    commutativeEnabled = true;
+                case "commutativedisabled": {
+                    commutativeEnabled = false;
                     break;
                 }
                 case "sourcepath": {
