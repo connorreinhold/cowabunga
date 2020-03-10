@@ -71,10 +71,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     private final IdGenerator generator;
 
-    public AstToIrVisitor() {
-        this(new DefaultIdGenerator());
-    }
-
     public AstToIrVisitor(IdGenerator generator) {
         this.generator = generator;
     }

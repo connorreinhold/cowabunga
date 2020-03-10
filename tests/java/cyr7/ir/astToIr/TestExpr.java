@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
+import cyr7.ir.DefaultIdGenerator;
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
@@ -31,7 +32,7 @@ class TestExpr {
 
     private static void assertEq(IRNode expected, Node toTransform) {
         assertEquals(expected,
-                toTransform.accept(new AstToIrVisitor()).assertFirst());
+                toTransform.accept(new AstToIrVisitor(new DefaultIdGenerator())).assertFirst());
     }
 
     private static void assertEq(IRNode expected, Node toTransform,
