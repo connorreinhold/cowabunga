@@ -15,7 +15,10 @@ public class TestPrograms {
     @Test
     void testArithmetic() throws Exception {
         String result = Run.runFile("arithmetic");
-        assertEquals("16\n", result);
+        String expected =
+            "16\n"
+            + "500\n";
+        assertEquals(expected, result);
     }
 
 }

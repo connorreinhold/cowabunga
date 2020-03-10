@@ -8,6 +8,7 @@ import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
@@ -73,4 +74,5 @@ public abstract class AbstractVisitor<T> {
     // unary expr
     abstract public T visit(BoolNegExprNode n);
     abstract public T visit(IntNegExprNode n);
+    abstract public T visit(LengthExprNode n);
 }
