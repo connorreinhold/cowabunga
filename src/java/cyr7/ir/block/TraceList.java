@@ -6,14 +6,14 @@ import java.util.List;
 
 import cyr7.ir.nodes.IRStmt;
 
-public class TraceSet extends LinkedList<ArrayList<BasicBlock>> {
+public class TraceList extends LinkedList<ArrayList<BasicBlock>> {
 
     /**
      *
      */
     private static final long serialVersionUID = -4678380381915982554L;
 
-    public TraceSet() {
+    public TraceList() {
         super();
     }
 

@@ -43,9 +43,9 @@ public class TraceOptimizer {
         return funcToSet;
     }
 
-    private Map<String, TraceSet> toTraces(
+    private Map<String, TraceList> toTraces(
             Map<String, BasicBlockList> blockMap) {
-        Map<String, TraceSet> funcToTraces = new HashMap<>();
+        Map<String, TraceList> funcToTraces = new HashMap<>();
         blockMap.forEach((f, blockSet) -> {
             BlockTraceGenerator trace = new BlockTraceGenerator(generate);
             funcToTraces.put(f, trace.getTraces(blockSet));
@@ -53,7 +53,7 @@ public class TraceOptimizer {
         return funcToTraces;
     }
 
-    private IRCompUnit finishOptimization(Map<String, TraceSet> traceSet) {
+    private IRCompUnit finishOptimization(Map<String, TraceList> traceSet) {
         IRNodeFactory make = new IRNodeFactory_c(this.compUnit.location());
         IRCompUnit optimizedCompUnit = make.IRCompUnit(this.compUnit.name());
         traceSet.forEach((f, trace) -> {

@@ -44,14 +44,13 @@ public class BlockTraceGenerator {
      * @param blocks
      * @return
      */
-    public TraceSet getTraces(BasicBlockList blocks) {
-        TraceSet traces = new TraceSet();
+    public TraceList getTraces(BasicBlockList blocks) {
+        TraceList traces = new TraceList();
         blocks.unmarkBlocks();
 
         while (blocks.hasUnmarkedBlock()) {
             LinkedList<BasicBlock> trace = new LinkedList<>();
             BasicBlock b = blocks.getAnUnmarkedBlock();
-            System.out.println(b);
             trace.add(b);
             List<String> jumpLabels = b.getJumpLabels();
             while (!jumpLabels.isEmpty()) {
@@ -71,7 +70,7 @@ public class BlockTraceGenerator {
         return traces;
     }
 
-    private void optimize(TraceSet traces) {
+    private void optimize(TraceList traces) {
         traces.forEach(trace -> {
             for (int i = 0; i < trace.size(); i++) {
                 BasicBlock b = trace.get(i);

@@ -16,11 +16,13 @@ public class BasicBlock {
         return this.stmts.toString();
     }
 
-    public final List<IRStmt> stmts;
-
+    /**
+     * An arbitrary instance of a basic block with no statements.
+     */
     public static BasicBlock EMPTY = new BasicBlock();
 
-    public final Optional<IRLabel> first;
+    public final List<IRStmt> stmts;
+    public Optional<IRLabel> first;
     private Optional<IRStmt> last;
 
     public BasicBlock(List<IRStmt> stmts) {
@@ -66,12 +68,21 @@ public class BasicBlock {
 
     public void replaceLastStmt(List<IRStmt> replacement) {
         this.stmts.remove(this.stmts.size() - 1);
-        this.stmts.addAll(replacement);
 
-        if (!this.stmts.isEmpty())
+        this.stmts.addAll(replacement);
+        if (!this.stmts.isEmpty()) {
             this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
-        else
+            IRStmt first = this.stmts.get(0);
+            if (first instanceof IRLabel) {
+                this.first = Optional.of((IRLabel) first);
+            } else {
+                this.first = Optional.empty();
+            }
+        }
+        else {
             this.last = Optional.empty();
+            this.first = Optional.empty();
+        }
 
     }
 

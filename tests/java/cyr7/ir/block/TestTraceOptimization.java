@@ -22,12 +22,12 @@ class TestTraceOptimization {
     private final IRNodeFactory make = new IRNodeFactory_c(loc);
     private final IdGenerator generate = new DefaultIdGenerator();
 
-    private void test(TraceSet expected, List<IRStmt> stmts) {
+    private void test(TraceList expected, List<IRStmt> stmts) {
         BasicBlockList actual = new BasicBlockGenerator(stmts).getBlocks();
 
         IdGenerator generator = new DefaultIdGenerator();
         BlockTraceGenerator traceGenerator = new BlockTraceGenerator(generator);
-        TraceSet result = traceGenerator.getTraces(actual);
+        TraceList result = traceGenerator.getTraces(actual);
         assertEquals(expected.size(), result.size());
         expected.forEach(e -> result.contains(e));
         result.forEach(e -> expected.contains(e));
@@ -37,8 +37,8 @@ class TestTraceOptimization {
         return new BasicBlock(Arrays.asList(stmts));
     }
 
-    private TraceSet trace(List<ArrayList<BasicBlock>> blocks) {
-        TraceSet set = new TraceSet();
+    private TraceList trace(List<ArrayList<BasicBlock>> blocks) {
+        TraceList set = new TraceList();
         set.addAll(blocks);
         return set;
     }
@@ -66,7 +66,7 @@ class TestTraceOptimization {
                                 make.IRConst(32)))
             );
         BasicBlock b3 = block(make.IRLabel(l1));
-        TraceSet expected = trace(
+        TraceList expected = trace(
                 List.of(new ArrayList<BasicBlock>(List.of(b1, b3, b2))));
         test(expected, stmts);
     }
@@ -100,7 +100,7 @@ class TestTraceOptimization {
                         make.IRConst(0)),
                 make.IRCallStmt(make.IRName("print")));
 
-        TraceSet expected = trace(
+        TraceList expected = trace(
                 List.of(new ArrayList<BasicBlock>(List.of(b1)),
                         new ArrayList<BasicBlock>(List.of(b2)),
                         new ArrayList<BasicBlock>(List.of(b3)),
@@ -129,8 +129,6 @@ class TestTraceOptimization {
                 make.IRLabel(lt),
                 make.IRReturn()
         );
-        BasicBlock b5 = block(make.IRJump(make.IRName("end")));
-
         BasicBlock b3 = block(
                 make.IRLabel(lf),
                 make.IRMove(make.IRTemp("_few"), make.IRConst(1))
@@ -138,7 +136,7 @@ class TestTraceOptimization {
 
         BasicBlock b4 = block(make.IRLabel("end"));
 
-        TraceSet expected = trace(
+        TraceList expected = trace(
                 List.of(new ArrayList<BasicBlock>(List.of(b1, b3)),
                         new ArrayList<BasicBlock>(
                                 List.of(BasicBlock.EMPTY, b4)),
@@ -166,7 +164,7 @@ class TestTraceOptimization {
         BasicBlock b3 = block(make.IRLabel(lf));
         BasicBlock b4 = block(make.IRLabel("end"));
 
-        TraceSet expected = trace(
+        TraceList expected = trace(
                 List.of(new ArrayList<BasicBlock>(List.of(b1, b2, b3, b4))));
         test(expected, stmts);
     }

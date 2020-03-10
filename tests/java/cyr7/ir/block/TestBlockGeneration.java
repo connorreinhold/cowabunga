@@ -271,8 +271,8 @@ class TestBlockGeneration {
 
         Set<BasicBlock> expectedBlocks = createExpectedSet(
                 block(make.IRCJump(make.IRConst(0), lt, lf)),
-                block(make.IRLabel(lt), make.IRReturn(),
-                        make.IRJump(make.IRName("end"))),
+                block(make.IRLabel(lt), make.IRReturn()),
+                block(make.IRJump(make.IRName("end"))),
                 block(make.IRLabel(lf),
                         make.IRMove(make.IRTemp("_few"), make.IRConst(1))),
                 block(make.IRLabel("end"))

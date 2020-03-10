@@ -8,7 +8,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Queue;
 
+/**
+ * Contains a collection of BasicBlocks, i.e. a list of statements that either
+ * end with a JUMP/CJUMP/RETURN or whose IR-code would have been immediately
+ * following by a LABEL.
+ *
+ * @author ayang
+ *
+ */
 public class BasicBlockList extends ArrayList<BasicBlock> {
 
     @Override
@@ -20,12 +29,13 @@ public class BasicBlockList extends ArrayList<BasicBlock> {
      *
      */
     private static final long serialVersionUID = 7934422314015560748L;
-    private LinkedList<BasicBlock> unmarkedBlocks;
+    private Queue<BasicBlock> unmarkedBlocks;
     private Map<String, BasicBlock> labelToBlock;
 
     public BasicBlockList(List<BasicBlock> blocks) {
         this.ensureCapacity(blocks.size());
         this.addAll(blocks);
+
         this.unmarkedBlocks = new LinkedList<>(this);
         this.labelToBlock = new HashMap<>();
         this.forEach(b -> {
@@ -77,7 +87,7 @@ public class BasicBlockList extends ArrayList<BasicBlock> {
                 if (itr.hasNext()) {
                     BasicBlock next = itr.next();
                     itr.remove();
-                    this.unmarkedBlocks.addLast(next);
+                    this.unmarkedBlocks.add(next);
                 }
                 return Optional.of(b);
             }
