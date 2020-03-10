@@ -661,8 +661,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
     @Override
     public Result visit(LiteralArrayExprNode n) {
         if (n.arrayVals.size() == 0) {
-            return Result
-                    .ofExpanded(new ExpandedType(ArrayType.voidArrayDefault));
+            return assignType(n, new ExpandedType(ArrayType.voidArrayDefault));
         }
 
         List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
