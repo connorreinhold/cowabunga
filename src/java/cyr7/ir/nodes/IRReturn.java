@@ -28,8 +28,19 @@ public class IRReturn extends IRStmt {
     }
 
     @Override
+    public int hashCode() {
+        return IRReturn.class.hashCode();
+    }
+
+    @Override
     public boolean equals(Object obj) {
-        return (obj instanceof IRReturn);
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof IRReturn)) {
+            return false;
+        }
+        return true;
     }
 
     @Override

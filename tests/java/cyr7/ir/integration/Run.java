@@ -71,17 +71,17 @@ public final class Run {
     public static String run(String program) throws Exception {
         String mirResult = mirRun(program);
 
-//        String lirResultNoOpts = lirRun(program, new Configuration(false, false));
-//        assertEquals(mirResult, lirResultNoOpts);
-//
-//        String lirResultCFold = lirRun(program, new Configuration(true, false));
-//        assertEquals(mirResult, lirResultCFold);
-//
-//        String lirResultCommute = lirRun(program, new Configuration(false, true));
-//        assertEquals(mirResult, lirResultCommute);
-//
-//        String lirResultAll = lirRun(program, new Configuration(true, true));
-//        assertEquals(mirResult, lirResultAll);
+        /*String lirResultNoOpts = lirRun(program, new Configuration(false, false));
+        assertEquals(mirResult, lirResultNoOpts);
+
+        String lirResultCFold = lirRun(program, new Configuration(true, false));
+        assertEquals(mirResult, lirResultCFold);
+
+        String lirResultCommute = lirRun(program, new Configuration(false, true));
+        assertEquals(mirResult, lirResultCommute);
+
+        String lirResultAll = lirRun(program, new Configuration(true, true));
+        assertEquals(mirResult, lirResultAll); */
 
         return mirResult;
     }

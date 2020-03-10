@@ -23,10 +23,6 @@ public class IRFactory {
         return result;
     }
 
-    public static long testExpr(IRNode irNode) {
-        return 0;
-    }
-
     public static long testStmts(IRStmt irStmts) {
         Location loc = new Location(-1, -1);
         IRStmt bBody = irStmts;

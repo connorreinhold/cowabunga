@@ -25,7 +25,7 @@ public interface IRNodeFactory {
 
     /**
      * Construct a CJUMP instruction with fall-through on false.
-     * 
+     *
      * @param expr      the condition for the jump
      * @param trueLabel the destination of the jump if {@code expr} evaluates to
      *                  true
@@ -90,7 +90,8 @@ public interface IRNodeFactory {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args);
+    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args);
 
     IRCallStmt IRCallStmt(IRExpr target);
 

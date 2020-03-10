@@ -1,7 +1,6 @@
 package cyr7.ir.astToIr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import java.util.List;
 
@@ -10,8 +9,6 @@ import org.junit.jupiter.api.Test;
 import cyr7.C;
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
-import cyr7.ast.expr.binexpr.AddExprNode;
-import cyr7.ast.expr.binexpr.OrExprNode;
 import cyr7.ast.expr.binexpr.RemExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
@@ -22,13 +19,11 @@ import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ir.AstToIrVisitor;
 import cyr7.ir.IdGenerator;
-import cyr7.ir.ctranslation.LookaheadIdGenerator;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
-import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.util.IRFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -48,6 +43,7 @@ class TestExpr {
     private final IRNodeFactory make = new IRNodeFactory_c(
             new Location(-1, -1));
 
+    /*
     @Test
     void testLiteral() {
         AbstractNode astNode = new LiteralBoolExprNode(C.LOC, false);
@@ -120,6 +116,7 @@ class TestExpr {
                         make.IRLabel(lt)), make.IRTemp(x));
         assertEq(expected, node, generator);
     }
+    */
 
     @Test
     void testRem() {

@@ -1,5 +1,14 @@
 package cyr7.parser.xi;
 
+import static cyr7.parser.util.ParserFactory.LOC;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.LinkedList;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
@@ -30,15 +39,6 @@ import cyr7.exceptions.lexer.LexerIntegerOverflowException;
 import cyr7.exceptions.parser.ParserIntegerOverflowException;
 import cyr7.parser.ParserUtil;
 import cyr7.parser.util.ParserFactory;
-import org.junit.jupiter.api.Test;
-
-import java.util.LinkedList;
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import static cyr7.parser.util.ParserFactory.LOC;
 
 class TestExpr {
 
@@ -357,37 +357,37 @@ class TestExpr {
         ));
         assertEquals(parsed, expected);
     }
-    
+
     @Test
     void testMaxInt() throws Exception {
         String expr = "9223372036854775807";
         ExprNode parsed = ParserFactory.parseExpr(expr);
         ExprNode expected = new LiteralIntExprNode(LOC, expr);
         assertEquals(parsed, expected);
-        
+
         expr = "-9223372036854775808";
         parsed = ParserFactory.parseExpr(expr);
-        expected = new IntNegExprNode(LOC, 
+        expected = new IntNegExprNode(LOC,
                 new LiteralIntExprNode(LOC, "9223372036854775808"));
         assertEquals(parsed, expected);
-        
+
         final String largeExpr = "9223372036854775808";
-        assertThrows(ParserIntegerOverflowException.class, () -> 
+        assertThrows(ParserIntegerOverflowException.class, () ->
             ParserFactory.parseExpr(largeExpr)
         );
-        
+
         final String largeNegInt = "-9223372036854775809";
-        assertThrows(LexerIntegerOverflowException.class, () -> 
+        assertThrows(LexerIntegerOverflowException.class, () ->
             ParserFactory.parseExpr(largeNegInt)
         );
-        
+
         final String veryLargeInt = "99129428931919223372036854775809";
-        assertThrows(LexerIntegerOverflowException.class, () -> 
+        assertThrows(LexerIntegerOverflowException.class, () ->
             ParserFactory.parseExpr(veryLargeInt)
         );
-        
+
         final String veryLargeNegInt = "-99129428931919223372036854775809";
-        assertThrows(LexerIntegerOverflowException.class, () -> 
+        assertThrows(LexerIntegerOverflowException.class, () ->
             ParserFactory.parseExpr(veryLargeNegInt)
         );
     }

@@ -60,6 +60,7 @@ import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
+import cyr7.parser.ParserUtil;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.semantics.types.ResultType;
 import cyr7.util.OneOfTwo;
@@ -478,12 +479,18 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         String leftArrAddr = generator.newTemp();
         String leftArrSize = generator.newTemp();
+        System.out.println("Left array addr: "+leftArrAddr);
+        System.out.println("Left array size: "+leftArrSize);
 
         String rightArrAddr = generator.newTemp();
         String rightArrSize = generator.newTemp();
+        System.out.println("Right array addr: "+rightArrAddr);
+        System.out.println("Right array size: "+rightArrSize);
 
         String summedArrSize = generator.newTemp();
         String summedArrAddr = generator.newTemp();
+        System.out.println("Summed array addr: "+summedArrAddr);
+        System.out.println("Summed array size: "+summedArrSize);
 
         seq.add(make.IRMove(make.IRTemp(leftArrAddr),
             n.left.accept(this).assertFirst()));
@@ -610,6 +617,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         seq.add(make.IRJump(make.IRName(leftSumming)));
 
         seq.add(make.IRLabel(exit));
+        IrUtil.printSExpr(make.IRESeq(make.IRSeq(seq),
+            make.IRTemp(summedArrAddr)));
         return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(seq),
             make.IRTemp(summedArrAddr)));
     }
