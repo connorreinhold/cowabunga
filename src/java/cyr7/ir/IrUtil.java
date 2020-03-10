@@ -34,7 +34,7 @@ public class IrUtil {
 
     }
 
-    private static IRCompUnit lower(
+    public static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
         Configuration configuration) {
@@ -51,7 +51,6 @@ public class IrUtil {
         IRCompUnit lowered = constFolded.accept(
             new LoweringVisitor(generator, configuration.commutativeEnabled))
             .assertThird();
-
 
         CLI.debugPrint("Actually Const Folded? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
         CLI.debugPrint("Actually Canonical? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
