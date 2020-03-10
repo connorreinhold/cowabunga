@@ -1,5 +1,9 @@
 package cyr7.ir;
 
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
 import cyr7.ir.fold.ConstFoldVisitor;
@@ -13,10 +17,6 @@ import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
 
 public class IrUtil {
 
@@ -134,5 +134,4 @@ public class IrUtil {
         long retVal = sim.call("_Imain_paai", 0);
         writer.append(String.valueOf(retVal)).append(System.lineSeparator());
     }
-
 }
