@@ -23,8 +23,8 @@ public class TestPrograms {
     
     @Test
     void testArithmeticIteration() throws Exception {
-        String result = Run.runFile("arithmeticiteration");
-        String expected = "3\n2\n7\n10\n";
+        String result = Run.runFile("arithmetic2");
+        String expected = "3\n2\n7\n10\nlHe\nsm\nCdefghijklmnopqrstuvwxyzAb\n100\n101\n";
         assertEquals(expected, result);
     }
 
