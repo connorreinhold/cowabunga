@@ -6,6 +6,7 @@ main(args: int[][]) {
     testArrayMultiDim()
     testPigLatin()
     testCount100()
+    testArithmeticHighMult()
 }
 
 testArrayAddition() {
@@ -76,5 +77,10 @@ secondCountTo100(a:int):int {
     return firstCountTo100(a + 1)
 }
 
+testArithmeticHighMult() {
+    a:int = -100;
+    b:int = 1323
+    println(unparseInt(b *>> -1));
 
+}
 

@@ -171,6 +171,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                 paramTypes, fun.header.getType().output);
             program.appendFunc(make.IRFuncDecl(funcName, funStmts));
         }
+        IrUtil.printSExpr(program);
         return OneOfTwo.ofSecond(program);
     }
 
@@ -395,7 +396,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
-
         return OneOfTwo.ofFirst(make.IRBinOp(opType, left, right));
     }
 
