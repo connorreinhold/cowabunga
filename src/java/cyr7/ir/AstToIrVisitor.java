@@ -479,18 +479,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         String leftArrAddr = generator.newTemp();
         String leftArrSize = generator.newTemp();
-        System.out.println("Left array addr: "+leftArrAddr);
-        System.out.println("Left array size: "+leftArrSize);
 
         String rightArrAddr = generator.newTemp();
         String rightArrSize = generator.newTemp();
-        System.out.println("Right array addr: "+rightArrAddr);
-        System.out.println("Right array size: "+rightArrSize);
 
         String summedArrSize = generator.newTemp();
         String summedArrAddr = generator.newTemp();
-        System.out.println("Summed array addr: "+summedArrAddr);
-        System.out.println("Summed array size: "+summedArrSize);
 
         seq.add(make.IRMove(make.IRTemp(leftArrAddr),
             n.left.accept(this).assertFirst()));
@@ -553,22 +547,13 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
          * }
          */
 
-        System.out.println("\n\n");
         String leftSumming = generator.newLabel();
-        System.out.println("leftSumming: "+leftSumming);
         String leftBody = generator.newLabel();
-        System.out.println("leftBody: "+leftBody);
         String i = generator.newTemp();
-        System.out.println("i: "+i);
         String rightSumming = generator.newLabel();
-        System.out.println("rightSumming: "+rightSumming);
         String rightBody = generator.newLabel();
-        System.out.println("rightBody: "+rightBody);
         String j = generator.newTemp();
-        System.out.println("j: "+j);
         String exit = generator.newLabel();
-        System.out.println("exit: "+exit);
-        System.out.println();
 
         seq.add(make.IRMove(make.IRTemp(i), make.IRConst(0)));
         seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
