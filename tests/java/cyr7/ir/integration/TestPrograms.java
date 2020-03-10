@@ -28,17 +28,17 @@ public class TestPrograms {
         assertEquals(expected, result);
     }
     
-    //@Test
+    @Test
     void testHighMult() throws Exception {
         String result = Run.runFile("highMult");
-        String expected = "9999";
+        String expected = "1152921504606846974\n";
         assertEquals(expected, result);
     }
     
     @Test
     void testCTranslation() throws Exception {
         String result = Run.runFile("ctranslation");
-        String expected = "1\n0\n0\n5\n";
+        String expected = "1\n0\n0\n5\n50\n";
         assertEquals(expected, result);
     }
 

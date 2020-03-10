@@ -44,3 +44,34 @@ trueGen(): bool {
 }
 
 
+testBoolArrays() {
+    b:bool[][] = {}
+    i: int = 0
+    b: int = 0
+    while (i < 10) {
+        add: bool[] = {}
+        while (j < 10) {
+            if (i + j % 2 != 1 | i + j % 2 == 0) { 
+                add = add + {true}
+            } else {
+                add = add + {false}
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    res: int = 0
+    i = 0
+    b = 0
+    while (i < 10) {
+        while (j < 10) {
+            if (b[i][j]) {
+                res = res + 1
+            }
+            j = j + 1
+        }
+        i = i + 1
+    }
+    println(unparseInt(res));
+}
+

@@ -80,7 +80,7 @@ secondCountTo100(a:int):int {
 testArithmeticHighMult() {
     a:int = -100;
     b:int = 1323
-    println(unparseInt(b *>> -1));
+    println(unparseInt(a *>> b));
 
 }
 
