@@ -571,6 +571,8 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         System.out.println();
 
         seq.add(make.IRMove(make.IRTemp(i), make.IRConst(0)));
+        seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
+        
         seq.add(make.IRLabel(leftSumming));
         // While i < leftArrSize
         seq.add(make.IRCJump(
@@ -601,8 +603,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         seq.add(make.IRJump(make.IRName(leftSumming)));
 
-
-        seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
         seq.add(make.IRLabel(rightSumming));
         seq.add(make.IRCJump(
             make.IRBinOp(OpType.LT, make.IRTemp(j),
@@ -619,11 +619,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                             make.IRTemp(j),
                             make.IRTemp(leftArrSize)),
                         make.IRConst(8)))),
-            make.IRBinOp(OpType.ADD,
+            make.IRMem(
+                make.IRBinOp(OpType.ADD,
                 make.IRTemp(rightArrAddr),
                 make.IRBinOp(OpType.MUL,
                     make.IRTemp(j),
-                    make.IRConst(8)))));
+                    make.IRConst(8))))));
         seq.add(make.IRMove(make.IRTemp(j),
             make.IRBinOp(OpType.ADD, make.IRTemp(j), make.IRConst(1))));
         seq.add(make.IRJump(make.IRName(leftSumming)));
