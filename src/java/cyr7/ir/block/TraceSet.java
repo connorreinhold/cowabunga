@@ -1,13 +1,12 @@
 package cyr7.ir.block;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 
 import cyr7.ir.nodes.IRStmt;
 
-public class TraceSet extends HashSet<ArrayList<BasicBlock>> {
+public class TraceSet extends LinkedList<ArrayList<BasicBlock>> {
 
     /**
      *

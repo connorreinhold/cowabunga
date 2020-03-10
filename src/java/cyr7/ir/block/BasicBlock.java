@@ -18,8 +18,10 @@ public class BasicBlock {
 
     public final List<IRStmt> stmts;
 
+    public static BasicBlock EMPTY = new BasicBlock();
+
     public final Optional<IRLabel> first;
-    private IRStmt last;
+    private Optional<IRStmt> last;
 
     public BasicBlock(List<IRStmt> stmts) {
         this.stmts = new ArrayList<>(stmts);
@@ -31,7 +33,12 @@ public class BasicBlock {
             this.first = Optional.empty();
         }
 
-        this.last = this.stmts.get(this.stmts.size() - 1);
+        this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
+    }
+
+    private BasicBlock() {
+        this.first = Optional.empty();
+        this.stmts = List.of();
     }
 
     public boolean hasStartLabel() {
@@ -39,7 +46,10 @@ public class BasicBlock {
     }
 
     public IRStmt last() {
-        return this.last;
+        if (this.last.isPresent())
+            return this.last.get();
+        else
+            throw new UnsupportedOperationException();
     }
 
     /**
@@ -48,13 +58,21 @@ public class BasicBlock {
      *
      */
     public List<String> getJumpLabels() {
-        return this.last.accept(LabelsInJumpStmtsVisitor.instance);
+        if (this.last.isPresent())
+            return this.last.get().accept(LabelsInJumpStmtsVisitor.instance);
+        else
+            throw new UnsupportedOperationException();
     }
 
     public void replaceLastStmt(List<IRStmt> replacement) {
         this.stmts.remove(this.stmts.size() - 1);
         this.stmts.addAll(replacement);
-        this.last = this.stmts.get(this.stmts.size() - 1);
+
+        if (!this.stmts.isEmpty())
+            this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
+        else
+            this.last = Optional.empty();
+
     }
 
     @Override

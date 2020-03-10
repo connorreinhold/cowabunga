@@ -86,7 +86,11 @@ public class BasicBlockList extends ArrayList<BasicBlock> {
     }
 
     public BasicBlock getAnUnmarkedBlock() {
-        return this.unmarkedBlocks.remove();
+        BasicBlock next = this.unmarkedBlocks.remove();
+        if (this.hasUnmarkedBlock()) {
+            this.unmarkedBlocks.add(this.unmarkedBlocks.remove());
+        }
+        return next;
     }
 
     public boolean hasUnmarkedBlock() {

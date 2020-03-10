@@ -29,7 +29,8 @@ class TestTraceOptimization {
         BlockTraceGenerator traceGenerator = new BlockTraceGenerator(generator);
         TraceSet result = traceGenerator.getTraces(actual);
         assertEquals(expected.size(), result.size());
-        assertEquals(expected, result);
+        expected.forEach(e -> result.contains(e));
+        result.forEach(e -> expected.contains(e));
     }
 
     private BasicBlock block(IRStmt... stmts) {
@@ -127,8 +128,9 @@ class TestTraceOptimization {
         BasicBlock b2 = block(
                 make.IRLabel(lt),
                 make.IRReturn()
-//                make.IRJump(make.IRName("end"))
         );
+        BasicBlock b5 = block(make.IRJump(make.IRName("end")));
+
         BasicBlock b3 = block(
                 make.IRLabel(lf),
                 make.IRMove(make.IRTemp("_few"), make.IRConst(1))
@@ -138,9 +140,35 @@ class TestTraceOptimization {
 
         TraceSet expected = trace(
                 List.of(new ArrayList<BasicBlock>(List.of(b1, b3)),
-                        new ArrayList<BasicBlock>(List.of(b2, b4))));
+                        new ArrayList<BasicBlock>(
+                                List.of(BasicBlock.EMPTY, b4)),
+                        new ArrayList<BasicBlock>(List.of(b2))));
         test(expected, stmts);
 
+    }
+
+    @Test
+    void emptyTracesTest() {
+        String lt = generate.newLabel();
+        String lf = generate.newLabel();
+        List<IRStmt> stmts = List.of(
+                make.IRJump(make.IRName(lt)),
+                make.IRLabel(lt),
+                make.IRJump(make.IRName(lf)),
+                make.IRLabel(lf),
+                make.IRJump(make.IRName("end")),
+                make.IRLabel("end")
+        );
+
+        BasicBlock b1 = BasicBlock.EMPTY;
+
+        BasicBlock b2 = block(make.IRLabel(lt));
+        BasicBlock b3 = block(make.IRLabel(lf));
+        BasicBlock b4 = block(make.IRLabel("end"));
+
+        TraceSet expected = trace(
+                List.of(new ArrayList<BasicBlock>(List.of(b1, b2, b3, b4))));
+        test(expected, stmts);
     }
 
 
