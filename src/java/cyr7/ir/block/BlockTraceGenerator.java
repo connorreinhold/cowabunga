@@ -150,22 +150,25 @@ final class BlockTraceGenerator {
 
             if (firstLabelOfNextBlock.isPresent()) {
                 if (falseLabel.equals(firstLabelOfNextBlock.get())) {
-                    return List.of(n);
+                    // the false label would fall through anyways
+                    return List.of(
+                        make.IRCJump(n.cond(), n.trueLabel())
+                    );
+
                 } else if (trueLabel.equals(firstLabelOfNextBlock.get())) {
+                    // we swap false and true so we fall through to the true
                     IRExpr inverted = make.IRBinOp(
                         OpType.XOR,
                         make.IRConst(1),
                         n.cond()
                     );
-                    return List.of(
-                            make.IRCJump(inverted, falseLabel, trueLabel));
+
+                    return List.of(make.IRCJump(inverted, falseLabel));
                 }
             }
 
-            var newFalseLabel = generator.newLabel();
             return List.of(
-                    make.IRCJump(n.cond(), n.trueLabel(), newFalseLabel),
-                    make.IRLabel(newFalseLabel),
+                    make.IRCJump(n.cond(), n.trueLabel()),
                     make.IRJump(make.IRName(n.falseLabel())));
 
         }

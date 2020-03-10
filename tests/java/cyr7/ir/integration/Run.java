@@ -5,6 +5,7 @@ import cyr7.ir.AstToIrVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.IrUtil.Configuration;
+import cyr7.ir.block.TraceOptimizer;
 import cyr7.ir.fold.ConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
@@ -90,30 +91,33 @@ public final class Run {
         IdGenerator generator,
         Configuration configuration) {
 
-        IRNode constFolded = compUnit;
-
+        // constant fold
         if (configuration.cFoldEnabled) {
-            constFolded =
+            IRNode node =
                 compUnit.accept(new ConstFoldVisitor()).assertSecond();
-        }
-        assert constFolded instanceof IRCompUnit;
+            assert node instanceof IRCompUnit;
+            assertTrue(node.aggregateChildren(new CheckConstFoldedIRVisitor()));
 
-        IRCompUnit lowered = constFolded.accept(
+            compUnit = (IRCompUnit) node;
+        }
+
+        // lower
+        compUnit = compUnit.accept(
             new LoweringVisitor(generator, configuration.commutativeEnabled))
             .assertThird();
 
-        if (configuration.cFoldEnabled) {
-            assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
-        }
+        // trace
+        compUnit = TraceOptimizer.optimize(compUnit, generator);
 
+        // check that it's lowered
         CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-        assertTrue(lowered.aggregateChildren(visitor),
+        assertTrue(compUnit.aggregateChildren(visitor),
             "Program: "
-                + sexp(lowered)
+                + sexp(compUnit)
                 + "\nOffending node: "
                 + visitor.noncanonical());
 
-        return lowered;
+        return compUnit;
     }
 
     private static String mirRun(String program) throws Exception {
