@@ -26,7 +26,7 @@ testIfStmts() {
     res:int = 0
     a: bool = true
     b: bool = false
-    if (a | false) {
+    if (!a | false) {
         a = false
     } else if (b | true) {
         b = true
@@ -50,9 +50,10 @@ testBoolArrays() {
     i: int = 0
     j: int = 0
     while (i < 10) {
+        j = 0
         add: bool[] = {}
         while (j < 10) {
-            if (i + j % 2 != 1 | i + j % 2 == 0) { 
+            if ((i + j) % 2 != 1 | (i + j) % 2 == 0) { 
                 add = add + {true}
             } else {
                 add = add + {false}
@@ -64,8 +65,8 @@ testBoolArrays() {
     }
     res: int = 0
     i = 0
-    j = 0
     while (i < 10) {
+        j = 0
         while (j < 10) {
             if (barr[i][j]) {
                 res = res + 1

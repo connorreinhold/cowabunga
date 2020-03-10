@@ -31,7 +31,7 @@ public class TestPrograms {
     @Test
     void testHighMult() throws Exception {
         String result = Run.runFile("highMult");
-        String expected = "1152921504606846974\n";
+        String expected = "72057594037927935\n51764673395029616\n";
         assertEquals(expected, result);
     }
     
