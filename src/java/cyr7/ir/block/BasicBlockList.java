@@ -1,5 +1,7 @@
 package cyr7.ir.block;
 
+import cyr7.util.Util;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -18,39 +20,30 @@ import java.util.Queue;
  * @author ayang
  *
  */
-public class BasicBlockList extends ArrayList<BasicBlock> {
+final class BasicBlockList {
 
     /**
      *
      */
     private static final long serialVersionUID = 6515358544269791637L;
 
-    @Override
-    public String toString() {
-        return Arrays.toString(this.toArray());
-    }
-
-    private Queue<BasicBlock> unmarkedBlocks;
-    private Map<String, BasicBlock> labelToBlock;
+    private final List<BasicBlock> basicBlocks;
+    private final Queue<BasicBlock> unmarkedBlocks;
+    private final Map<String, BasicBlock> labelToBlock;
 
     public BasicBlockList(List<BasicBlock> blocks) {
-        this.ensureCapacity(blocks.size());
-        this.addAll(blocks);
+        this.basicBlocks = Util.immutableCopy(blocks);
 
-        this.unmarkedBlocks = new LinkedList<>(this);
+        this.unmarkedBlocks = new LinkedList<>(this.basicBlocks);
         this.labelToBlock = new HashMap<>();
-        this.forEach(b -> {
-            b.first.ifPresent(l -> {
-                this.labelToBlock.put(l.name(), b);
-            });
-        });
+        this.basicBlocks.forEach(b ->
+            b.first().ifPresent(l -> this.labelToBlock.put(l.name(), b))
+        );
     }
 
     public void unmarkBlocks() {
         this.unmarkedBlocks.clear();
-        this.forEach(b -> {
-            this.unmarkedBlocks.add(b);
-        });
+        this.unmarkedBlocks.addAll(this.basicBlocks);
     }
 
     /**
@@ -68,28 +61,16 @@ public class BasicBlockList extends ArrayList<BasicBlock> {
      * @return
      */
     public Optional<BasicBlock> getBlock(String label) {
-//        BasicBlock b = this.labelToBlock.get(label);
-//        if (b == null) {
-//            return Optional.empty();
-//        } else {
-//            if (this.unmarkedBlocks.contains(b)) {
-//                this.unmarkedBlocks.remove(b);
-//                return Optional.of(b);
-//            }
-//            return Optional.empty();
-//        }
         Iterator<BasicBlock> itr = this.unmarkedBlocks.iterator();
+
         while (itr.hasNext()) {
             BasicBlock b = itr.next();
-            var maybeLabel = b.first;
+
+            var maybeLabel = b.first();
             if (maybeLabel.isPresent()
                     && maybeLabel.get().name().equals(label)) {
+
                 itr.remove();
-                if (itr.hasNext()) {
-                    BasicBlock next = itr.next();
-                    itr.remove();
-                    this.unmarkedBlocks.add(next);
-                }
                 return Optional.of(b);
             }
         }
@@ -97,15 +78,15 @@ public class BasicBlockList extends ArrayList<BasicBlock> {
     }
 
     public BasicBlock getAnUnmarkedBlock() {
-        BasicBlock next = this.unmarkedBlocks.remove();
-        if (this.hasUnmarkedBlock()) {
-            this.unmarkedBlocks.add(this.unmarkedBlocks.remove());
-        }
-        return next;
+        return this.unmarkedBlocks.remove();
     }
 
     public boolean hasUnmarkedBlock() {
         return !this.unmarkedBlocks.isEmpty();
     }
 
+    @Override
+    public String toString() {
+        return basicBlocks.toString();
+    }
 }

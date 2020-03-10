@@ -25,7 +25,7 @@ import cyr7.visitor.MyIRVisitor;
 
 public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
 
-    public static LabelsInJumpStmtsVisitor instance = new LabelsInJumpStmtsVisitor();
+    public final static LabelsInJumpStmtsVisitor instance = new LabelsInJumpStmtsVisitor();
 
     @Override
     public List<String> visit(IRBinOp n) {

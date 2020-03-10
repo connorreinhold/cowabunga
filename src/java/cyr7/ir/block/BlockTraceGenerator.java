@@ -33,21 +33,10 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
-public class BlockTraceGenerator {
-    private final IdGenerator generator;
+final class BlockTraceGenerator {
 
-    public BlockTraceGenerator(IdGenerator generator) {
-        this.generator = generator;
-    }
-
-    /**
-     * Given a set of basic blocks, return a set of traces.
-     * A trace is a list of blocks.
-     * @param blocks
-     * @return
-     */
-    public TraceList getTraces(BasicBlockList blocks) {
-        TraceList traces = new TraceList();
+    public static List<List<BasicBlock>> getTraces(IdGenerator generator, BasicBlockList blocks) {
+        List<List<BasicBlock>> traces = new LinkedList<>();
         blocks.unmarkBlocks();
 
         while (blocks.hasUnmarkedBlock()) {
@@ -70,37 +59,46 @@ public class BlockTraceGenerator {
             }
             traces.add(new ArrayList<>(trace));
         }
-        optimize(traces);
+
+        optimize(generator, traces);
+
         return traces;
     }
 
-    private void optimize(TraceList traces) {
+    /**
+     * Removes useless jumps and organizes cjumps such that the false label
+     * always occurs directly after the cjump
+     *
+     * @param generator
+     * @param traces
+     */
+    private static void optimize(IdGenerator generator, List<List<BasicBlock>> traces) {
         traces.forEach(trace -> {
             for (int i = 0; i < trace.size(); i++) {
                 BasicBlock b = trace.get(i);
-                IRStmt last = b.last();
-                if (i < trace.size() - 1) {
+
+                if (b.last().isPresent()) {
+                    IRStmt last = b.last().get();
+
                     BasicBlock nextBlock = trace.get(i + 1);
-                    List<IRStmt> replace = last
-                            .accept(new FinalBlockStmtVisitor(nextBlock));
-                    b.replaceLastStmt(replace);
+                    List<IRStmt> replacement=
+                        last.accept(new FinalBlockStmtVisitor(generator, nextBlock));
+                    b.replaceLastStmt(replacement);
                 }
             }
         });
     }
 
-    private class FinalBlockStmtVisitor implements MyIRVisitor<List<IRStmt>> {
+    private static class FinalBlockStmtVisitor implements MyIRVisitor<List<IRStmt>> {
 
         private final String errorMsg = "The accessed node is an expression.";
         private final Optional<String> firstLabelOfNextBlock;
 
-        public FinalBlockStmtVisitor(BasicBlock nextBlock) {
-            if (nextBlock.first.isPresent()) {
-                this.firstLabelOfNextBlock =
-                        Optional.of(nextBlock.first.get().name());
-            } else {
-                this.firstLabelOfNextBlock = Optional.empty();
-            }
+        private final IdGenerator generator;
+
+        public FinalBlockStmtVisitor(IdGenerator generator, BasicBlock nextBlock) {
+            this.generator = generator;
+            this.firstLabelOfNextBlock = nextBlock.first().map(IRLabel::name);
         }
 
         @Override
@@ -154,12 +152,16 @@ public class BlockTraceGenerator {
                 if (falseLabel.equals(firstLabelOfNextBlock.get())) {
                     return List.of(n);
                 } else if (trueLabel.equals(firstLabelOfNextBlock.get())) {
-                    IRExpr inverted = make.IRBinOp(OpType.XOR, make.IRConst(1),
-                            n.cond());
+                    IRExpr inverted = make.IRBinOp(
+                        OpType.XOR,
+                        make.IRConst(1),
+                        n.cond()
+                    );
                     return List.of(
                             make.IRCJump(inverted, falseLabel, trueLabel));
                 }
             }
+
             var newFalseLabel = generator.newLabel();
             return List.of(
                     make.IRCJump(n.cond(), n.trueLabel(), newFalseLabel),

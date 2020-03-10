@@ -45,7 +45,6 @@ public class IRCJump extends IRStmt {
         return falseLabel;
     }
 
-
     @Override
     public String label() {
         return "CJUMP";

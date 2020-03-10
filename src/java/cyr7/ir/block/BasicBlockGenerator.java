@@ -7,7 +7,7 @@ import cyr7.ir.lowering.ContainsJumpsStmtVisitor;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 
-public final class BasicBlockGenerator {
+final class BasicBlockGenerator {
 
     private BasicBlockGenerator() {}
 
@@ -22,24 +22,24 @@ public final class BasicBlockGenerator {
     public static BasicBlockList getBlocks(List<IRStmt> stmts) {
         ContainsJumpsStmtVisitor hasJumps = new ContainsJumpsStmtVisitor();
         List<BasicBlock> blocks = new LinkedList<>();
-        List<IRStmt> currentBlockStmt = new LinkedList<>();
+        List<IRStmt> currentBlockStmts = new LinkedList<>();
 
         stmts.stream().forEach(s -> {
             if (s.accept(hasJumps)) {
-                currentBlockStmt.add(s);
-                blocks.add(new BasicBlock(currentBlockStmt));
-                currentBlockStmt.clear();
+                currentBlockStmts.add(s);
+                blocks.add(new BasicBlock(currentBlockStmts));
+                currentBlockStmts.clear();
             } else if (s instanceof IRLabel) {
-                if (!currentBlockStmt.isEmpty())
-                    blocks.add(new BasicBlock(currentBlockStmt));
-                currentBlockStmt.clear();
-                currentBlockStmt.add(s);
+                if (!currentBlockStmts.isEmpty())
+                    blocks.add(new BasicBlock(currentBlockStmts));
+                currentBlockStmts.clear();
+                currentBlockStmts.add(s);
             } else {
-                currentBlockStmt.add(s);
+                currentBlockStmts.add(s);
             }
         });
-        if (!currentBlockStmt.isEmpty()) {
-            blocks.add(new BasicBlock(currentBlockStmt));
+        if (!currentBlockStmts.isEmpty()) {
+            blocks.add(new BasicBlock(currentBlockStmts));
         }
         return new BasicBlockList(blocks);
     }

@@ -9,26 +9,11 @@ import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 
-public class BasicBlock {
-    /**
-     * An arbitrary instance of a basic block with no statements.
-     */
-    public final static BasicBlock EMPTY = new BasicBlock();
+import javax.swing.text.html.Option;
 
-    private BasicBlock() {
-        this.first = Optional.empty();
-        this.stmts = List.of();
-    }
-
-    @Override
-    public String toString() {
-        return this.stmts.toString();
-    }
-
+final class BasicBlock {
 
     public final List<IRStmt> stmts;
-    public Optional<IRLabel> first;
-    private Optional<IRStmt> last;
 
     /**
      * @param stmts Must have at least one statement.
@@ -36,23 +21,26 @@ public class BasicBlock {
     public BasicBlock(List<IRStmt> stmts) {
         assert stmts.size() >= 1;
         this.stmts = new ArrayList<>(stmts);
+    }
 
-        IRStmt first = this.stmts.get(0);
-        if (first instanceof IRLabel) {
-            this.first = Optional.of((IRLabel) first);
-        } else {
-            this.first = Optional.empty();
+    public Optional<IRLabel> first() {
+        if (stmts.isEmpty()) {
+            return Optional.empty();
         }
 
-        this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
+        IRStmt first = stmts.get(0);
+        if (first instanceof IRLabel) {
+            return Optional.of((IRLabel) first);
+        } else {
+            return Optional.empty();
+        }
     }
 
-    public boolean hasStartLabel() {
-        return this.first.isPresent();
-    }
-
-    public IRStmt last() {
-        return this.last.get();
+    public Optional<IRStmt> last() {
+        if (stmts.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(this.stmts.get(this.stmts.size() - 1));
     }
 
     /**
@@ -61,7 +49,7 @@ public class BasicBlock {
      *
      */
     public List<String> getJumpLabels() {
-        return this.last.get().accept(LabelsInJumpStmtsVisitor.instance);
+        return last().map(last -> last.accept(LabelsInJumpStmtsVisitor.instance)).orElse(List.of());
     }
 
     /**
@@ -76,39 +64,24 @@ public class BasicBlock {
         this.stmts.remove(this.stmts.size() - 1);
 
         this.stmts.addAll(replacement);
-
-        if (!this.stmts.isEmpty()) {
-            this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
-            IRStmt first = this.stmts.get(0);
-            if (first instanceof IRLabel) {
-                this.first = Optional.of((IRLabel) first);
-            } else {
-                this.first = Optional.empty();
-            }
-        }
-        else {
-            this.last = Optional.empty();
-            this.first = Optional.empty();
-        }
-
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof BasicBlock)) {
-            return false;
-        }
-        BasicBlock other = (BasicBlock) obj;
-        return Objects.equals(first, other.first)
-                && Objects.equals(last, other.last)
-                && Objects.equals(stmts, other.stmts);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BasicBlock that = (BasicBlock) o;
+        return Objects.equals(stmts, that.stmts);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(first, last, stmts);
+        return Objects.hash(stmts);
     }
+
+    @Override
+    public String toString() {
+        return this.stmts.toString();
+    }
+
 }
