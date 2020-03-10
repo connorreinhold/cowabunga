@@ -6,13 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestPrograms {
 
-    //@Test
+    @Test
     void testAck() throws Exception {
         String result = Run.runFile("ack");
         assertEquals("Ack(2,11): 25\n", result);
     }
 
-    //@Test
+    @Test
     void testArithmetic() throws Exception {
         String result = Run.runFile("arithmetic");
         String expected =
@@ -40,6 +40,54 @@ public class TestPrograms {
         String result = Run.runFile("ctranslation");
         String expected = "1\n0\n0\n5\n50\n";
         assertEquals(expected, result);
+    }
+
+    @Test
+    void testFibonacci() throws Exception {
+        String result = Run.runFile("fibonacci");
+        String expected = "8";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testFactorial() throws Exception {
+        String result = Run.runFile("factorial");
+        String expected = "Factorial 10 is: 3628800";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testStarTriangle() throws Exception {
+        String result = Run.runFile("startriangle");
+        System.out.println(result);
+        String expected =
+            "\n" +
+            "*\n" +
+            "**\n" +
+            "***\n" +
+            "****\n" +
+            "*****\n" +
+            "******\n" +
+            "*******\n" +
+            "********\n" +
+            "*********\n" +
+            "***********\n" +
+            "**********\n" +
+            "*********\n" +
+            "********\n" +
+            "*******\n" +
+            "******\n" +
+            "*****\n" +
+            "****\n" +
+            "***\n" +
+            "**\n" +
+            "*\n";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testPyramid() throws Exception {
+
     }
 
 }

@@ -7,6 +7,12 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class WilliamTestProgram {
 
     @Test
+    void testMultiDimArray() throws Exception {
+        String result = Run.runFile("multidimarray");
+        assertEquals("", result);
+    }
+
+    @Test
     void testGaleShapley() throws Exception {
         String result = Run.runFile("galeshapley", new int[][]{
             new int[]{1}

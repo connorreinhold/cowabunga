@@ -62,6 +62,7 @@ import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.parser.ParserUtil;
 import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.FunctionType;
 import cyr7.semantics.types.ResultType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
@@ -75,29 +76,33 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         this.generator = generator;
     }
 
-    private String functionName(String n, List<ExpandedType> paramTypes,
-                                ExpandedType returnType) {
-        String name = "_I" + n.replace("_", "__") + "_";
-        StringBuffer params = new StringBuffer();
-        paramTypes.forEach(t -> params.append(typeIdentifier(t)));
-        return name + typeIdentifier(returnType) + params.toString();
+    private String functionName(String name, FunctionType f) {
+        return functionName(name, f.input, f.output);
     }
 
-    private String typeIdentifier(ExpandedType t) {
+    private String functionName(String n, ExpandedType inputType,
+                                ExpandedType outputType) {
+        String name = "_I" + n.replace("_", "__") + "_";
+        return name
+            + typeIdentifier(outputType, false)
+            + typeIdentifier(inputType, true);
+    }
+
+    private String typeIdentifier(ExpandedType t, boolean isInput) {
         if (t.isSubtypeOfInt()) {
             return "i";
         } else if (t.isSubtypeOfBool()) {
             return "b";
         } else if (t.isUnit()) {
-            return "p";
+            return isInput ? "" : "p";
         } else if (t.isSubtypeOfArray()) {
             return "a"
-                + typeIdentifier(new ExpandedType(t.getInnerArrayType()));
+                + typeIdentifier(new ExpandedType(t.getInnerArrayType()), isInput);
         } else if (t.isTuple()) {
             StringBuffer types = new StringBuffer();
             t.getTypes().forEach(
                 type -> types
-                    .append(typeIdentifier(new ExpandedType(type))));
+                    .append(typeIdentifier(new ExpandedType(type), isInput)));
             return "t" + t.getTypes().size() + types.toString();
         } else {
             throw new IllegalArgumentException("invalid type for function");
@@ -161,10 +166,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRCompUnit program = make.IRCompUnit(file);
         for (FunctionDeclNode fun : n.functions) {
             IRStmt funStmts = fun.accept(this).assertSecond();
-            List<ExpandedType> paramTypes = fun.header.args.stream()
-                .map(vdn -> vdn.getType()).collect(Collectors.toList());
-            String funcName = this.functionName(fun.header.identifier,
-                paramTypes, fun.header.getType().output);
+            String funcName = this.functionName(fun.header.identifier, fun.header.getType());
             program.appendFunc(make.IRFuncDecl(funcName, funStmts));
         }
         IrUtil.printSExpr(program);
@@ -405,10 +407,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> params = n.parameters.stream()
             .map(stmt -> stmt.accept(this).assertFirst())
             .collect(Collectors.toList());
-        List<ExpandedType> paramTypes =
-            n.parameters.stream().map(vdn -> vdn.getType()).collect(Collectors.toList());
-        String encodedName = functionName(n.identifier, paramTypes,
-            n.getType());
+        String encodedName = functionName(n.identifier, n.getFunctionType().get());
         return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params));
     }
 
