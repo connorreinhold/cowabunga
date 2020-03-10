@@ -4,6 +4,7 @@ use io
 main(args: int[][]) {
     testBooleanExpr()
     testIfStmts()
+    testBoolArrays()
 }
 
 testBooleanExpr() {
@@ -45,9 +46,9 @@ trueGen(): bool {
 
 
 testBoolArrays() {
-    b:bool[][] = {}
+    barr:bool[][] = {}
     i: int = 0
-    b: int = 0
+    j: int = 0
     while (i < 10) {
         add: bool[] = {}
         while (j < 10) {
@@ -58,14 +59,15 @@ testBoolArrays() {
             }
             j = j + 1
         }
+        barr = barr + {add}
         i = i + 1
     }
     res: int = 0
     i = 0
-    b = 0
+    j = 0
     while (i < 10) {
         while (j < 10) {
-            if (b[i][j]) {
+            if (barr[i][j]) {
                 res = res + 1
             }
             j = j + 1
