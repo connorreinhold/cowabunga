@@ -615,8 +615,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         seq.add(make.IRJump(make.IRName(leftSumming)));
 
         seq.add(make.IRLabel(exit));
-        IrUtil.printSExpr(make.IRESeq(make.IRSeq(seq),
-            make.IRTemp(summedArrAddr)));
         return OneOfTwo.ofFirst(make.IRESeq(make.IRSeq(seq),
             make.IRTemp(summedArrAddr)));
     }
