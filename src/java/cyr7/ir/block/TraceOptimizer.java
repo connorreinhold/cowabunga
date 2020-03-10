@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cyr7.cli.CLI;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -28,17 +29,22 @@ public class TraceOptimizer {
                         this.mapToBlocks()));
     }
 
+    /**
+     * Function names --> basic blocks of the body of the function.
+     * @return
+     */
     private Map<String, BasicBlockList> mapToBlocks() {
         Map<String, BasicBlockList> funcToSet = new HashMap<>();
+
         compUnit.functions().forEach((f, decl) -> {
             IRStmt body = decl.body();
-            BasicBlockGenerator blockGenerator;
             if (body instanceof IRSeq) {
-                blockGenerator = new BasicBlockGenerator(((IRSeq) body).stmts());
+                funcToSet.put(f,
+                        BasicBlockGenerator.getBlocks(((IRSeq) body).stmts()));
             } else {
-                blockGenerator = new BasicBlockGenerator(List.of(body));
+                CLI.debugPrint("Something might have gone wrong.");
+                funcToSet.put(f, BasicBlockGenerator.getBlocks(List.of(body)));
             }
-            funcToSet.put(f, blockGenerator.getBlocks());
         });
         return funcToSet;
     }

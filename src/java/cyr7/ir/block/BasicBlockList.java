@@ -20,15 +20,16 @@ import java.util.Queue;
  */
 public class BasicBlockList extends ArrayList<BasicBlock> {
 
+    /**
+     *
+     */
+    private static final long serialVersionUID = 6515358544269791637L;
+
     @Override
     public String toString() {
         return Arrays.toString(this.toArray());
     }
 
-    /**
-     *
-     */
-    private static final long serialVersionUID = 7934422314015560748L;
     private Queue<BasicBlock> unmarkedBlocks;
     private Map<String, BasicBlock> labelToBlock;
 

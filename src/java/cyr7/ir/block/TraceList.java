@@ -13,10 +13,6 @@ public class TraceList extends LinkedList<ArrayList<BasicBlock>> {
      */
     private static final long serialVersionUID = -4678380381915982554L;
 
-    public TraceList() {
-        super();
-    }
-
     public List<IRStmt> flattenToStmt() {
         List<IRStmt> stmts = new LinkedList<>();
         this.forEach(lst -> {

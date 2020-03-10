@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import cyr7.cli.CLI;
+import cyr7.ir.CTranslationVisitor;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
 import cyr7.ir.nodes.IRBinOp;
@@ -53,6 +55,8 @@ public class BlockTraceGenerator {
             BasicBlock b = blocks.getAnUnmarkedBlock();
             trace.add(b);
             List<String> jumpLabels = b.getJumpLabels();
+
+            // Iterate across the list of jump labels.
             while (!jumpLabels.isEmpty()) {
                 String label = jumpLabels.get(0);
                 var maybeNextBlock = blocks.getBlock(label);
@@ -88,13 +92,14 @@ public class BlockTraceGenerator {
     private class FinalBlockStmtVisitor implements MyIRVisitor<List<IRStmt>> {
 
         private final String errorMsg = "The accessed node is an expression.";
-        private final Optional<String> nextLabel;
+        private final Optional<String> firstLabelOfNextBlock;
 
         public FinalBlockStmtVisitor(BasicBlock nextBlock) {
             if (nextBlock.first.isPresent()) {
-                this.nextLabel = Optional.of(nextBlock.first.get().name());
+                this.firstLabelOfNextBlock =
+                        Optional.of(nextBlock.first.get().name());
             } else {
-                this.nextLabel = Optional.empty();
+                this.firstLabelOfNextBlock = Optional.empty();
             }
         }
 
@@ -141,20 +146,23 @@ public class BlockTraceGenerator {
         @Override
         public List<IRStmt> visit(IRCJump n) {
             IRNodeFactory make = new IRNodeFactory_c(n.location());
+
             String trueLabel = n.trueLabel();
             String falseLabel = n.falseLabel();
-            if (nextLabel.isPresent()) {
-                if (falseLabel.equals(nextLabel.get())) {
+
+            if (firstLabelOfNextBlock.isPresent()) {
+                if (falseLabel.equals(firstLabelOfNextBlock.get())) {
                     return List.of(n);
-                } else if (trueLabel.equals(nextLabel.get())) {
+                } else if (trueLabel.equals(firstLabelOfNextBlock.get())) {
                     IRExpr inverted = make.IRBinOp(OpType.XOR, make.IRConst(1),
                             n.cond());
-                    return List
-                            .of(make.IRCJump(inverted, falseLabel, trueLabel));
+                    return List.of(
+                            make.IRCJump(inverted, falseLabel, trueLabel));
                 }
             }
             var newFalseLabel = generator.newLabel();
-            return List.of(make.IRCJump(n.cond(), n.trueLabel(), newFalseLabel),
+            return List.of(
+                    make.IRCJump(n.cond(), n.trueLabel(), newFalseLabel),
                     make.IRLabel(newFalseLabel),
                     make.IRJump(make.IRName(n.falseLabel())));
 
@@ -179,11 +187,13 @@ public class BlockTraceGenerator {
         public List<IRStmt> visit(IRJump n) {
             List<String> labels = n.accept(LabelsInJumpStmtsVisitor.instance);
             if (labels.isEmpty()) {
+                CLI.debugPrint("Maybe something is not right?");
                 return List.of(n);
             }
 
             String label = labels.get(0);
-            if (nextLabel.isPresent() && label.equals(nextLabel.get())) {
+            if (firstLabelOfNextBlock.isPresent()
+                    && label.equals(firstLabelOfNextBlock.get())) {
                 return List.of();
             } else {
                 return List.of(n);

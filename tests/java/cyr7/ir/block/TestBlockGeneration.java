@@ -25,8 +25,7 @@ class TestBlockGeneration {
     private final IdGenerator generate = new DefaultIdGenerator();
 
     void test(Set<BasicBlock> expected, List<IRStmt> actual) {
-        BasicBlockGenerator gen = new BasicBlockGenerator(actual);
-        BasicBlockList blockSet = gen.getBlocks();
+        BasicBlockList blockSet = BasicBlockGenerator.getBlocks(actual);
         assertEquals(expected.size(), blockSet.size());
         // Redundant here but just in case.
         blockSet.forEach(b -> assertTrue(expected.contains(b)));

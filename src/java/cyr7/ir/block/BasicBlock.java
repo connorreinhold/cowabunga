@@ -10,22 +10,31 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 
 public class BasicBlock {
+    /**
+     * An arbitrary instance of a basic block with no statements.
+     */
+    public final static BasicBlock EMPTY = new BasicBlock();
+
+    private BasicBlock() {
+        this.first = Optional.empty();
+        this.stmts = List.of();
+    }
 
     @Override
     public String toString() {
         return this.stmts.toString();
     }
 
-    /**
-     * An arbitrary instance of a basic block with no statements.
-     */
-    public static BasicBlock EMPTY = new BasicBlock();
 
     public final List<IRStmt> stmts;
     public Optional<IRLabel> first;
     private Optional<IRStmt> last;
 
+    /**
+     * @param stmts Must have at least one statement.
+     */
     public BasicBlock(List<IRStmt> stmts) {
+        assert stmts.size() >= 1;
         this.stmts = new ArrayList<>(stmts);
 
         IRStmt first = this.stmts.get(0);
@@ -38,20 +47,12 @@ public class BasicBlock {
         this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
     }
 
-    private BasicBlock() {
-        this.first = Optional.empty();
-        this.stmts = List.of();
-    }
-
     public boolean hasStartLabel() {
         return this.first.isPresent();
     }
 
     public IRStmt last() {
-        if (this.last.isPresent())
-            return this.last.get();
-        else
-            throw new UnsupportedOperationException();
+        return this.last.get();
     }
 
     /**
@@ -60,16 +61,22 @@ public class BasicBlock {
      *
      */
     public List<String> getJumpLabels() {
-        if (this.last.isPresent())
-            return this.last.get().accept(LabelsInJumpStmtsVisitor.instance);
-        else
-            throw new UnsupportedOperationException();
+        return this.last.get().accept(LabelsInJumpStmtsVisitor.instance);
     }
 
+    /**
+     * Used to replace redundant statement sequences such as JUMP(l1);
+     * LABEL(l1);
+     *
+     * Updates first and last fields.
+     *
+     * @param replacement
+     */
     public void replaceLastStmt(List<IRStmt> replacement) {
         this.stmts.remove(this.stmts.size() - 1);
 
         this.stmts.addAll(replacement);
+
         if (!this.stmts.isEmpty()) {
             this.last = Optional.of(this.stmts.get(this.stmts.size() - 1));
             IRStmt first = this.stmts.get(0);

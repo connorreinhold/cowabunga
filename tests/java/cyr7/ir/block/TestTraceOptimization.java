@@ -23,7 +23,7 @@ class TestTraceOptimization {
     private final IdGenerator generate = new DefaultIdGenerator();
 
     private void test(TraceList expected, List<IRStmt> stmts) {
-        BasicBlockList actual = new BasicBlockGenerator(stmts).getBlocks();
+        BasicBlockList actual = BasicBlockGenerator.getBlocks(stmts);
 
         IdGenerator generator = new DefaultIdGenerator();
         BlockTraceGenerator traceGenerator = new BlockTraceGenerator(generator);
