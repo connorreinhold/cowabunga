@@ -46,9 +46,14 @@ public final class ComplexConstantFoldVisitor
                 make.IRBinOp(OpType.ADD, make.IRConst(12), make.IRTemp("t")),
                 make.IRBinOp(OpType.ADD, make.IRConst(-3), make.IRTemp("a")));
         e = make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.XOR, make.IRConst(1), 
-                make.IRBinOp(OpType.LEQ, 
+                make.IRBinOp(OpType.XOR, make.IRConst(1),
+                make.IRBinOp(OpType.LEQ,
                         make.IRTemp("d"), make.IRConst(3))));
+
+        e = make.IRBinOp(OpType.OR,
+                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("a")),
+                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("b")));
+
         var visitor = new ComplexConstantFoldVisitor();
 
         var result = e.accept(visitor).assertFirst();
@@ -82,9 +87,11 @@ public final class ComplexConstantFoldVisitor
                 .accept(CheckNegationFoldConstVisitor.instance);
         if (possibleLeftNeg.isPresent() && possibleRightNeg.isPresent()) {
             // Apply De Morgan's
+            var left = possibleLeftNeg.get();
+            var right = possibleRightNeg.get();
             return Optional.of(make.IRBinOp(OpType.XOR,
                     make.IRConst(1),
-                    make.IRBinOp(innerOperation, n.left(), n.right())));
+                    make.IRBinOp(innerOperation, left, right)));
         }
         return Optional.empty();
     }
@@ -117,7 +124,7 @@ public final class ComplexConstantFoldVisitor
             }
             break;
         case OR:
-            maybeDeMorgan = this.tryDeMorgan(n, make, OpType.OR);
+            maybeDeMorgan = this.tryDeMorgan(n, make, OpType.AND);
             if (maybeDeMorgan.isPresent()) {
                 return OneOfThree.ofFirst(maybeDeMorgan.get());
             }
