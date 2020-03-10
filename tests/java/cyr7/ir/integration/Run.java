@@ -4,6 +4,7 @@ import cyr7.ast.Node;
 import cyr7.ir.AstToIrVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
+import cyr7.ir.IrUtil;
 import cyr7.ir.IrUtil.Configuration;
 import cyr7.ir.fold.ConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
@@ -19,7 +20,6 @@ import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintStream;
@@ -28,10 +28,7 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class Run {
@@ -91,17 +88,7 @@ public final class Run {
         IdGenerator generator,
         Configuration configuration) {
 
-        IRNode constFolded = compUnit;
-
-        if (configuration.cFoldEnabled) {
-            constFolded =
-                compUnit.accept(new ConstFoldVisitor()).assertSecond();
-        }
-        assert constFolded instanceof IRCompUnit;
-
-        IRCompUnit lowered = constFolded.accept(
-            new LoweringVisitor(generator, configuration.commutativeEnabled))
-            .assertThird();
+        IRCompUnit lowered = IrUtil.lower(compUnit, generator, configuration);
 
         if (configuration.cFoldEnabled) {
             assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
