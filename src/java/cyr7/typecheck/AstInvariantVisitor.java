@@ -1,6 +1,5 @@
 package cyr7.typecheck;
 
-import cyr7.ast.Node;
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
@@ -26,6 +25,7 @@ import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
@@ -274,6 +274,11 @@ class AstInvariantVisitor extends AbstractVisitor<Boolean>
 
     @Override
     public Boolean visit(IntNegExprNode n) {
+        return n.getType() != null;
+    }
+
+    @Override
+    public Boolean visit(LengthExprNode n) {
         return n.getType() != null;
     }
 }

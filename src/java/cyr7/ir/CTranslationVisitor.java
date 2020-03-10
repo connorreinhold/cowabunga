@@ -26,6 +26,7 @@ import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
@@ -202,6 +203,11 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(IntNegExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(LengthExprNode n) {
         return cjump(n);
     }
 

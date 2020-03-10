@@ -37,6 +37,7 @@ import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
@@ -88,7 +89,6 @@ import cyr7.util.OneOfThree;
 import cyr7.visitor.AbstractVisitor;
 
 final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
-
 
     static final class Result extends OneOfThree<ExpandedType, ResultType, Void> {
 
@@ -302,11 +302,6 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
      */
     @Override
     public Result visit(XiProgramNode n) {
-        context.addFn("length",
-                new FunctionType(
-                        new ExpandedType(new ArrayType(UnitType.unitValue)),
-                        ExpandedType.intType));
-
         // Type check use statements
         n.uses.forEach(use -> use.accept(this));
 
@@ -460,7 +455,8 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
     public Result visit(ExprStmtNode n) {
         ExpandedType type = n.expr.accept(this).assertFirst();
 
-        if (!(n.expr instanceof FunctionCallExprNode)) {
+        if (!(n.expr instanceof FunctionCallExprNode
+            || n.expr instanceof LengthExprNode)) {
             throw new ExpectedFunctionException(n.expr.getLocation());
         }
 
@@ -936,6 +932,16 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         }
         throw new TypeMismatchException(type, ExpandedType.intType,
                 n.expr.getLocation());
+    }
+
+    @Override
+    public Result visit(LengthExprNode n) {
+        ExpandedType type = n.expr.accept(this).assertFirst();
+        if (type.isSubtypeOfArray()) {
+            return assignType(n, ExpandedType.intType);
+        }
+        throw new TypeMismatchException(type, ExpandedType.intType,
+            n.expr.getLocation());
     }
 
     @Override

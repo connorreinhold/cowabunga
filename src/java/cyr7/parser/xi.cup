@@ -450,9 +450,6 @@ FunctionCall ::=
             l.addFirst(e);
             RESULT = new FunctionCallExprNode(idxleft, id, l);
         :}
-    | LENGTH:len L_PAREN Expr:e R_PAREN {:
-            RESULT = new FunctionCallExprNode(lenxleft, "length", List.of(e));
-        :}
     ;
 
 ArgParamList ::=
@@ -487,6 +484,9 @@ UnaryExpr ::=
             ExprNode e = new LiteralIntExprNode(ixleft, MyLexer.maxIntegerString);
             RESULT = new IntNegExprNode(mxleft, e);
         :} %prec NEG_INT
+    | LENGTH:len L_PAREN Expr:e R_PAREN {:
+            RESULT = new LengthExprNode(lenxleft, e);
+        :}
     ;
 
 BinaryExpr ::=

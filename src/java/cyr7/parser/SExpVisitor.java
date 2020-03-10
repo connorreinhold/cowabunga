@@ -9,6 +9,7 @@ import cyr7.ast.expr.binexpr.*;
 import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.type.PrimitiveTypeNode;
@@ -442,6 +443,19 @@ public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
         printer.printAtom("-");
         n.expr.accept(this);
         printer.endList();
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(LengthExprNode n) {
+        printer.startList();
+
+        printer.printAtom("length");
+
+        n.expr.accept(this);
+
+        printer.endList();
+
         return Optional.empty();
     }
 

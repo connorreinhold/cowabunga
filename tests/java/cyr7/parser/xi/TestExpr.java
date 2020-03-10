@@ -25,6 +25,7 @@ import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
+import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.exceptions.lexer.LexerIntegerOverflowException;
 import cyr7.exceptions.parser.ParserIntegerOverflowException;
 import cyr7.parser.ParserUtil;
@@ -297,13 +298,12 @@ class TestExpr {
 
         expr = "length(a[2+b])";
         parsed = ParserFactory.parseExpr(expr);
-        LinkedList<ExprNode> params = new LinkedList<>();
-        params.add(new ArrayAccessExprNode(LOC,
+        ExprNode param = new ArrayAccessExprNode(LOC,
             new VariableAccessExprNode(LOC, "a"),
             new AddExprNode(LOC,
                 new LiteralIntExprNode(LOC, "2"),
-                new VariableAccessExprNode(LOC, "b"))));
-        expected = new FunctionCallExprNode(LOC, "length", params);
+                new VariableAccessExprNode(LOC, "b")));
+        expected = new LengthExprNode(LOC, param);
 
         assertEquals(parsed, expected);
     }
