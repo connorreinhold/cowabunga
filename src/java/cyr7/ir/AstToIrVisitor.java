@@ -553,21 +553,32 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
          * }
          */
 
+        System.out.println("\n\n");
         String leftSumming = generator.newLabel();
+        System.out.println("leftSumming: "+leftSumming);
         String leftBody = generator.newLabel();
+        System.out.println("leftBody: "+leftBody);
         String i = generator.newTemp();
+        System.out.println("i: "+i);
         String rightSumming = generator.newLabel();
+        System.out.println("rightSumming: "+rightSumming);
         String rightBody = generator.newLabel();
+        System.out.println("rightBody: "+rightBody);
         String j = generator.newTemp();
+        System.out.println("j: "+j);
         String exit = generator.newLabel();
+        System.out.println("exit: "+exit);
+        System.out.println();
 
         seq.add(make.IRMove(make.IRTemp(i), make.IRConst(0)));
         seq.add(make.IRLabel(leftSumming));
+        // While i < leftArrSize
         seq.add(make.IRCJump(
             make.IRBinOp(OpType.LT, make.IRTemp(i), make.IRTemp(leftArrSize)),
             leftBody,
             rightSumming));
         seq.add(make.IRLabel(leftBody));
+        // Move value at [leftArrAddr + 8 * i] into [summedArrAddr + 8 * i]
         seq.add(make.IRMove(
             make.IRMem(
                 make.IRBinOp(OpType.ADD,
@@ -575,11 +586,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     make.IRBinOp(OpType.MUL,
                         make.IRTemp(i),
                         make.IRConst(8)))),
-            make.IRBinOp(OpType.ADD,
+            make.IRMem(
+                make.IRBinOp(OpType.ADD,
                 make.IRTemp(leftArrAddr),
                 make.IRBinOp(OpType.MUL,
                     make.IRTemp(i),
-                    make.IRConst(8)))));
+                    make.IRConst(8))))));
         // i++
         seq.add(make.IRMove(
             make.IRTemp(i),

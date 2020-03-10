@@ -25,7 +25,7 @@ public class TestPrograms {
     void testArithmeticIteration() throws Exception {
         String result = Run.runFile("arithmeticiteration");
         System.out.println(result);
-        String expected = "3";
+        String expected = "2";
         System.out.println(expected);
         assertEquals(expected, result);
     }
