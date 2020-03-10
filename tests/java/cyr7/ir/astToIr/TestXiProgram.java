@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.StringReader;
 
+import cyr7.ir.DefaultIdGenerator;
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
@@ -27,7 +28,7 @@ class TestXiProgram {
 
     private static void assertEq(IRNode expected, Node toTransform) {
         assertEquals(expected,
-                toTransform.accept(new AstToIrVisitor()).assertFirst());
+                toTransform.accept(new AstToIrVisitor(new DefaultIdGenerator())).assertFirst());
     }
 
     private static void assertEq(IRNode expected, Node toTransform,
@@ -43,7 +44,7 @@ class TestXiProgram {
         XiProgramNode node = (XiProgramNode) parser.parse().value;
         TypeCheckUtil.typeCheckNoIxiFiles(node);
         // Should be a statement
-        IRNode result = node.accept(new AstToIrVisitor()).assertSecond();
+        IRNode result = node.accept(new AstToIrVisitor(new DefaultIdGenerator())).assertSecond();
         IRFuncDecl downcasted = (IRFuncDecl) result;
         IRCompUnit compUnit = new IRCompUnit(C.LOC, "test");
         compUnit.appendFunc(downcasted);

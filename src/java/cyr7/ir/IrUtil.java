@@ -6,6 +6,7 @@ import java.io.Writer;
 
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
+import cyr7.ir.block.TraceOptimizer;
 import cyr7.ir.fold.ConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
@@ -39,23 +40,23 @@ public class IrUtil {
         IdGenerator generator,
         Configuration configuration) {
 
-        IRNode constFolded = compUnit;
-
         CLI.debugPrint("Constant Folding Enabled: " + configuration.cFoldEnabled);
         if (configuration.cFoldEnabled) {
-            constFolded =
-                compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            assert node instanceof IRCompUnit;
+            compUnit = (IRCompUnit) node;
         }
-        assert constFolded instanceof IRCompUnit;
 
-        IRCompUnit lowered = constFolded.accept(
+        compUnit = compUnit.accept(
             new LoweringVisitor(generator, configuration.commutativeEnabled))
             .assertThird();
 
-        CLI.debugPrint("Actually Const Folded? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
-        CLI.debugPrint("Actually Canonical? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
+        compUnit = TraceOptimizer.optimize(compUnit, generator);
 
-        return lowered;
+        CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
+        CLI.debugPrint("Actually Canonical? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
+
+        return compUnit;
     }
 
     public static void mirRun(
@@ -68,9 +69,11 @@ public class IrUtil {
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, opener);
 
+        IdGenerator generator = new DefaultIdGenerator();
+
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor()).assertSecond();
+            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -95,7 +98,7 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor()).assertSecond();
+            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -123,7 +126,7 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor()).assertSecond();
+            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }

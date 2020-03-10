@@ -76,7 +76,7 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(BoolNegExprNode n) {
-        return n.accept(new CTranslationVisitor(generator, fLabel, tLabel));
+        return n.expr.accept(new CTranslationVisitor(generator, fLabel, tLabel));
     }
 
     @Override
@@ -102,7 +102,7 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     private IRStmt cjump(ExprNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-        return make.IRCJump(n.accept(new AstToIrVisitor())
+        return make.IRCJump(n.accept(new AstToIrVisitor(generator))
                              .assertFirst(), tLabel, fLabel);
     }
 
