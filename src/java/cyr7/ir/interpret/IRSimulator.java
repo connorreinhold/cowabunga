@@ -1,5 +1,6 @@
 package cyr7.ir.interpret;
 
+import cyr7.cli.CLI;
 import cyr7.ir.nodes.*;
 import cyr7.ir.visit.InsnMapsBuilder;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
@@ -9,6 +10,8 @@ import polyglot.util.SerialVersionUID;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,12 +58,22 @@ public class IRSimulator {
     private final IRNodeFactory make = new IRNodeFactory_c(
             new Location(-1, -1));
 
+    private final PrintStream stdout;
+
     /**
      * Construct an IR interpreter with a default heap size
      * @param compUnit the compilation unit to be interpreted
      */
     public IRSimulator(IRCompUnit compUnit) {
-        this(compUnit, DEFAULT_HEAP_SIZE);
+        this(compUnit, DEFAULT_HEAP_SIZE, System.out);
+    }
+
+    /**
+     * Construct an IR interpreter with a default heap size
+     * @param compUnit the compilation unit to be interpreted
+     */
+    public IRSimulator(IRCompUnit compUnit, PrintStream stdout) {
+        this(compUnit, DEFAULT_HEAP_SIZE, stdout);
     }
 
     /**
@@ -68,7 +81,7 @@ public class IRSimulator {
      * @param compUnit the compilation unit to be interpreted
      * @param heapSize the heap size
      */
-    public IRSimulator(IRCompUnit compUnit, int heapSize) {
+    public IRSimulator(IRCompUnit compUnit, int heapSize, PrintStream stdout) {
         this.compUnit = compUnit;
         this.heapSizeMax = heapSize;
 
@@ -99,6 +112,8 @@ public class IRSimulator {
         compUnit = (IRCompUnit) imb.visit(compUnit);
         indexToInsn = imb.indexToInsn();
         nameToIndex = imb.nameToIndex();
+
+        this.stdout = stdout;
 
     }
 
@@ -234,9 +249,7 @@ public class IRSimulator {
             // Transfer child's return temps to the parent frame, because the child frame is going away
             for (int i = 0; i <= numReturnVals; i++) {
                 String currRetTmp = Configuration.ABSTRACT_RET_PREFIX + i;
-                if (debugLevel > 2) {
-                    System.out.println("Returning: " + currRetTmp + ", " + frame.get(currRetTmp));
-                }
+                CLI.debugPrint("Returning: " + currRetTmp + ", " + frame.get(currRetTmp));
                 parent.put(currRetTmp, frame.get(currRetTmp));
             }
             if (numReturnVals > 0) {
@@ -266,14 +279,14 @@ public class IRSimulator {
             case "_Iprint_pai": {
                 long ptr = args[0], size = read(ptr - ws);
                 for (long i = 0; i < size; ++i)
-                    System.out.print((char) read(ptr + i * ws));
+                    stdout.print((char) read(ptr + i * ws));
                 break;
             }
             case "_Iprintln_pai": {
                 long ptr = args[0], size = read(ptr - ws);
                 for (long i = 0; i < size; ++i)
-                    System.out.print((char) read(ptr + i * ws));
-                System.out.println();
+                    stdout.print((char) read(ptr + i * ws));
+                stdout.println();
                 break;
             }
             case "_Ireadln_ai": {
@@ -452,7 +465,9 @@ public class IRSimulator {
                     + insn + "' (target '" + target.value + "' is unknown)!");
 
             long retVal = call(frame, targetName, args);
-            System.err.println("Return value: " + retVal);
+            if (debugLevel > 2) {
+                System.err.println("Return value: " + retVal);
+            }
             exprStack.pushValue(retVal);
         }
         else if (insn instanceof IRName) {

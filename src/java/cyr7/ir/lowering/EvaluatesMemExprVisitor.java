@@ -43,68 +43,67 @@ public class EvaluatesMemExprVisitor implements MyIRVisitor<Boolean> {
 
     @Override
     public Boolean visit(IRCall n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRESeq n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRName n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
-
 
     @Override
     public Boolean visit(IRCallStmt n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRCJump n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRCompUnit n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRExp n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRFuncDecl n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRJump n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRLabel n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRMove n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRReturn n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
     @Override
     public Boolean visit(IRSeq n) {
-        throw new UnsupportedOperationException();
+        return true;
     }
 
 }

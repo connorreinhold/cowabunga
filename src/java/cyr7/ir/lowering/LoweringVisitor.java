@@ -286,7 +286,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         for (IRFuncDecl funcDecl : functions) {
             List<IRStmt> loweredStmts = funcDecl.body().accept(this).assertFirst();
             IRStmt loweredBody = make.IRSeq(loweredStmts);
-            IRFuncDecl loweredFuncDecl = make.IRFuncDecl(n.name(), loweredBody);
+            IRFuncDecl loweredFuncDecl = make.IRFuncDecl(funcDecl.name(), loweredBody);
             compUnit.appendFunc(loweredFuncDecl);
         }
         return Result.compUnit(compUnit);
