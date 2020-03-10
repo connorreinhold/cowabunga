@@ -47,7 +47,7 @@ class SequenceTest {
         test(List.of(callMain), singletonSeq);
 
         IRStmt moveNum = make.IRExp(make.IRTemp("t1"));
-        IRStmt jump = make.IRCJump(make.IRConst(1), "__lt");
+        IRStmt jump = make.IRCJump(make.IRConst(1), "__lt", "__lf");
         IRSeq sequenceOfThree = seq(
                 seq(moveNum, seq(seq(callMain, seq())), jump));
         test(List.of(callMain, jump), sequenceOfThree);
