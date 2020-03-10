@@ -3,6 +3,8 @@ package cyr7.ir.astToIr;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
@@ -12,6 +14,7 @@ import cyr7.ast.expr.binexpr.AddExprNode;
 import cyr7.ast.expr.binexpr.OrExprNode;
 import cyr7.ast.expr.binexpr.RemExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
@@ -103,9 +106,9 @@ class TestExpr {
 
         LookaheadIdGenerator generator = new LookaheadIdGenerator();
         String x = generator.peekTemp(0);
-        String lt = generator.peekTemp(1);
-        String lf = generator.peekTemp(2);
-        String lf_ = generator.peekTemp(3);
+        String lt = generator.peekLabel(0);
+        String lf = generator.peekLabel(1);
+        String lf_ = generator.peekLabel(2);
 
         IRStmt left = make.IRJump(make.IRName(lt));
         IRStmt right = make.IRJump(make.IRName(lf_));
@@ -115,7 +118,6 @@ class TestExpr {
                         left, make.IRLabel(lf), right, make.IRLabel(lf_),
                         make.IRMove(make.IRTemp(x), make.IRConst(0)),
                         make.IRLabel(lt)), make.IRTemp(x));
-
         assertEq(expected, node, generator);
     }
 
@@ -175,15 +177,4 @@ class TestExpr {
         IRExpr expected = make.IRConst('x');
         assertEq(expected, node);
     }
-
-    @Test
-    void testLiteralString() {
-        fail();
-    }
-
-    @Test
-    void testLiteralArray() {
-        fail();
-    }
-
 }

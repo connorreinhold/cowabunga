@@ -19,7 +19,9 @@ import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
@@ -59,11 +61,10 @@ public final class Run {
     }
 
     public static String runFile(String filename) throws Exception {
-        String filePath = Run.class
+        InputStream filePath = Run.class
             .getClassLoader()
-            .getResource("irgen/"+ filename + ".xi")
-            .getFile();
-        String program = new String(Files.readAllBytes(Paths.get(filePath)));
+            .getResourceAsStream("irgen/"+ filename + ".xi");
+        String program = new String(filePath.readAllBytes());
         return run(program);
     }
 

@@ -20,5 +20,14 @@ public class TestPrograms {
             + "500\n";
         assertEquals(expected, result);
     }
+    
+    @Test
+    void testArithmeticIteration() throws Exception {
+        String result = Run.runFile("arithmeticiteration");
+        System.out.println(result);
+        String expected = "32767";
+        System.out.println(expected);
+        assertEquals("1", "2");
+    }
 
 }
