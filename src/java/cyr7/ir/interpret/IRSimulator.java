@@ -441,6 +441,7 @@ public class IRSimulator {
         }
         else if (insn instanceof IRMem) {
             long addr = exprStack.popValue();
+            System.err.println(insn.location());
             exprStack.pushAddr(read(addr), addr);
         }
         else if (insn instanceof IRCall) {
