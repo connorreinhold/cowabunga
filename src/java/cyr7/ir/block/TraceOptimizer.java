@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public final class TraceOptimizer {
 
-    public static void optimize(IRCompUnit compUnit, IdGenerator generator) {
+    public static IRCompUnit optimize(IRCompUnit compUnit, IdGenerator generator) {
         IRNodeFactory factory = new IRNodeFactory_c(compUnit.location());
 
         IRCompUnit optimized = factory.IRCompUnit(compUnit.name());
@@ -33,6 +33,8 @@ public final class TraceOptimizer {
             IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(), newBody);
             optimized.appendFunc(funcDecl);
         });
+
+        return optimized;
     }
 
     private static List<IRStmt> flatten(List<List<BasicBlock>> traces) {
