@@ -18,29 +18,24 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 class TestTraceOptimization {
 
+    private final BasicBlock EMPTY = new BasicBlock(List.of());
+
     private final Location loc = new Location(-1, -1);
     private final IRNodeFactory make = new IRNodeFactory_c(loc);
     private final IdGenerator generate = new DefaultIdGenerator();
 
-    private void test(TraceList expected, List<IRStmt> stmts) {
+    private void test(List<List<BasicBlock>> expected, List<IRStmt> stmts) {
         BasicBlockList actual = BasicBlockGenerator.getBlocks(stmts);
 
         IdGenerator generator = new DefaultIdGenerator();
-        BlockTraceGenerator traceGenerator = new BlockTraceGenerator(generator);
-        TraceList result = traceGenerator.getTraces(actual);
+        List<List<BasicBlock>> result = BlockTraceGenerator.getTraces(generator, actual);
         assertEquals(expected.size(), result.size());
-        expected.forEach(e -> result.contains(e));
-        result.forEach(e -> expected.contains(e));
+        expected.forEach(result::contains);
+        result.forEach(expected::contains);
     }
 
     private BasicBlock block(IRStmt... stmts) {
         return new BasicBlock(Arrays.asList(stmts));
-    }
-
-    private TraceList trace(List<ArrayList<BasicBlock>> blocks) {
-        TraceList set = new TraceList();
-        set.addAll(blocks);
-        return set;
     }
 
     @Test
@@ -66,8 +61,8 @@ class TestTraceOptimization {
                                 make.IRConst(32)))
             );
         BasicBlock b3 = block(make.IRLabel(l1));
-        TraceList expected = trace(
-                List.of(new ArrayList<BasicBlock>(List.of(b1, b3, b2))));
+        List<List<BasicBlock>> expected = 
+                List.of(new ArrayList<BasicBlock>(List.of(b1, b3, b2)));
         test(expected, stmts);
     }
 
@@ -100,11 +95,12 @@ class TestTraceOptimization {
                         make.IRConst(0)),
                 make.IRCallStmt(make.IRName("print")));
 
-        TraceList expected = trace(
-                List.of(new ArrayList<BasicBlock>(List.of(b1)),
-                        new ArrayList<BasicBlock>(List.of(b2)),
-                        new ArrayList<BasicBlock>(List.of(b3)),
-                        new ArrayList<BasicBlock>(List.of(b4))));
+        List<List<BasicBlock>> expected =
+                List.of(
+                    new ArrayList<>(List.of(b1)),
+                    new ArrayList<>(List.of(b2)),
+                    new ArrayList<>(List.of(b3)),
+                    new ArrayList<>(List.of(b4)));
 
         test(expected, stmts);
 
@@ -136,13 +132,12 @@ class TestTraceOptimization {
 
         BasicBlock b4 = block(make.IRLabel("end"));
 
-        TraceList expected = trace(
-                List.of(new ArrayList<BasicBlock>(List.of(b1, b3)),
-                        new ArrayList<BasicBlock>(
-                                List.of(BasicBlock.EMPTY, b4)),
-                        new ArrayList<BasicBlock>(List.of(b2))));
+        List<List<BasicBlock>> expected =
+                List.of(new ArrayList<>(List.of(b1, b3)),
+                    new ArrayList<>(
+                        List.of(EMPTY, b4)),
+                    new ArrayList<>(List.of(b2)));
         test(expected, stmts);
-
     }
 
     @Test
@@ -158,14 +153,14 @@ class TestTraceOptimization {
                 make.IRLabel("end")
         );
 
-        BasicBlock b1 = BasicBlock.EMPTY;
+        BasicBlock b1 = EMPTY;
 
         BasicBlock b2 = block(make.IRLabel(lt));
         BasicBlock b3 = block(make.IRLabel(lf));
         BasicBlock b4 = block(make.IRLabel("end"));
 
-        TraceList expected = trace(
-                List.of(new ArrayList<BasicBlock>(List.of(b1, b2, b3, b4))));
+        List<List<BasicBlock>> expected =
+                List.of(new ArrayList<>(List.of(b1, b2, b3, b4)));
         test(expected, stmts);
     }
 

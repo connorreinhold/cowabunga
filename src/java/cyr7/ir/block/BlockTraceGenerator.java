@@ -77,7 +77,7 @@ final class BlockTraceGenerator {
             for (int i = 0; i < trace.size(); i++) {
                 BasicBlock b = trace.get(i);
 
-                if (b.last().isPresent()) {
+                if (b.last().isPresent() && i < trace.size() - 1) {
                     IRStmt last = b.last().get();
 
                     BasicBlock nextBlock = trace.get(i + 1);

@@ -26,10 +26,10 @@ class TestBlockGeneration {
 
     void test(Set<BasicBlock> expected, List<IRStmt> actual) {
         BasicBlockList blockSet = BasicBlockGenerator.getBlocks(actual);
-        assertEquals(expected.size(), blockSet.size());
+        assertEquals(expected.size(), blockSet.basicBlocks.size());
         // Redundant here but just in case.
-        blockSet.forEach(b -> assertTrue(expected.contains(b)));
-        expected.forEach(b -> assertTrue(blockSet.contains(b)));
+        blockSet.basicBlocks.forEach(b -> assertTrue(expected.contains(b)));
+        expected.forEach(b -> assertTrue(blockSet.basicBlocks.contains(b)));
     }
 
     private Set<BasicBlock> createExpectedSet(BasicBlock... blocks) {

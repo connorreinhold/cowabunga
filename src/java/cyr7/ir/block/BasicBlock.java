@@ -19,7 +19,6 @@ final class BasicBlock {
      * @param stmts Must have at least one statement.
      */
     public BasicBlock(List<IRStmt> stmts) {
-        assert stmts.size() >= 1;
         this.stmts = new ArrayList<>(stmts);
     }
 

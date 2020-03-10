@@ -27,7 +27,7 @@ final class BasicBlockList {
      */
     private static final long serialVersionUID = 6515358544269791637L;
 
-    private final List<BasicBlock> basicBlocks;
+    public final List<BasicBlock> basicBlocks;
     private final Queue<BasicBlock> unmarkedBlocks;
     private final Map<String, BasicBlock> labelToBlock;
 
