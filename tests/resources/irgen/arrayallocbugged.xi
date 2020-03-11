@@ -1,7 +1,6 @@
 main(args: int[][]) {
-    testArrayMultiDim();
-}
+    this_works: int[][] = {{} + {}}
+    this_works2: int[][] = {{}}
 
-testArrayMultiDim() {
-    a:int[][] = {{3,2,4,-1,0}} + {{5,6} + {7,8}}
+    this_breaks:int[][] = {{}} + {{} + {}}
 }
