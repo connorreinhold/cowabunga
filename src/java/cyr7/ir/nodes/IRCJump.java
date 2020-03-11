@@ -1,6 +1,7 @@
 package cyr7.ir.nodes;
 
 import java.util.Objects;
+import java.util.Optional;
 
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
@@ -9,6 +10,8 @@ import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+import javax.swing.text.html.Option;
+
 /**
  * An intermediate representation for a conditional transfer of control
  * CJUMP(expr, trueLabel, falseLabel)
@@ -16,7 +19,15 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class IRCJump extends IRStmt {
     private IRExpr cond;
     private String trueLabel;
-    private String falseLabel;
+    private Optional<String> falseLabel;
+
+    public IRCJump(Location location, IRExpr cond, String trueLabel) {
+        this(location, cond, trueLabel, Optional.empty());
+    }
+
+    public IRCJump(Location location, IRExpr cond, String trueLabel, String falseLabel) {
+        this(location, cond, trueLabel, Optional.of(falseLabel));
+    }
 
     /**
      *
@@ -26,8 +37,12 @@ public class IRCJump extends IRStmt {
      * @param falseLabel the destination of the jump if {@code expr} evaluates
      *          to false
      */
-    public IRCJump(Location location, IRExpr cond, String trueLabel, String falseLabel) {
+    public IRCJump(Location location, IRExpr cond, String trueLabel, Optional<String> falseLabel) {
         super(location);
+        assert cond != null;
+        assert trueLabel != null;
+        assert falseLabel != null;
+
         this.cond = cond;
         this.trueLabel = trueLabel;
         this.falseLabel = falseLabel;
@@ -42,7 +57,7 @@ public class IRCJump extends IRStmt {
     }
 
     public String falseLabel() {
-        return falseLabel;
+        return falseLabel.orElse(null);
     }
 
     @Override
@@ -55,13 +70,13 @@ public class IRCJump extends IRStmt {
         IRExpr expr = (IRExpr) v.visit(this, this.cond);
 
         if (expr != this.cond)
-            return v.nodeFactory().IRCJump(expr, trueLabel, falseLabel);
+            return new IRCJump(location(), expr, trueLabel, falseLabel);
 
         return this;
     }
 
     public boolean hasFalseLabel() {
-        return falseLabel != null;
+        return falseLabel.isPresent();
     }
 
     @Override
@@ -83,7 +98,7 @@ public class IRCJump extends IRStmt {
         cond.printSExp(p);
         p.printAtom(trueLabel);
         if (hasFalseLabel())
-            p.printAtom(falseLabel);
+            p.printAtom(falseLabel.get());
         p.endList();
     }
 

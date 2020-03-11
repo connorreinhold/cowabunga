@@ -31,7 +31,7 @@ public class IRNodeFactory_c implements IRNodeFactory {
 
     @Override
     public IRCJump IRCJump(IRExpr expr, String trueLabel) {
-        throw new UnsupportedOperationException();
+        return new IRCJump(location, expr, trueLabel);
     }
 
     @Override
