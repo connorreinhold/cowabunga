@@ -21,12 +21,18 @@ public class TestPrograms {
             + "500\n";
         assertEquals(expected, result);
     }
-    
+
     @Test
     void testArithmeticIteration() throws Exception {
-        RunConfiguration configuration = new RunConfiguration().bigHeap(true);
-        String result = Run.runFile("arithmetic2", configuration);
+        String result = Run.runFile("arithmetic2");
         String expected = "3\n2\n7\n10\nlHe\nsm\nCdefghijklmnopqrstuvwxyzAb\n100\n101\n";
+        assertEquals(expected, result);
+    }
+
+    @Test
+    void testArithmeticMemoryAlloc() throws Exception {
+        String result = Run.runFile("arrayallocbugged");
+        String expected = "";
         assertEquals(expected, result);
     }
     

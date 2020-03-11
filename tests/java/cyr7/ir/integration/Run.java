@@ -218,7 +218,7 @@ public final class Run {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
-        addPremain(result, runConfiguration.args);
+        result = addPremain(result, runConfiguration.args);
         TypeCheckUtil.typeCheck(result, new Opener());
 
         IdGenerator generator = new DefaultIdGenerator();
@@ -232,13 +232,15 @@ public final class Run {
 
         IRCompUnit lowered = lower(compUnit, generator, configuration);
 
+        System.err.println(sexp(lowered));
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         MyIRSimulator sim = new MyIRSimulator(
             lowered,
             runConfiguration.bigHeap ? MyIRSimulator.BIG_HEAP_SIZE : MyIRSimulator.DEFAULT_HEAP_SIZE,
             new PrintStream(outputStream)
         );
-        sim.call("_Imain_paai", 0);
+        sim.call("_Ipremain_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 

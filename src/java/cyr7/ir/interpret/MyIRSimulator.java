@@ -203,7 +203,9 @@ public final class MyIRSimulator extends IRSimulator {
             IRCallStmt callStmt = (IRCallStmt) insn;
             IRCall syntheticCall = make.IRCall(callStmt.target(), args);
             interpret(frame, syntheticCall);
-            exprStack.popValue(); // Remove function name node from stack (?)
+
+            // Remove the return value that was pushed onto the stack by IRCall
+            exprStack.popValue();
         } else if (insn instanceof IRExp) {
             // Discard result.
             exprStack.pop();
