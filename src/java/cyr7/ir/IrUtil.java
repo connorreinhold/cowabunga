@@ -42,17 +42,18 @@ public class IrUtil {
         Configuration configuration) {
 
         CLI.debugPrint("Constant Folding Enabled: " + configuration.cFoldEnabled);
-        if (configuration.cFoldEnabled) {
-            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
-        }
 
         compUnit = compUnit.accept(
             new LoweringVisitor(generator, configuration.commutativeEnabled))
             .assertThird();
 
         compUnit = TraceOptimizer.optimize(compUnit, generator);
+
+        if (configuration.cFoldEnabled) {
+            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            assert node instanceof IRCompUnit;
+            compUnit = (IRCompUnit) node;
+        }
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
         CLI.debugPrint("Actually Canonical? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));

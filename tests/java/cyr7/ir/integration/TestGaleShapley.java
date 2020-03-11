@@ -1,5 +1,6 @@
 package cyr7.ir.integration;
 
+import cyr7.ir.integration.Run.RunConfiguration;
 import org.junit.jupiter.api.Test;
 
 import java.util.Scanner;
@@ -8,11 +9,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestGaleShapley {
 
-    private int[][] parseGaleShapleyArgs(String input) {
+    private long[][] parseGaleShapleyArgs(String input) {
         Scanner scanner = new Scanner(input);
         int n = scanner.nextInt();
         scanner.nextLine();
-        int[][] args = new int[2 * n][n];
+        long[][] args = new long[2 * n][n];
         for (int i = 0; i < 2 * n; i++) {
             for (int j = 0; j < n; j++) {
                 args[i][j] = scanner.nextInt();
@@ -33,8 +34,10 @@ public class TestGaleShapley {
             "0 3 1 2\n" +
             "0 2 3 1\n" +
             "3 0 2 1\n";
-        String result = Run.runFile("galeshapley",
-            parseGaleShapleyArgs(test0), false);
+        RunConfiguration configuration = new RunConfiguration()
+            .args(parseGaleShapleyArgs(test0))
+            .bigHeap(false);
+        String result = Run.runFile("galeshapley", configuration);
         assertEquals("[3, 0, 2, 1]", result);
     }
 
@@ -53,8 +56,10 @@ public class TestGaleShapley {
             "1 2 5 4 3 0\n" +
             "0 5 1 3 4 2\n" +
             "3 2 4 1 0 5\n";
-        String result = Run.runFile("galeshapley",
-            parseGaleShapleyArgs(test1), false);
+        RunConfiguration configuration = new RunConfiguration()
+            .args(parseGaleShapleyArgs(test1))
+            .bigHeap(false);
+        String result = Run.runFile("galeshapley", configuration);
         assertEquals("[5, 3, 2, 1, 0, 4]", result);
     }
 
@@ -81,8 +86,10 @@ public class TestGaleShapley {
             "5 8 0 7 9 2 4 6 3 1\n" +
             "6 0 3 7 1 2 8 4 9 5\n" +
             "8 2 9 6 7 4 1 5 0 3\n";
-        String result = Run.runFile("galeshapley",
-            parseGaleShapleyArgs(test2), false);
+        RunConfiguration configuration = new RunConfiguration()
+            .args(parseGaleShapleyArgs(test2))
+            .bigHeap(false);
+        String result = Run.runFile("galeshapley", configuration);
         assertEquals("[4, 1, 3, 6, 5, 9, 0, 8, 7, 2]", result);
     }
 
@@ -1089,8 +1096,10 @@ public class TestGaleShapley {
             " 92 44 4 84 51 26 38 60 19 40 34 43 67 59 95 66 10 30 93 53 17 " +
             "33 20 22 3 94 25 56 36 2 49 50 46 9 96 79 73 18 87 74 83 39 0 31" +
             " 21 6 90 64 28 86 16 75 89 98 69 5\n";
-        String result = Run.runFile("galeshapley",
-            parseGaleShapleyArgs(test3), true);
+        RunConfiguration configuration = new RunConfiguration()
+            .args(parseGaleShapleyArgs(test3))
+            .bigHeap(false);
+        String result = Run.runFile("galeshapley", configuration);
         assertEquals("[62, 92, 33, 6, 94, 39, 90, 21, 7, 87, 1, 41, 91, 88, " +
             "31, 55, 48, 12, 46, 19, 80, 37, 47, 30, 81, 64, 49, 78, 34, 54, " +
             "35, 66, 9, 16, 20, 63, 82, 72, 97, 11, 57, 73, 38, 77, 93, 14, " +

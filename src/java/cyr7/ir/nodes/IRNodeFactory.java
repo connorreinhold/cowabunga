@@ -90,8 +90,10 @@ public interface IRNodeFactory {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
-            List<IRExpr> args);
+    default IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args) {
+        throw new UnsupportedOperationException("IRCallStmt should not have children!");
+    }
 
     IRCallStmt IRCallStmt(IRExpr target);
 

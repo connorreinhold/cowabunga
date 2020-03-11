@@ -1,9 +1,7 @@
 package cyr7.ir.integration;
 
+import cyr7.ir.integration.Run.RunConfiguration;
 import org.junit.jupiter.api.Test;
-
-import java.util.Arrays;
-import java.util.Scanner;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -24,9 +22,10 @@ public class TestPrograms {
         assertEquals(expected, result);
     }
     
-    //@Test
+    @Test
     void testArithmeticIteration() throws Exception {
-        String result = Run.runFile("arithmetic2");
+        RunConfiguration configuration = new RunConfiguration().bigHeap(true);
+        String result = Run.runFile("arithmetic2", configuration);
         String expected = "3\n2\n7\n10\nlHe\nsm\nCdefghijklmnopqrstuvwxyzAb\n100\n101\n";
         assertEquals(expected, result);
     }
@@ -98,9 +97,11 @@ public class TestPrograms {
 
     @Test
     void testEcho() throws Exception {
-        String result = Run.runFile("echo", new int[][]{
-            new int[]{ 72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100 }
-        }, false);
+        RunConfiguration runConfiguration = new RunConfiguration().args(new long[][]{
+            new long[]{ 72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100 }
+        });
+
+        String result = Run.runFile("echo", runConfiguration);
         assertEquals("Hello world\n", result);
     }
 

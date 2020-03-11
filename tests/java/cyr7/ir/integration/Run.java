@@ -17,6 +17,7 @@ import cyr7.ir.IrUtil;
 import cyr7.ir.IrUtil.Configuration;
 import cyr7.ir.fold.ConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
+import cyr7.ir.interpret.MyIRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -44,9 +45,36 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class Run {
+
+    public static final class RunConfiguration {
+
+        public final long[][] args;
+
+        public final boolean bigHeap;
+
+        public RunConfiguration() {
+            this.args = new long[][] { };
+            this.bigHeap = false;
+        }
+
+        public RunConfiguration(long[][] args, boolean bigHeap) {
+            this.args = args;
+            this.bigHeap = bigHeap;
+        }
+
+        public RunConfiguration args(long[][] args) {
+            return new RunConfiguration(args, this.bigHeap);
+        }
+
+        public RunConfiguration bigHeap(boolean bigHeap) {
+            return new RunConfiguration(this.args, bigHeap);
+        }
+
+    }
 
     private static class Opener implements IxiFileOpener {
 
@@ -73,34 +101,34 @@ public final class Run {
     }
 
     public static String runFile(String filename) throws Exception {
-        return runFile(filename, new int[][] {}, false);
+        return runFile(filename, new RunConfiguration());
     }
 
-    public static String runFile(String filename, int[][] args, boolean bigHeap) throws Exception {
+    public static String runFile(String filename, RunConfiguration configuration) throws Exception {
         InputStream filePath = Run.class
             .getClassLoader()
             .getResourceAsStream("irgen/"+ filename + ".xi");
         String program = new String(filePath.readAllBytes());
-        return run(program, args, bigHeap);
+        return run(program, configuration);
     }
 
     public static String run(String program) throws Exception {
-        return run(program, new int[][] {}, false);
+        return run(program, new RunConfiguration());
     }
 
-    public static String run(String program, int[][] args, boolean bigHeap) throws Exception {
-        String mirResult = mirRun(program, args, bigHeap);
+    public static String run(String program, RunConfiguration runConfiguration) throws Exception {
+        String mirResult = mirRun(program, runConfiguration);
 
-//        String lirResultNoOpts = lirRun(program, new Configuration(false, false));
-//        assertEquals(mirResult, lirResultNoOpts);
-//
-//        String lirResultCFold = lirRun(program, new Configuration(true, false));
+        String lirResultNoOpts = lirRun(program, new Configuration(false, false), runConfiguration);
+        assertEquals(mirResult, lirResultNoOpts);
+
+//        String lirResultCFold = lirRun(program, new Configuration(true, false), runConfiguration);
 //        assertEquals(mirResult, lirResultCFold);
 //
-//        String lirResultCommute = lirRun(program, new Configuration(false, true));
+//        String lirResultCommute = lirRun(program, new Configuration(false, true), runConfiguration);
 //        assertEquals(mirResult, lirResultCommute);
 //
-//        String lirResultAll = lirRun(program, new Configuration(true, true));
+//        String lirResultAll = lirRun(program, new Configuration(true, true), runConfiguration);
 //        assertEquals(mirResult, lirResultAll);
 
         return mirResult;
@@ -119,7 +147,7 @@ public final class Run {
 
         CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
         assertTrue(lowered.aggregateChildren(visitor),
-            "Program: "
+            "Program is not lowered, but it's supposed to be!: "
                 + sexp(lowered)
                 + "\nOffending node: "
                 + visitor.noncanonical());
@@ -127,14 +155,14 @@ public final class Run {
         return lowered;
     }
 
-    private static XiProgramNode addPremain(XiProgramNode toModify, int[][] args) {
+    private static XiProgramNode addPremain(XiProgramNode toModify, long[][] args) {
         Location LOC = new Location(-1, -1);
 
         List<ExprNode> exprArgs = new ArrayList<>();
-        for (int[] arg : args) {
+        for (long[] arg : args) {
             List<ExprNode> exprArg = new ArrayList<>();
-            for (int val : arg) {
-                exprArg.add(new LiteralIntExprNode(LOC, Integer.toString(val)));
+            for (long val : arg) {
+                exprArg.add(new LiteralIntExprNode(LOC, Long.toString(val)));
             }
             exprArgs.add(new LiteralArrayExprNode(LOC, exprArg));
         }
@@ -160,11 +188,11 @@ public final class Run {
         return new XiProgramNode(toModify.getLocation(), toModify.uses, functionDecls);
     }
 
-    private static String mirRun(String program, int[][] args, boolean bigHeap) throws Exception {
+    private static String mirRun(String program, RunConfiguration runConfiguration) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
-        result = addPremain(result, args);
+        result = addPremain(result, runConfiguration.args);
         TypeCheckUtil.typeCheck(result, new Opener());
 
         IdGenerator generator = new DefaultIdGenerator();
@@ -177,20 +205,20 @@ public final class Run {
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        IRSimulator sim = new IRSimulator(
+        MyIRSimulator sim = new MyIRSimulator(
             compUnit,
-            bigHeap ? 1_000_000 : IRSimulator.DEFAULT_HEAP_SIZE,
+            runConfiguration.bigHeap ? MyIRSimulator.BIG_HEAP_SIZE : MyIRSimulator.DEFAULT_HEAP_SIZE,
             new PrintStream(outputStream)
         );
         sim.call("_Ipremain_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 
-    private static String lirRun(String program, Configuration configuration, int[][] args) throws Exception {
+    private static String lirRun(String program, Configuration configuration, RunConfiguration runConfiguration) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
-        addPremain(result, args);
+        addPremain(result, runConfiguration.args);
         TypeCheckUtil.typeCheck(result, new Opener());
 
         IdGenerator generator = new DefaultIdGenerator();
@@ -205,7 +233,11 @@ public final class Run {
         IRCompUnit lowered = lower(compUnit, generator, configuration);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        IRSimulator sim = new IRSimulator(lowered, new PrintStream(outputStream));
+        MyIRSimulator sim = new MyIRSimulator(
+            lowered,
+            runConfiguration.bigHeap ? MyIRSimulator.BIG_HEAP_SIZE : MyIRSimulator.DEFAULT_HEAP_SIZE,
+            new PrintStream(outputStream)
+        );
         sim.call("_Imain_paai", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }

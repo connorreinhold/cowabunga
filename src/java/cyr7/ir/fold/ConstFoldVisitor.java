@@ -234,20 +234,12 @@ public class ConstFoldVisitor
     // Statements
 
     /**
-     * CFold[IRCallStmt(etarget, ...argsj)] ::= CallStmt(CFold[etarget],
-     * CFold[...argsj])
+     * A call statement node has no children (except for a function name),
+     * so there's no folding to do
      */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRCallStmt n) {
-        IRNodeFactory make = new IRNodeFactory_c(n.location());
-
-        IRExpr target = n.target().accept(this).assertFirst();
-        List<IRExpr> foldedArgs = n.args().stream().map(a -> {
-            return a.accept(this).assertFirst();
-        }).collect(Collectors.toList());
-
-        return OneOfThree
-                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));
+        return OneOfThree.ofSecond(n);
     }
 
     /**
