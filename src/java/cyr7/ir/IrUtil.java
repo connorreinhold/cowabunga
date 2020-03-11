@@ -2,6 +2,7 @@ package cyr7.ir;
 
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 
 import cyr7.ast.Node;
@@ -138,9 +139,11 @@ public class IrUtil {
         writer.append(String.valueOf(retVal)).append(System.lineSeparator());
     }
     
-    public static void printSExpr(IRNode node) {
-        SExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(System.out));
+    public static String sexpr(IRNode node) {
+        StringWriter writer = new StringWriter();
+        SExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
         node.printSExp(printer);
         printer.flush();
+        return writer.toString();
     }
 }

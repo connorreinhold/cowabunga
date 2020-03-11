@@ -2,6 +2,9 @@ package cyr7.ir.integration;
 
 import org.junit.jupiter.api.Test;
 
+import java.util.Arrays;
+import java.util.Scanner;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestPrograms {
@@ -86,8 +89,25 @@ public class TestPrograms {
     }
 
     @Test
-    void testPyramid() throws Exception {
+    void testMultiDimArray() throws Exception {
+        String result = Run.runFile("multidimarray");
+        String expected = "abcdeghijkmnopqstuvwyz{|}\n"
+            + "[[3, 0, 2, 1][0, 2, 3, 1][0, 3, 1, 2][1, 3, 2, 0]]";
+        assertEquals(expected, result);
+    }
 
+    @Test
+    void testEcho() throws Exception {
+        String result = Run.runFile("echo", new int[][]{
+            new int[]{ 72, 101, 108, 108, 111, 32, 119, 111, 114, 108, 100 }
+        }, false);
+        assertEquals("Hello world\n", result);
+    }
+
+    @Test
+    void testScope() throws Exception {
+        String result = Run.runFile("scope");
+        assertEquals("0", result);
     }
 
 }

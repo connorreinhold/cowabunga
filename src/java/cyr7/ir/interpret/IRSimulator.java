@@ -1,7 +1,23 @@
 package cyr7.ir.interpret;
 
 import cyr7.cli.CLI;
-import cyr7.ir.nodes.*;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRCJump;
+import cyr7.ir.nodes.IRCall;
+import cyr7.ir.nodes.IRCallStmt;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRConst;
+import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRFuncDecl;
+import cyr7.ir.nodes.IRJump;
+import cyr7.ir.nodes.IRMem;
+import cyr7.ir.nodes.IRMove;
+import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
+import cyr7.ir.nodes.IRReturn;
+import cyr7.ir.nodes.IRTemp;
 import cyr7.ir.visit.InsnMapsBuilder;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -11,7 +27,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -441,7 +456,6 @@ public class IRSimulator {
         }
         else if (insn instanceof IRMem) {
             long addr = exprStack.popValue();
-            System.err.println(insn.location());
             exprStack.pushAddr(read(addr), addr);
         }
         else if (insn instanceof IRCall) {
@@ -595,7 +609,7 @@ public class IRSimulator {
             if (Thread.currentThread().isInterrupted()) return false;
 
             if (debugLevel > 1)
-                System.out.println("Evaluating " + getCurrentInsn().label());
+                System.out.println("Evaluating " + getCurrentInsn().label() + " at " + getCurrentInsn().location());
             long backupIP = ip;
             leave(this);
 

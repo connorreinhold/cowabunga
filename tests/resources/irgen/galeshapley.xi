@@ -2,11 +2,6 @@ use io
 use conv
 
 main(prefData: int[][]) {
-    i: int = 0
-    while (i < length(prefData)) {
-        printArray(prefData[i])
-        i = i + 1
-    }
     proposerPrefs: int[][], respondentInvPrefs: int[][] = prefs(prefData)
     result: int[] = galeShapley(proposerPrefs, respondentInvPrefs)
     printArray(result)
@@ -22,6 +17,7 @@ prefs(prefData: int[][]): int[][], int[][] {
     j: int = 0
 
     while i < n {
+        j = 0
         while j < n {
            proposerPrefs[i][j] = prefData[i][j]
            j = j + 1
@@ -31,8 +27,10 @@ prefs(prefData: int[][]): int[][], int[][] {
 
     i = 0
     while i < n {
+        j = 0
+        line: int[] = prefData[n + i]
         while j < n {
-            respondentInvPrefs[i][prefData[i][j]] = j
+            respondentInvPrefs[i][line[j]] = j
             j = j + 1
         }
         i = i + 1
@@ -76,6 +74,8 @@ galeShapley(proposerPrefs: int[][], respondentPrefsInv: int[][]): int[] {
         proposer: int = 0
         while proposer < n {
             if !matched[proposer] {
+                matched[proposer] = true
+
                 respondent: int = proposerPrefs[proposer][proposerPreferenceIndex[proposer]]
                 proposerPreferenceIndex[proposer] = proposerPreferenceIndex[proposer] + 1
 
@@ -84,7 +84,7 @@ galeShapley(proposerPrefs: int[][], respondentPrefsInv: int[][]): int[] {
                     matchRespondentToProposer[respondent] = proposer
                 else {
                     if respondentPrefersProposer(respondentPrefsInv, respondent, otherProposer, proposer) {
-
+                        matched[proposer] = false
                     } else {
                         matchRespondentToProposer[respondent] = proposer
                         matched[otherProposer] = false
@@ -108,12 +108,22 @@ respondentPrefersProposer(respondentPrefsInv: int[][], respondent: int, leftProp
 
 printArray(a: int[]) {
     i: int = 0
-    print("[ ")
+    print("[")
     while (i < length(a)) {
         print(unparseInt(a[i]))
-        print(" ")
+        if (i < length(a) - 1)
+            print(", ")
         i = i + 1
     }
     print("]")
 }
 
+printArrayArray(a: int[][]) {
+    i: int = 0
+    print("[")
+    while (i < length(a)) {
+        printArray(a[i])
+        i = i + 1
+    }
+    print("]")
+}

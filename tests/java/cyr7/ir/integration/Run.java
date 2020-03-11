@@ -73,23 +73,23 @@ public final class Run {
     }
 
     public static String runFile(String filename) throws Exception {
-        return runFile(filename, new int[][] {});
+        return runFile(filename, new int[][] {}, false);
     }
 
-    public static String runFile(String filename, int[][] args) throws Exception {
+    public static String runFile(String filename, int[][] args, boolean bigHeap) throws Exception {
         InputStream filePath = Run.class
             .getClassLoader()
             .getResourceAsStream("irgen/"+ filename + ".xi");
         String program = new String(filePath.readAllBytes());
-        return run(program, args);
+        return run(program, args, bigHeap);
     }
 
     public static String run(String program) throws Exception {
-        return run(program, new int[][] {});
+        return run(program, new int[][] {}, false);
     }
 
-    public static String run(String program, int[][] args) throws Exception {
-        String mirResult = mirRun(program, args);
+    public static String run(String program, int[][] args, boolean bigHeap) throws Exception {
+        String mirResult = mirRun(program, args, bigHeap);
 
 //        String lirResultNoOpts = lirRun(program, new Configuration(false, false));
 //        assertEquals(mirResult, lirResultNoOpts);
@@ -160,15 +160,12 @@ public final class Run {
         return new XiProgramNode(toModify.getLocation(), toModify.uses, functionDecls);
     }
 
-
-    private static String mirRun(String program, int[][] args) throws Exception {
+    private static String mirRun(String program, int[][] args, boolean bigHeap) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
         result = addPremain(result, args);
         TypeCheckUtil.typeCheck(result, new Opener());
-
-        ParserUtil.printSExpr(result);
 
         IdGenerator generator = new DefaultIdGenerator();
 
@@ -179,10 +176,12 @@ public final class Run {
             compUnit = (IRCompUnit) node;
         }
 
-        System.out.println(sexp(compUnit));
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        IRSimulator sim = new IRSimulator(compUnit, 100_000, new PrintStream(outputStream));
+        IRSimulator sim = new IRSimulator(
+            compUnit,
+            bigHeap ? 1_000_000 : IRSimulator.DEFAULT_HEAP_SIZE,
+            new PrintStream(outputStream)
+        );
         sim.call("_Ipremain_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
