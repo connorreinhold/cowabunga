@@ -41,17 +41,12 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
+/**
+ * Generates a list of traces from a list of basic blocks.
+ */
 final class BlockTraceGenerator {
 
-    /**
-     * A debugging method that returns the trivial trace (the trace of every
-     * single block in original order)
-     */
-    public static List<List<BasicBlock>> getTrivialTraces(IdGenerator generator, List<BasicBlock> basicBlocks) {
-        return List.of(basicBlocks);
-    }
-
-    public static List<List<BasicBlock>> getTraces(IdGenerator generator, List<BasicBlock> basicBlocks) {
+    public static List<List<BasicBlock>> getTraces(List<BasicBlock> basicBlocks) {
         List<List<BasicBlock>> traces = new LinkedList<>();
         Queue<BasicBlock> queue = new LinkedList<>(basicBlocks);
         Set<BasicBlock> markedBlocks = new HashSet<>();
@@ -86,174 +81,7 @@ final class BlockTraceGenerator {
         assert markedBlocks.containsAll(basicBlocks);
         assert basicBlocks.containsAll(markedBlocks);
 
-//        optimize(generator, traces);
-
         return traces;
-    }
-
-    /**
-     * Removes useless jumps and organizes cjumps such that the false label
-     * always occurs directly after the cjump
-     *
-     * @param generator
-     * @param traces
-     */
-    private static void optimize(IdGenerator generator, List<List<BasicBlock>> traces) {
-        traces.forEach(trace -> {
-            for (int i = 0; i < trace.size(); i++) {
-                BasicBlock b = trace.get(i);
-
-                if (b.last().isPresent() && i < trace.size() - 1) {
-                    IRStmt last = b.last().get();
-
-                    BasicBlock nextBlock = trace.get(i + 1);
-                    List<IRStmt> replacement=
-                        last.accept(new FinalBlockStmtVisitor(generator, nextBlock));
-                    b.replaceLastStmt(replacement);
-                }
-            }
-        });
-    }
-
-    private static class FinalBlockStmtVisitor implements MyIRVisitor<List<IRStmt>> {
-
-        private final String errorMsg = "The accessed node is an expression.";
-        private final Optional<String> firstLabelOfNextBlock;
-
-        private final IdGenerator generator;
-
-        public FinalBlockStmtVisitor(IdGenerator generator, BasicBlock nextBlock) {
-            this.generator = generator;
-            this.firstLabelOfNextBlock = nextBlock.first().map(IRLabel::name);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRBinOp n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRCall n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRConst n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRESeq n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRMem n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRName n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRTemp n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRCallStmt n) {
-            return List.of(n);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRCJump n) {
-            IRNodeFactory make = new IRNodeFactory_c(n.location());
-
-            String trueLabel = n.trueLabel();
-            if (n.falseLabel().isEmpty()) {
-                return List.of(n);
-            }
-
-            String falseLabel = n.falseLabel().get();
-
-            if (firstLabelOfNextBlock.isPresent()) {
-                if (falseLabel.equals(firstLabelOfNextBlock.get())) {
-                    // the false label would fall through anyways
-                    return List.of(
-                        make.IRCJump(n.cond(), n.trueLabel())
-                    );
-
-                } else if (trueLabel.equals(firstLabelOfNextBlock.get())) {
-                    // we swap false and true so we fall through to the true
-                    IRExpr inverted = make.IRBinOp(
-                        OpType.XOR,
-                        make.IRConst(1),
-                        n.cond()
-                    );
-
-                    return List.of(make.IRCJump(inverted, falseLabel));
-                }
-            }
-
-            return List.of(
-                    make.IRCJump(n.cond(), n.trueLabel()),
-                    make.IRJump(make.IRName(falseLabel)));
-        }
-
-        @Override
-        public List<IRStmt> visit(IRCompUnit n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRExp n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRFuncDecl n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRJump n) {
-            List<String> labels = n.accept(LabelsInJumpStmtsVisitor.instance);
-            if (labels.isEmpty()) {
-                CLI.debugPrint("Maybe something is not right?");
-                return List.of(n);
-            }
-
-            String label = labels.get(0);
-            if (firstLabelOfNextBlock.isPresent()
-                    && label.equals(firstLabelOfNextBlock.get())) {
-                return List.of();
-            } else {
-                return List.of(n);
-            }
-        }
-
-        @Override
-        public List<IRStmt> visit(IRLabel n) {
-            return List.of(n);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRMove n) {
-            return List.of(n);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRReturn n) {
-            return List.of(n);
-        }
-
-        @Override
-        public List<IRStmt> visit(IRSeq n) {
-            throw new UnsupportedOperationException(errorMsg);
-        }
-
     }
 
 }

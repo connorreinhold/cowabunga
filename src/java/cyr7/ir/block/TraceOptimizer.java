@@ -27,7 +27,8 @@ public final class TraceOptimizer {
             }
 
             List<BasicBlock> blocks = BlockGenerator.getBlocks(generator, statements);
-            List<List<BasicBlock>> traces = BlockTraceGenerator.getTraces(generator, blocks);
+            List<List<BasicBlock>> traces = BlockTraceGenerator.getTraces(blocks);
+            traces = BlockTraceOptimizer.optimized(traces);
             IRSeq newBody = new IRSeq(decl.body().location(), flatten(traces));
 
             IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(), newBody);
@@ -37,12 +38,13 @@ public final class TraceOptimizer {
         return optimized;
     }
 
-
     private static List<IRStmt> flatten(List<List<BasicBlock>> traces) {
         return traces.stream()
             .flatMap(trace -> trace.stream()
                 .flatMap(basicBlock -> basicBlock.stmts.stream())
             ).collect(Collectors.toList());
     }
+
+    private TraceOptimizer() { }
 
 }

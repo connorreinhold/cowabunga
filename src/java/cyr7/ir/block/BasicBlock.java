@@ -60,10 +60,11 @@ final class BasicBlock {
      *
      * @param replacement
      */
-    public void replaceLastStmt(List<IRStmt> replacement) {
-        this.stmts.remove(this.stmts.size() - 1);
-
-        this.stmts.addAll(replacement);
+    public BasicBlock replacingLastStmtWith(List<IRStmt> replacement) {
+        List<IRStmt> modifiedStmts = new ArrayList<>(stmts);
+        modifiedStmts.remove(modifiedStmts.size() - 1);
+        modifiedStmts.addAll(replacement);
+        return new BasicBlock(modifiedStmts);
     }
 
     @Override
