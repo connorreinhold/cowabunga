@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -434,11 +435,11 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            IRUtil.Configuration configuration;
+            LowerConfiguration lowerConfiguration;
             if (!optimizationsEnabled) {
-                configuration = new IRUtil.Configuration(false, true);
+                lowerConfiguration = new LowerConfiguration(false, true);
             } else {
-                configuration = new IRUtil.Configuration(cFoldEnabled, true);
+                lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
             }
 
             if (wantsIrGen) {
@@ -452,7 +453,7 @@ public class CLI {
                         filename,
                         isIXI,
                         opener,
-                        configuration
+                        lowerConfiguration
                     );
                 } catch (Exception e) {
                     debugPrint(e);
@@ -491,7 +492,7 @@ public class CLI {
                         filename,
                         isIXI,
                         opener,
-                        configuration
+                        lowerConfiguration
                     );
                 } catch (Exception e) {
                     debugPrint(e);

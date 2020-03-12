@@ -8,6 +8,7 @@ import java.util.Optional;
 import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
+import cyr7.util.Util;
 
 import javax.swing.text.html.Option;
 
@@ -19,7 +20,7 @@ final class BasicBlock {
      * @param stmts Must have at least one statement.
      */
     public BasicBlock(List<IRStmt> stmts) {
-        this.stmts = new ArrayList<>(stmts);
+        this.stmts = Util.immutableCopy(stmts);
     }
 
     public Optional<IRLabel> first() {

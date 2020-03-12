@@ -1,6 +1,6 @@
 package cyr7.ir.integration;
 
-import cyr7.ir.IRUtil.Configuration;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.integration.Run.RunConfiguration;
 import org.junit.jupiter.api.Test;
 
@@ -24,25 +24,25 @@ public abstract class TestProgram {
 
     @Test
     void testLirNoOptimizations() throws Exception {
-        String result = Run.lirRun(Run.getFile(filename()), new Configuration(false, false), configuration());
+        String result = Run.lirRun(Run.getFile(filename()), new LowerConfiguration(false, false), configuration());
         assertEquals(expected(), result);
     }
 
     @Test
     void testLirCfoldEnabled() throws Exception {
-        String result = Run.lirRun(Run.getFile(filename()), new Configuration(true, false), configuration());
+        String result = Run.lirRun(Run.getFile(filename()), new LowerConfiguration(true, false), configuration());
         assertEquals(expected(), result);
     }
 
     @Test
     void testLirTraceEnabled() throws Exception {
-        String result = Run.lirRun(Run.getFile(filename()), new Configuration(false, true), configuration());
+        String result = Run.lirRun(Run.getFile(filename()), new LowerConfiguration(false, true), configuration());
         assertEquals(expected(), result);
     }
 
     @Test
     void testLirAllEnabled() throws Exception {
-        String result = Run.lirRun(Run.getFile(filename()), new Configuration(true, true), configuration());
+        String result = Run.lirRun(Run.getFile(filename()), new LowerConfiguration(true, true), configuration());
         assertEquals(expected(), result);
     }
 

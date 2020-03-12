@@ -68,6 +68,9 @@ import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+/**
+ * Assumption: All CJUMPs have both labels set
+ */
 public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     private final IdGenerator generator;
@@ -835,8 +838,11 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr e = n.expr.accept(this).assertFirst();
         return OneOfTwo.ofFirst(
             make.IRMem(
-                make.IRBinOp(OpType.SUB, e,
-                    make.IRConst(Configuration.WORD_SIZE))
+                make.IRBinOp(
+                    OpType.SUB,
+                    e,
+                    make.IRConst(Configuration.WORD_SIZE)
+                )
             )
         );
     }

@@ -22,12 +22,12 @@ import java.io.Writer;
 
 public class IRUtil {
 
-    public static class Configuration {
+    public static class LowerConfiguration {
 
         public final boolean cFoldEnabled;
         public final boolean traceEnabled;
 
-        public Configuration(boolean cFoldEnabled, boolean traceEnabled) {
+        public LowerConfiguration(boolean cFoldEnabled, boolean traceEnabled) {
             this.cFoldEnabled = cFoldEnabled;
             this.traceEnabled = traceEnabled;
         }
@@ -37,17 +37,17 @@ public class IRUtil {
     public static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
-        Configuration configuration) {
+        LowerConfiguration lowerConfiguration) {
 
-        CLI.debugPrint("Constant Folding Enabled: " + configuration.cFoldEnabled);
+        CLI.debugPrint("Constant Folding Enabled: " + lowerConfiguration.cFoldEnabled);
 
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
 
-        if (configuration.traceEnabled) {
+        if (lowerConfiguration.traceEnabled) {
             compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
-        if (configuration.cFoldEnabled) {
+        if (lowerConfiguration.cFoldEnabled) {
             IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
@@ -89,7 +89,7 @@ public class IRUtil {
         String filename,
         boolean isIXI,
         IxiFileOpener fileOpener,
-        Configuration configuration) throws Exception {
+        LowerConfiguration lowerConfiguration) throws Exception {
 
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, fileOpener);
@@ -103,7 +103,7 @@ public class IRUtil {
             compUnit = (IRCompUnit) node;
         }
 
-        IRNode lowered = lower(compUnit, generator, configuration);
+        IRNode lowered = lower(compUnit, generator, lowerConfiguration);
 
         SExpPrinter printer =
             new CodeWriterSExpPrinter(new PrintWriter(writer));
@@ -117,7 +117,7 @@ public class IRUtil {
         String filename,
         boolean isIXI,
         IxiFileOpener fileOpener,
-        Configuration configuration) throws Exception {
+        LowerConfiguration lowerConfiguration) throws Exception {
 
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, fileOpener);
@@ -131,7 +131,7 @@ public class IRUtil {
             compUnit = (IRCompUnit) node;
         }
 
-        IRCompUnit lowered = lower(compUnit, generator, configuration);
+        IRCompUnit lowered = lower(compUnit, generator, lowerConfiguration);
 
         IRSimulator sim = new IRSimulator(lowered);
         long retVal = sim.call("_Imain_paai", 0);

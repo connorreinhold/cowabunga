@@ -13,7 +13,7 @@ import cyr7.ir.ASTToIRVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.Configuration;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRNode;
@@ -102,17 +102,15 @@ public final class Run {
     private static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
-        Configuration configuration) {
+        LowerConfiguration lowerConfiguration) {
 
-        IRCompUnit lowered = IRUtil.lower(compUnit, generator, configuration);
+        IRCompUnit lowered = IRUtil.lower(compUnit, generator, lowerConfiguration);
 
-        if (configuration.cFoldEnabled) {
+        if (lowerConfiguration.cFoldEnabled) {
             assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
         }
-
-        CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-
-        if (configuration.traceEnabled) {
+        if (lowerConfiguration.traceEnabled) {
+            CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
             assertTrue(lowered.aggregateChildren(visitor),
                 "Program is not lowered, but it's supposed to be!: "
                     + sexp(lowered)
@@ -182,7 +180,7 @@ public final class Run {
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 
-    public static String lirRun(String program, Configuration configuration, RunConfiguration runConfiguration) throws Exception {
+    public static String lirRun(String program, LowerConfiguration lowerConfiguration, RunConfiguration runConfiguration) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
@@ -198,7 +196,7 @@ public final class Run {
             compUnit = (IRCompUnit) node;
         }
 
-        IRCompUnit lowered = lower(compUnit, generator, configuration);
+        IRCompUnit lowered = lower(compUnit, generator, lowerConfiguration);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         IRSimulator sim = new IRSimulator(

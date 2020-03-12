@@ -43,6 +43,14 @@ import cyr7.visitor.MyIRVisitor;
 
 final class BlockTraceGenerator {
 
+    /**
+     * A debugging method that returns the trivial trace (the trace of every
+     * single block in original order)
+     */
+    public static List<List<BasicBlock>> getTrivialTraces(IdGenerator generator, List<BasicBlock> basicBlocks) {
+        return List.of(basicBlocks);
+    }
+
     public static List<List<BasicBlock>> getTraces(IdGenerator generator, List<BasicBlock> basicBlocks) {
         List<List<BasicBlock>> traces = new LinkedList<>();
         Queue<BasicBlock> queue = new LinkedList<>(basicBlocks);
@@ -68,39 +76,19 @@ final class BlockTraceGenerator {
                         continue nextBlock;
                     }
                 }
-
-                Optional<BasicBlock> fallthroughBlock = fallthroughBlock(basicBlocks, block);
-                if (fallthroughBlock.isPresent() && !markedBlocks.contains(fallthroughBlock.get())) {
-                    block = fallthroughBlock.get();
-                }
             }
 
-            traces.add(trace);
+            if (!trace.isEmpty()) {
+                traces.add(trace);
+            }
         }
 
-        optimize(generator, traces);
+        assert markedBlocks.containsAll(basicBlocks);
+        assert basicBlocks.containsAll(markedBlocks);
+
+//        optimize(generator, traces);
 
         return traces;
-    }
-
-    /**
-     * Get the block that would have fallen through for block if it exists.
-     * @param blocks
-     * @param block
-     * @return
-     */
-    private static Optional<BasicBlock> fallthroughBlock(List<BasicBlock> blocks, BasicBlock block) {
-        Iterator<BasicBlock> iterator = blocks.iterator();
-        while (iterator.hasNext()) {
-            if (iterator.next() == block) {
-                if (iterator.hasNext()) {
-                    return Optional.of(iterator.next());
-                } else {
-                    return Optional.empty();
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     /**

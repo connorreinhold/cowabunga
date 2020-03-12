@@ -25,9 +25,8 @@ class TestTraceOptimization {
     private final IdGenerator generate = new DefaultIdGenerator();
 
     private void test(List<List<BasicBlock>> expected, List<IRStmt> stmts) {
-        List<BasicBlock> actual = TraceOptimizer.getBlocks(stmts);
-
         IdGenerator generator = new DefaultIdGenerator();
+        List<BasicBlock> actual = BlockGenerator.getBlocks(generator, stmts);
         List<List<BasicBlock>> result = BlockTraceGenerator.getTraces(generator, actual);
         assertEquals(expected.size(), result.size());
         expected.forEach(result::contains);
