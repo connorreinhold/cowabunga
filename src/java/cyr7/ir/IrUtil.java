@@ -1,10 +1,5 @@
 package cyr7.ir;
 
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.StringWriter;
-import java.io.Writer;
-
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
 import cyr7.ir.block.TraceOptimizer;
@@ -15,23 +10,26 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.parser.ParserUtil;
-import cyr7.parser.SExpVisitor;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
+
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.StringWriter;
+import java.io.Writer;
 
 public class IrUtil {
 
     public static class Configuration {
 
         public final boolean cFoldEnabled;
-        public final boolean commutativeEnabled;
+        public final boolean traceEnabled;
 
-        public Configuration(boolean cFoldEnabled,
-                              boolean commutativeEnabled) {
+        public Configuration(boolean cFoldEnabled, boolean traceEnabled) {
             this.cFoldEnabled = cFoldEnabled;
-            this.commutativeEnabled = commutativeEnabled;
+            this.traceEnabled = traceEnabled;
         }
 
     }
@@ -43,11 +41,11 @@ public class IrUtil {
 
         CLI.debugPrint("Constant Folding Enabled: " + configuration.cFoldEnabled);
 
-        compUnit = compUnit.accept(
-            new LoweringVisitor(generator, configuration.commutativeEnabled))
-            .assertThird();
+        compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
 
-        compUnit = TraceOptimizer.optimize(compUnit, generator);
+        if (configuration.traceEnabled) {
+            compUnit = TraceOptimizer.optimize(compUnit, generator);
+        }
 
         if (configuration.cFoldEnabled) {
             IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();

@@ -25,11 +25,11 @@ class TestBlockGeneration {
     private final IdGenerator generate = new DefaultIdGenerator();
 
     void test(Set<BasicBlock> expected, List<IRStmt> actual) {
-        BasicBlockList blockSet = BasicBlockGenerator.getBlocks(actual);
-        assertEquals(expected.size(), blockSet.basicBlocks.size());
+        List<BasicBlock> blockSet = TraceOptimizer.getBlocks(actual);
+        assertEquals(expected.size(), blockSet.size());
         // Redundant here but just in case.
-        blockSet.basicBlocks.forEach(b -> assertTrue(expected.contains(b)));
-        expected.forEach(b -> assertTrue(blockSet.basicBlocks.contains(b)));
+        blockSet.forEach(b -> assertTrue(expected.contains(b)));
+        expected.forEach(b -> assertTrue(blockSet.contains(b)));
     }
 
     private Set<BasicBlock> createExpectedSet(BasicBlock... blocks) {

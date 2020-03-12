@@ -1,6 +1,5 @@
 package cyr7.ir.integration;
 
-import cyr7.ast.Node;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
@@ -15,12 +14,8 @@ import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.IrUtil;
 import cyr7.ir.IrUtil.Configuration;
-import cyr7.ir.fold.ConstFoldVisitor;
-import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.interpret.MyIRSimulator;
-import cyr7.ir.lowering.LoweringVisitor;
 import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
@@ -41,11 +36,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public final class Run {
@@ -100,38 +92,11 @@ public final class Run {
 
     }
 
-    public static String runFile(String filename) throws Exception {
-        return runFile(filename, new RunConfiguration());
-    }
-
-    public static String runFile(String filename, RunConfiguration configuration) throws Exception {
+    public static String getFile(String filename) throws Exception {
         InputStream filePath = Run.class
             .getClassLoader()
             .getResourceAsStream("irgen/"+ filename + ".xi");
-        String program = new String(filePath.readAllBytes());
-        return run(program, configuration);
-    }
-
-    public static String run(String program) throws Exception {
-        return run(program, new RunConfiguration());
-    }
-
-    public static String run(String program, RunConfiguration runConfiguration) throws Exception {
-        String mirResult = mirRun(program, runConfiguration);
-
-        String lirResultNoOpts = lirRun(program, new Configuration(false, false), runConfiguration);
-        assertEquals(mirResult, lirResultNoOpts);
-
-//        String lirResultCFold = lirRun(program, new Configuration(true, false), runConfiguration);
-//        assertEquals(mirResult, lirResultCFold);
-//
-//        String lirResultCommute = lirRun(program, new Configuration(false, true), runConfiguration);
-//        assertEquals(mirResult, lirResultCommute);
-//
-//        String lirResultAll = lirRun(program, new Configuration(true, true), runConfiguration);
-//        assertEquals(mirResult, lirResultAll);
-
-        return mirResult;
+        return new String(filePath.readAllBytes());
     }
 
     private static IRCompUnit lower(
@@ -146,11 +111,14 @@ public final class Run {
         }
 
         CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-        assertTrue(lowered.aggregateChildren(visitor),
-            "Program is not lowered, but it's supposed to be!: "
-                + sexp(lowered)
-                + "\nOffending node: "
-                + visitor.noncanonical());
+
+        if (configuration.traceEnabled) {
+            assertTrue(lowered.aggregateChildren(visitor),
+                "Program is not lowered, but it's supposed to be!: "
+                    + sexp(lowered)
+                    + "\nOffending node: "
+                    + visitor.noncanonical());
+        }
 
         return lowered;
     }
@@ -188,7 +156,7 @@ public final class Run {
         return new XiProgramNode(toModify.getLocation(), toModify.uses, functionDecls);
     }
 
-    private static String mirRun(String program, RunConfiguration runConfiguration) throws Exception {
+    public static String mirRun(String program, RunConfiguration runConfiguration) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
@@ -214,7 +182,7 @@ public final class Run {
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 
-    private static String lirRun(String program, Configuration configuration, RunConfiguration runConfiguration) throws Exception {
+    public static String lirRun(String program, Configuration configuration, RunConfiguration runConfiguration) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
@@ -231,8 +199,6 @@ public final class Run {
         }
 
         IRCompUnit lowered = lower(compUnit, generator, configuration);
-
-        System.err.println(sexp(lowered));
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         MyIRSimulator sim = new MyIRSimulator(

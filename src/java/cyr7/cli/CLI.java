@@ -437,12 +437,9 @@ public class CLI {
 
             IrUtil.Configuration configuration;
             if (!optimizationsEnabled) {
-                configuration = new IrUtil.Configuration(false, false);
+                configuration = new IrUtil.Configuration(false, true);
             } else {
-                configuration = new IrUtil.Configuration(
-                    cFoldEnabled,
-                    commutativeEnabled
-                );
+                configuration = new IrUtil.Configuration(cFoldEnabled, true);
             }
 
             if (wantsIrGen) {

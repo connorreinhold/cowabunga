@@ -21,9 +21,6 @@ import cyr7.visitor.MyIRVisitor;
 
 public class ContainsJumpsStmtVisitor implements MyIRVisitor<Boolean> {
 
-    public static ContainsJumpsStmtVisitor instance =
-            new ContainsJumpsStmtVisitor();
-
     /**
      * Call is not an statement in LIR. Use CallStmt instead.
      */

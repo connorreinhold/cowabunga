@@ -20,7 +20,6 @@ import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.ir.visit.InsnMapsBuilder;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.SerialVersionUID;
 
 import java.io.BufferedReader;
@@ -70,6 +69,7 @@ public class IRSimulator {
     protected static int debugLevel = 0;
 
     public static final int DEFAULT_HEAP_SIZE = 10240;
+    public static final int BIG_HEAP_SIZE = 10240;
 
     private final PrintStream stdout;
 

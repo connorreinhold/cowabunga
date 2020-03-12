@@ -1,9 +1,17 @@
 package cyr7.ir.block;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Queue;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import cyr7.cli.CLI;
 import cyr7.ir.CTranslationVisitor;
@@ -35,34 +43,64 @@ import cyr7.visitor.MyIRVisitor;
 
 final class BlockTraceGenerator {
 
-    public static List<List<BasicBlock>> getTraces(IdGenerator generator, BasicBlockList blocks) {
+    public static List<List<BasicBlock>> getTraces(IdGenerator generator, List<BasicBlock> basicBlocks) {
         List<List<BasicBlock>> traces = new LinkedList<>();
-        blocks.unmarkBlocks();
+        Queue<BasicBlock> queue = new LinkedList<>(basicBlocks);
+        Set<BasicBlock> markedBlocks = new HashSet<>();
 
-        while (blocks.hasUnmarkedBlock()) {
+        Map<String, BasicBlock> labelToBlock = new HashMap<>();
+        basicBlocks.forEach(b ->
+            b.first().ifPresent(l -> labelToBlock.put(l.name(), b))
+        );
+
+        while (!queue.isEmpty()) {
             LinkedList<BasicBlock> trace = new LinkedList<>();
-            BasicBlock b = blocks.getAnUnmarkedBlock();
-            trace.add(b);
-            List<String> jumpLabels = b.getJumpLabels();
+            BasicBlock block = queue.remove();
 
-            // Iterate across the list of jump labels.
-            while (!jumpLabels.isEmpty()) {
-                String label = jumpLabels.get(0);
-                var maybeNextBlock = blocks.getBlock(label);
-                if (maybeNextBlock.isPresent()) {
-                    b = maybeNextBlock.get();
-                    jumpLabels = b.getJumpLabels();
-                    trace.add(b);
-                } else {
-                    break;
+            nextBlock: while (!markedBlocks.contains(block)) {
+                markedBlocks.add(block);
+                trace.add(block);
+
+                for (String label : block.getJumpLabels()) {
+                    BasicBlock successor = labelToBlock.get(label);
+                    if (successor != null && !markedBlocks.contains(successor)) {
+                        block = successor;
+                        continue nextBlock;
+                    }
+                }
+
+                Optional<BasicBlock> fallthroughBlock = fallthroughBlock(basicBlocks, block);
+                if (fallthroughBlock.isPresent() && !markedBlocks.contains(fallthroughBlock.get())) {
+                    block = fallthroughBlock.get();
                 }
             }
-            traces.add(new ArrayList<>(trace));
+
+            traces.add(trace);
         }
 
         optimize(generator, traces);
 
         return traces;
+    }
+
+    /**
+     * Get the block that would have fallen through for block if it exists.
+     * @param blocks
+     * @param block
+     * @return
+     */
+    private static Optional<BasicBlock> fallthroughBlock(List<BasicBlock> blocks, BasicBlock block) {
+        Iterator<BasicBlock> iterator = blocks.iterator();
+        while (iterator.hasNext()) {
+            if (iterator.next() == block) {
+                if (iterator.hasNext()) {
+                    return Optional.of(iterator.next());
+                } else {
+                    return Optional.empty();
+                }
+            }
+        }
+        return Optional.empty();
     }
 
     /**

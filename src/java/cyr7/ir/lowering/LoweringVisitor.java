@@ -58,88 +58,11 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     }
 
-    private final IRExprCommutableChecker commutability;
     private final IdGenerator generator;
 
     public LoweringVisitor(IdGenerator generator) {
-        this(generator, true);
-    }
-
-    public LoweringVisitor(IdGenerator generator,
-            boolean commuteOptimizationEnabled) {
         this.generator = generator;
-        this.commutability = new IRExprCommutableChecker(this,
-                commuteOptimizationEnabled);
     }
-
-    // Methods
-
-    /**
-     * Checks if there exists an instruction in {@code e2} that affects
-     * {@code e1}. Returns {@code true} if {@code e2} does not {@code e1}.
-     */
-    public boolean commutes(IRExpr e1, IRExpr e2) {
-        if (!commutability.commutes(e1, e2)) {
-            return false;
-        }
-
-        var e1Result = e1.accept(this).assertSecond();
-        var e2Result = e2.accept(this).assertSecond();
-
-        List<IRStmt> e2Stmt = e2Result.part1();
-        if (containsJumps(e2Stmt)) {
-            return false;
-        }
-
-        // If e2 assigns to a MEM(e), where e cannot be simplified to
-        // a constant.
-        List<IRStmt> e1Stmt = e1Result.part1();
-        if (!(this.canDetermineEquality(e2Stmt)
-            && this.canDetermineEquality(e1Stmt))) {
-            return false;
-        }
-
-        Set<IRExpr> e1UsedExprSet = this.setOfUsedExpr(e1Stmt);
-        Set<IRExpr> e2DestSet = this.setOfDestinations(e2Stmt);
-
-        return Collections.disjoint(e1UsedExprSet, e2DestSet);
-    }
-
-    /**
-     * Returns true if there is a Jump
-     *
-     * @param stmts
-     * @return
-     */
-    private boolean containsJumps(List<IRStmt> stmts) {
-        ContainsJumpsStmtVisitor hasJumps = new ContainsJumpsStmtVisitor();
-        for (var stmt : stmts) {
-            if (stmt.accept(hasJumps)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private Set<IRExpr> setOfDestinations(List<IRStmt> stmts) {
-        return stmts.stream()
-            .filter(s -> (s instanceof IRMove))
-            .map(move -> ((IRMove) move).target())
-            .collect(Collectors.toSet());
-    }
-
-    private Set<IRExpr> setOfUsedExpr(List<IRStmt> stmts) {
-        var visitor = new TempsAccessedExprVisitor();
-        return stmts.stream()
-            .flatMap(s -> s.accept(visitor).stream())
-            .collect(Collectors.toSet());
-    }
-
-    private boolean canDetermineEquality(List<IRStmt> stmts) {
-        var visitor = new EvaluatesMemExprVisitor();
-        return stmts.stream().reduce(true, (u, s) -> {
-            return u && s.accept(visitor).booleanValue();
-        }, (u, i) -> true);    }
 
     // Visitor
 
@@ -149,47 +72,30 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         var leftResult = n.left().accept(this).assertSecond();
         var rightResult = n.right().accept(this).assertSecond();
         List<IRStmt> stmts = new ArrayList<>();
-        if (commutes(n.left(), n.right())) {
-            stmts.addAll(leftResult.part1());
-            stmts.addAll(rightResult.part1());
+        String t1 = generator.newTemp();
+        stmts.addAll(leftResult.part1());
+        stmts.add(make.IRMove(
+            make.IRTemp(t1),
+            leftResult.part2()
+        ));
+        stmts.addAll(rightResult.part1());
 
-            IRExpr expr = make.IRBinOp(n.opType(),
-                leftResult.part2(),
-                rightResult.part2());
+        IRExpr expr = make.IRBinOp(n.opType(),
+            make.IRTemp(t1),
+            rightResult.part2());
 
-            return Result.expr(stmts, expr);
-
-        } else {
-            String t1 = generator.newTemp();
-            stmts.addAll(leftResult.part1());
-            stmts.add(make.IRMove(
-                make.IRTemp(t1),
-                leftResult.part2()
-            ));
-            stmts.addAll(rightResult.part1());
-
-            IRExpr expr = make.IRBinOp(n.opType(),
-                make.IRTemp(t1),
-                rightResult.part2());
-
-            return Result.expr(stmts, expr);
-        }
+        return Result.expr(stmts, expr);
     }
 
-    /**
-     * The output will be a Pair(List of IRStmt, IRExpr)
-     */
     @Override
     public Result visit(IRCall n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
 
         List<IRStmt> stmts = new LinkedList<>();
-        var iterator = n.args().iterator();
 
         int i = 0;
-        while (iterator.hasNext()) {
-            var nextArg = iterator.next();
-            Result argResult = nextArg.accept(this);
+        for (IRExpr arg : n.args()) {
+            Result argResult = arg.accept(this);
             var resultPair = argResult.assertSecond();
             stmts.addAll(resultPair.part1());
             var argTemp = make.IRTemp(generator.argTemp(i));
@@ -238,33 +144,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCallStmt n) {
-        IRNodeFactory make = new IRNodeFactory_c(n.location());
-        List<IRStmt> stmts = new LinkedList<>();
-
-        var iterator = n.args().iterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-            var nextArg = iterator.next();
-            Result argResult = nextArg.accept(this);
-            var resultPair = argResult.assertSecond();
-            stmts.addAll(resultPair.part1());
-            var argTemp = make.IRTemp(generator.argTemp(i));
-            stmts.add(make.IRMove(argTemp, resultPair.part2()));
-            i++;
-        }
-        stmts.add(make.IRCallStmt(n.target()));
-
-        int j = 0;
-        var collectors = n.collectors().iterator();
-        while (collectors.hasNext()) {
-            String nextResult = collectors.next();
-            if (!nextResult.equals("_")) {
-                stmts.add(make.IRMove(make.IRTemp(generator.newTemp()),
-                        make.IRTemp(generator.retTemp(j))));
-            }
-            j++;
-        }
-        return Result.stmts(stmts);
+        return Result.stmts(List.of(n));
     }
 
     @Override
@@ -331,15 +211,53 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRMove n) {
-        var handler = new LowerMoveVisitor(this, generator);
-        return Result.stmts(n.accept(handler));
+        IRNodeFactory make = new IRNodeFactory_c(n.target().location());
+
+        var targetResult = n.target().accept(this).assertSecond();
+        var targetSideEffects = targetResult.part1();
+        var targetExpr = targetResult.part2();
+
+        var sourceResult = n.source().accept(this).assertSecond();
+        var sourceSideEffects = sourceResult.part1();
+        var sourceExpr = sourceResult.part2();
+
+        if (targetExpr instanceof IRTemp) {
+            List<IRStmt> stmts = new ArrayList<>();
+
+            // add the target side effects to the overall side effects, but we
+            // really expect it to be empty
+            assert targetSideEffects.isEmpty();
+            stmts.addAll(targetSideEffects);
+
+            stmts.addAll(sourceSideEffects);
+            stmts.add(make.IRMove(targetExpr, sourceExpr));
+
+            return Result.stmts(stmts);
+
+        } else if (targetExpr instanceof IRMem) {
+            IRMem targetMemExpr = (IRMem) targetExpr;
+            IRTemp t = make.IRTemp(generator.newTemp());
+
+            List<IRStmt> stmts = new ArrayList<>();
+            stmts.addAll(targetSideEffects);
+            stmts.add(make.IRMove(t, targetMemExpr.expr()));
+            stmts.addAll(sourceSideEffects);
+            stmts.add(make.IRMove(make.IRMem(t), sourceExpr));
+
+            return Result.stmts(stmts);
+
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @Override
     public Result visit(IRSeq n) {
-        return Result.stmts(n.stmts().stream().flatMap(s -> {
-            return s.accept(this).assertFirst().stream();
-        }).collect(Collectors.toList()));
+        return Result.stmts(
+            n.stmts().stream().flatMap(
+                s -> s.accept(this).assertFirst().stream()).collect(Collectors.toList()
+            )
+        );
     }
 
 }
