@@ -91,6 +91,8 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     public Result visit(IRCall n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
 
+        List<IRExpr> args = new ArrayList<>();
+
         List<IRStmt> stmts = new LinkedList<>();
 
         int i = 0;
@@ -100,15 +102,14 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
             stmts.addAll(resultPair.part1());
             var argTemp = make.IRTemp(generator.argTemp(i));
             stmts.add(make.IRMove(argTemp, resultPair.part2()));
+            args.add(argTemp);
             i++;
         }
 
-        stmts.add(make.IRCallStmt(n.target()));
+        String result = generator.newTemp();
+        stmts.add(make.IRCallStmt(List.of(result), n.target(), args));
 
-        IRTemp t = make.IRTemp(generator.newTemp());
-        stmts.add(make.IRMove(t, make.IRTemp(generator.retTemp(0))));
-
-        return Result.expr(stmts, t);
+        return Result.expr(stmts, make.IRTemp(result));
     }
 
     @Override

@@ -1,6 +1,6 @@
 package cyr7.ir.integration;
 
-import cyr7.ir.IrUtil.Configuration;
+import cyr7.ir.IRUtil.Configuration;
 import cyr7.ir.integration.Run.RunConfiguration;
 import org.junit.jupiter.api.Test;
 

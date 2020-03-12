@@ -1,7 +1,7 @@
 package cyr7.ir.util;
 
 import cyr7.ast.AbstractNode;
-import cyr7.ir.AstToIrVisitor;
+import cyr7.ir.ASTToIRVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRCompUnit;
@@ -13,13 +13,13 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class IRFactory {
 
     public static IRNode parseAstExpr(AbstractNode astNode) {
-        AstToIrVisitor visitor = new AstToIrVisitor(new DefaultIdGenerator());
+        ASTToIRVisitor visitor = new ASTToIRVisitor(new DefaultIdGenerator());
         IRNode result = astNode.accept(visitor).assertFirst();
         return result;
     }
 
     public static IRNode parseAstStmt(AbstractNode astNode) {
-        AstToIrVisitor visitor = new AstToIrVisitor(new DefaultIdGenerator());
+        ASTToIRVisitor visitor = new ASTToIRVisitor(new DefaultIdGenerator());
         IRNode result = astNode.accept(visitor).assertSecond();
         return result;
     }

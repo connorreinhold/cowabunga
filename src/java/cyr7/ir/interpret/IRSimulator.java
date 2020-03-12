@@ -69,7 +69,7 @@ public class IRSimulator {
     protected static int debugLevel = 0;
 
     public static final int DEFAULT_HEAP_SIZE = 10240;
-    public static final int BIG_HEAP_SIZE = 10240;
+    public static final int BIG_HEAP_SIZE = 64 * 10240;
 
     private final PrintStream stdout;
 
@@ -538,7 +538,7 @@ public class IRSimulator {
             long top = exprStack.popValue();
             String label;
             if (top == 0)
-                label = irCJump.falseLabel();
+                label = irCJump.falseLabel().orElse(null);
             else if (top == 1)
                 label = irCJump.trueLabel();
             else throw new InternalCompilerError("Invalid value in CJUMP - expected 0/1, got "

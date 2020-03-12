@@ -2,42 +2,37 @@ package cyr7.ir.astToIr;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.util.List;
-
 import cyr7.ir.DefaultIdGenerator;
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
-import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
 import cyr7.ast.expr.binexpr.RemExprNode;
 import cyr7.ast.expr.binexpr.SubExprNode;
-import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
-import cyr7.ir.AstToIrVisitor;
+import cyr7.ir.ASTToIRVisitor;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
-import cyr7.ir.util.IRFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 class TestExpr {
 
     private static void assertEq(IRNode expected, Node toTransform) {
         assertEquals(expected,
-                toTransform.accept(new AstToIrVisitor(new DefaultIdGenerator())).assertFirst());
+                toTransform.accept(new ASTToIRVisitor(new DefaultIdGenerator())).assertFirst());
     }
 
     private static void assertEq(IRNode expected, Node toTransform,
             IdGenerator generator) {
-        assertEquals(expected, toTransform.accept(new AstToIrVisitor(generator))
+        assertEquals(expected, toTransform.accept(new ASTToIRVisitor(generator))
                 .assertFirst());
     }
 

@@ -56,8 +56,8 @@ public class IRCJump extends IRStmt {
         return trueLabel;
     }
 
-    public String falseLabel() {
-        return falseLabel.orElse(null);
+    public Optional<String> falseLabel() {
+        return falseLabel;
     }
 
     @Override

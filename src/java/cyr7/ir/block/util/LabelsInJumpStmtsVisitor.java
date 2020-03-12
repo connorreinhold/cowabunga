@@ -70,7 +70,7 @@ public class LabelsInJumpStmtsVisitor implements MyIRVisitor<List<String>> {
     @Override
     public List<String> visit(IRCJump n) {
         List<String> setOfLabels = new LinkedList<>();
-        setOfLabels.add(n.falseLabel());
+        n.falseLabel().ifPresent(setOfLabels::add);
         setOfLabels.add(n.trueLabel());
         return Collections.unmodifiableList(setOfLabels);
     }

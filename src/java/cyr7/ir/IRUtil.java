@@ -20,7 +20,7 @@ import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
 
-public class IrUtil {
+public class IRUtil {
 
     public static class Configuration {
 
@@ -73,7 +73,7 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -98,7 +98,7 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -126,7 +126,7 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }

@@ -68,11 +68,11 @@ import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
+public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     private final IdGenerator generator;
 
-    public AstToIrVisitor(IdGenerator generator) {
+    public ASTToIRVisitor(IdGenerator generator) {
         this.generator = generator;
     }
 
@@ -313,14 +313,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr functionCall = n.initializer.accept(this).assertFirst();
         commands.add(make.IRExp(functionCall));
 
-        AtomicInteger retNum = new AtomicInteger();
+        int retNum = 0;
         for (Optional<VarDeclNode> var : n.varDecls) {
             if (var.isPresent()) {
                 commands.add(make.IRMove(
                     make.IRTemp(var.get().identifier),
-                    make.IRTemp(generator.retTemp(retNum.get()))));
+                    make.IRTemp(generator.retTemp(retNum))));
             }
-            retNum.incrementAndGet();
+            retNum++;
         }
         return OneOfTwo.ofSecond(make.IRSeq(commands));
     }

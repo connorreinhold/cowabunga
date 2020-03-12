@@ -9,12 +9,12 @@ import cyr7.ast.stmt.ProcedureStmtNode;
 import cyr7.ast.toplevel.FunctionDeclNode;
 import cyr7.ast.toplevel.FunctionHeaderDeclNode;
 import cyr7.ast.toplevel.XiProgramNode;
-import cyr7.ir.AstToIrVisitor;
+import cyr7.ir.ASTToIRVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
-import cyr7.ir.IrUtil;
-import cyr7.ir.IrUtil.Configuration;
-import cyr7.ir.interpret.MyIRSimulator;
+import cyr7.ir.IRUtil;
+import cyr7.ir.IRUtil.Configuration;
+import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRNode;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
@@ -104,7 +104,7 @@ public final class Run {
         IdGenerator generator,
         Configuration configuration) {
 
-        IRCompUnit lowered = IrUtil.lower(compUnit, generator, configuration);
+        IRCompUnit lowered = IRUtil.lower(compUnit, generator, configuration);
 
         if (configuration.cFoldEnabled) {
             assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
@@ -167,15 +167,15 @@ public final class Run {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        MyIRSimulator sim = new MyIRSimulator(
+        IRSimulator sim = new IRSimulator(
             compUnit,
-            runConfiguration.bigHeap ? MyIRSimulator.BIG_HEAP_SIZE : MyIRSimulator.DEFAULT_HEAP_SIZE,
+            runConfiguration.bigHeap ? IRSimulator.BIG_HEAP_SIZE : IRSimulator.DEFAULT_HEAP_SIZE,
             new PrintStream(outputStream)
         );
         sim.call("_Ipremain_p", 0);
@@ -193,7 +193,7 @@ public final class Run {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor(generator)).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -201,9 +201,9 @@ public final class Run {
         IRCompUnit lowered = lower(compUnit, generator, configuration);
 
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        MyIRSimulator sim = new MyIRSimulator(
+        IRSimulator sim = new IRSimulator(
             lowered,
-            runConfiguration.bigHeap ? MyIRSimulator.BIG_HEAP_SIZE : MyIRSimulator.DEFAULT_HEAP_SIZE,
+            runConfiguration.bigHeap ? IRSimulator.BIG_HEAP_SIZE : IRSimulator.DEFAULT_HEAP_SIZE,
             new PrintStream(outputStream)
         );
         sim.call("_Ipremain_p", 0);

@@ -184,7 +184,11 @@ final class BlockTraceGenerator {
             IRNodeFactory make = new IRNodeFactory_c(n.location());
 
             String trueLabel = n.trueLabel();
-            String falseLabel = n.falseLabel();
+            if (n.falseLabel().isEmpty()) {
+                return List.of(n);
+            }
+
+            String falseLabel = n.falseLabel().get();
 
             if (firstLabelOfNextBlock.isPresent()) {
                 if (falseLabel.equals(firstLabelOfNextBlock.get())) {
@@ -207,8 +211,7 @@ final class BlockTraceGenerator {
 
             return List.of(
                     make.IRCJump(n.cond(), n.trueLabel()),
-                    make.IRJump(make.IRName(n.falseLabel())));
-
+                    make.IRJump(make.IRName(falseLabel)));
         }
 
         @Override

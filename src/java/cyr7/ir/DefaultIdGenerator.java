@@ -13,7 +13,7 @@ public final class DefaultIdGenerator implements IdGenerator {
     }
 
     @Override
-    public String newLabel() {
+    public String newLabe() {
         return String.format("_l%d", (labelCounter++));
     }
 

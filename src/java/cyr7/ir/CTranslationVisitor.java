@@ -102,7 +102,7 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     private IRStmt cjump(ExprNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-        return make.IRCJump(n.accept(new AstToIrVisitor(generator))
+        return make.IRCJump(n.accept(new ASTToIRVisitor(generator))
                              .assertFirst(), tLabel, fLabel);
     }
 
