@@ -1,5 +1,6 @@
 package cyr7.ir.lowering;
 
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -90,25 +91,34 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRCall n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-
         List<IRExpr> args = new ArrayList<>();
-
         List<IRStmt> stmts = new LinkedList<>();
 
-        int i = 0;
+        // List of temps representing the values of each function argument
+        List<IRTemp> argValTemps = new ArrayList<IRTemp>();
         for (IRExpr arg : n.args()) {
             Result argResult = arg.accept(this);
             var resultPair = argResult.assertSecond();
             stmts.addAll(resultPair.part1());
+            
+            IRTemp argValTemp = make.IRTemp(generator.newTemp());
+            argValTemps.add(argValTemp);
+            // Cannot move directly into ARG_0 as nested function calls will overwrite the value
+            // i.e. call(1, call(0, 0))
+            stmts.add(make.IRMove(argValTemp, resultPair.part2()));
+            args.add(argValTemp);
+        }
+        
+        int i = 0;
+        for(IRTemp argValTemp: argValTemps) {
             var argTemp = make.IRTemp(generator.argTemp(i));
-            stmts.add(make.IRMove(argTemp, resultPair.part2()));
-            args.add(argTemp);
+            stmts.add(make.IRMove(argTemp, argValTemp));
             i++;
         }
-
+        
+        
         String result = generator.newTemp();
         stmts.add(make.IRCallStmt(List.of(result), n.target(), args));
-
         return Result.expr(stmts, make.IRTemp(result));
     }
 
