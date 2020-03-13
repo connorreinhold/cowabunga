@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -60,6 +61,7 @@ import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
+import cyr7.ir.nodes.IRTemp;
 import cyr7.parser.ParserUtil;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.semantics.types.FunctionType;
@@ -340,15 +342,25 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
-
-        AtomicInteger retNum = new AtomicInteger();
-        List<IRStmt> rets = n.exprs.stream()
-            .map(stmt -> make.IRMove(
-                make.IRTemp(generator.retTemp(retNum.getAndIncrement())),
-                stmt.accept(this).assertFirst()))
-            .collect(Collectors.toList());
-        rets.add(make.IRReturn());
-        return OneOfTwo.ofSecond(make.IRSeq(rets));
+        List<IRStmt> stmts = new ArrayList<IRStmt>();
+        List<IRTemp> returnValTemps = new ArrayList<IRTemp>();
+        
+        // Move each return arg into a temp representing its value
+        for (ExprNode expr: n.exprs) {
+            IRTemp valTemp = make.IRTemp(generator.newTemp());
+            stmts.add(make.IRMove(valTemp, expr.accept(this).assertFirst()));
+            returnValTemps.add(valTemp);
+        }
+        
+        // After calculation, move each of these return values into RET_0, RET_1
+        // Need to do this because otherwise "return 1, fun(0)" would overwrite RET_0
+        for(int i = 0; i < returnValTemps.size(); i++) {
+            stmts.add(make.IRMove(
+                make.IRTemp(generator.retTemp(i)), 
+                returnValTemps.get(i)));
+        }
+        stmts.add(make.IRReturn());
+        return OneOfTwo.ofSecond(make.IRSeq(stmts));
     }
 
     @Override

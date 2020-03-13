@@ -9,7 +9,7 @@ public class TestRetFuncCall extends TestProgram {
 
     @Override
     protected String expected() {
-        return "getPair(): 4\n";
+        return "4";
     }
 
 }

@@ -38,8 +38,8 @@ import polyglot.util.Pair;
 
 public class LoweringVisitor implements MyIRVisitor<Result> {
 
-    public static class Result
-            extends OneOfThree<List<IRStmt>, Pair<List<IRStmt>, IRExpr>, IRCompUnit> {
+    public static class Result extends
+            OneOfThree<List<IRStmt>, Pair<List<IRStmt>, IRExpr>, IRCompUnit> {
 
         public static Result stmts(List<IRStmt> statement) {
             return new Result(statement, null, null);
@@ -48,12 +48,13 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         public static Result expr(List<IRStmt> sideEffects, IRExpr expr) {
             return new Result(null, new Pair<>(sideEffects, expr), null);
         }
-        
+
         public static Result compUnit(IRCompUnit compUnit) {
             return new Result(null, null, compUnit);
         }
 
-        protected Result(List<IRStmt> stmts, Pair<List<IRStmt>, IRExpr> expr, IRCompUnit compUnit) {
+        protected Result(List<IRStmt> stmts, Pair<List<IRStmt>, IRExpr> expr,
+                IRCompUnit compUnit) {
             super(stmts, expr, compUnit);
         }
 
@@ -75,15 +76,11 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         List<IRStmt> stmts = new ArrayList<>();
         String t1 = generator.newTemp();
         stmts.addAll(leftResult.part1());
-        stmts.add(make.IRMove(
-            make.IRTemp(t1),
-            leftResult.part2()
-        ));
+        stmts.add(make.IRMove(make.IRTemp(t1), leftResult.part2()));
         stmts.addAll(rightResult.part1());
 
-        IRExpr expr = make.IRBinOp(n.opType(),
-            make.IRTemp(t1),
-            rightResult.part2());
+        IRExpr expr = make.IRBinOp(n.opType(), make.IRTemp(t1),
+                rightResult.part2());
 
         return Result.expr(stmts, expr);
     }
@@ -100,23 +97,22 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
             Result argResult = arg.accept(this);
             var resultPair = argResult.assertSecond();
             stmts.addAll(resultPair.part1());
-            
+
             IRTemp argValTemp = make.IRTemp(generator.newTemp());
             argValTemps.add(argValTemp);
-            // Cannot move directly into ARG_0 as nested function calls will overwrite the value
+            // Cannot move directly into ARG_0 as nested function calls will
+            // overwrite the value
             // i.e. call(1, call(0, 0))
             stmts.add(make.IRMove(argValTemp, resultPair.part2()));
             args.add(argValTemp);
         }
-        
-        int i = 0;
-        for(IRTemp argValTemp: argValTemps) {
+
+        // Move temps into function ARG_0, ARG_1, etc.
+        for (int i = 0; i < argValTemps.size(); i++) {
             var argTemp = make.IRTemp(generator.argTemp(i));
-            stmts.add(make.IRMove(argTemp, argValTemp));
-            i++;
+            stmts.add(make.IRMove(argTemp, argValTemps.get(i)));
         }
-        
-        
+
         String result = generator.newTemp();
         stmts.add(make.IRCallStmt(List.of(result), n.target(), args));
         return Result.expr(stmts, make.IRTemp(result));
@@ -175,9 +171,11 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         IRCompUnit compUnit = make.IRCompUnit(n.name());
         var functions = n.functions().values();
         for (IRFuncDecl funcDecl : functions) {
-            List<IRStmt> loweredStmts = funcDecl.body().accept(this).assertFirst();
+            List<IRStmt> loweredStmts = funcDecl.body().accept(this)
+                    .assertFirst();
             IRStmt loweredBody = make.IRSeq(loweredStmts);
-            IRFuncDecl loweredFuncDecl = make.IRFuncDecl(funcDecl.name(), loweredBody);
+            IRFuncDecl loweredFuncDecl = make.IRFuncDecl(funcDecl.name(),
+                    loweredBody);
             compUnit.appendFunc(loweredFuncDecl);
         }
         return Result.compUnit(compUnit);
@@ -264,11 +262,9 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRSeq n) {
-        return Result.stmts(
-            n.stmts().stream().flatMap(
-                s -> s.accept(this).assertFirst().stream()).collect(Collectors.toList()
-            )
-        );
+        return Result.stmts(n.stmts().stream()
+                .flatMap(s -> s.accept(this).assertFirst().stream())
+                .collect(Collectors.toList()));
     }
 
 }
