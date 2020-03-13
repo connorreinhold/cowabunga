@@ -1,6 +1,7 @@
-package cyr7.ir.integration;
+package cyr7.ir.integration.galeshapley;
 
 import cyr7.ir.integration.Run.RunConfiguration;
+import cyr7.ir.integration.TestProgram;
 
 import java.util.Scanner;
 

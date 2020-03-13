@@ -1,8 +1,9 @@
-package cyr7.ir.integration;
+package cyr7.ir.integration.galeshapley;
 
 import cyr7.ir.integration.Run.RunConfiguration;
+import cyr7.ir.integration.TestProgram;
 
-import static cyr7.ir.integration.TestGaleShapley0.parseGaleShapleyArgs;
+import static cyr7.ir.integration.galeshapley.TestGaleShapley0.parseGaleShapleyArgs;
 
 public class TestGaleShapley1 extends TestProgram {
     @Override
