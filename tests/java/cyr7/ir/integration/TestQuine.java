@@ -4,6 +4,11 @@ import cyr7.ir.integration.Run.RunConfiguration;
 
 import java.io.InputStream;
 
+/*
+ * A quine is a program that outputs itself. The expected output of the program
+ * should be the program itself. That's why the expected result for this program
+ * is just the file itself.
+ */
 public class TestQuine extends TestProgram {
     @Override
     protected String filename() {
