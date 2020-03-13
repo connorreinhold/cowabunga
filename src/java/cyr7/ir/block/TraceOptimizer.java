@@ -28,8 +28,8 @@ public final class TraceOptimizer {
 
             List<BasicBlock> blocks = BlockGenerator.getBlocks(generator, statements);
             List<List<BasicBlock>> traces = BlockTraceGenerator.getTraces(blocks);
-            traces = BlockTraceOptimizer.optimized(traces);
-            IRSeq newBody = new IRSeq(decl.body().location(), flatten(traces));
+            List<List<BasicBlock>> optimizedTraces = BlockTraceOptimizer.optimized(traces);
+            IRSeq newBody = new IRSeq(decl.body().location(), flatten(optimizedTraces));
 
             IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(), newBody);
             optimized.appendFunc(funcDecl);

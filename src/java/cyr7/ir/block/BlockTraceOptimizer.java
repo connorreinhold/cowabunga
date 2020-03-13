@@ -49,14 +49,18 @@ final class BlockTraceOptimizer {
                 IRStmt last = b.last().get();
 
                 BasicBlock nextBlock = trace.get(i + 1);
-                List<IRStmt> replacement=
+                List<IRStmt> replacement =
                     last.accept(new FinalBlockStmtVisitor(nextBlock));
                 b = b.replacingLastStmtWith(replacement);
 
                 optimizedTrace.add(b);
             }
 
-            optimizedTrace.add(trace.get(trace.size() - 1));
+            BasicBlock last = trace.get(trace.size() - 1);
+            List<IRStmt> replacement =
+                last.last().get().accept(new FinalBlockStmtVisitor(Optional.empty()));
+            last = last.replacingLastStmtWith(replacement);
+            optimizedTrace.add(last);
 
             optimizedTraces.add(optimizedTrace);
         }
@@ -70,7 +74,11 @@ final class BlockTraceOptimizer {
         private final Optional<String> firstLabelOfNextBlock;
 
         public FinalBlockStmtVisitor(BasicBlock nextBlock) {
-            this.firstLabelOfNextBlock = nextBlock.first().map(IRLabel::name);
+            this(nextBlock.first().map(IRLabel::name));
+        }
+
+        public FinalBlockStmtVisitor(Optional<String> firstLabelOfNextBlock) {
+            this.firstLabelOfNextBlock = firstLabelOfNextBlock;
         }
 
         @Override
