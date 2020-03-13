@@ -46,11 +46,10 @@ final class BlockTraceOptimizer {
 
             for (int i = 0; i < trace.size() - 1; i++) {
                 BasicBlock b = trace.get(i);
-                IRStmt last = b.last().get();
 
                 BasicBlock nextBlock = trace.get(i + 1);
                 List<IRStmt> replacement =
-                    last.accept(new FinalBlockStmtVisitor(nextBlock));
+                    b.last().accept(new FinalBlockStmtVisitor(nextBlock));
                 b = b.replacingLastStmtWith(replacement);
 
                 optimizedTrace.add(b);
@@ -58,7 +57,7 @@ final class BlockTraceOptimizer {
 
             BasicBlock last = trace.get(trace.size() - 1);
             List<IRStmt> replacement =
-                last.last().get().accept(new FinalBlockStmtVisitor(Optional.empty()));
+                last.last().accept(new FinalBlockStmtVisitor(Optional.empty()));
             last = last.replacingLastStmtWith(replacement);
             optimizedTrace.add(last);
 
