@@ -247,8 +247,7 @@ public class ConstFoldVisitor
         }).collect(Collectors.toList());
 
         return OneOfThree
-                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));
-    }
+            .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));    }
 
     /**
      * CFold[CJump(etarget, lt, lf)] ::= CJump(CFold[etarget], lt, lf)

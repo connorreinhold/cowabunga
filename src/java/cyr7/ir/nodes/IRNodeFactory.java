@@ -2,6 +2,7 @@ package cyr7.ir.nodes;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
 
@@ -25,7 +26,7 @@ public interface IRNodeFactory {
 
     /**
      * Construct a CJUMP instruction with fall-through on false.
-     * 
+     *
      * @param expr      the condition for the jump
      * @param trueLabel the destination of the jump if {@code expr} evaluates to
      *                  true
@@ -41,6 +42,8 @@ public interface IRNodeFactory {
      *          to false
      */
     IRCJump IRCJump(IRExpr expr, String trueLabel, String falseLabel);
+
+    IRCJump IRCJump(IRExpr expr, String trueLabel, Optional<String> falseLabel);
 
     IRCompUnit IRCompUnit(String name);
 
@@ -90,7 +93,10 @@ public interface IRNodeFactory {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args);
+    default IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args) {
+        throw new UnsupportedOperationException("IRCallStmt should not have children!");
+    }
 
     IRCallStmt IRCallStmt(IRExpr target);
 

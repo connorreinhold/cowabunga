@@ -661,8 +661,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
     @Override
     public Result visit(LiteralArrayExprNode n) {
         if (n.arrayVals.size() == 0) {
-            return Result
-                    .ofExpanded(new ExpandedType(ArrayType.voidArrayDefault));
+            return assignType(n, new ExpandedType(ArrayType.voidArrayDefault));
         }
 
         List<ExpandedType> arrayTypes = n.arrayVals.stream().map(e -> {
@@ -710,8 +709,8 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         if (optionalFn.isEmpty()) {
             throw new UnboundIdentifierException(n.identifier, n.getLocation());
         }
-        FunctionType function = optionalFn.get();
-        ExpandedType inputTypes = function.input;
+        FunctionType functionType = optionalFn.get();
+        ExpandedType inputTypes = functionType.input;
         ExpandedType params = new ExpandedType(n.parameters.stream().map(e -> {
             ExpandedType type = e.accept(this).assertFirst();
             if (!type.isOrdinary()) {
@@ -722,7 +721,8 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         }).collect(Collectors.toList()));
 
         if (params.isASubtypeOf(inputTypes)) {
-            return assignType(n, function.output);
+            n.setFunctionType(functionType);
+            return assignType(n, functionType.output);
         } else {
             throw new InvalidArgumentException(params, inputTypes,
                     n.getLocation());

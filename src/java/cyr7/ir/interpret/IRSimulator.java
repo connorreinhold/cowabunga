@@ -1,20 +1,35 @@
 package cyr7.ir.interpret;
 
 import cyr7.cli.CLI;
-import cyr7.ir.nodes.*;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRCJump;
+import cyr7.ir.nodes.IRCall;
+import cyr7.ir.nodes.IRCallStmt;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRConst;
+import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRFuncDecl;
+import cyr7.ir.nodes.IRJump;
+import cyr7.ir.nodes.IRMem;
+import cyr7.ir.nodes.IRMove;
+import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
+import cyr7.ir.nodes.IRReturn;
+import cyr7.ir.nodes.IRTemp;
 import cyr7.ir.visit.InsnMapsBuilder;
 import edu.cornell.cs.cs4120.util.InternalCompilerError;
-import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.SerialVersionUID;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.io.PrintWriter;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -46,17 +61,15 @@ public class IRSimulator {
     /** heap size maximum **/
     private long heapSizeMax;
 
-    private ExprStack exprStack;
+    protected ExprStack exprStack;
     private BufferedReader inReader;
 
-    private Set<String> libraryFunctions;
+    protected Set<String> libraryFunctions;
 
     protected static int debugLevel = 0;
 
     public static final int DEFAULT_HEAP_SIZE = 10240;
-
-    private final IRNodeFactory make = new IRNodeFactory_c(
-            new Location(-1, -1));
+    public static final int BIG_HEAP_SIZE = 64 * 10240;
 
     private final PrintStream stdout;
 
@@ -363,7 +376,7 @@ public class IRSimulator {
         interpret(frame, frame.getCurrentInsn());
     }
 
-    private void interpret(ExecutionFrame frame, IRNode insn) {
+    protected void interpret(ExecutionFrame frame, IRNode insn) {
         if (insn instanceof IRConst)
             exprStack.pushValue(((IRConst) insn).value());
         else if (insn instanceof IRTemp) {
@@ -494,6 +507,8 @@ public class IRSimulator {
             }
         }
         else if (insn instanceof IRCallStmt) {
+            IRNodeFactory make = new IRNodeFactory_c(insn.location());
+
             IRCallStmt callStmt = (IRCallStmt) insn;
             IRCall syntheticCall = make.IRCall(callStmt.target(),
                     callStmt.args());
@@ -523,7 +538,7 @@ public class IRSimulator {
             long top = exprStack.popValue();
             String label;
             if (top == 0)
-                label = irCJump.falseLabel();
+                label = irCJump.falseLabel().orElse(null);
             else if (top == 1)
                 label = irCJump.trueLabel();
             else throw new InternalCompilerError("Invalid value in CJUMP - expected 0/1, got "
@@ -540,7 +555,7 @@ public class IRSimulator {
      * @param name name of the label
      * @return the IR node at the named label
      */
-    private long findLabel(String name) {
+    protected long findLabel(String name) {
         if (!nameToIndex.containsKey(name))
             throw new Trap("Could not find label '" + name + "'!");
         return nameToIndex.get(name);
@@ -550,7 +565,7 @@ public class IRSimulator {
      * Holds the instruction pointer and temporary registers
      * within an execution frame.
      */
-    private class ExecutionFrame {
+    protected class ExecutionFrame {
         /** instruction pointer */
         protected long ip;
 
@@ -594,7 +609,7 @@ public class IRSimulator {
             if (Thread.currentThread().isInterrupted()) return false;
 
             if (debugLevel > 1)
-                System.out.println("Evaluating " + getCurrentInsn().label());
+                System.out.println("Evaluating " + getCurrentInsn().label() + " at " + getCurrentInsn().location());
             long backupIP = ip;
             leave(this);
 
@@ -623,6 +638,11 @@ public class IRSimulator {
                 throw new Trap("No next instruction.  Forgot RETURN?");
             return insn;
         }
+
+        public Map<String, Long> regs() {
+            return Collections.unmodifiableMap(this.regs);
+        }
+
     };
 
     /**
@@ -631,7 +651,7 @@ public class IRSimulator {
      * This also keeps track of whether a value was created by a TEMP
      * or MEM, or NAME reference, which is useful when executing moves.
      */
-    private static class ExprStack {
+    protected static class ExprStack {
 
         private Stack<StackItem> stack;
 

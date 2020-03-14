@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
+import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
@@ -60,47 +61,53 @@ import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
+import cyr7.ir.nodes.IRTemp;
+import cyr7.parser.ParserUtil;
 import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.FunctionType;
 import cyr7.semantics.types.ResultType;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
+/**
+ * Assumption: All CJUMPs have both labels set
+ */
+public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
     private final IdGenerator generator;
 
-    public AstToIrVisitor() {
-        this(new DefaultIdGenerator());
-    }
-
-    public AstToIrVisitor(IdGenerator generator) {
+    public ASTToIRVisitor(IdGenerator generator) {
         this.generator = generator;
     }
 
-    private String functionName(String n, List<ExpandedType> paramTypes,
-                                ExpandedType returnType) {
-        String name = "_I" + n.replace("_", "__") + "_";
-        StringBuffer params = new StringBuffer();
-        paramTypes.forEach(t -> params.append(typeIdentifier(t)));
-        return name + typeIdentifier(returnType) + params.toString();
+    private String functionName(String name, FunctionType f) {
+        return functionName(name, f.input, f.output);
     }
 
-    private String typeIdentifier(ExpandedType t) {
+    private String functionName(String n, ExpandedType inputType,
+                                ExpandedType outputType) {
+        String name = "_I" + n.replace("_", "__") + "_";
+        return name
+            + typeIdentifier(outputType, false)
+            + typeIdentifier(inputType, true);
+    }
+
+    private String typeIdentifier(ExpandedType t, boolean isInput) {
         if (t.isSubtypeOfInt()) {
             return "i";
         } else if (t.isSubtypeOfBool()) {
             return "b";
         } else if (t.isUnit()) {
-            return "p";
+            return isInput ? "" : "p";
         } else if (t.isSubtypeOfArray()) {
             return "a"
-                + typeIdentifier(new ExpandedType(t.getInnerArrayType()));
+                + typeIdentifier(new ExpandedType(t.getInnerArrayType()), isInput);
         } else if (t.isTuple()) {
             StringBuffer types = new StringBuffer();
             t.getTypes().forEach(
                 type -> types
-                    .append(typeIdentifier(new ExpandedType(type))));
+                    .append(typeIdentifier(new ExpandedType(type), isInput)));
             return "t" + t.getTypes().size() + types.toString();
         } else {
             throw new IllegalArgumentException("invalid type for function");
@@ -164,10 +171,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRCompUnit program = make.IRCompUnit(file);
         for (FunctionDeclNode fun : n.functions) {
             IRStmt funStmts = fun.accept(this).assertSecond();
-            List<ExpandedType> paramTypes = fun.header.args.stream()
-                .map(vdn -> vdn.getType()).collect(Collectors.toList());
-            String funcName = this.functionName(fun.header.identifier,
-                paramTypes, fun.header.getType().output);
+            String funcName = this.functionName(fun.header.identifier, fun.header.getType());
             program.appendFunc(make.IRFuncDecl(funcName, funStmts));
         }
         return OneOfTwo.ofSecond(program);
@@ -183,7 +187,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(TypeExprArrayNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-        List<IRStmt> commands = new ArrayList<IRStmt>();
+        List<IRStmt> commands = new ArrayList<>();
 
         if (n.size.isEmpty()) {
             return OneOfTwo.ofFirst(make.IRConst(0));
@@ -231,14 +235,16 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     make.IRConst(1))),
             make.IRMove(valueLoc, createArray));
 
+        commands.add(make.IRSeq(make.IRLabel(lh),
+            make.IRCJump(guard, lt, lf),
+            make.IRLabel(lt),
+            make.IRSeq(block,
+                make.IRJump(make.IRName(lh))),
+            make.IRLabel(lf)));
+
         return OneOfTwo.ofFirst(
             make.IRESeq(
-                make.IRSeq(make.IRLabel(lh),
-                    make.IRCJump(guard, lt, lf),
-                    make.IRLabel(lt),
-                    make.IRSeq(block,
-                        make.IRJump(make.IRName(lh))),
-                    make.IRLabel(lf)),
+                make.IRSeq(commands),
                 make.IRTemp(pointerStart)));
     }
 
@@ -312,14 +318,14 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr functionCall = n.initializer.accept(this).assertFirst();
         commands.add(make.IRExp(functionCall));
 
-        AtomicInteger retNum = new AtomicInteger();
+        int retNum = 0;
         for (Optional<VarDeclNode> var : n.varDecls) {
             if (var.isPresent()) {
                 commands.add(make.IRMove(
                     make.IRTemp(var.get().identifier),
-                    make.IRTemp(generator.retTemp(retNum.get()))));
+                    make.IRTemp(generator.retTemp(retNum))));
             }
-            retNum.incrementAndGet();
+            retNum++;
         }
         return OneOfTwo.ofSecond(make.IRSeq(commands));
     }
@@ -336,15 +342,25 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
-
-        AtomicInteger retNum = new AtomicInteger();
-        List<IRStmt> rets = n.exprs.stream()
-            .map(stmt -> make.IRMove(
-                make.IRTemp(generator.retTemp(retNum.getAndIncrement())),
-                stmt.accept(this).assertFirst()))
-            .collect(Collectors.toList());
-        rets.add(make.IRReturn());
-        return OneOfTwo.ofSecond(make.IRSeq(rets));
+        List<IRStmt> stmts = new ArrayList<IRStmt>();
+        List<IRTemp> returnValTemps = new ArrayList<IRTemp>();
+        
+        // Move each return arg into a temp representing its value
+        for (ExprNode expr: n.exprs) {
+            IRTemp valTemp = make.IRTemp(generator.newTemp());
+            stmts.add(make.IRMove(valTemp, expr.accept(this).assertFirst()));
+            returnValTemps.add(valTemp);
+        }
+        
+        // After calculation, move each of these return values into RET_0, RET_1
+        // Need to do this because otherwise "return 1, fun(0)" would overwrite RET_0
+        for(int i = 0; i < returnValTemps.size(); i++) {
+            stmts.add(make.IRMove(
+                make.IRTemp(generator.retTemp(i)), 
+                returnValTemps.get(i)));
+        }
+        stmts.add(make.IRReturn());
+        return OneOfTwo.ofSecond(make.IRSeq(stmts));
     }
 
     @Override
@@ -394,7 +410,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         IRExpr left = n.left.accept(this).assertFirst();
         IRExpr right = n.right.accept(this).assertFirst();
-
         return OneOfTwo.ofFirst(make.IRBinOp(opType, left, right));
     }
 
@@ -408,10 +423,7 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> params = n.parameters.stream()
             .map(stmt -> stmt.accept(this).assertFirst())
             .collect(Collectors.toList());
-        List<ExpandedType> paramTypes =
-            n.parameters.stream().map(vdn -> vdn.getType()).collect(Collectors.toList());
-        String encodedName = functionName(n.identifier, paramTypes,
-            n.getType());
+        String encodedName = functionName(n.identifier, n.getFunctionType().get());
         return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params));
     }
 
@@ -555,12 +567,16 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         String exit = generator.newLabel();
 
         seq.add(make.IRMove(make.IRTemp(i), make.IRConst(0)));
+        seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
+        
         seq.add(make.IRLabel(leftSumming));
+        // While i < leftArrSize
         seq.add(make.IRCJump(
             make.IRBinOp(OpType.LT, make.IRTemp(i), make.IRTemp(leftArrSize)),
             leftBody,
             rightSumming));
         seq.add(make.IRLabel(leftBody));
+        // Move value at [leftArrAddr + 8 * i] into [summedArrAddr + 8 * i]
         seq.add(make.IRMove(
             make.IRMem(
                 make.IRBinOp(OpType.ADD,
@@ -568,11 +584,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     make.IRBinOp(OpType.MUL,
                         make.IRTemp(i),
                         make.IRConst(8)))),
-            make.IRBinOp(OpType.ADD,
+            make.IRMem(
+                make.IRBinOp(OpType.ADD,
                 make.IRTemp(leftArrAddr),
                 make.IRBinOp(OpType.MUL,
                     make.IRTemp(i),
-                    make.IRConst(8)))));
+                    make.IRConst(8))))));
         // i++
         seq.add(make.IRMove(
             make.IRTemp(i),
@@ -582,8 +599,6 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         seq.add(make.IRJump(make.IRName(leftSumming)));
 
-
-        seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
         seq.add(make.IRLabel(rightSumming));
         seq.add(make.IRCJump(
             make.IRBinOp(OpType.LT, make.IRTemp(j),
@@ -600,11 +615,12 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                             make.IRTemp(j),
                             make.IRTemp(leftArrSize)),
                         make.IRConst(8)))),
-            make.IRBinOp(OpType.ADD,
+            make.IRMem(
+                make.IRBinOp(OpType.ADD,
                 make.IRTemp(rightArrAddr),
                 make.IRBinOp(OpType.MUL,
                     make.IRTemp(j),
-                    make.IRConst(8)))));
+                    make.IRConst(8))))));
         seq.add(make.IRMove(make.IRTemp(j),
             make.IRBinOp(OpType.ADD, make.IRTemp(j), make.IRConst(1))));
         seq.add(make.IRJump(make.IRName(leftSumming)));
@@ -834,8 +850,11 @@ public class AstToIrVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr e = n.expr.accept(this).assertFirst();
         return OneOfTwo.ofFirst(
             make.IRMem(
-                make.IRBinOp(OpType.SUB, e,
-                    make.IRConst(Configuration.WORD_SIZE))
+                make.IRBinOp(
+                    OpType.SUB,
+                    e,
+                    make.IRConst(Configuration.WORD_SIZE)
+                )
             )
         );
     }

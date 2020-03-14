@@ -2,12 +2,14 @@ package cyr7.ast.expr;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
+import cyr7.semantics.types.FunctionType;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Represents a call to a function (which is still an expression). Contains the
@@ -19,6 +21,8 @@ public final class FunctionCallExprNode extends AbstractExprNode {
     public final String identifier;
     public final List<ExprNode> parameters;
 
+    private Optional<FunctionType> functionType = Optional.empty();
+
     public FunctionCallExprNode(Location location,
                                 String id, List<ExprNode> parameters) {
         super(location);
@@ -28,6 +32,14 @@ public final class FunctionCallExprNode extends AbstractExprNode {
 
         this.identifier = id;
         this.parameters = Util.immutableCopy(parameters);
+    }
+
+    public Optional<FunctionType> getFunctionType() {
+        return functionType;
+    }
+
+    public void setFunctionType(FunctionType type) {
+        this.functionType = Optional.of(type);
     }
 
     @Override

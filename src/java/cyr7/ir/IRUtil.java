@@ -2,6 +2,7 @@ package cyr7.ir;
 
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
+import cyr7.ir.block.TraceOptimizer;
 import cyr7.ir.fold.ConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
@@ -16,46 +17,46 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.io.Writer;
 
-public class IrUtil {
+public class IRUtil {
 
-    public static class Configuration {
+    public static class LowerConfiguration {
 
         public final boolean cFoldEnabled;
-        public final boolean commutativeEnabled;
+        public final boolean traceEnabled;
 
-        public Configuration(boolean cFoldEnabled,
-                              boolean commutativeEnabled) {
+        public LowerConfiguration(boolean cFoldEnabled, boolean traceEnabled) {
             this.cFoldEnabled = cFoldEnabled;
-            this.commutativeEnabled = commutativeEnabled;
+            this.traceEnabled = traceEnabled;
         }
 
     }
 
-    private static IRCompUnit lower(
+    public static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
-        Configuration configuration) {
+        LowerConfiguration lowerConfiguration) {
 
-        IRNode constFolded = compUnit;
+        CLI.debugPrint("Constant Folding Enabled: " + lowerConfiguration.cFoldEnabled);
 
-        CLI.debugPrint("Constant Folding Enabled: " + configuration.cFoldEnabled);
-        if (configuration.cFoldEnabled) {
-            constFolded =
-                compUnit.accept(new ConstFoldVisitor()).assertSecond();
+        compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
+
+        if (lowerConfiguration.traceEnabled) {
+            compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
-        assert constFolded instanceof IRCompUnit;
 
-        IRCompUnit lowered = constFolded.accept(
-            new LoweringVisitor(generator, configuration.commutativeEnabled))
-            .assertThird();
+        if (lowerConfiguration.cFoldEnabled) {
+            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            assert node instanceof IRCompUnit;
+            compUnit = (IRCompUnit) node;
+        }
 
+        CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
+        CLI.debugPrint("Actually Canonical? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
 
-        CLI.debugPrint("Actually Const Folded? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
-        CLI.debugPrint("Actually Canonical? " + lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
-
-        return lowered;
+        return compUnit;
     }
 
     public static void mirRun(
@@ -68,9 +69,11 @@ public class IrUtil {
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, opener);
 
+        IdGenerator generator = new DefaultIdGenerator();
+
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor()).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -86,7 +89,7 @@ public class IrUtil {
         String filename,
         boolean isIXI,
         IxiFileOpener fileOpener,
-        Configuration configuration) throws Exception {
+        LowerConfiguration lowerConfiguration) throws Exception {
 
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, fileOpener);
@@ -95,12 +98,12 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor()).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
 
-        IRNode lowered = lower(compUnit, generator, configuration);
+        IRNode lowered = lower(compUnit, generator, lowerConfiguration);
 
         SExpPrinter printer =
             new CodeWriterSExpPrinter(new PrintWriter(writer));
@@ -114,7 +117,7 @@ public class IrUtil {
         String filename,
         boolean isIXI,
         IxiFileOpener fileOpener,
-        Configuration configuration) throws Exception {
+        LowerConfiguration lowerConfiguration) throws Exception {
 
         Node result = ParserUtil.parseNode(reader, filename, isIXI);
         TypeCheckUtil.typeCheck(result, fileOpener);
@@ -123,16 +126,23 @@ public class IrUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new AstToIrVisitor()).assertSecond();
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
 
-        IRCompUnit lowered = lower(compUnit, generator, configuration);
+        IRCompUnit lowered = lower(compUnit, generator, lowerConfiguration);
 
         IRSimulator sim = new IRSimulator(lowered);
         long retVal = sim.call("_Imain_paai", 0);
         writer.append(String.valueOf(retVal)).append(System.lineSeparator());
     }
-
+    
+    public static String sexpr(IRNode node) {
+        StringWriter writer = new StringWriter();
+        SExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
+        node.printSExp(printer);
+        printer.flush();
+        return writer.toString();
+    }
 }

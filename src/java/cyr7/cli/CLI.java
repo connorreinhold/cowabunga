@@ -12,7 +12,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import cyr7.ir.IrUtil.Configuration;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -22,7 +22,7 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
-import cyr7.ir.IrUtil;
+import cyr7.ir.IRUtil;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.TypeCheckUtil;
@@ -435,14 +435,11 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            IrUtil.Configuration configuration;
+            LowerConfiguration lowerConfiguration;
             if (!optimizationsEnabled) {
-                configuration = new IrUtil.Configuration(false, false);
+                lowerConfiguration = new LowerConfiguration(false, true);
             } else {
-                configuration = new IrUtil.Configuration(
-                    cFoldEnabled,
-                    commutativeEnabled
-                );
+                lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
             }
 
             if (wantsIrGen) {
@@ -450,13 +447,13 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "ir");
-                    IrUtil.irGen(
+                    IRUtil.irGen(
                         input,
                         output,
                         filename,
                         isIXI,
                         opener,
-                        configuration
+                        lowerConfiguration
                     );
                 } catch (Exception e) {
                     debugPrint(e);
@@ -470,7 +467,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "mir_run");
-                    IrUtil.mirRun(
+                    IRUtil.mirRun(
                         input,
                         output,
                         filename,
@@ -489,13 +486,13 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "ir_run");
-                    IrUtil.irRun(
+                    IRUtil.irRun(
                         input,
                         output,
                         filename,
                         isIXI,
                         opener,
-                        configuration
+                        lowerConfiguration
                     );
                 } catch (Exception e) {
                     debugPrint(e);

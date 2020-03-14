@@ -1,5 +1,6 @@
 package cyr7.ir.ctranslation;
 
+import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 
 public final class LookaheadIdGenerator implements IdGenerator {
@@ -58,12 +59,12 @@ public final class LookaheadIdGenerator implements IdGenerator {
 
     @Override
     public String retTemp(int num) {
-        return null;
+        return new DefaultIdGenerator().retTemp(num);
     }
 
     @Override
     public String argTemp(int num) {
-        return null;
+        return new DefaultIdGenerator().argTemp(num);
     }
 
 }
