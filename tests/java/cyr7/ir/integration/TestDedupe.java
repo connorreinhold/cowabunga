@@ -3,7 +3,7 @@ package cyr7.ir.integration;
 public class TestDedupe extends TestProgram {
     @Override
     protected String filename() {
-        return "arrayRemoveDup";
+        return "dedupe";
     }
 
     @Override
