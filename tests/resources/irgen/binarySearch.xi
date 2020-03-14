@@ -25,9 +25,12 @@ binarySearch(x: int, arr: int[]): int {
 }
 
 main(args: int[][]) {
-    value: int = args[0][0]
-    arr: int[] = args[1]
-    
-    index: int = binarySearch(value, arr);
-    println(unparseInt(index));
+    arr: int[] = args[0]
+    size: int = length(arr);
+    i: int = 0;
+    while (i < size) {
+        index: int = binarySearch(arr[i], arr);
+        println(unparseInt(index));
+        i = i + 1;
+    }
 }
