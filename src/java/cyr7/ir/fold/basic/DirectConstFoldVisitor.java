@@ -1,11 +1,12 @@
-package cyr7.ir.fold.identity;
+package cyr7.ir.fold.basic;
 
+import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import cyr7.ir.fold.binophandler.IdentityBinopHandler;
+import cyr7.ir.interpret.IRSimulator.Trap;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -30,50 +31,137 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.MyIRVisitor;
-import java_cup.runtime.ComplexSymbolFactory.Location;
+import edu.cornell.cs.cs4120.util.InternalCompilerError;
 
 /**
- * Includes folds that utilize associative properties of operations and De Morgan's law on booleans.
- * <o>
- * Converts multiplication and division into shifts if possible.
+ * Called by the OneOfThree<IRExpr, IRStmt, IRFuncDecl>'s OneOfThree<IRExpr,
+ * IRStmt>.accept(IRVisitor) method. The returned value is relative to the
+ * callee node. In this implementation for constant folding, the return type is
+ * an OneOfThree<IRExpr, IRStmt, IRFuncDecl>, in which the returned
+ * OneOfThree<IRExpr, IRStmt, IRFuncDecl> represents a constant-folded version
+ * of that node, if possible.
+ * <p>
+ * For any node, the fields of nodes are recursively folded. The returned node
+ * has all of its child nodes folded if possible.
+ *
  * @author ayang
  *
  */
-public final class IdentityConstantFoldVisitor
+public class DirectConstFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
+	
+    /**
+     * Called from visit(IRBinOp).
+     *
+     * @return If both the left and right operands are constants, then this
+     *         returns a Constant that is equal to the value represented by the
+     *         binary operator's node when the operation type is applied.
+     *         Otherwise, this returns the argument {@code n}.
+     */
+    private IRExpr performConstantBinop(IRBinOp n) {
+        IRNodeFactory make = new IRNodeFactory_c(n.location());
 
-    public static void main(String[] args) {
-        IRNodeFactory make = new IRNodeFactory_c(new Location(-1, -1));
+        if (!n.left().isConstant() || !n.right().isConstant()) {
+            return n;
+        }
+        final long l = n.left().constant();
+        final long r = n.right().constant();
+        long value;
 
-        IRExpr e = make.IRBinOp(OpType.ADD,
-                make.IRBinOp(OpType.ADD, make.IRConst(12), make.IRTemp("t")),
-                make.IRBinOp(OpType.ADD, make.IRConst(-3), make.IRTemp("a")));
-        e = make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.LEQ,
-                        make.IRTemp("d"), make.IRConst(3))));
+        // Copied from staff-given interpreter code.
+        switch (n.opType()) {
+        case ADD:
+            value = l + r;
+            break;
+        case SUB:
+            value = l - r;
+            break;
+        case MUL:
+            value = l * r;
+            break;
+        case HMUL:
+            value = BigInteger.valueOf(l).multiply(BigInteger.valueOf(r))
+                    .shiftRight(64).longValue();
+            break;
+        case DIV:
+            if (r == 0)
+                throw new Trap("Division by zero!");
+            value = l / r;
+            break;
+        case MOD:
+            if (r == 0)
+                throw new Trap("Division by zero!");
+            value = l % r;
+            break;
+        case AND:
+            value = l & r;
+            break;
+        case OR:
+            value = l | r;
+            break;
+        case XOR:
+            value = l ^ r;
+            break;
+        case LSHIFT:
+            value = l << r;
+            break;
+        case RSHIFT:
+            value = l >>> r;
+            break;
+        case ARSHIFT:
+            value = l >> r;
+            break;
+        case EQ:
+            value = l == r ? 1 : 0;
+            break;
+        case NEQ:
+            value = l != r ? 1 : 0;
+            break;
+        case LT:
+            value = l < r ? 1 : 0;
+            break;
+        case GT:
+            value = l > r ? 1 : 0;
+            break;
+        case LEQ:
+            value = l <= r ? 1 : 0;
+            break;
+        case GEQ:
+            value = l >= r ? 1 : 0;
+            break;
+        default:
+            throw new InternalCompilerError("Invalid binary operation");
+        }
 
-        e = make.IRBinOp(OpType.OR,
-                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("a")),
-                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("b")));
-
-        var visitor = new IdentityConstantFoldVisitor();
-
-        var result = e.accept(visitor).assertFirst();
-
-        System.out.println(result);
+        return make.IRConst(value);
     }
 
+    // Expressions
 
+    /**
+     *
+     * If one of the binary operator's two operands is not a constant, then the
+     * binary operator node is not a constant.
+     * <p>
+     * If binary operator's type is MOD or DIV, then if the right operand is is
+     * zero, then return.
+     *
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-
-        IRExpr left = n.left().accept(this).assertFirst();
-        IRExpr right = n.right().accept(this).assertFirst();
-        n = make.IRBinOp(n.opType(), left, right);
-        assert !(left.isConstant() && right.isConstant());
-        return OneOfThree.ofFirst(IdentityBinopHandler.instance.accept(n.opType(), n));
+        IRExpr leftFold = n.left()
+                           .accept(this)
+                           .assertFirst();
+        IRExpr rightFold = n.right()
+                            .accept(this)
+                            .assertFirst();
+        n = make.IRBinOp(n.opType(), leftFold, rightFold);
+        if ((n.opType() == OpType.DIV || n.opType() == OpType.MOD)
+                && rightFold.isConstant() && rightFold.constant() == 0) {
+            return OneOfThree.ofFirst(n);
+        }
+        return OneOfThree.ofFirst(performConstantBinop(n));
     }
 
     @Override
@@ -88,11 +176,20 @@ public final class IdentityConstantFoldVisitor
         return OneOfThree.ofFirst(make.IRCall(target, foldedArgs));
     }
 
+    /**
+     * CFold[Const(n)] ::= Const(n)
+     * <ul>
+     * <li>No change
+     * </ul>
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRConst n) {
         return OneOfThree.ofFirst(n);
     }
 
+    /**
+     * CFold[ESeq(...s, e)] ::= ESeq(CFold[...s], CFold[e])
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRESeq n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -101,6 +198,10 @@ public final class IdentityConstantFoldVisitor
         return OneOfThree.ofFirst(make.IRESeq(stmt, expr));
     }
 
+    /**
+     * CFold[Mem(e)] ::= Mem(CFold[e])
+     *
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRMem n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -108,16 +209,34 @@ public final class IdentityConstantFoldVisitor
                 .ofFirst(make.IRMem(n.expr().accept(this).assertFirst()));
     }
 
+    /**
+     * CFold[Name(l)] ::= Name(l)
+     * <ul>
+     * <li>No change
+     * </ul>
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRName n) {
         return OneOfThree.ofFirst(n);
     }
 
+    /**
+     * CFold[Temp(t)] ::= Temp(t)
+     * <ul>
+     * <li>No change
+     * </ul>
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRTemp n) {
         return OneOfThree.ofFirst(n);
     }
 
+    // Statements
+
+    /**
+     * CFold[IRCallStmt(etarget, ...argsj)] ::= CallStmt(CFold[etarget],
+     * CFold[...argsj])
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRCallStmt n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -128,9 +247,11 @@ public final class IdentityConstantFoldVisitor
         }).collect(Collectors.toList());
 
         return OneOfThree
-                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));
-    }
+            .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));    }
 
+    /**
+     * CFold[CJump(etarget, lt, lf)] ::= CJump(CFold[etarget], lt, lf)
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRCJump n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -150,6 +271,9 @@ public final class IdentityConstantFoldVisitor
         return OneOfThree.ofSecond(make.IRCompUnit(n.name(), functions));
     }
 
+    /**
+     * CFold[Exp(e)] ::= Exp(CFold[etarget])
+     */
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRExp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -221,6 +345,5 @@ public final class IdentityConstantFoldVisitor
                 .collect(Collectors.toList());
         return OneOfThree.ofSecond(make.IRSeq(foldedStmts));
     }
-
 
 }

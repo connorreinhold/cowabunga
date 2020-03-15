@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
+import cyr7.ir.fold.basic.DirectConstFoldVisitor;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRNodeFactory;

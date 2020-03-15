@@ -1,4 +1,4 @@
-package cyr7.ir.fold.visitors;
+package cyr7.ir.fold.associativity;
 
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
@@ -47,12 +47,12 @@ public class AssociativePropertyVisitor
                     make.IRConst(Math.abs(constant)));
         } else {
             return make.IRBinOp(OpType.ADD, res.part1(),
-                    make.IRConst(constant));
+            	    make.IRConst(constant));
         }
     }
 
     private Pair<IRExpr, Long> pairOf(IRExpr e, Long l) {
-        return new Pair<IRExpr, Long>(e, l);
+        return new Pair<>(e, l);
     }
 
     @Override
