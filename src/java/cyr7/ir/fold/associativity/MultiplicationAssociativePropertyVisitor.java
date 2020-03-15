@@ -31,25 +31,10 @@ import polyglot.util.Pair;
  * @author ayang
  *
  */
-public class AssociativePropertyVisitor
+public class MultiplicationAssociativePropertyVisitor
         implements MyIRVisitor<Pair<IRExpr, Long>> {
 
-    private AssociativePropertyVisitor() {}
-
-    public static IRExpr valueOf(IRExpr root) {
-        IRNodeFactory make = new IRNodeFactory_c(root.location());
-        var res = root.accept(new AssociativePropertyVisitor());
-        var constant = res.part2();
-        if (constant == 0) {
-            return res.part1();
-        } else if (constant < 0) {
-            return make.IRBinOp(OpType.SUB, res.part1(),
-                    make.IRConst(Math.abs(constant)));
-        } else {
-            return make.IRBinOp(OpType.ADD, res.part1(),
-            	    make.IRConst(constant));
-        }
-    }
+    protected MultiplicationAssociativePropertyVisitor() {}
 
     private Pair<IRExpr, Long> pairOf(IRExpr e, Long l) {
         return new Pair<>(e, l);
@@ -58,68 +43,54 @@ public class AssociativePropertyVisitor
     @Override
     public Pair<IRExpr, Long> visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        if (n.opType() == OpType.ADD) {
+        if (n.opType() == OpType.MUL) {
             if (n.left().isConstant()) {
                 var res = n.right().accept(this);
-                long accumulated = res.part2() + n.left().constant();
+                long accumulated = res.part2() * n.left().constant();
                 return pairOf(res.part1(), accumulated);
             } else if (n.right().isConstant()) {
                 var res = n.left().accept(this);
-                long accumulated = res.part2() + n.right().constant();
+                long accumulated = res.part2() * n.right().constant();
                 return pairOf(res.part1(), accumulated);
             } else {
                 var resLeft = n.left().accept(this);
                 var resRight = n.right().accept(this);
-                long accumulated = resLeft.part2() + resRight.part2();
+                long accumulated = resLeft.part2() * resRight.part2();
                 return pairOf(make.IRBinOp(n.opType(), resLeft.part1(),
                         resRight.part1()), accumulated);
             }
         }
-        if (n.opType() == OpType.SUB) {
-            if (n.right().isConstant()) {
-                var res = n.left().accept(this);
-                long accumulated = res.part2() - n.right().constant();
-                return pairOf(res.part1(), accumulated);
-            } else {
-                var resLeft = n.left().accept(this);
-                var resRight = n.right().accept(this);
-
-                long accumulated = resLeft.part2() + resRight.part2();
-                return pairOf(make.IRBinOp(n.opType(), resLeft.part1(),
-                        resRight.part1()), accumulated);
-            }
-        }
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override
     public Pair<IRExpr, Long> visit(IRCall n) {
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override
     public Pair<IRExpr, Long> visit(IRConst n) {
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override
     public Pair<IRExpr, Long> visit(IRESeq n) {
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override
     public Pair<IRExpr, Long> visit(IRMem n) {
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override
     public Pair<IRExpr, Long> visit(IRName n) {
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override
     public Pair<IRExpr, Long> visit(IRTemp n) {
-        return pairOf(n, 0L);
+        return pairOf(n, 1L);
     }
 
     @Override

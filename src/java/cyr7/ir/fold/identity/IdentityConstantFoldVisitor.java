@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import cyr7.ir.fold.binophandler.IdentityBinopHandler;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -42,29 +41,12 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public final class IdentityConstantFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
-    public static void main(String[] args) {
-        IRNodeFactory make = new IRNodeFactory_c(new Location(-1, -1));
-
-        IRExpr e = make.IRBinOp(OpType.ADD,
-                make.IRBinOp(OpType.ADD, make.IRConst(12), make.IRTemp("t")),
-                make.IRBinOp(OpType.ADD, make.IRConst(-3), make.IRTemp("a")));
-        e = make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.LEQ,
-                        make.IRTemp("d"), make.IRConst(3))));
-
-        e = make.IRBinOp(OpType.OR,
-                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("a")),
-                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("b")));
-
-        var visitor = new IdentityConstantFoldVisitor();
-
-        var result = e.accept(visitor).assertFirst();
-
-        System.out.println(result);
-    }
-
-
+	private final boolean isCanonical;
+	
+	public IdentityConstantFoldVisitor(boolean isCanonical) {
+		this.isCanonical = isCanonical;
+	}
+	
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -73,7 +55,8 @@ public final class IdentityConstantFoldVisitor
         IRExpr right = n.right().accept(this).assertFirst();
         n = make.IRBinOp(n.opType(), left, right);
         assert !(left.isConstant() && right.isConstant());
-        return OneOfThree.ofFirst(IdentityBinopHandler.instance.accept(n.opType(), n));
+        return OneOfThree.ofFirst(
+        		IdentityBinopHandler.instance.accept(n.opType(), n, isCanonical));
     }
 
     @Override

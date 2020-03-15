@@ -1,9 +1,5 @@
 package cyr7.ir.fold.binophandler;
 
-import java.util.Optional;
-
-import cyr7.ir.fold.visitors.BooleanNegationConstFoldVisitor;
-import cyr7.ir.fold.visitors.CheckNegationFoldConstVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRNodeFactory;
@@ -15,11 +11,13 @@ public abstract class AbstractBinopHandler {
 	protected IRNodeFactory make; 
 	protected IRExpr left;
 	protected IRExpr right;	
+	protected boolean isCanonical;
 	
-	public IRExpr accept(OpType opType, IRBinOp n) {
+	public IRExpr accept(OpType opType, IRBinOp n, boolean isCanonical) {
 		this.make = new IRNodeFactory_c(n.location());
 		this.left = n.left();
 		this.right = n.right();
+		this.isCanonical = isCanonical;
 		
 		switch (opType) {
 		case ADD:

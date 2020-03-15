@@ -43,6 +43,14 @@ public class TestCompleteBinop {
         return make.IRBinOp(t, constant(l), constant(r));
     }
     
+    private IRExpr mult(IRExpr l, IRExpr r) {
+    	return make.IRBinOp(OpType.MUL, l, r);
+    }
+    
+    private IRExpr add(IRExpr l, IRExpr r) {
+    	return make.IRBinOp(OpType.ADD, l, r);
+    }
+    
     private IRExpr neg(IRExpr n) {
     	return binop(OpType.XOR, constant(1), n);
     }
@@ -61,7 +69,7 @@ public class TestCompleteBinop {
     
     
     @Test
-    public void testAdditionAssociativity() {
+    void testAdditionAssociativity() {
         IRExpr test = binop(OpType.ADD,
                 binop(OpType.ADD, constant(12), temp("t")),
                 binop(OpType.ADD, constant(-3), temp("a")));
@@ -72,7 +80,7 @@ public class TestCompleteBinop {
     }
     
     @Test
-    public void testNegations() {
+    void testNegations() {
     	var base = temp("d");
         var actual = neg(neg(base));
         var expected = base;
@@ -84,12 +92,41 @@ public class TestCompleteBinop {
     }
     
     @Test
-    public void testDeMorgan() {
+    void testDeMorgan() {
         var actual = binop(OpType.OR, neg(temp("a")), neg(temp("b")));
         var expected = neg(binop(OpType.AND, temp("a"), temp("b")));
-        test(expected, actual);
-        
+        test(expected, actual);        
     }
-       
-	
+
+    @Test
+    void testNestedDeMorgan() {
+    	// (!a | !b) & (!c | !d) 
+    	// !(a & b) & !(c & d)
+    	// !((a & b) | (c & d))
+        var actual = binop(OpType.AND, binop(OpType.OR, neg(temp("a")), neg(temp("b"))), 
+        							   binop(OpType.OR, neg(temp("c")), neg(temp("d"))));
+        var expected = neg(binop(OpType.OR, 
+        					binop(OpType.AND, temp("a"), temp("b")), 
+        					binop(OpType.AND, temp("c"), temp("d"))));
+        test(expected, actual);        
+    }
+    
+    
+    @Test
+    void testZeroMultProperty() {
+    	// (0 * a) * (c + (d * 123)) 
+    	// 0
+        var actual = mult(mult(constant(0), temp("a")),
+        				  add(temp("c"), mult(temp("d"), constant(123))));
+        var expected = constant(0);
+        test(expected, actual);        
+    }
+
+    @Test
+    void testMultToShift() {
+    	var actual = mult(temp("b"), constant(256));
+    	var expected = binop(OpType.LSHIFT, temp("b"), constant(8));
+    	test(expected, actual);
+    }
+    
 }

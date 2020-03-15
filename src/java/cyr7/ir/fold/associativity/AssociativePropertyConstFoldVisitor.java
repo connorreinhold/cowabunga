@@ -34,7 +34,7 @@ public class AssociativePropertyConstFoldVisitor
 
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRBinOp n) {
-        return OneOfThree.ofFirst(AssociativePropertyVisitor.valueOf(n));
+        return OneOfThree.ofFirst(AssociativePropertyHandler.valueOf(n));
     }
 
     @Override
