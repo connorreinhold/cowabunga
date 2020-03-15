@@ -158,7 +158,7 @@ public class ConstFoldVisitor
                             .assertFirst();
         n = make.IRBinOp(n.opType(), leftFold, rightFold);
         if ((n.opType() == OpType.DIV || n.opType() == OpType.MOD)
-                && rightFold.constant() == 0) {
+                && rightFold.isConstant() && rightFold.constant() == 0) {
             return OneOfThree.ofFirst(n);
         }
         return OneOfThree.ofFirst(performConstantBinop(n));
