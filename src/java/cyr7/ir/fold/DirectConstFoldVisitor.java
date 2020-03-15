@@ -47,7 +47,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  * @author ayang
  *
  */
-public class ConstFoldVisitor
+public class DirectConstFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
     /**

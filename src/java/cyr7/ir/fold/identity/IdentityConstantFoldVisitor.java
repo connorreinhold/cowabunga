@@ -1,15 +1,10 @@
-package cyr7.ir.fold;
+package cyr7.ir.fold.identity;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
-import cyr7.ir.fold.visitors.AssociativePropertyVisitor;
-import cyr7.ir.fold.visitors.BinopCalc;
-import cyr7.ir.fold.visitors.BooleanNegationConstFoldVisitor;
-import cyr7.ir.fold.visitors.CheckNegationFoldConstVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -36,7 +31,14 @@ import cyr7.util.OneOfThree;
 import cyr7.visitor.MyIRVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public final class ComplexConstantFoldVisitor
+/**
+ * Includes folds that utilize associative properties of operations and De Morgan's law on booleans.
+ * <o>
+ * Converts multiplication and division into shifts if possible.
+ * @author ayang
+ *
+ */
+public final class IdentityConstantFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
     public static void main(String[] args) {
@@ -54,47 +56,13 @@ public final class ComplexConstantFoldVisitor
                 make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("a")),
                 make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("b")));
 
-        var visitor = new ComplexConstantFoldVisitor();
+        var visitor = new IdentityConstantFoldVisitor();
 
         var result = e.accept(visitor).assertFirst();
 
         System.out.println(result);
     }
 
-    private long logBase2(long num) {
-        if (isPowerOfTwo(num)) {
-            long position = 1;
-            for (int i = 0; i < 64; i++) {
-                if ((position & num) == 0) {
-                    return i;
-                } else {
-                    position <<= 1;
-                }
-            }
-        }
-        throw new UnsupportedOperationException();
-    }
-
-    private boolean isPowerOfTwo(long num) {
-        return num != 0 && ((num & (num - 1)) == 0);
-    }
-
-    private Optional<IRExpr> tryDeMorgan(IRBinOp n, IRNodeFactory make,
-            OpType innerOperation) {
-        var possibleLeftNeg = n.left()
-                .accept(CheckNegationFoldConstVisitor.instance);
-        var possibleRightNeg = n.right()
-                .accept(CheckNegationFoldConstVisitor.instance);
-        if (possibleLeftNeg.isPresent() && possibleRightNeg.isPresent()) {
-            // Apply De Morgan's
-            var left = possibleLeftNeg.get();
-            var right = possibleRightNeg.get();
-            return Optional.of(make.IRBinOp(OpType.XOR,
-                    make.IRConst(1),
-                    make.IRBinOp(innerOperation, left, right)));
-        }
-        return Optional.empty();
-    }
 
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRBinOp n) {
@@ -102,104 +70,9 @@ public final class ComplexConstantFoldVisitor
 
         IRExpr left = n.left().accept(this).assertFirst();
         IRExpr right = n.right().accept(this).assertFirst();
-
-
         n = make.IRBinOp(n.opType(), left, right);
-        if (n.left().isConstant() && n.right().isConstant()) {
-            return OneOfThree.ofFirst(BinopCalc.calc(n));
-        }
-
-        IRExpr result;
-        Optional<IRExpr> maybeDeMorgan;
-        switch (n.opType()) {
-        case AND:
-            maybeDeMorgan = this.tryDeMorgan(n, make, OpType.OR);
-            if (maybeDeMorgan.isPresent()) {
-                return OneOfThree.ofFirst(maybeDeMorgan.get());
-            }
-            if (n.left().isConstant() && n.left().constant() == 1) {
-                return OneOfThree.ofFirst(n.right());
-            } else if (n.right().isConstant() && n.right().constant() == 1) {
-                return OneOfThree.ofFirst(n.left());
-            }
-            break;
-        case OR:
-            maybeDeMorgan = this.tryDeMorgan(n, make, OpType.AND);
-            if (maybeDeMorgan.isPresent()) {
-                return OneOfThree.ofFirst(maybeDeMorgan.get());
-            }
-            if (n.left().isConstant() && n.left().constant() == 0) {
-                return OneOfThree.ofFirst(n.right());
-            } else if (n.right().isConstant() && n.right().constant() == 0) {
-                return OneOfThree.ofFirst(n.left());
-            }
-            break;
-        case XOR:
-            if (n.left().isConstant() && n.left().constant() == 1) {
-                // Apply negation tactics.
-                return OneOfThree.ofFirst(n.right()
-                        .accept(new BooleanNegationConstFoldVisitor(n)));
-            }
-            break;
-        case ADD:
-            if (n.left().isConstant() && n.left().constant() == 0) {
-                return OneOfThree.ofFirst(n.right());
-            } else if (n.right().isConstant() && n.right().constant() == 0) {
-                return OneOfThree.ofFirst(n.left());
-            }
-            break;
-        case SUB:
-            if (n.right().isConstant() && n.right().constant() == 0) {
-                return OneOfThree.ofFirst(n.left());
-            }
-            break;
-        case DIV:
-            if (n.right().isConstant() && n.right().constant() == 1) {
-                return OneOfThree.ofFirst(n.left());
-            } else if (n.right().isConstant()) {
-                long rightConstant = n.right().constant();
-                if (isPowerOfTwo(rightConstant)) {
-                    return OneOfThree.ofFirst(make.IRBinOp(OpType.ARSHIFT,
-                            n.left(), make.IRConst(logBase2(rightConstant))));
-                }
-            }
-            break;
-        case MUL:
-            if (n.left().isConstant() && n.left().constant() == 1) {
-                return OneOfThree.ofFirst(n.right());
-            } else if (n.right().isConstant() && n.right().constant() == 1) {
-                return OneOfThree.ofFirst(n.left());
-            } else if (n.right().isConstant()) {
-                long rightConstant = n.right().constant();
-                if (isPowerOfTwo(rightConstant)) {
-                    return OneOfThree.ofFirst(make.IRBinOp(OpType.LSHIFT,
-                            n.left(), make.IRConst(logBase2(rightConstant))));
-                }
-            } else if (n.left().isConstant()) {
-                long leftConstant = n.left().constant();
-                if (isPowerOfTwo(leftConstant)) {
-                    return OneOfThree.ofFirst(make.IRBinOp(OpType.LSHIFT,
-                            n.right(), make.IRConst(logBase2(leftConstant))));
-                }
-            }
-            break;
-        case MOD:
-        case HMUL:
-        case ARSHIFT:
-        case LSHIFT:
-        case RSHIFT:
-        case GEQ:
-        case GT:
-        case LEQ:
-        case LT:
-        case EQ:
-        case NEQ:
-        default:
-            break;
-        }
-        result = BinopCalc.calc(n);
-        result = AssociativePropertyVisitor.valueOf(result);
-        return OneOfThree.ofFirst(result);
+        assert !(left.isConstant() && right.isConstant());
+        return OneOfThree.ofFirst(BinopHandler.accept(n.opType(), n));
     }
 
     @Override
