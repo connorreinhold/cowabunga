@@ -14,39 +14,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class MainConstantFolder {
 
 	private MainConstantFolder() {}
-	
-	public static void main(String[] args) {
-        IRNodeFactory make = new IRNodeFactory_c(new Location(-1, -1));
-
-        IRExpr e = make.IRBinOp(OpType.ADD,
-                make.IRBinOp(OpType.ADD, make.IRConst(12), make.IRTemp("t")),
-                make.IRBinOp(OpType.ADD, make.IRConst(-3), make.IRTemp("a")));
-        System.out.println(e);
-        var result = MainConstantFolder.foldExpr(e);        
-        System.out.println(result);
-        System.out.println();
-
-        e = make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.XOR, make.IRConst(1),
-                make.IRBinOp(OpType.LEQ,
-                        make.IRTemp("d"), make.IRConst(3))));
-        result = MainConstantFolder.foldExpr(e);        
-        System.out.println(e);
-        result = MainConstantFolder.foldExpr(e);        
-        System.out.println(result);
-        System.out.println();
-        
-        e = make.IRBinOp(OpType.OR,
-                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("a")),
-                make.IRBinOp(OpType.XOR, make.IRConst(1), make.IRTemp("b")));
-
-        result = MainConstantFolder.foldExpr(e);        
-        System.out.println(e);
-        result = MainConstantFolder.foldExpr(e);        
-        System.out.println(result);
-        System.out.println();
-	}
-	
+		
 	public static IRCompUnit foldCompUnit(IRCompUnit n) {
 		if (n.isCanonical(new CheckCanonicalIRVisitor())) {
 			// Different constant fold settings

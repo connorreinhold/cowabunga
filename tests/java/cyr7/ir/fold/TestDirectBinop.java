@@ -16,7 +16,7 @@ import cyr7.visitor.MyIRVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
 
-class TestBinop {
+class TestDirectBinop {
 
     /**
      * IRNodeFactory with a default location. Location is more or less
@@ -28,7 +28,7 @@ class TestBinop {
     private final MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> folder = new DirectConstFoldVisitor();
 
     private <T, E> Pair<T, E> pairOf(T expected, E test) {
-        return new Pair<T, E>(expected, test);
+        return new Pair<>(expected, test);
     }
 
     private IRExpr constant(long n) {
@@ -84,8 +84,6 @@ class TestBinop {
         test(pairOf(constant(0),
                 binop(type, -9223372036854775808L,
                         -9223372036854775808L)));
-
-
     }
 
     @Test
