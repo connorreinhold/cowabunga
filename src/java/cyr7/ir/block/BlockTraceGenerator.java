@@ -27,7 +27,7 @@ final class BlockTraceGenerator {
             LinkedList<BasicBlock> trace = new LinkedList<>();
             BasicBlock block = queue.remove();
 
-            nextBlock: while (!markedBlocks.contains(block)) {
+            while (!markedBlocks.contains(block)) {
                 markedBlocks.add(block);
                 trace.add(block);
 
@@ -35,7 +35,7 @@ final class BlockTraceGenerator {
                     BasicBlock successor = labelToBlock.get(label);
                     if (successor != null && !markedBlocks.contains(successor)) {
                         block = successor;
-                        continue nextBlock;
+                        break;
                     }
                 }
             }
