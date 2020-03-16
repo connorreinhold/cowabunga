@@ -1,14 +1,14 @@
-package cyr7.ir.integration.galeshapley;
+package cyr7.ir.integration.galeshapley.duplicates;
 
 import static cyr7.ir.integration.galeshapley.TestGaleShapley0.parseGaleShapleyArgs;
 
 import cyr7.ir.integration.Run.RunConfiguration;
 import cyr7.ir.integration.TestProgram;
 
-public class TestGaleShapleyDuplicate extends TestProgram {
+public class TestGaleShapleyTimes16 extends TestProgram {
     @Override
     protected String filename() {
-        return "galeshapleyDuplicate";
+        return "galeshapleyTimes16";
     }
 
     @Override
