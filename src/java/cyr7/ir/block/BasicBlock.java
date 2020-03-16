@@ -10,8 +10,6 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.util.Util;
 
-import javax.swing.text.html.Option;
-
 final class BasicBlock {
 
     public final List<IRStmt> stmts;

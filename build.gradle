@@ -13,7 +13,6 @@ repositories {
 
 dependencies {
     compile fileTree(dir: 'dependencies', include: ['*.jar'])
-    implementation 'org.testng:testng:6.9.6'
 }
 
 jar {
