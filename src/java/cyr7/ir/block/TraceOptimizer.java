@@ -1,5 +1,8 @@
 package cyr7.ir.block;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -7,9 +10,6 @@ import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
-
-import java.util.List;
-import java.util.stream.Collectors;
 
 public final class TraceOptimizer {
 
@@ -29,7 +29,8 @@ public final class TraceOptimizer {
             List<BasicBlock> blocks = BlockGenerator.getBlocks(generator, statements);
             List<List<BasicBlock>> traces = BlockTraceGenerator.getTraces(blocks);
             List<List<BasicBlock>> optimizedTraces = BlockTraceOptimizer.optimized(traces);
-            IRSeq newBody = new IRSeq(decl.body().location(), flatten(optimizedTraces));
+            List<IRStmt> flattenedStmts = flatten(optimizedTraces);
+            IRSeq newBody = new IRSeq(decl.body().location(), flattenedStmts);
 
             IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(), newBody);
             optimized.appendFunc(funcDecl);

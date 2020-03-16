@@ -72,7 +72,8 @@ public final class BlockGenerator {
                 // s is the start of the next label
                 if (!currentBlockStmts.isEmpty()) {
                     // Make a new block if there is already a non-empty block being built.
-                    if (!currentBlockStmts.get(currentBlockStmts.size() - 1).accept(blockTerminator)) {
+                    if (!currentBlockStmts.get(currentBlockStmts.size() - 1)
+                            .accept(blockTerminator)) {
                         // the current block doesn't have a terminator, so we
                         // add a jump statement to the next block
                         var jumpStmt = make.IRJump(make.IRName(label.name()));
@@ -108,7 +109,7 @@ public final class BlockGenerator {
             assert currentBlockStmts.get(0) instanceof IRLabel;
 
             IRNodeFactory make = new IRNodeFactory_c(new Location(
-                "IRReturn inserted by BlockGenerator", -1, -1
+                    "IRReturn inserted by BlockGenerator", -1, -1
             ));
             currentBlockStmts.add(make.IRReturn());
         }
@@ -120,7 +121,7 @@ public final class BlockGenerator {
             List<IRStmt> stmts) {
         if (stmts.isEmpty() || !(stmts.get(0) instanceof IRLabel)) {
             stmts.add(0, new IRLabel(
-                new Location("Label Inserted by BlockGenerator", 0, 0),
+                    new Location("IRLabel inserted by BlockGenerator", -2, -2),
                 generator.newLabel()));
         }
     }

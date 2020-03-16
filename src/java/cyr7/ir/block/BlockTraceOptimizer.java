@@ -1,5 +1,9 @@
 package cyr7.ir.block;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import cyr7.cli.CLI;
 import cyr7.ir.block.util.LabelsInJumpStmtsVisitor;
 import cyr7.ir.nodes.IRBinOp;
@@ -25,10 +29,6 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 final class BlockTraceOptimizer {
 
@@ -67,6 +67,11 @@ final class BlockTraceOptimizer {
         return optimizedTraces;
     }
 
+    /**
+     * Returns the list of statements that should replace the final statement of
+     * a basic block, given the label of the next basic block.
+     *
+     */
     private static class FinalBlockStmtVisitor implements MyIRVisitor<List<IRStmt>> {
 
         private final String errorMsg = "The accessed node is an expression.";
