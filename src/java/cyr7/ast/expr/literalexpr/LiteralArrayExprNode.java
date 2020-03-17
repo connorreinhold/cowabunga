@@ -1,15 +1,14 @@
 package cyr7.ast.expr.literalexpr;
 
-import cyr7.ast.AbstractNode;
+import java.util.Collections;
+import java.util.List;
+
 import cyr7.ast.Node;
 import cyr7.ast.expr.AbstractExprNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Represents an Array Expression: i.e. {1,2,3,} with a list of ExprNode for
