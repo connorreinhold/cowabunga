@@ -12,7 +12,7 @@ import cyr7.parser.sym;
 import cyr7.util.Util;
 import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 
-class CMSLexerTests {
+class CMSLexerTest {
 
     StringReader sr;
     MyLexer lexer;

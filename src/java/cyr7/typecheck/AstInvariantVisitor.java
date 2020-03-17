@@ -16,6 +16,7 @@ import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.ExprStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.MultiAssignStmtNode;
@@ -202,5 +203,10 @@ class AstInvariantVisitor extends AbstractVisitor<Boolean>
     @Override
     public Boolean visit(LengthExprNode n) {
         return n.getType() != null;
+    }
+
+    @Override
+    public Boolean visit(CompoundAssignStmtNode n) {
+        return n.lhs != null && n.rhs != null && n.opType != null;
     }
 }

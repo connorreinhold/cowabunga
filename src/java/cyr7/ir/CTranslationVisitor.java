@@ -17,6 +17,7 @@ import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.ExprStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.MultiAssignStmtNode;
@@ -258,6 +259,11 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(WhileStmtNode n) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public IRStmt visit(CompoundAssignStmtNode n) {
         throw new UnsupportedOperationException();
     }
 

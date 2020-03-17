@@ -7,7 +7,7 @@ import cyr7.parser.sym;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class LexerBooleanTest {
+public class TestBoolean {
 
     @Test
     void booleanLiteralTest() throws Exception {

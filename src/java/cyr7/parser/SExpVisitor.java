@@ -21,6 +21,7 @@ import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.ExprStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.MultiAssignStmtNode;
@@ -453,6 +454,42 @@ public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
         printer.endList();
 
         return Optional.empty();
+    }
+
+    private Optional<Void> printCompoundAssignStmt(String symbol,
+            CompoundAssignStmtNode n) {
+        printer.startList();
+        printer.printAtom(symbol);
+        n.lhs.accept(this);
+        n.rhs.accept(this);
+        printer.endList();
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CompoundAssignStmtNode n) {
+        switch (n.opType) {
+        case AND:
+            return printCompoundAssignStmt("&=", n);
+        case DIV:
+            return printCompoundAssignStmt("/=", n);
+        case HIGH_MULT:
+            return printCompoundAssignStmt("*>>=", n);
+        case MINUS:
+            return printCompoundAssignStmt("-=", n);
+        case MULT:
+            return printCompoundAssignStmt("*=", n);
+        case OR:
+            return printCompoundAssignStmt("|=", n);
+        case PLUS:
+            return printCompoundAssignStmt("+=", n);
+        case REM:
+            return printCompoundAssignStmt("%=", n);
+        default:
+            break;
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override

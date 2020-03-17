@@ -8,7 +8,7 @@ import cyr7.parser.sym;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-public class LexerCommentTest {
+public class TestComment {
 
     @Test
     void commentSingleLine() throws Exception {

@@ -13,7 +13,7 @@ import java.util.regex.Pattern;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LexerProvidedTest {
+public class TestProvided {
 
     private void testFile(String filename) throws Exception {
         MyLexer lexer = new MyLexer(new FileReader(

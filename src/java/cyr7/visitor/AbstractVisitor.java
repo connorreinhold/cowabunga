@@ -31,6 +31,7 @@ public abstract class AbstractVisitor<T> {
     // stmt
     abstract public T visit(ArrayDeclStmtNode n);
     abstract public T visit(AssignmentStmtNode n);
+    abstract public T visit(CompoundAssignStmtNode n);
     abstract public T visit(BlockStmtNode n);
     abstract public T visit(ExprStmtNode n);
     abstract public T visit(IfElseStmtNode n);

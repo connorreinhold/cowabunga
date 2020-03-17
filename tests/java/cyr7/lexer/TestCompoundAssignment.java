@@ -13,7 +13,7 @@ import cyr7.parser.sym;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class LexerOperatorTest {
+class TestCompoundAssignment {
 
     @Test
     void doesNotBreakLexer() throws Exception {

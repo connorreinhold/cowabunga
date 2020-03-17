@@ -11,6 +11,7 @@ import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
 import cyr7.ast.expr.binexpr.BinExprNode;
+import cyr7.ast.expr.binexpr.BinExprNode.ASTOpType;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -22,6 +23,7 @@ import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.ExprStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.MultiAssignStmtNode;
@@ -747,6 +749,44 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr e = n.expr.accept(this).assertFirst();
         return OneOfTwo.ofFirst(make.IRMem(make.IRBinOp(OpType.SUB, e,
                 make.IRConst(Configuration.WORD_SIZE))));
+    }
+
+    @Override
+    public OneOfTwo<IRExpr, IRStmt> visit(CompoundAssignStmtNode n) {
+        ASTOpType equivalentOp;
+        switch (n.opType) {
+        case AND:
+            equivalentOp = ASTOpType.AND;
+            break;
+        case DIV:
+            equivalentOp = ASTOpType.DIV;
+            break;
+        case HIGH_MULT:
+            equivalentOp = ASTOpType.HIGH_MUL;
+            break;
+        case MINUS:
+            equivalentOp = ASTOpType.SUB;
+            break;
+        case MULT:
+            equivalentOp = ASTOpType.MUL;
+            break;
+        case OR:
+            equivalentOp = ASTOpType.OR;
+            break;
+        case PLUS:
+            equivalentOp = ASTOpType.ADD;
+            break;
+        case REM:
+            equivalentOp = ASTOpType.MOD;
+            break;
+        default:
+            throw new UnsupportedOperationException();
+        }
+        BinExprNode binopRep = new BinExprNode(n.getLocation(), equivalentOp,
+                n.lhs, n.rhs);
+        AssignmentStmtNode assignRep = new AssignmentStmtNode(n.getLocation(),
+                n.lhs, binopRep);
+        return assignRep.accept(this);
     }
 
 }

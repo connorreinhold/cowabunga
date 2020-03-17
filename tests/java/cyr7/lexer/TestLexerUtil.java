@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class LexerUtilTest {
+public class TestLexerUtil {
 
     @Test
     void testTypeAttributeDescriptionExist() throws Exception {
