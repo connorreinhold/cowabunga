@@ -1,7 +1,6 @@
 package cyr7.ast.expr.unaryexpr;
 
 import cyr7.ast.expr.ExprNode;
-import cyr7.semantics.types.ExpandedType;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 

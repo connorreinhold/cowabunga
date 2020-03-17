@@ -1,7 +1,6 @@
 package cyr7.ir.nodes;
 
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
-import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**

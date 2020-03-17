@@ -12,8 +12,6 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import cyr7.ir.IRUtil.LowerConfiguration;
-import cyr7.typecheck.IxiFileOpener;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -23,19 +21,21 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import cyr7.ir.IRUtil;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
+import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
 
 public class CLI {
 
-    final static private String usage = "xic [options] <source files>";
-    final static private int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
-    final static private int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
-    final static private PrintWriter writer = new PrintWriter(System.out);
-    final static private HelpFormatter helpFormatter = new HelpFormatter();
-    final static private Options options = createOptions();
-    final static private CommandLineParser parser = new DefaultParser();
+    private static final String usage = "xic [options] <source files>";
+    private static final int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
+    private static final int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
+    private static final PrintWriter writer = new PrintWriter(System.out);
+    private static final HelpFormatter helpFormatter = new HelpFormatter();
+    private static final Options options = createOptions();
+    private static final CommandLineParser parser = new DefaultParser();
 
     private static boolean debugPrintingEnabled = false;
     private static boolean optimizationsEnabled = true;

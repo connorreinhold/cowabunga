@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import cyr7.ir.nodes.IRBinOp;
-import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRCallStmt;
@@ -29,7 +28,6 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.MyIRVisitor;
-import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /**
  * Includes folds that utilize associative properties of operations and De Morgan's law on booleans.
