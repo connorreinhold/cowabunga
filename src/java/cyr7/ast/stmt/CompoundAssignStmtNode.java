@@ -1,6 +1,7 @@
 package cyr7.ast.stmt;
 
 import java.util.List;
+import java.util.Objects;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
@@ -34,6 +35,24 @@ public class CompoundAssignStmtNode extends AbstractNode implements StmtNode {
     @Override
     public List<Node> getChildren() {
         return List.of(lhs, rhs);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(lhs, opType, rhs);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (!(obj instanceof CompoundAssignStmtNode)) {
+            return false;
+        }
+        CompoundAssignStmtNode other = (CompoundAssignStmtNode) obj;
+        return Objects.equals(lhs, other.lhs) && opType == other.opType
+                && Objects.equals(rhs, other.rhs);
     }
 
 }
