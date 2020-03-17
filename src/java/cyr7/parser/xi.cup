@@ -11,6 +11,7 @@ import cyr7.ast.*;
 import cyr7.ast.expr.*;
 import cyr7.ast.expr.access.*;
 import cyr7.ast.expr.binexpr.*;
+import cyr7.ast.expr.binexpr.BinExprNode.ASTOpType;
 import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.*;
 import cyr7.ast.toplevel.*;
@@ -490,19 +491,19 @@ UnaryExpr ::=
     ;
 
 BinaryExpr ::=
-    Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1xleft, e1, e2); :}
+    Expr:e1 MULT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.MUL, e1, e2); :}
+    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.HIGH_MUL, e1, e2); :}
+    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.DIV, e1, e2); :}
+    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.MOD, e1, e2); :}
+    | Expr:e1 PLUS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.ADD, e1, e2); :}
+    | Expr:e1 MINUS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.SUB, e1, e2); :}
+    | Expr:e1 LT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.LT, e1, e2); :}
+    | Expr:e1 LTE Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.LEQ, e1, e2); :}
+    | Expr:e1 GT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.GT, e1, e2); :}
+    | Expr:e1 GTE Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.GEQ, e1, e2); :}
+    | Expr:e1 EQUALS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.EQ, e1, e2); :}
+    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.NEQ, e1, e2); :}
+    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.AND, e1, e2); :}
+    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.OR, e1, e2); :}
     ;
 

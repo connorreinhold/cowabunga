@@ -15,21 +15,7 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
-import cyr7.ast.expr.binexpr.AddExprNode;
-import cyr7.ast.expr.binexpr.AndExprNode;
 import cyr7.ast.expr.binexpr.BinExprNode;
-import cyr7.ast.expr.binexpr.DivExprNode;
-import cyr7.ast.expr.binexpr.EqualsExprNode;
-import cyr7.ast.expr.binexpr.GTEExprNode;
-import cyr7.ast.expr.binexpr.GTExprNode;
-import cyr7.ast.expr.binexpr.HighMultExprNode;
-import cyr7.ast.expr.binexpr.LTEExprNode;
-import cyr7.ast.expr.binexpr.LTExprNode;
-import cyr7.ast.expr.binexpr.MultExprNode;
-import cyr7.ast.expr.binexpr.NotEqualsExprNode;
-import cyr7.ast.expr.binexpr.OrExprNode;
-import cyr7.ast.expr.binexpr.RemExprNode;
-import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -90,7 +76,8 @@ import cyr7.visitor.AbstractVisitor;
 
 final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
 
-    static final class Result extends OneOfThree<ExpandedType, ResultType, Void> {
+    static final class Result
+            extends OneOfThree<ExpandedType, ResultType, Void> {
 
         static Result ofExpanded(ExpandedType e) {
             return new Result(e, null);
@@ -104,8 +91,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
             return new Result(null, null);
         }
 
-        protected Result(ExpandedType first,
-                         ResultType second) {
+        protected Result(ExpandedType first, ResultType second) {
             super(first, second, null);
         }
 
@@ -456,7 +442,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         ExpandedType type = n.expr.accept(this).assertFirst();
 
         if (!(n.expr instanceof FunctionCallExprNode
-            || n.expr instanceof LengthExprNode)) {
+                || n.expr instanceof LengthExprNode)) {
             throw new ExpectedFunctionException(n.expr.getLocation());
         }
 
@@ -806,92 +792,51 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
     }
 
     @Override
-    public Result visit(AddExprNode n) {
-        ExpandedType left = n.left.accept(this).assertFirst();
-        ExpandedType right = n.right.accept(this).assertFirst();
+    public Result visit(BinExprNode n) {
+        switch (n.opType) {
+        case ADD: {
+            ExpandedType left = n.left.accept(this).assertFirst();
+            ExpandedType right = n.right.accept(this).assertFirst();
 
-        if (left.isVoid() && right.isVoid()) {
-            return assignType(n, ExpandedType.genericAddType);
-        }
-
-        if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
-            Optional<ExpandedType> supertype = supertypeOf(left, right);
-            if (supertype.isPresent()) {
-                return assignType(n, supertype.get());
+            if (left.isVoid() && right.isVoid()) {
+                return assignType(n, ExpandedType.genericAddType);
             }
-        }
-        if (left.isSubtypeOfArray() && right.isSubtypeOfArray()) {
-            Optional<ExpandedType> supertype = supertypeOf(left, right);
-            if (supertype.isPresent()) {
-                return assignType(n, supertype.get());
+
+            if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
+                Optional<ExpandedType> supertype = supertypeOf(left, right);
+                if (supertype.isPresent()) {
+                    return assignType(n, supertype.get());
+                }
             }
+            if (left.isSubtypeOfArray() && right.isSubtypeOfArray()) {
+                Optional<ExpandedType> supertype = supertypeOf(left, right);
+                if (supertype.isPresent()) {
+                    return assignType(n, supertype.get());
+                }
+            }
+            throw new UnsummableValuesException(left, right, n.getLocation());
         }
-        throw new UnsummableValuesException(left, right, n.getLocation());
-    }
-
-    @Override
-    public Result visit(EqualsExprNode n) {
-        return typecheckEqualityBinExpr(n);
-    }
-
-    @Override
-    public Result visit(NotEqualsExprNode n) {
-        return typecheckEqualityBinExpr(n);
-    }
-
-    @Override
-    public Result visit(HighMultExprNode n) {
-        return typecheckIntegerBinExpr(n);
-    }
-
-    @Override
-    public Result visit(MultExprNode n) {
-        return typecheckIntegerBinExpr(n);
-    }
-
-    @Override
-    public Result visit(RemExprNode n) {
-        return typecheckIntegerBinExpr(n);
-    }
-
-    @Override
-    public Result visit(SubExprNode n) {
-        return typecheckIntegerBinExpr(n);
-    }
-
-    @Override
-    public Result visit(DivExprNode n) {
-        return typecheckIntegerBinExpr(n);
-    }
-
-    @Override
-    public Result visit(LTEExprNode n) {
-        return typecheckComparisonBinExpr(n);
-    }
-
-    @Override
-    public Result visit(LTExprNode n) {
-        return typecheckComparisonBinExpr(n);
-    }
-
-    @Override
-    public Result visit(GTEExprNode n) {
-        return typecheckComparisonBinExpr(n);
-    }
-
-    @Override
-    public Result visit(GTExprNode n) {
-        return typecheckComparisonBinExpr(n);
-    }
-
-    @Override
-    public Result visit(OrExprNode n) {
-        return typecheckBooleanBinExpr(n);
-    }
-
-    @Override
-    public Result visit(AndExprNode n) {
-        return typecheckBooleanBinExpr(n);
+        case AND:
+        case OR:
+            return typecheckBooleanBinExpr(n);
+        case EQ:
+        case NEQ:
+            return typecheckEqualityBinExpr(n);
+        case GEQ:
+        case GT:
+        case LEQ:
+        case LT:
+            return typecheckComparisonBinExpr(n);
+        case MOD:
+        case MUL:
+        case SUB:
+        case DIV:
+        case HIGH_MUL:
+            return typecheckIntegerBinExpr(n);
+        default:
+            break;
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -941,7 +886,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
             return assignType(n, ExpandedType.intType);
         }
         throw new TypeMismatchException(type, ExpandedType.intType,
-            n.expr.getLocation());
+                n.expr.getLocation());
     }
 
     @Override

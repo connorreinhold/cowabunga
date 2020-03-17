@@ -4,20 +4,7 @@ import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
-import cyr7.ast.expr.binexpr.AddExprNode;
-import cyr7.ast.expr.binexpr.AndExprNode;
-import cyr7.ast.expr.binexpr.DivExprNode;
-import cyr7.ast.expr.binexpr.EqualsExprNode;
-import cyr7.ast.expr.binexpr.GTEExprNode;
-import cyr7.ast.expr.binexpr.GTExprNode;
-import cyr7.ast.expr.binexpr.HighMultExprNode;
-import cyr7.ast.expr.binexpr.LTEExprNode;
-import cyr7.ast.expr.binexpr.LTExprNode;
-import cyr7.ast.expr.binexpr.MultExprNode;
-import cyr7.ast.expr.binexpr.NotEqualsExprNode;
-import cyr7.ast.expr.binexpr.OrExprNode;
-import cyr7.ast.expr.binexpr.RemExprNode;
-import cyr7.ast.expr.binexpr.SubExprNode;
+import cyr7.ast.expr.binexpr.BinExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -48,7 +35,7 @@ import cyr7.visitor.AbstractVisitor;
 import cyr7.visitor.PostOrderReduceTraversal;
 
 class AstInvariantVisitor extends AbstractVisitor<Boolean>
-    implements PostOrderReduceTraversal.ReduceVisitor<Boolean> {
+        implements PostOrderReduceTraversal.ReduceVisitor<Boolean> {
 
     @Override
     public Boolean unit() {
@@ -173,72 +160,7 @@ class AstInvariantVisitor extends AbstractVisitor<Boolean>
     }
 
     @Override
-    public Boolean visit(AddExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(AndExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(DivExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(EqualsExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(GTEExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(GTExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(HighMultExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(LTEExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(LTExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(MultExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(NotEqualsExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(OrExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(RemExprNode n) {
-        return n.getType() != null;
-    }
-
-    @Override
-    public Boolean visit(SubExprNode n) {
+    public Boolean visit(BinExprNode n) {
         return n.getType() != null;
     }
 
