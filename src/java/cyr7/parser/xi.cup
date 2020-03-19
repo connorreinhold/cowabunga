@@ -11,10 +11,12 @@ import cyr7.ast.*;
 import cyr7.ast.expr.*;
 import cyr7.ast.expr.access.*;
 import cyr7.ast.expr.binexpr.*;
+import cyr7.ast.expr.binexpr.BinExprNode.ASTOpType;
 import cyr7.ast.expr.literalexpr.*;
 import cyr7.ast.expr.unaryexpr.*;
 import cyr7.ast.toplevel.*;
 import cyr7.ast.stmt.*;
+import cyr7.ast.stmt.CompoundAssignStmtNode.CompoundOpType;
 import cyr7.ast.type.*;
 import cyr7.exceptions.parser.*;
 import cyr7.lexer.LexerUtil;
@@ -99,6 +101,16 @@ terminal ASSIGN,
          LOGICAL_AND,
          LOGICAL_OR
          ;
+         
+// Compound-Assignment Operators
+terminal COMPOUND_PLUS,
+         COMPOUND_MINUS,
+         COMPOUND_MULT,
+         COMPOUND_HIGH_MULT,
+         COMPOUND_DIV,
+         COMPOUND_REM,
+         COMPOUND_AND,
+         COMPOUND_OR;
 
 // Program-wide
 nonterminal AbstractNode Program;
@@ -127,9 +139,13 @@ nonterminal LinkedList<UseNode> UseList;
 nonterminal LinkedList<FunctionDeclNode> FunctionDeclList;
 nonterminal FunctionDeclNode FunctionDecl;
 
+
+// Xi Statements
+
 nonterminal StmtNode XiStatement;
 nonterminal LinkedList<StmtNode> XiStatementList;
 nonterminal StmtNode SingleXiStatement;
+nonterminal CompoundAssignStmtNode CompoundAssignmentStatement;
 nonterminal ReturnStmtNode ReturnStatement;
 nonterminal BlockStmtNode BlockStatement;
 nonterminal ProcedureStmtNode ProcedureStatement;
@@ -231,12 +247,18 @@ ReturnTypeList ::=
 // Xi Grammar
 
 XiProgram ::=
-    UseList:uses FunctionDeclList:functions {: RESULT = new XiProgramNode(usesxleft, uses, functions); :}
+    UseList:uses FunctionDeclList:functions {: 
+        RESULT = new XiProgramNode(usesxleft, uses, functions); 
+    :}
     ;
 
 UseList ::=
-    USE:u ID:id UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
-    | USE:u ID:id SEMICOLON UseList:l {: l.addFirst(new UseNode(uxleft, id)); RESULT = l; :}
+    USE:u ID:id UseList:l {: 
+        l.addFirst(new UseNode(uxleft, id)); RESULT = l; 
+    :}
+    | USE:u ID:id SEMICOLON UseList:l {: 
+        l.addFirst(new UseNode(uxleft, id)); RESULT = l; 
+    :}
     | {: RESULT = new LinkedList<>(); :}
     ;
 
@@ -248,6 +270,7 @@ XiStatement ::=
     | WhileStatement:s {: RESULT = s; :}
     | AssignmentStatement:s {: RESULT = s; :}
     | VarDeclStatement:s {: RESULT = s; :}
+    | CompoundAssignmentStatement: s {: RESULT = s; :}
     ;
 
 // Xi statement list excluding return
@@ -275,9 +298,15 @@ FunctionDecl ::=
     ;
 
 BlockStatement ::=
-    L_BRACE:b XiStatementList:l R_BRACE {: RESULT = new BlockStmtNode(bxleft, l); :}
-    | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
-    | L_BRACE:b XiStatementList:l ReturnStatement:r SEMICOLON R_BRACE {: l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); :}
+    L_BRACE:b XiStatementList:l R_BRACE {: 
+        RESULT = new BlockStmtNode(bxleft, l); 
+    :}
+    | L_BRACE:b XiStatementList:l ReturnStatement:r R_BRACE {: 
+        l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); 
+    :}
+    | L_BRACE:b XiStatementList:l ReturnStatement:r SEMICOLON R_BRACE {: 
+        l.addLast(r); RESULT = new BlockStmtNode(bxleft, l); 
+    :}
     ;
 
 ReturnStatement ::=
@@ -298,7 +327,9 @@ IfElseStatement ::=
     ;
 
 WhileStatement ::=
-    WHILE:w Expr:e XiStatement:s {: RESULT = new WhileStmtNode(wxleft, e, s); :}
+    WHILE:w Expr:e XiStatement:s {: 
+        RESULT = new WhileStmtNode(wxleft, e, s); 
+    :}
     ;
 
 AssignmentStatement ::=
@@ -318,6 +349,34 @@ AssignmentLHS ::=
         RESULT = new VariableAccessExprNode(idxleft, id);
     :}
     ;
+
+CompoundAssignmentStatement ::= 
+    AssignmentLHS:a COMPOUND_PLUS Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.PLUS, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_MINUS Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.MINUS, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_MULT Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.MULT, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_HIGH_MULT Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.HIGH_MULT, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_DIV Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.DIV, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_REM Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.REM, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_AND Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.AND, a, e);
+    :}
+    | AssignmentLHS:a COMPOUND_OR Expr:e {:
+        RESULT = new CompoundAssignStmtNode(axleft, CompoundOpType.OR, a, e);
+    :}
+    ;
+
 
 VarDeclStatement ::=
     VarDeclArrayInit:arr {:
@@ -393,8 +452,12 @@ VarDecl ::=
     ;
 
 Primitive ::=
-    TYPE_INT:i {: RESULT = new PrimitiveTypeNode(ixleft, PrimitiveEnum.INT); :}
-    | TYPE_BOOL:b {: RESULT = new PrimitiveTypeNode(bxleft, PrimitiveEnum.BOOL); :}
+    TYPE_INT:i {: 
+        RESULT = new PrimitiveTypeNode(ixleft, PrimitiveEnum.INT); 
+    :}
+    | TYPE_BOOL:b {: 
+        RESULT = new PrimitiveTypeNode(bxleft, PrimitiveEnum.BOOL); 
+    :}
     ;
 
 TypeExpr ::=
@@ -406,7 +469,9 @@ TypeExpr ::=
     ;
 
 TypeExprArrayList ::=
-    L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: l.addFirst(Optional.empty()); RESULT = l; :}
+    L_SQ_BRKT R_SQ_BRKT TypeExprArrayList:l {: 
+        l.addFirst(Optional.empty()); RESULT = l; 
+    :}
     | {: RESULT = new LinkedList<>(); :} ;
 
 ExprList ::=
@@ -462,11 +527,15 @@ LiteralExpr ::=
     | CHAR_LITERAL:l {: RESULT = new LiteralCharExprNode(lxleft, l); :}
     | STRING_LITERAL:l {: RESULT = new LiteralStringExprNode(lxleft, l); :}
     | BOOL_LITERAL:l {: RESULT = new LiteralBoolExprNode(lxleft, l); :}
-    | L_BRACE ArrayElements:l R_BRACE {: RESULT = new LiteralArrayExprNode(lxleft, l); :}
+    | L_BRACE ArrayElements:l R_BRACE {: 
+        RESULT = new LiteralArrayExprNode(lxleft, l); 
+    :}
     ;
 
 ArrayElements ::=
-    Expr:e COMMA ArrayElements:l {:l.addFirst(e); RESULT = l;:}
+    Expr:e COMMA ArrayElements:l {: 
+        l.addFirst(e); RESULT = l;
+    :}
     | Expr:e {:
             LinkedList<ExprNode> l = new LinkedList<>();
             l.add(e);
@@ -490,19 +559,19 @@ UnaryExpr ::=
     ;
 
 BinaryExpr ::=
-    Expr:e1 MULT Expr:e2 {: RESULT = new MultExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new HighMultExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new DivExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new RemExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 PLUS Expr:e2 {: RESULT = new AddExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 MINUS Expr:e2 {: RESULT = new SubExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LT Expr:e2 {: RESULT = new LTExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LTE Expr:e2 {: RESULT = new LTEExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 GT Expr:e2 {: RESULT = new GTExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 GTE Expr:e2 {: RESULT = new GTEExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 EQUALS Expr:e2 {: RESULT = new EqualsExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new NotEqualsExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new AndExprNode(e1xleft, e1, e2); :}
-    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new OrExprNode(e1xleft, e1, e2); :}
+    Expr:e1 MULT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.MUL, e1, e2); :}
+    | Expr:e1 HIGH_MULT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.HIGH_MUL, e1, e2); :}
+    | Expr:e1 DIVIDE Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.DIV, e1, e2); :}
+    | Expr:e1 REMAINDER Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.MOD, e1, e2); :}
+    | Expr:e1 PLUS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.ADD, e1, e2); :}
+    | Expr:e1 MINUS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.SUB, e1, e2); :}
+    | Expr:e1 LT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.LT, e1, e2); :}
+    | Expr:e1 LTE Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.LEQ, e1, e2); :}
+    | Expr:e1 GT Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.GT, e1, e2); :}
+    | Expr:e1 GTE Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.GEQ, e1, e2); :}
+    | Expr:e1 EQUALS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.EQ, e1, e2); :}
+    | Expr:e1 NOT_EQUALS Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.NEQ, e1, e2); :}
+    | Expr:e1 LOGICAL_AND Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.AND, e1, e2); :}
+    | Expr:e1 LOGICAL_OR Expr:e2 {: RESULT = new BinExprNode(e1xleft, ASTOpType.OR, e1, e2); :}
     ;
 

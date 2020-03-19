@@ -1,17 +1,41 @@
 package cyr7.parser;
 
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.Optional;
+
 import cyr7.ast.VarDeclNode;
 import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
-import cyr7.ast.expr.binexpr.*;
-import cyr7.ast.expr.literalexpr.*;
+import cyr7.ast.expr.binexpr.BinExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
+import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
+import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
+import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
+import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.expr.unaryexpr.BoolNegExprNode;
 import cyr7.ast.expr.unaryexpr.IntNegExprNode;
 import cyr7.ast.expr.unaryexpr.LengthExprNode;
-import cyr7.ast.stmt.*;
-import cyr7.ast.toplevel.*;
+import cyr7.ast.stmt.ArrayDeclStmtNode;
+import cyr7.ast.stmt.AssignmentStmtNode;
+import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.CompoundAssignStmtNode;
+import cyr7.ast.stmt.ExprStmtNode;
+import cyr7.ast.stmt.IfElseStmtNode;
+import cyr7.ast.stmt.MultiAssignStmtNode;
+import cyr7.ast.stmt.ProcedureStmtNode;
+import cyr7.ast.stmt.ReturnStmtNode;
+import cyr7.ast.stmt.StmtNode;
+import cyr7.ast.stmt.VarDeclStmtNode;
+import cyr7.ast.stmt.VarInitStmtNode;
+import cyr7.ast.stmt.WhileStmtNode;
+import cyr7.ast.toplevel.FunctionDeclNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
+import cyr7.ast.toplevel.IxiProgramNode;
+import cyr7.ast.toplevel.UseNode;
+import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ast.type.TypeExprNode;
@@ -19,10 +43,6 @@ import cyr7.util.Util;
 import cyr7.visitor.AbstractVisitor;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
-
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.Optional;
 
 public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
 
@@ -321,86 +341,53 @@ public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
     }
 
     @Override
-    public Optional<Void> visit(AddExprNode n) {
-        printBinExpr("+", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(AndExprNode n) {
-        printBinExpr("&", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(DivExprNode n) {
-        printBinExpr("/", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(EqualsExprNode n) {
-        printBinExpr("==", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(GTEExprNode n) {
-        printBinExpr(">=", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(GTExprNode n) {
-        printBinExpr(">", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(HighMultExprNode n) {
-        printBinExpr("*>>", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(LTEExprNode n) {
-        printBinExpr("<=", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(LTExprNode n) {
-        printBinExpr("<", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(MultExprNode n) {
-        printBinExpr("*", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(NotEqualsExprNode n) {
-        printBinExpr("!=", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(OrExprNode n) {
-        printBinExpr("|", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(RemExprNode n) {
-        printBinExpr("%", n);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(SubExprNode n) {
-        printBinExpr("-", n);
+    public Optional<Void> visit(BinExprNode n) {
+        switch (n.opType) {
+        case ADD:
+            printBinExpr("+", n);
+            break;
+        case AND:
+            printBinExpr("&", n);
+            break;
+        case DIV:
+            printBinExpr("/", n);
+            break;
+        case EQ:
+            printBinExpr("==", n);
+            break;
+        case GEQ:
+            printBinExpr(">=", n);
+            break;
+        case GT:
+            printBinExpr(">", n);
+            break;
+        case HIGH_MUL:
+            printBinExpr("*>>", n);
+            break;
+        case LEQ:
+            printBinExpr("<=", n);
+            break;
+        case LT:
+            printBinExpr("<", n);
+            break;
+        case MOD:
+            printBinExpr("%", n);
+            break;
+        case MUL:
+            printBinExpr("*", n);
+            break;
+        case NEQ:
+            printBinExpr("!=", n);
+            break;
+        case OR:
+            printBinExpr("|", n);
+            break;
+        case SUB:
+            printBinExpr("-", n);
+            break;
+        default:
+            break;
+        }
         return Optional.empty();
     }
 
@@ -467,6 +454,42 @@ public final class SExpVisitor extends AbstractVisitor<Optional<Void>> {
         printer.endList();
 
         return Optional.empty();
+    }
+
+    private Optional<Void> printCompoundAssignStmt(String symbol,
+            CompoundAssignStmtNode n) {
+        printer.startList();
+        printer.printAtom(symbol);
+        n.lhs.accept(this);
+        n.rhs.accept(this);
+        printer.endList();
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CompoundAssignStmtNode n) {
+        switch (n.opType) {
+        case AND:
+            return printCompoundAssignStmt("&=", n);
+        case DIV:
+            return printCompoundAssignStmt("/=", n);
+        case HIGH_MULT:
+            return printCompoundAssignStmt("*>>=", n);
+        case MINUS:
+            return printCompoundAssignStmt("-=", n);
+        case MULT:
+            return printCompoundAssignStmt("*=", n);
+        case OR:
+            return printCompoundAssignStmt("|=", n);
+        case PLUS:
+            return printCompoundAssignStmt("+=", n);
+        case REM:
+            return printCompoundAssignStmt("%=", n);
+        default:
+            break;
+        }
+        throw new UnsupportedOperationException();
     }
 
     @Override

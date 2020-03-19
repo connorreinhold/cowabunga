@@ -184,5 +184,6 @@ buildNumber.properties
 .settings/
 bin/
 
-
+# IntelliJ-related project files
+.idea
 

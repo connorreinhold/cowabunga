@@ -1,13 +1,11 @@
 package cyr7.ast.expr.literalexpr;
 
-import cyr7.ast.AbstractNode;
+import java.util.List;
+
 import cyr7.ast.Node;
 import cyr7.ast.expr.AbstractExprNode;
-import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-
-import java.util.List;
 
 /**
  * Represents a boolean literal of either true or false

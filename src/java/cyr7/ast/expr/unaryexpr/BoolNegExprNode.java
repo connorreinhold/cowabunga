@@ -1,11 +1,8 @@
 package cyr7.ast.expr.unaryexpr;
 
-import cyr7.ast.Node;
 import cyr7.ast.expr.ExprNode;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-
-import java.util.List;
 
 /**
  * Represents the logical negation expression: ![ExprNode expr]
