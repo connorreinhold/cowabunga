@@ -7,6 +7,8 @@ import java.io.Writer;
 
 import cyr7.ast.AbstractNode;
 import cyr7.ast.Node;
+import cyr7.exceptions.lexer.LexerException;
+import cyr7.exceptions.parser.ParserException;
 import cyr7.lexer.MultiFileLexer;
 import java_cup.runtime.ComplexSymbolFactory;
 import java_cup.runtime.ScannerBuffer;
@@ -24,6 +26,8 @@ public class ParserUtil {
             SExpVisitor visitor = new SExpVisitor(writer);
             node.accept(visitor);
             visitor.flush();
+        } catch (ParserException | LexerException e) {
+            writer.append(e.getMessage()).append(System.lineSeparator());
         } catch (Exception e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
         }
@@ -31,8 +35,8 @@ public class ParserUtil {
 
     public static Node parseNode(Reader reader, String filename, boolean isIxi)
             throws Exception {
-        ScannerBuffer lexer = new ScannerBuffer(
-                new MultiFileLexer(reader, filename, isIxi));
+        ScannerBuffer lexer = new ScannerBuffer(new MultiFileLexer(reader,
+                filename, isIxi));
         XiParser p = new XiParser(lexer, new ComplexSymbolFactory());
         return (Node) p.parse().value;
     }

@@ -1,7 +1,6 @@
-# Built from cs4120 Compiler
+# cs4120
 
-Forked from connorreinhold/cowbunga.
-Literally better.
+As cowabungans, we make compilers in Java
 
 ## Frequent Commands
 

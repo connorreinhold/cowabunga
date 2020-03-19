@@ -1,16 +1,16 @@
 package cyr7.lexer;
 
+import cyr7.util.Util;
+import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 
 import cyr7.parser.sym;
-import cyr7.util.Util;
-import java_cup.runtime.ComplexSymbolFactory.ComplexSymbol;
 
 public class LexerUtil {
-
     /**
      * Read contents and write a line by line description of the lexed output.
      * 
@@ -18,7 +18,7 @@ public class LexerUtil {
      * @param writer the place to write
      * @throws IOException if the reader throws an {@code IOException}
      */
-    public static void lex(Reader reader, Writer writer, String filename)
+    public static void lex(Reader reader, Writer writer, String filename) 
             throws IOException {
         MyLexer lexer = new MyLexer(new BufferedReader(reader), filename);
         ComplexSymbol token;
@@ -26,10 +26,11 @@ public class LexerUtil {
         try {
             while ((token = lexer.next_token()).sym != sym.EOF) {
                 writer.append(fullDescription(token))
-                        .append(System.lineSeparator());
+                      .append(System.lineSeparator());
             }
         } catch (Exception e) {
-            writer.append(e.getMessage()).append(System.lineSeparator());
+            writer.append(e.getMessage())
+                  .append(System.lineSeparator());
         }
     }
 
@@ -89,8 +90,7 @@ public class LexerUtil {
         case sym.INT_MAX:
             return "integer " + MyLexer.maxIntegerString;
         case sym.CHAR_LITERAL:
-            return "character "
-                    + Util.unescapeCharacterString(value.toString());
+            return "character " + Util.unescapeCharacterString(value.toString());
         case sym.STRING_LITERAL:
             return "string " + Util.unescapeString(value.toString());
 
@@ -146,23 +146,6 @@ public class LexerUtil {
         case sym.GTE:
             return ">=";
 
-        case sym.COMPOUND_AND:
-            return "&=";
-        case sym.COMPOUND_OR:
-            return "|=";
-        case sym.COMPOUND_PLUS:
-            return "+=";
-        case sym.COMPOUND_MINUS:
-            return "-=";
-        case sym.COMPOUND_MULT:
-            return "*=";
-        case sym.COMPOUND_HIGH_MULT:
-            return "*>>=";
-        case sym.COMPOUND_REM:
-            return "%=";
-        case sym.COMPOUND_DIV:
-            return "/=";
-
         case sym.EQUALS:
             return "==";
         case sym.NOT_EQUALS:
@@ -182,8 +165,8 @@ public class LexerUtil {
                             + value);
 
         default:
-            throw new RuntimeException(
-                    "Token " + symId + " is missing a description.");
+            throw new RuntimeException("Token " + symId
+                    + " is missing a description.");
         }
     }
 

@@ -5,7 +5,20 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
-import cyr7.ast.expr.binexpr.BinExprNode;
+import cyr7.ast.expr.binexpr.AddExprNode;
+import cyr7.ast.expr.binexpr.AndExprNode;
+import cyr7.ast.expr.binexpr.DivExprNode;
+import cyr7.ast.expr.binexpr.EqualsExprNode;
+import cyr7.ast.expr.binexpr.GTEExprNode;
+import cyr7.ast.expr.binexpr.GTExprNode;
+import cyr7.ast.expr.binexpr.HighMultExprNode;
+import cyr7.ast.expr.binexpr.LTEExprNode;
+import cyr7.ast.expr.binexpr.LTExprNode;
+import cyr7.ast.expr.binexpr.MultExprNode;
+import cyr7.ast.expr.binexpr.NotEqualsExprNode;
+import cyr7.ast.expr.binexpr.OrExprNode;
+import cyr7.ast.expr.binexpr.RemExprNode;
+import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -17,7 +30,6 @@ import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.ExprStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.MultiAssignStmtNode;
@@ -44,37 +56,39 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
     private final IdGenerator generator;
     private final String tLabel, fLabel;
 
-    public CTranslationVisitor(IdGenerator generator, String tLabel,
-            String fLabel) {
+    public CTranslationVisitor(IdGenerator generator, String tLabel, String fLabel) {
         this.generator = generator;
         this.tLabel = tLabel;
         this.fLabel = fLabel;
     }
 
-    public IRStmt andExprCTranslation(BinExprNode n) {
+    @Override
+    public IRStmt visit(AndExprNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
         String tPrime = generator.newLabel();
         return make.IRSeq(
-                n.left.accept(
-                        new CTranslationVisitor(generator, tPrime, fLabel)),
-                make.IRLabel(tPrime), n.right.accept(
-                        new CTranslationVisitor(generator, tLabel, fLabel)));
+                n.left.accept(new CTranslationVisitor(generator, tPrime,
+                        fLabel)),
+                make.IRLabel(tPrime),
+                n.right.accept(new CTranslationVisitor(generator, tLabel,
+                        fLabel)));
     }
 
     @Override
     public IRStmt visit(BoolNegExprNode n) {
-        return n.expr
-                .accept(new CTranslationVisitor(generator, fLabel, tLabel));
+        return n.expr.accept(new CTranslationVisitor(generator, fLabel, tLabel));
     }
 
-    public IRStmt orExprCTranslation(BinExprNode n) {
+    @Override
+    public IRStmt visit(OrExprNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
         String fPrime = generator.newLabel();
         return make.IRSeq(
-                n.left.accept(
-                        new CTranslationVisitor(generator, tLabel, fPrime)),
-                make.IRLabel(fPrime), n.right.accept(
-                        new CTranslationVisitor(generator, tLabel, fLabel)));
+                n.left.accept(new CTranslationVisitor(generator, tLabel,
+                        fPrime)),
+                make.IRLabel(fPrime),
+                n.right.accept(new CTranslationVisitor(generator, tLabel,
+                        fLabel)));
     }
 
     @Override
@@ -88,35 +102,8 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     private IRStmt cjump(ExprNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-        return make.IRCJump(
-                n.accept(new ASTToIRVisitor(generator)).assertFirst(), tLabel,
-                fLabel);
-    }
-
-    @Override
-    public IRStmt visit(BinExprNode n) {
-        switch (n.opType) {
-        case AND:
-            return andExprCTranslation(n);
-        case OR:
-            return orExprCTranslation(n);
-        case ADD:
-        case DIV:
-        case EQ:
-        case GEQ:
-        case GT:
-        case HIGH_MUL:
-        case LEQ:
-        case LT:
-        case MOD:
-        case MUL:
-        case NEQ:
-        case SUB:
-            return cjump(n);
-        default:
-            break;
-        }
-        throw new UnsupportedOperationException();
+        return make.IRCJump(n.accept(new ASTToIRVisitor(generator))
+                             .assertFirst(), tLabel, fLabel);
     }
 
     @Override
@@ -131,6 +118,66 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(VariableAccessExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(AddExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(DivExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(EqualsExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(GTEExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(GTExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(HighMultExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(LTEExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(LTExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(MultExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(NotEqualsExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(RemExprNode n) {
+        return cjump(n);
+    }
+
+    @Override
+    public IRStmt visit(SubExprNode n) {
         return cjump(n);
     }
 
@@ -259,11 +306,6 @@ public final class CTranslationVisitor extends AbstractVisitor<IRStmt> {
 
     @Override
     public IRStmt visit(WhileStmtNode n) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public IRStmt visit(CompoundAssignStmtNode n) {
         throw new UnsupportedOperationException();
     }
 
