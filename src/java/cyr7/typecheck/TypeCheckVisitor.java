@@ -968,7 +968,9 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
                 n.lhs, n.rhs);
         AssignmentStmtNode assignRep = new AssignmentStmtNode(n.getLocation(),
                 n.lhs, binopRep);
-        return assignRep.accept(this);
+        var res = assignRep.accept(this);
+        System.out.println();
+        return res;
     }
 
 }

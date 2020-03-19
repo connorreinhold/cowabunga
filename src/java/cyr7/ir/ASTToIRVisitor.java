@@ -784,6 +784,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         }
         BinExprNode binopRep = new BinExprNode(n.getLocation(), equivalentOp,
                 n.lhs, n.rhs);
+        binopRep.setType(n.lhs.getType());
         AssignmentStmtNode assignRep = new AssignmentStmtNode(n.getLocation(),
                 n.lhs, binopRep);
         return assignRep.accept(this);

@@ -29,7 +29,7 @@ public class CompoundAssignStmtNode extends AbstractNode implements StmtNode {
 
     @Override
     public <T> T accept(AbstractVisitor<T> visitor) {
-        return this.accept(visitor);
+        return visitor.visit(this);
     }
 
     @Override

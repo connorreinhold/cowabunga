@@ -7,7 +7,12 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ast.expr.ExprNode;
+import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
+import cyr7.ast.expr.binexpr.BinExprNode;
+import cyr7.ast.expr.binexpr.BinExprNode.ASTOpType;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
 import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.CompoundAssignStmtNode.CompoundOpType;
@@ -38,6 +43,38 @@ public class TestCompoundAssignment {
         assertEquals(
                 List.of(compAssign(CompoundOpType.PLUS, var("a"), var("a"))),
                 expr);
+
+        expr = ParserFactory.parseStatement("a /= 12;");
+        assertEquals(
+                List.of(compAssign(CompoundOpType.DIV, var("a"), constant(12))),
+                expr);
     }
+
+    @Test
+    void testComplexRHS() throws Exception {
+        var expr = ParserFactory.parseStatement("a += f(1,2,4) + 34");
+        assertEquals(
+                List.of(compAssign(CompoundOpType.PLUS, var("a"),
+                        new BinExprNode(LOC, ASTOpType.ADD,
+                                new FunctionCallExprNode(LOC, "f",
+                                        List.of(constant(1), constant(2),
+                                                constant(4))),
+                                constant(34)))),
+                expr);
+    }
+
+    @Test
+    void testLHS() throws Exception {
+        var expr = ParserFactory.parseStatement("foo()[0] += {3, 2}");
+        assertEquals(List.of(
+                compAssign(CompoundOpType.PLUS, 
+                        new ArrayAccessExprNode(LOC, 
+                                new FunctionCallExprNode(LOC, "foo", 
+                                        List.of()), constant(0)),
+                        new LiteralArrayExprNode(LOC, 
+                                List.of(constant(3), constant(2))))
+        ), expr);
+    }
+
 
 }

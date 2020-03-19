@@ -35,12 +35,12 @@ class TestEdgeCases {
 
     void test(String prgm) throws Exception {
         ParserUtil.parseNode(new StringReader(prgm), "test.xi", false)
-                  .accept(new TypeCheckVisitor(null));
+                .accept(new TypeCheckVisitor(null));
     }
 
     void testInterface(String prgm) throws Exception {
         ParserUtil.parseNode(new StringReader(prgm), "test.ixi", true)
-                  .accept(new TypeCheckVisitor(null));
+                .accept(new TypeCheckVisitor(null));
     }
 
     @Test
@@ -112,10 +112,10 @@ class TestEdgeCases {
 
     @Test
     void badCompare() {
-        String good1 = create.apply(
-                "main(): bool, bool { return 1 == 1, 1 <= 1; }");
-        String good2 = create.apply(
-                "main(): bool, bool { return h(3) == 1, 1 <= h(1); }");
+        String good1 = create
+                .apply("main(): bool, bool { return 1 == 1, 1 <= 1; }");
+        String good2 = create
+                .apply("main(): bool, bool { return h(3) == 1, 1 <= h(1); }");
         String p1 = create.apply("main(): bool { return f() == f(); }");
         String p2 = create.apply("main(): bool { return g() == g(); }");
         String p3 = create.apply("main(): bool { return f() == g(); }");
@@ -169,16 +169,16 @@ class TestEdgeCases {
 
     @Test
     void multipleSameParamNames() {
-        String good1 = create.apply("main1(i: int) { } main2(i: int) { }"
-                + " main3(i: bool) { }");
-        String good2 = create.apply("main1(i: int, j:bool) { } main2(i: int) { }"
-                + " main3(i: bool) { }");
+        String good1 = create.apply(
+                "main1(i: int) { } main2(i: int) { }" + " main3(i: bool) { }");
+        String good2 = create
+                .apply("main1(i: int, j:bool) { } main2(i: int) { }"
+                        + " main3(i: bool) { }");
 
         String semanticBad1 = create.apply("main(i: int, i: bool) { }");
         String semanticBad2 = create.apply("main(i: int, i: int) { }");
         String semanticBad3 = create.apply("main1(i: int, j:bool, i:bool) { } "
-                + "main2(i: int) { }"
-                + " main3(i: bool) { }");
+                + "main2(i: int) { }" + " main3(i: bool) { }");
 
         assertDoesNotThrow(() -> test(good1));
         assertDoesNotThrow(() -> test(good2));
@@ -193,14 +193,14 @@ class TestEdgeCases {
         String semanticBad2 = create.apply("main() { return length({}); }");
         String parseBad3 = create.apply("main(): int { return length(); }");
         String semanticBad4 = create.apply("main(): int { return length(2); }");
-        String semanticBad5 = create.apply(
-                "main(): int { return length(true); }");
+        String semanticBad5 = create
+                .apply("main(): int { return length(true); }");
 
         String good1 = create.apply("main() { _ = length({1,4,6,7}); }");
-        String good2 = create.apply(
-                "main(): int { return length({1,4,6,7}); }");
-        String good3 = create.apply(
-                "main(): int { return length({}[0][0][0][0]); }");
+        String good2 = create
+                .apply("main(): int { return length({1,4,6,7}); }");
+        String good3 = create
+                .apply("main(): int { return length({}[0][0][0][0]); }");
 
         assertThrows(ParserException.class, () -> test(parseBad1));
         assertThrows(SemanticException.class, () -> test(semanticBad2));
@@ -218,67 +218,63 @@ class TestEdgeCases {
      */
     @Test
     void testAdding() {
-        String good1 = create.apply("main() { "
-                + "i: int = {}[0] + {}[0]; "
-                + "r: bool = i < 3;}");
-        String good2 = create.apply("main() { "
-                + "i: int = (2 + {}[0]) + 5; }");
-        String good3 = create.apply("main() { "
-                + "i: int = ({}[0] + 2) + 5; }");
-        String good4 = create.apply("main() { "
-                + "i: int[] = ({}[0] + {2}) + {5}; }");
-        String good5 = create.apply("main() { "
-                + "i: int[] = ({}[0] + {}); }");
-        String good6 = create.apply("main() { "
-                + "i: int = ({}[0] + \"\"[0]); }");
-        String good7 = create.apply("main() { "
-                + "i: int = ({}[0] + {}[0]); }");
-        String good8 = create.apply("main() { "
-                + "i: bool = {}[0] + {}[0] == {}; }");
-        String good9 = create.apply("main() { "
-                + "i: bool = {}[0] + {}[0] == {1, 2, 4}; }");
-        String good10 = create.apply("main() { "
-                + "i: bool = {}[0] + {}[0] == 32; }");
-        String good11 = create.apply("main() { "
-                + "i: int[] = ({}[0] + {}[0]) + {32}; }");
-        String good12 = create.apply("main() { "
-                + "i: int = length({}[0] + {}[0]); }");
-        String good13 = create.apply("main() { "
-                + "i: int = ({}[0] + {}[0])[0]; }");
-        String good14 = create.apply("main() { "
-                + "i: int = (({}[0] + {}[0])[0][0] + {}[0])[0]; }");
-        String good15 = create.apply("main() { "
-                + "i: int = {}[0] + {}[0] + {}[0]; }");
-        String good16 = create.apply("main() { "
-                + "i: int[] = {}[0] + {}[0] + {}[0]; }");
-        String good17 = create.apply("main() { "
-                + "i: int[] = {{}[0] + {}[0] + {}[0]}; }");
+        String good1 = create.apply(
+                "main() { " + "i: int = {}[0] + {}[0]; " + "r: bool = i < 3;}");
+        String good2 = create
+                .apply("main() { " + "i: int = (2 + {}[0]) + 5; }");
+        String good3 = create
+                .apply("main() { " + "i: int = ({}[0] + 2) + 5; }");
+        String good4 = create
+                .apply("main() { " + "i: int[] = ({}[0] + {2}) + {5}; }");
+        String good5 = create.apply("main() { " + "i: int[] = ({}[0] + {}); }");
+        String good6 = create
+                .apply("main() { " + "i: int = ({}[0] + \"\"[0]); }");
+        String good7 = create
+                .apply("main() { " + "i: int = ({}[0] + {}[0]); }");
+        String good8 = create
+                .apply("main() { " + "i: bool = {}[0] + {}[0] == {}; }");
+        String good9 = create
+                .apply("main() { " + "i: bool = {}[0] + {}[0] == {1, 2, 4}; }");
+        String good10 = create
+                .apply("main() { " + "i: bool = {}[0] + {}[0] == 32; }");
+        String good11 = create
+                .apply("main() { " + "i: int[] = ({}[0] + {}[0]) + {32}; }");
+        String good12 = create
+                .apply("main() { " + "i: int = length({}[0] + {}[0]); }");
+        String good13 = create
+                .apply("main() { " + "i: int = ({}[0] + {}[0])[0]; }");
+        String good14 = create.apply(
+                "main() { " + "i: int = (({}[0] + {}[0])[0][0] + {}[0])[0]; }");
+        String good15 = create
+                .apply("main() { " + "i: int = {}[0] + {}[0] + {}[0]; }");
+        String good16 = create
+                .apply("main() { " + "i: int[] = {}[0] + {}[0] + {}[0]; }");
+        String good17 = create
+                .apply("main() { " + "i: int[] = {{}[0] + {}[0] + {}[0]}; }");
         String good18 = create.apply("main() { "
                 + "i: int[] = \"Hello\" + {}[0] + {}[0] + {}[0] + \"World\"; }");
-        String good19 = create.apply("main() { "
-                + "p({}[0] + {}[0], ({}[0] + {}[0])/2);}");
-        String good20 = create.apply("main() { "
-                + "a: bool = ({}[0] + {}[0]) == 12 }");
-        String good21 = create.apply("main(i: int[]) { "
-                + "main({}[0] + {}[0]) }");
-        String good22 = create.apply("main(i: int[]) { "
-                + "a: bool = ({}[0] + {}[0]) < 12; }");
+        String good19 = create
+                .apply("main() { " + "p({}[0] + {}[0], ({}[0] + {}[0])/2);}");
+        String good20 = create
+                .apply("main() { " + "a: bool = ({}[0] + {}[0]) == 12 }");
+        String good21 = create
+                .apply("main(i: int[]) { " + "main({}[0] + {}[0]) }");
+        String good22 = create.apply(
+                "main(i: int[]) { " + "a: bool = ({}[0] + {}[0]) < 12; }");
         String good23 = create.apply("main(i: int[]) { "
                 + "a: bool = length({}[0] + {}[0]) < 12; }");
-        String good24 = create.apply("main(i: int[]): int[] { "
-                + "return main({}[0] + {}[0]);}");
+        String good24 = create.apply(
+                "main(i: int[]): int[] { " + "return main({}[0] + {}[0]);}");
 
-
-        String bad1 = create.apply("main() { i: int[] = {}[0] + {}[0]; "
-                + "r: bool = i < 3; }");
-        String bad2 = create.apply("main() { "
-                + "i: bool = ({}[0] + {}[0]) & true; }");
-        String bad3 = create.apply("main() { "
-                + "i: int = ({}[0] + {}); }");
-        String bad4 = create.apply("main() { "
-                + "i: int = ({}[0] & {}[0]) + 3; }");
-        String bad5 = create.apply("main() { "
-                + "i: bool[] = {{}[0] + {}[0] + {}[0]}; }");
+        String bad1 = create.apply(
+                "main() { i: int[] = {}[0] + {}[0]; " + "r: bool = i < 3; }");
+        String bad2 = create
+                .apply("main() { " + "i: bool = ({}[0] + {}[0]) & true; }");
+        String bad3 = create.apply("main() { " + "i: int = ({}[0] + {}); }");
+        String bad4 = create
+                .apply("main() { " + "i: int = ({}[0] & {}[0]) + 3; }");
+        String bad5 = create
+                .apply("main() { " + "i: bool[] = {{}[0] + {}[0] + {}[0]}; }");
 
         assertDoesNotThrow(() -> test(good1));
         assertDoesNotThrow(() -> test(good2));
@@ -318,69 +314,60 @@ class TestEdgeCases {
         String bad1 = create.apply("main() { if (true) return else return}");
         assertThrows(ParserException.class, () -> test(bad1));
 
-        String bad2 = create.apply(
-                "main() { if (true) { return } else return}");
+        String bad2 = create
+                .apply("main() { if (true) { return } else return}");
         assertThrows(ParserException.class, () -> test(bad2));
 
-        String bad3 = create.apply(
-                "main() { if (true) return else { return} }");
+        String bad3 = create
+                .apply("main() { if (true) return else { return} }");
         assertThrows(ParserException.class, () -> test(bad3));
 
         String bad4 = create.apply("main() { if (true) return }");
         assertThrows(ParserException.class, () -> test(bad4));
 
-        String bad5 = create.apply(
-                "main() { if (true) i: int = 4 else return}");
+        String bad5 = create
+                .apply("main() { if (true) i: int = 4 else return}");
         assertThrows(ParserException.class, () -> test(bad5));
 
-        String good1 = create.apply(
-                "main() { if (true) i: int = 4 else {return }}");
+        String good1 = create
+                .apply("main() { if (true) i: int = 4 else {return }}");
         assertDoesNotThrow(() -> test(good1));
 
-        String good2 = create.apply(
-                "main() { if (true) {return} else {return }}");
+        String good2 = create
+                .apply("main() { if (true) {return} else {return }}");
         assertDoesNotThrow(() -> test(good2));
 
-        String good3 = create.apply("main() {"
-                + "{{{return; }}}"
-                + "}");
+        String good3 = create.apply("main() {" + "{{{return; }}}" + "}");
         assertDoesNotThrow(() -> test(good3));
     }
-
 
     @Test
     void blockTests() {
         String good1 = create.apply("main(): int[] {"
-                + "{}{}{}{}{}{}{}{}{}{} return {1,2,3};"
-                + "}");
+                + "{}{}{}{}{}{}{}{}{}{} return {1,2,3};" + "}");
         assertDoesNotThrow(() -> test(good1));
 
         String good2 = create.apply("main(): int[] {"
-                + "{}{}{}let: int = 12{}{}{}{}{}{return {let}}"
-                + "}");
+                + "{}{}{}let: int = 12{}{}{}{}{}{return {let}}" + "}");
         assertDoesNotThrow(() -> test(good2));
 
-
         String bad1 = create.apply("main(): int[] {"
-                + "{}{}{}let: int = 12{}{}{}{}{return {let}}{}"
-                + "}");
+                + "{}{}{}let: int = 12{}{}{}{}{return {let}}{}" + "}");
         assertThrows(SemanticException.class, () -> test(bad1));
 
         // i becomes out of scope.
-        String bad2 = create.apply("main() : int {"
-                + " {i: int = 4;}"
-                + "i = 12; return i; }");
+        String bad2 = create.apply(
+                "main() : int {" + " {i: int = 4;}" + "i = 12; return i; }");
         assertThrows(SemanticException.class, () -> test(bad2));
 
         // i gets declared in an accessible scope.
-        String bad3 = create.apply("main() : int {"
-                + "i: int; {i: int = 4;}"
+        String bad3 = create.apply("main() : int {" + "i: int; {i: int = 4;}"
                 + "i = 12; return i; }");
         assertThrows(SemanticException.class, () -> test(bad3));
 
         // Try not to confuse arrays with statement blocks
-        String bad4 = create.apply("main() : int {"
-                + "i: int[] = {return h(45)}}");
+        String bad4 = create
+                .apply("main() : int {" + "i: int[] = {return h(45)}}");
         assertThrows(ParserException.class, () -> test(bad4));
     }
 
@@ -389,76 +376,54 @@ class TestEdgeCases {
         String bad1 = create.apply("main() { i: int = i; }");
         assertThrows(SemanticException.class, () -> test(bad1));
 
-        String bad2 = create.apply("main() : int {"
-                + "return i: int;"
-                + "}");
+        String bad2 = create.apply("main() : int {" + "return i: int;" + "}");
         assertThrows(ParserException.class, () -> test(bad2));
     }
-
 
     /**
      * These are test cases created based on posts/responses made by other
      * students/course staff on the CS4120 Piazza.
      * <p>
-     * Each test program is named in the form p[num], where [num] is the
-     * post number on Piazza.
+     * Each test program is named in the form p[num], where [num] is the post
+     * number on Piazza.
      */
     @Test
     void piazzaExamplePrograms() {
-        String p194 = "main() { f(g()) }\n" +
-                "f(a:int, b: int) { }\n" +
-                "g(): int, int { return 1, 1 }";
+        String p194 = "main() { f(g()) }\n" + "f(a:int, b: int) { }\n"
+                + "g(): int, int { return 1, 1 }";
         assertThrows(SemanticException.class, () -> test(p194));
 
-
-        String p190 = "foo() { }\n" +
-                "bar() { x:int = foo() }";
+        String p190 = "foo() { }\n" + "bar() { x:int = foo() }";
         assertThrows(SemanticException.class, () -> test(p190));
 
-
-        String p186 = "main() {\n" +
-                "  if (true) return\n" +
-                "  a:int = 2\n" +
-                "}";
+        String p186 = "main() {\n" + "  if (true) return\n" + "  a:int = 2\n"
+                + "}";
         // Because return statement is not the last statement in a block.
         assertThrows(ParserException.class, () -> test(p186));
 
-
-        String p187 = "f(a: int[]) : int[] {\n" +
-                "  b: int[] = a\n" +
-                "  return b\n" +
-                "}\n" +
-                "main() {\n" +
-                "   x: int[] = { 1, 2, 3, 4 }\n" +
-                "   f(x)[0] = 42\n" +
-                "   println(unparseInt(x[0]))\n" +
-                "}\n\n" +
-                "unparseInt(i: int): int[] { return \"\" }" +
-                "println(s: int[]) { return; }";
+        String p187 = "f(a: int[]) : int[] {\n" + "  b: int[] = a\n"
+                + "  return b\n" + "}\n" + "main() {\n"
+                + "   x: int[] = { 1, 2, 3, 4 }\n" + "   f(x)[0] = 42\n"
+                + "   println(unparseInt(x[0]))\n" + "}\n\n"
+                + "unparseInt(i: int): int[] { return \"\" }"
+                + "println(s: int[]) { return; }";
         assertDoesNotThrow(() -> test(p187));
 
-        String p185 = "foo1 (a: int) {}\n" +
-                "foo2 (a: int) {}";
+        String p185 = "foo1 (a: int) {}\n" + "foo2 (a: int) {}";
         assertDoesNotThrow(() -> test(p185));
 
-
-        String p179 = "foo(){\n" +
-                "   a:int[][] = {}[0][0][0][0][0][0][0][0][0][0][0]\n" +
-                "}";
+        String p179 = "foo(){\n"
+                + "   a:int[][] = {}[0][0][0][0][0][0][0][0][0][0][0]\n" + "}";
         assertDoesNotThrow(() -> test(p179));
 
-        String p176 = "main() { x: int[]; x = {1,}\n" +
-                "x = {1,2,3,} }";
+        String p176 = "main() { x: int[]; x = {1,}\n" + "x = {1,2,3,} }";
         assertDoesNotThrow(() -> test(p176));
 
-        String p175 = "f() : int {\n" +
-                "  { return 5 }\n" +
-                "  c: int = 5\n" +
-                "}";
+        String p175 = "f() : int {\n" + "  { return 5 }\n" + "  c: int = 5\n"
+                + "}";
         assertThrows(SemanticException.class, () -> test(p175));
 
     }
-
 
     @Test
     void useFunction() {
@@ -468,7 +433,6 @@ class TestEdgeCases {
         String p2 = "i(i: int) { i = 12;}";
         assertThrows(SemanticException.class, () -> test(p2));
     }
-
 
     @Test
     void interfaceFileTest() {
@@ -480,6 +444,19 @@ class TestEdgeCases {
 
         String i2 = "main(i: int, i: int, i: int)";
         assertDoesNotThrow(() -> testInterface(i2));
+    }
+
+    @Test
+    void testCompoundAssignment() {
+        String p1 = "main() { x: int = 12; x += 40; }";
+        assertDoesNotThrow(() -> test(p1));
+
+        String p2 = "main() { x: int[] = {2,3,};  x += x; }";
+        assertDoesNotThrow(() -> test(p2));
+
+        String bad1 = "main() { x: int[] = {};  x /= 12; }";
+        assertThrows(SemanticException.class, () -> test(bad1));
+
     }
 
 }
