@@ -206,15 +206,6 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "="                 { return symbol(sym.ASSIGN); }
 
-    "+="                { return symbol(sym.COMPOUND_PLUS); }
-    "-="                { return symbol(sym.COMPOUND_MINUS); }
-    "*="                { return symbol(sym.COMPOUND_MULT); }
-    "*>>="              { return symbol(sym.COMPOUND_HIGH_MULT); }
-    "/="                { return symbol(sym.COMPOUND_DIV); }
-    "%="                { return symbol(sym.COMPOUND_REM); }
-    "&="                { return symbol(sym.COMPOUND_AND); }
-    "|="                { return symbol(sym.COMPOUND_OR); }
-
     "+"                 { return symbol(sym.PLUS); }
     "-"                 { return symbol(sym.MINUS); }
     "*"                 { return symbol(sym.MULT); }
@@ -234,6 +225,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "&"                 { return symbol(sym.LOGICAL_AND); }
     "|"                 { return symbol(sym.LOGICAL_OR); }
+    
     .               
        { 
           throw new cyr7.exceptions.lexer.InvalidTokenException(yytext(),

@@ -31,7 +31,6 @@ public abstract class AbstractVisitor<T> {
     // stmt
     abstract public T visit(ArrayDeclStmtNode n);
     abstract public T visit(AssignmentStmtNode n);
-    abstract public T visit(CompoundAssignStmtNode n);
     abstract public T visit(BlockStmtNode n);
     abstract public T visit(ExprStmtNode n);
     abstract public T visit(IfElseStmtNode n);
@@ -50,7 +49,20 @@ public abstract class AbstractVisitor<T> {
     abstract public T visit(VariableAccessExprNode n);
 
     // bin expr
-    abstract public T visit(BinExprNode n);
+    abstract public T visit(AddExprNode n);
+    abstract public T visit(AndExprNode n);
+    abstract public T visit(DivExprNode n);
+    abstract public T visit(EqualsExprNode n);
+    abstract public T visit(GTEExprNode n);
+    abstract public T visit(GTExprNode n);
+    abstract public T visit(HighMultExprNode n);
+    abstract public T visit(LTEExprNode n);
+    abstract public T visit(LTExprNode n);
+    abstract public T visit(MultExprNode n);
+    abstract public T visit(NotEqualsExprNode n);
+    abstract public T visit(OrExprNode n);
+    abstract public T visit(RemExprNode n);
+    abstract public T visit(SubExprNode n);
 
     // literal expr
     abstract public T visit(LiteralArrayExprNode n);

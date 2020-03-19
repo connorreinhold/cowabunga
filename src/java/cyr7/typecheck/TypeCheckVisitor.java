@@ -15,8 +15,21 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.access.ArrayAccessExprNode;
 import cyr7.ast.expr.access.VariableAccessExprNode;
+import cyr7.ast.expr.binexpr.AddExprNode;
+import cyr7.ast.expr.binexpr.AndExprNode;
 import cyr7.ast.expr.binexpr.BinExprNode;
-import cyr7.ast.expr.binexpr.BinExprNode.ASTOpType;
+import cyr7.ast.expr.binexpr.DivExprNode;
+import cyr7.ast.expr.binexpr.EqualsExprNode;
+import cyr7.ast.expr.binexpr.GTEExprNode;
+import cyr7.ast.expr.binexpr.GTExprNode;
+import cyr7.ast.expr.binexpr.HighMultExprNode;
+import cyr7.ast.expr.binexpr.LTEExprNode;
+import cyr7.ast.expr.binexpr.LTExprNode;
+import cyr7.ast.expr.binexpr.MultExprNode;
+import cyr7.ast.expr.binexpr.NotEqualsExprNode;
+import cyr7.ast.expr.binexpr.OrExprNode;
+import cyr7.ast.expr.binexpr.RemExprNode;
+import cyr7.ast.expr.binexpr.SubExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralBoolExprNode;
 import cyr7.ast.expr.literalexpr.LiteralCharExprNode;
@@ -28,7 +41,6 @@ import cyr7.ast.expr.unaryexpr.LengthExprNode;
 import cyr7.ast.stmt.ArrayDeclStmtNode;
 import cyr7.ast.stmt.AssignmentStmtNode;
 import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.CompoundAssignStmtNode;
 import cyr7.ast.stmt.ExprStmtNode;
 import cyr7.ast.stmt.IfElseStmtNode;
 import cyr7.ast.stmt.MultiAssignStmtNode;
@@ -78,8 +90,7 @@ import cyr7.visitor.AbstractVisitor;
 
 final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
 
-    static final class Result
-            extends OneOfThree<ExpandedType, ResultType, Void> {
+    static final class Result extends OneOfThree<ExpandedType, ResultType, Void> {
 
         static Result ofExpanded(ExpandedType e) {
             return new Result(e, null);
@@ -93,7 +104,8 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
             return new Result(null, null);
         }
 
-        protected Result(ExpandedType first, ResultType second) {
+        protected Result(ExpandedType first,
+                         ResultType second) {
             super(first, second, null);
         }
 
@@ -444,7 +456,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
         ExpandedType type = n.expr.accept(this).assertFirst();
 
         if (!(n.expr instanceof FunctionCallExprNode
-                || n.expr instanceof LengthExprNode)) {
+            || n.expr instanceof LengthExprNode)) {
             throw new ExpectedFunctionException(n.expr.getLocation());
         }
 
@@ -720,139 +732,166 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
     /**
      * Typechecks an integer binary operation expression, e.g. 9 + 10.
      */
-    private Result typecheckIntegerBinExpr(ExprNode lhs, ExprNode rhs) {
-        ExpandedType left = lhs.accept(this).assertFirst();
-        ExpandedType right = rhs.accept(this).assertFirst();
+    private Result typecheckIntegerBinExpr(BinExprNode n) {
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (!left.isSubtypeOfInt()) {
             throw new TypeMismatchException(left, ExpandedType.intType,
-                    lhs.getLocation());
+                    n.left.getLocation());
         }
         if (!right.isSubtypeOfInt()) {
             throw new TypeMismatchException(right, ExpandedType.intType,
-                    rhs.getLocation());
+                    n.right.getLocation());
         }
 
-        return Result.ofExpanded(ExpandedType.intType);
+        return assignType(n, ExpandedType.intType);
     }
 
     /**
      * Typechecks a boolean binary operation expression, e.g. true || false.
      */
-    private Result typecheckBooleanBinExpr(ExprNode lhs, ExprNode rhs) {
-        ExpandedType left = lhs.accept(this).assertFirst();
-        ExpandedType right = rhs.accept(this).assertFirst();
+    private Result typecheckBooleanBinExpr(BinExprNode n) {
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (!left.isSubtypeOfBool()) {
             throw new TypeMismatchException(left, ExpandedType.boolType,
-                    lhs.getLocation());
+                    n.left.getLocation());
         }
 
         if (!right.isSubtypeOfBool()) {
             throw new TypeMismatchException(right, ExpandedType.boolType,
-                    rhs.getLocation());
+                    n.right.getLocation());
         }
-        assignType(lhs, left);
-        assignType(rhs, right);
-        return Result.ofExpanded(ExpandedType.boolType);
+        return assignType(n, ExpandedType.boolType);
     }
 
     /**
      * Typechecks a comparison expression, e.g. 3 <= 31.
      */
-    private Result typecheckComparisonBinExpr(ExprNode lhs, ExprNode rhs) {
-        ExpandedType left = lhs.accept(this).assertFirst();
-        ExpandedType right = rhs.accept(this).assertFirst();
+    private Result typecheckComparisonBinExpr(BinExprNode n) {
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (!left.isSubtypeOfInt()) {
             throw new TypeMismatchException(left, ExpandedType.intType,
-                    lhs.getLocation());
+                    n.left.getLocation());
         }
         if (!right.isSubtypeOfInt()) {
             throw new TypeMismatchException(right, ExpandedType.intType,
-                    rhs.getLocation());
+                    n.right.getLocation());
         }
-        return Result.ofExpanded(ExpandedType.boolType);
+        return assignType(n, ExpandedType.boolType);
     }
 
     /**
      * Typechecks an equality expression, e.g. 3 == 31.
      */
-    private Result typecheckEqualityBinExpr(ExprNode lhs, ExprNode rhs) {
-        ExpandedType left = lhs.accept(this).assertFirst();
-        ExpandedType right = rhs.accept(this).assertFirst();
+    private Result typecheckEqualityBinExpr(BinExprNode n) {
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
         if (!left.isOrdinary()) {
-            throw new OrdinaryTypeExpectedException(lhs.getLocation());
+            throw new OrdinaryTypeExpectedException(n.left.getLocation());
         }
         if (!right.isOrdinary()) {
-            throw new OrdinaryTypeExpectedException(rhs.getLocation());
+            throw new OrdinaryTypeExpectedException(n.right.getLocation());
         }
 
         if (supertypeOf(left, right).isEmpty()) {
-            throw new UncomparableValuesException(left, right,
-                    lhs.getLocation());
+            throw new UncomparableValuesException(left, right, n.getLocation());
         }
-        return Result.ofExpanded(ExpandedType.boolType);
+        return assignType(n, ExpandedType.boolType);
     }
 
     @Override
-    public Result visit(BinExprNode n) {
-        switch (n.opType) {
-        case ADD: {
-            ExpandedType left = n.left.accept(this).assertFirst();
-            ExpandedType right = n.right.accept(this).assertFirst();
+    public Result visit(AddExprNode n) {
+        ExpandedType left = n.left.accept(this).assertFirst();
+        ExpandedType right = n.right.accept(this).assertFirst();
 
-            if (left.isVoid() && right.isVoid()) {
-                return assignType(n, ExpandedType.genericAddType);
-            }
+        if (left.isVoid() && right.isVoid()) {
+            return assignType(n, ExpandedType.genericAddType);
+        }
 
-            if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
-                Optional<ExpandedType> supertype = supertypeOf(left, right);
-                if (supertype.isPresent()) {
-                    return assignType(n, supertype.get());
-                }
+        if (left.isSubtypeOfInt() && right.isSubtypeOfInt()) {
+            Optional<ExpandedType> supertype = supertypeOf(left, right);
+            if (supertype.isPresent()) {
+                return assignType(n, supertype.get());
             }
-            if (left.isSubtypeOfArray() && right.isSubtypeOfArray()) {
-                Optional<ExpandedType> supertype = supertypeOf(left, right);
-                if (supertype.isPresent()) {
-                    return assignType(n, supertype.get());
-                }
+        }
+        if (left.isSubtypeOfArray() && right.isSubtypeOfArray()) {
+            Optional<ExpandedType> supertype = supertypeOf(left, right);
+            if (supertype.isPresent()) {
+                return assignType(n, supertype.get());
             }
-            throw new UnsummableValuesException(left, right, n.getLocation());
         }
-        case AND:
-        case OR: {
-            var result = typecheckBooleanBinExpr(n.left, n.right);
-            assignType(n, result.assertFirst());
-            return result;
-        }
-        case EQ:
-        case NEQ: {
-            var result = typecheckEqualityBinExpr(n.left, n.right);
-            assignType(n, result.assertFirst());
-            return result;
-        }
-        case GEQ:
-        case GT:
-        case LEQ:
-        case LT: {
-            var result = typecheckComparisonBinExpr(n.left, n.right);
-            assignType(n, result.assertFirst());
-            return result;
-        }
-        case MOD:
-        case MUL:
-        case SUB:
-        case DIV:
-        case HIGH_MUL: {
-            var result = typecheckIntegerBinExpr(n.left, n.right);
-            assignType(n, result.assertFirst());
-            return result;
-        }
-        default:
-            throw new UnsupportedOperationException();
-        }
+        throw new UnsummableValuesException(left, right, n.getLocation());
+    }
+
+    @Override
+    public Result visit(EqualsExprNode n) {
+        return typecheckEqualityBinExpr(n);
+    }
+
+    @Override
+    public Result visit(NotEqualsExprNode n) {
+        return typecheckEqualityBinExpr(n);
+    }
+
+    @Override
+    public Result visit(HighMultExprNode n) {
+        return typecheckIntegerBinExpr(n);
+    }
+
+    @Override
+    public Result visit(MultExprNode n) {
+        return typecheckIntegerBinExpr(n);
+    }
+
+    @Override
+    public Result visit(RemExprNode n) {
+        return typecheckIntegerBinExpr(n);
+    }
+
+    @Override
+    public Result visit(SubExprNode n) {
+        return typecheckIntegerBinExpr(n);
+    }
+
+    @Override
+    public Result visit(DivExprNode n) {
+        return typecheckIntegerBinExpr(n);
+    }
+
+    @Override
+    public Result visit(LTEExprNode n) {
+        return typecheckComparisonBinExpr(n);
+    }
+
+    @Override
+    public Result visit(LTExprNode n) {
+        return typecheckComparisonBinExpr(n);
+    }
+
+    @Override
+    public Result visit(GTEExprNode n) {
+        return typecheckComparisonBinExpr(n);
+    }
+
+    @Override
+    public Result visit(GTExprNode n) {
+        return typecheckComparisonBinExpr(n);
+    }
+
+    @Override
+    public Result visit(OrExprNode n) {
+        return typecheckBooleanBinExpr(n);
+    }
+
+    @Override
+    public Result visit(AndExprNode n) {
+        return typecheckBooleanBinExpr(n);
     }
 
     @Override
@@ -902,7 +941,7 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
             return assignType(n, ExpandedType.intType);
         }
         throw new TypeMismatchException(type, ExpandedType.intType,
-                n.expr.getLocation());
+            n.expr.getLocation());
     }
 
     @Override
@@ -931,46 +970,6 @@ final class TypeCheckVisitor extends AbstractVisitor<TypeCheckVisitor.Result> {
             return assignType(n, optionalVar.get());
         }
         throw new UnboundIdentifierException(n.identifier, n.getLocation());
-    }
-
-    @Override
-    public Result visit(CompoundAssignStmtNode n) {
-        ASTOpType equivalentOp;
-        switch (n.opType) {
-        case AND:
-            equivalentOp = ASTOpType.AND;
-            break;
-        case DIV:
-            equivalentOp = ASTOpType.DIV;
-            break;
-        case HIGH_MULT:
-            equivalentOp = ASTOpType.HIGH_MUL;
-            break;
-        case MINUS:
-            equivalentOp = ASTOpType.SUB;
-            break;
-        case MULT:
-            equivalentOp = ASTOpType.MUL;
-            break;
-        case OR:
-            equivalentOp = ASTOpType.OR;
-            break;
-        case PLUS:
-            equivalentOp = ASTOpType.ADD;
-            break;
-        case REM:
-            equivalentOp = ASTOpType.MOD;
-            break;
-        default:
-            throw new UnsupportedOperationException();
-        }
-        BinExprNode binopRep = new BinExprNode(n.getLocation(), equivalentOp,
-                n.lhs, n.rhs);
-        AssignmentStmtNode assignRep = new AssignmentStmtNode(n.getLocation(),
-                n.lhs, binopRep);
-        var res = assignRep.accept(this);
-        System.out.println();
-        return res;
     }
 
 }

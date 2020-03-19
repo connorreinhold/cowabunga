@@ -9,7 +9,6 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.ir.fold.basic.DirectConstFoldVisitor;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRNode;
@@ -30,7 +29,7 @@ class SubexpressionTest {
     private final IRNodeFactory make = new IRNodeFactory_c(
             new Location(-1, -1));
 
-    private final MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> folder = new DirectConstFoldVisitor();
+    private final MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> folder = new ConstFoldVisitor();
 
     private <T, E> Pair<T, E> pairOf(T expected, E test) {
         return new Pair<T, E>(expected, test);
