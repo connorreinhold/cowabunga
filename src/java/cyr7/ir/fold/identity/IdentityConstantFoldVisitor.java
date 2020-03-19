@@ -30,21 +30,22 @@ import cyr7.util.OneOfThree;
 import cyr7.visitor.MyIRVisitor;
 
 /**
- * Includes folds that utilize associative properties of operations and De Morgan's law on booleans.
- * <o>
- * Converts multiplication and division into shifts if possible.
+ * Includes folds that utilize associative properties of operations and De
+ * Morgan's law on booleans. <o> Converts multiplication and division into
+ * shifts if possible.
+ * 
  * @author ayang
  *
  */
 public final class IdentityConstantFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
-	private final boolean isCanonical;
-	
-	public IdentityConstantFoldVisitor(boolean isCanonical) {
-		this.isCanonical = isCanonical;
-	}
-	
+    private final boolean isCanonical;
+
+    public IdentityConstantFoldVisitor(boolean isCanonical) {
+        this.isCanonical = isCanonical;
+    }
+
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -53,8 +54,8 @@ public final class IdentityConstantFoldVisitor
         IRExpr right = n.right().accept(this).assertFirst();
         n = make.IRBinOp(n.opType(), left, right);
         assert !(left.isConstant() && right.isConstant());
-        return OneOfThree.ofFirst(
-        		IdentityBinopHandler.instance.accept(n.opType(), n, isCanonical));
+        return OneOfThree.ofFirst(IdentityBinopHandler.instance
+                .accept(n.opType(), n, isCanonical));
     }
 
     @Override
@@ -202,6 +203,5 @@ public final class IdentityConstantFoldVisitor
                 .collect(Collectors.toList());
         return OneOfThree.ofSecond(make.IRSeq(foldedStmts));
     }
-
 
 }

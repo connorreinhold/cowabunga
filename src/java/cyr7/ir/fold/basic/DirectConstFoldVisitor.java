@@ -1,12 +1,11 @@
 package cyr7.ir.fold.basic;
 
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import cyr7.ir.interpret.IRSimulator.Trap;
+import cyr7.ir.fold.visitors.BinopCalc;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -31,7 +30,6 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.MyIRVisitor;
-import edu.cornell.cs.cs4120.util.InternalCompilerError;
 
 /**
  * Called by the OneOfThree<IRExpr, IRStmt, IRFuncDecl>'s OneOfThree<IRExpr,
@@ -49,92 +47,6 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  */
 public class DirectConstFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
-	
-    /**
-     * Called from visit(IRBinOp).
-     *
-     * @return If both the left and right operands are constants, then this
-     *         returns a Constant that is equal to the value represented by the
-     *         binary operator's node when the operation type is applied.
-     *         Otherwise, this returns the argument {@code n}.
-     */
-    private IRExpr performConstantBinop(IRBinOp n) {
-        IRNodeFactory make = new IRNodeFactory_c(n.location());
-
-        if (!n.left().isConstant() || !n.right().isConstant()) {
-            return n;
-        }
-        final long l = n.left().constant();
-        final long r = n.right().constant();
-        long value;
-
-        // Copied from staff-given interpreter code.
-        switch (n.opType()) {
-        case ADD:
-            value = l + r;
-            break;
-        case SUB:
-            value = l - r;
-            break;
-        case MUL:
-            value = l * r;
-            break;
-        case HMUL:
-            value = BigInteger.valueOf(l).multiply(BigInteger.valueOf(r))
-                    .shiftRight(64).longValue();
-            break;
-        case DIV:
-            if (r == 0)
-                throw new Trap("Division by zero!");
-            value = l / r;
-            break;
-        case MOD:
-            if (r == 0)
-                throw new Trap("Division by zero!");
-            value = l % r;
-            break;
-        case AND:
-            value = l & r;
-            break;
-        case OR:
-            value = l | r;
-            break;
-        case XOR:
-            value = l ^ r;
-            break;
-        case LSHIFT:
-            value = l << r;
-            break;
-        case RSHIFT:
-            value = l >>> r;
-            break;
-        case ARSHIFT:
-            value = l >> r;
-            break;
-        case EQ:
-            value = l == r ? 1 : 0;
-            break;
-        case NEQ:
-            value = l != r ? 1 : 0;
-            break;
-        case LT:
-            value = l < r ? 1 : 0;
-            break;
-        case GT:
-            value = l > r ? 1 : 0;
-            break;
-        case LEQ:
-            value = l <= r ? 1 : 0;
-            break;
-        case GEQ:
-            value = l >= r ? 1 : 0;
-            break;
-        default:
-            throw new InternalCompilerError("Invalid binary operation");
-        }
-
-        return make.IRConst(value);
-    }
 
     // Expressions
 
@@ -150,18 +62,14 @@ public class DirectConstFoldVisitor
     @Override
     public OneOfThree<IRExpr, IRStmt, IRFuncDecl> visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        IRExpr leftFold = n.left()
-                           .accept(this)
-                           .assertFirst();
-        IRExpr rightFold = n.right()
-                            .accept(this)
-                            .assertFirst();
+        IRExpr leftFold = n.left().accept(this).assertFirst();
+        IRExpr rightFold = n.right().accept(this).assertFirst();
         n = make.IRBinOp(n.opType(), leftFold, rightFold);
         if ((n.opType() == OpType.DIV || n.opType() == OpType.MOD)
                 && rightFold.isConstant() && rightFold.constant() == 0) {
             return OneOfThree.ofFirst(n);
         }
-        return OneOfThree.ofFirst(performConstantBinop(n));
+        return OneOfThree.ofFirst(BinopCalc.calc(n));
     }
 
     @Override
@@ -247,7 +155,8 @@ public class DirectConstFoldVisitor
         }).collect(Collectors.toList());
 
         return OneOfThree
-            .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));    }
+                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));
+    }
 
     /**
      * CFold[CJump(etarget, lt, lf)] ::= CJump(CFold[etarget], lt, lf)
