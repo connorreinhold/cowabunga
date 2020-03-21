@@ -1,5 +1,8 @@
 package cyr7.ir.block;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -23,9 +26,6 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-
-import java.util.LinkedList;
-import java.util.List;
 
 public final class BlockGenerator {
 
@@ -56,37 +56,35 @@ public final class BlockGenerator {
             if (s.accept(blockTerminator)) {
                 // s is a block terminator
 
-                currentBlockStmts.add(s);
+                /*
+                 * Complete by adding the terminating statement to the block
+                 * being built. Append a label to the front of this block if
+                 * necessary.
+                 */
 
+                currentBlockStmts.add(s);
                 addLabelToStartIfNeeded(generator, currentBlockStmts);
-                if (currentBlockStmts.size() == 1) {
-                    System.out.println();
-                }
+
                 blocks.add(new BasicBlock(currentBlockStmts));
                 currentBlockStmts.clear();
-
             } else if (s instanceof IRLabel) {
                 IRLabel label = (IRLabel) s;
                 // s is the start of the next label
-
                 if (!currentBlockStmts.isEmpty()) {
-                    if (!currentBlockStmts.get(currentBlockStmts.size() - 1).accept(blockTerminator)) {
+                    // Make a new block if there is already a non-empty block being built.
+                    if (!currentBlockStmts.get(currentBlockStmts.size() - 1)
+                            .accept(blockTerminator)) {
                         // the current block doesn't have a terminator, so we
                         // add a jump statement to the next block
-
-                        currentBlockStmts.add(make.IRJump(make.IRName(label.name())));
+                        var jumpStmt = make.IRJump(make.IRName(label.name()));
+                        currentBlockStmts.add(jumpStmt);
                     }
-
                     addLabelToStartIfNeeded(generator, currentBlockStmts);
-                    if (currentBlockStmts.size() == 1) {
-                        System.out.println();
-                    }
                     blocks.add(new BasicBlock(currentBlockStmts));
                     currentBlockStmts.clear();
                 }
 
                 currentBlockStmts.add(s);
-
             } else {
                 currentBlockStmts.add(s);
             }
@@ -102,45 +100,39 @@ public final class BlockGenerator {
         if (!currentBlockStmts.isEmpty()) {
             /*
              * The last statement of a function block should be a return.
-             * However, various optimization stages (I think CTranslation ???)
-             * might cause statements to be generated after the last return.
-             * Therefore, these statements should never occur. Just in case,
-             * there is a call to `_xi_out_of_bounds` which should terminate
-             * the program.
-             *
-             * Finally, since it's a guarantee of the function that all blocks
-             * end with jump statements, this block includes a jump to a fake
-             * label
+             * However, CTranslationVisitor may naively insert a label to the
+             * "rest" of the function after a return. Therefore, there may be
+             * labels generated after the last return.
              */
 
-            addLabelToStartIfNeeded(generator, currentBlockStmts);
+            assert currentBlockStmts.size() == 1 : currentBlockStmts.toString();
+            assert currentBlockStmts.get(0) instanceof IRLabel;
 
-            Location location = new Location("Fatal Error inserted by BlockTraceOptimizer", 0, 0);
-            currentBlockStmts.add(
-                new IRCallStmt(location,
-                    List.of(),
-                    new IRName(location, "_xi_out_of_bounds"),
-                    List.of()));
-            currentBlockStmts.add(
-                new IRJump(
-                    location,
-                    new IRName(location, generator.newLabel())
-                ));
-
-            blocks.add(new BasicBlock(currentBlockStmts));
+            IRNodeFactory make = new IRNodeFactory_c(new Location(
+                    "IRReturn inserted by BlockGenerator", -1, -1
+            ));
+            currentBlockStmts.add(make.IRReturn());
         }
 
         return blocks;
     }
 
-    private static void addLabelToStartIfNeeded(IdGenerator generator, List<IRStmt> stmts) {
+    private static void addLabelToStartIfNeeded(IdGenerator generator,
+            List<IRStmt> stmts) {
         if (stmts.isEmpty() || !(stmts.get(0) instanceof IRLabel)) {
             stmts.add(0, new IRLabel(
-                new Location("Label Inserted by BlockGenerator", 0, 0),
+                    new Location("IRLabel inserted by BlockGenerator", -2, -2),
                 generator.newLabel()));
         }
     }
 
+    /**
+     * A statement is a block terminator if it is one of: JUMP, CJUMP, or
+     * RETURN.
+     *
+     * @author ayang
+     *
+     */
     private static class TerminatesBlockVisitor implements MyIRVisitor<Boolean> {
 
         /**

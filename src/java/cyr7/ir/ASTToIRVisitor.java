@@ -3,7 +3,6 @@ package cyr7.ir;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import cyr7.ast.VarDeclNode;
@@ -57,12 +56,10 @@ import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
-import cyr7.parser.ParserUtil;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.semantics.types.FunctionType;
 import cyr7.semantics.types.ResultType;
@@ -220,7 +217,6 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr guard = make.IRBinOp(OpType.GT, make.IRTemp(arrSize),
             make.IRConst(0));
 
-        // Memory location: 334312
         IRExpr createArray = n.child.accept(this).assertFirst();
 
         IRExpr valueLoc = make

@@ -10,8 +10,6 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.util.Util;
 
-import javax.swing.text.html.Option;
-
 final class BasicBlock {
 
     public final List<IRStmt> stmts;
@@ -20,14 +18,12 @@ final class BasicBlock {
      * @param stmts Must have at least one statement.
      */
     public BasicBlock(List<IRStmt> stmts) {
+        assert !stmts.isEmpty();
+        assert stmts.get(0) instanceof IRLabel;
         this.stmts = Util.immutableCopy(stmts);
     }
 
     public Optional<IRLabel> first() {
-        if (stmts.isEmpty()) {
-            return Optional.empty();
-        }
-
         IRStmt first = stmts.get(0);
         if (first instanceof IRLabel) {
             return Optional.of((IRLabel) first);
@@ -36,20 +32,16 @@ final class BasicBlock {
         }
     }
 
-    public Optional<IRStmt> last() {
-        if (stmts.isEmpty()) {
-            return Optional.empty();
-        }
-        return Optional.of(this.stmts.get(this.stmts.size() - 1));
+    public IRStmt last() {
+        return this.stmts.get(this.stmts.size() - 1);
     }
 
     /**
      * Returns a list of labels that can be reached from the end of this block,
      * such as via a jump statement or conditional jump.
-     *
      */
     public List<String> getJumpLabels() {
-        return last().map(last -> last.accept(LabelsInJumpStmtsVisitor.instance)).orElse(List.of());
+        return last().accept(LabelsInJumpStmtsVisitor.instance);
     }
 
     /**
