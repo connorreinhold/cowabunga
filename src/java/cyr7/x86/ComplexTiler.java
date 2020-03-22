@@ -4,89 +4,91 @@ import cyr7.ir.nodes.*;
 import cyr7.visitor.MyIRVisitor;
 import cyr7.x86.asm.ASMInstr;
 
-public class ComplexTiler implements MyIRVisitor<ASMInstr> {
+import java.util.List;
+
+public class ComplexTiler implements MyIRVisitor<List<ASMInstr>> {
     @Override
-    public ASMInstr visit(IRBinOp n) {
+    public List<ASMInstr> visit(IRBinOp n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRCall n) {
+    public List<ASMInstr> visit(IRCall n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRConst n) {
+    public List<ASMInstr> visit(IRConst n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRESeq n) {
+    public List<ASMInstr> visit(IRESeq n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRMem n) {
+    public List<ASMInstr> visit(IRMem n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRName n) {
+    public List<ASMInstr> visit(IRName n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRTemp n) {
+    public List<ASMInstr> visit(IRTemp n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRCallStmt n) {
+    public List<ASMInstr> visit(IRCallStmt n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRCJump n) {
+    public List<ASMInstr> visit(IRCJump n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRCompUnit n) {
+    public List<ASMInstr> visit(IRCompUnit n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRExp n) {
+    public List<ASMInstr> visit(IRExp n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRFuncDecl n) {
+    public List<ASMInstr> visit(IRFuncDecl n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRJump n) {
+    public List<ASMInstr> visit(IRJump n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRLabel n) {
+    public List<ASMInstr> visit(IRLabel n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRMove n) {
+    public List<ASMInstr> visit(IRMove n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRReturn n) {
+    public List<ASMInstr> visit(IRReturn n) {
         return null;
     }
 
     @Override
-    public ASMInstr visit(IRSeq n) {
+    public List<ASMInstr> visit(IRSeq n) {
         return null;
     }
 }

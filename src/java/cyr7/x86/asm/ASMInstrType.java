@@ -17,8 +17,6 @@ enum ASMInstrType {
     POP,
 
     // Control Flow
-    LABEL,
-    TEST,
     CMP,
     CALL,
     RET;

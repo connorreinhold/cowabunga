@@ -2,7 +2,7 @@ package cyr7.x86.asm;
 
 import java.util.List;
 
-public abstract class ASMInstr {
+public class ASMInstr {
     final List<ASMArg> args;
     final ASMInstrType type;
 
