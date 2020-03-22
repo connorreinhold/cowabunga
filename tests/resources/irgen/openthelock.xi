@@ -19,10 +19,10 @@ arrayEq(list1:int[], list2: int[]): bool {
         return true;
     }
 }
-// Brute force method to check if [target] is in [list]
-contains(list:int[][], target: int[]):bool {
+// Brute force method to check if [target] is in [list] before [index]
+contains(list:int[][], target: int[], index:int):bool {
     i: int = 0;
-    while(i < length(list)) {
+    while(i < index) {
         if (arrayEq(list[i],target)) {
             return true;
         }
@@ -107,13 +107,13 @@ genBfsListSteps(deadends: int[][], numSteps: int[], bfsList: int[][], bfsLength:
         consider2: int[] = {}+elmt
         consider2[i] = (consider2[i] + 9) % 10
         
-        if (!contains(deadends, consider1) & !contains(bfsList, consider1)) {
+        if (!contains(deadends, consider1, length(deadends)) & !contains(bfsList, consider1, bfsLength[0])) {
             bfsList[bfsLength[0]] = consider1
             // numSteps[i] is how many steps it took to get to a specific point
             numSteps[bfsLength[0]] = numSteps[indexOfElmt] + 1
             bfsLength[0] = bfsLength[0] + 1
         }
-        if (!contains(deadends, consider2) & !contains(bfsList, consider2)) {
+        if (!contains(deadends, consider2, length(deadends)) & !contains(bfsList, consider2, bfsLength[0])) {
             bfsList[bfsLength[0]] = consider2
             numSteps[bfsLength[0]] = numSteps[indexOfElmt] + 1
             bfsLength[0] = bfsLength[0] + 1
@@ -144,11 +144,8 @@ main(args:int[][]) {
     solution = openTheLock(deadends, target, bfsList, numSteps)
     println(unparseInt(solution))
     
-    bfsList = {{0,0}} + genEmptyBfsList()
-    numSteps = {0} + genEmptyNumSteps()
-    
-    deadends = {{1,0}, {2,1}, {2,9}, {0,9}, {9,0}, {8,9}, {9,8}}
-    target = {4,0}
+    deadends = {{1,0}, {2,1}, {0,9}}
+    target = {3,0}
     solution = openTheLock(deadends, target, bfsList, numSteps)
     println(unparseInt(solution))
     

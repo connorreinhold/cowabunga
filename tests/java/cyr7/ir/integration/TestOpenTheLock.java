@@ -12,7 +12,7 @@ public class TestOpenTheLock extends TestProgram {
     @Override
     protected String expected() {
         return
-            "-1\n4\n3\n8\n";
+            "-1\n4\n3\n7\n";
     }
 
     @Override
