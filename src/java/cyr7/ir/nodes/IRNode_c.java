@@ -12,6 +12,7 @@ import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import cyr7.x86.TilerData;
 import cyr7.x86.asm.ASMInstr;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
@@ -24,88 +25,20 @@ public abstract class IRNode_c implements IRNode {
 
     private final Location location;
 
-    /**
-     * The cost of the optimal tile formed with {@code this} node as the root of
-     * an IR tree.
-     */
-    private Optional<Integer> tileCost;
-
-    /**
-     * The optimal list of instructions representing the optimal tile formed
-     * with {@code this} node as the root of an IR tree.
-     * <p>
-     * The instructions are in order from lowest index to highest index. This
-     * means the first instruction of the list is the first instruction executed
-     * in assembly.
-     */
-    private Optional<List<ASMInstr>> optimalInstructions;
+    private Optional<TilerData> optimalTiling;
 
     public IRNode_c(Location location) {
         assert location != null;
         this.location = location;
-        this.tileCost = Optional.empty();
-        this.optimalInstructions = Optional.empty();
+        this.optimalTiling = Optional.empty();
     }
 
-    /**
-     * Assigns the cost of the optimal tile formed with {@code this} node as the
-     * root of an IR tree.
-     *
-     */
-    final public void assignCost(int cost) {
-        if (this.tileCost.isPresent()) {
-            throw new RuntimeException(
-                    "Cost already given: " + this.tileCost.get());
-        } else {
-            this.tileCost = Optional.of(cost);
+    private void setOptimalTilingOnce(TilerData tilerData) {
+        if (optimalTiling.isPresent()) {
+            throw new UnsupportedOperationException();
         }
-    }
 
-    /**
-     * Returns the cost of the optimal tile formed with {@code this} node as the
-     * root of an IR tree.
-     *
-     * <p>
-     * <b>Required: </b> {@link #assignCost(int)} must had been called once.
-     *
-     */
-    final public int cost() {
-        return this.tileCost.map(c -> c)
-                .orElseThrow(() -> new RuntimeException("Cost is negative"));
-    }
-
-    /**
-     * Set {@code instructions} to be the optimal list of instructions
-     * representing the optimal tile formed with {@code this} node as the root
-     * of an IR tree.
-     *
-     * @param instructions The instructions are in order from lowest index to
-     *                     highest index. This means the first instruction of
-     *                     the list is the first instruction executed in
-     *                     assembly.
-     * @throws RuntimeException If a list of instructions has already been set.
-     */
-    final public void setAssemblyInstructions(List<ASMInstr> instructions) {
-        if (this.optimalInstructions.isPresent()) {
-            throw new RuntimeException(
-                    "List already given: " + this.optimalInstructions.get());
-        } else {
-            this.optimalInstructions = Optional.of(Collections
-                    .unmodifiableList(new ArrayList<>(instructions)));
-        }
-    }
-
-    /**
-     * Returns a list of instructions that represents the optimal tile formed
-     * with {@code this} node as the root of an IR tree.
-     *
-     * @return The instructions are in order from lowest index to highest index.
-     *         This means the first instruction of the list is the first
-     *         instruction executed in assembly.
-     */
-    final public List<ASMInstr> optimalInstructions() {
-        return this.optimalInstructions.map(opt -> opt)
-                .orElseThrow(() -> new RuntimeException("Cost is negative"));
+        optimalTiling = Optional.of(tilerData);
     }
 
     @Override
