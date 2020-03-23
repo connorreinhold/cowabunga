@@ -1,6 +1,7 @@
 package cyr7.x86;
 
 import cyr7.ir.nodes.IRTemp;
+import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMInstr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -27,12 +28,12 @@ public final class TilerData {
      */
     public final List<ASMInstr> optimalInstructions;
 
-    public final String resultTemp;
+    public final ASMArg result;
 
-    TilerData(int tileCost, List<ASMInstr> optimalInstructions, String resultTemp) {
+    TilerData(int tileCost, List<ASMInstr> optimalInstructions, ASMArg result) {
         this.tileCost = tileCost;
         this.optimalInstructions = optimalInstructions;
-        this.resultTemp = resultTemp;
+        this.result = result;
     }
 
 }
