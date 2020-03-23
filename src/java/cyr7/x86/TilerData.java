@@ -28,9 +28,9 @@ public final class TilerData {
      */
     public final List<ASMInstr> optimalInstructions;
 
-    public final ASMArg result;
+    public final Optional<ASMArg> result;
 
-    TilerData(int tileCost, List<ASMInstr> optimalInstructions, ASMArg result) {
+    TilerData(int tileCost, List<ASMInstr> optimalInstructions, Optional<ASMArg> result) {
         this.tileCost = tileCost;
         this.optimalInstructions = optimalInstructions;
         this.result = result;
