@@ -51,7 +51,6 @@ public abstract class IRNode_c implements IRNode {
      * Assigns the cost of the optimal tile formed with {@code this} node as the
      * root of an IR tree.
      *
-     * @param cost Must be nonnegative.
      */
     final public void assignCost(int cost) {
         if (this.tileCost.isPresent()) {
