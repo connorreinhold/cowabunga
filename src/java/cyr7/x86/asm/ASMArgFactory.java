@@ -24,7 +24,8 @@ public class ASMArgFactory {
     return new ASMRegArg(reg);
   }
 
-  public ASMAddrExpr addr(Optional<Register> base, ScaleValues scale, Optional<Register> index, int displacement) {
+  public ASMAddrExpr addr(Optional<Register> base, ScaleValues scale, 
+          Optional<Register> index, int displacement) {
     return new ASMAddrExpr(base, scale, index, displacement);
   }
 

@@ -2,13 +2,10 @@ package cyr7.x86;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import javax.management.RuntimeErrorException;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.interpret.Configuration;
@@ -20,7 +17,6 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExp;
-import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
@@ -43,7 +39,6 @@ import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
-import cyr7.x86.asm.ASMRegArg;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.Register;
 
@@ -357,7 +352,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData body = n.body().accept(this);
         instructions.addAll(body.optimalInstructions);
         // TODO: add epilogue
+
         TilerData result = new TilerData(instructions.size(), instructions, Optional.empty());
+        n.setOptimalTilingOnce(result);
         return result;
     }
 
@@ -374,6 +371,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (target.result.isPresent()) {
             instructions.add(make.Jump(target.result.get()));
             result = new TilerData(1 + target.tileCost, instructions, Optional.empty());
+        } else {
+            throw new RuntimeException("Missing target result");
         }
         n.setOptimalTilingOnce(result);
         return result;
@@ -400,42 +399,140 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData target = n.target().accept(this);
         TilerData source = n.source().accept(this);
         List<ASMLine> instrs = new ArrayList<>();
-        instrs.addAll(target.optimalInstructions);
         instrs.addAll(source.optimalInstructions);
+        instrs.addAll(target.optimalInstructions);
 
-        if (n.source() instanceof IRTemp) {
-            IRTemp sourceTemp = (IRTemp) n.source();
-            String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
-            if (sourceTemp.name().startsWith(RET_PREFIX)) {
-                String index = sourceTemp.name().substring(RET_PREFIX.length());
+        final String ARG_PREFIX = Configuration.ABSTRACT_ARG_PREFIX;
+        final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
+        var rdi = arg.reg(Register.RDI);
+        var rsi = arg.reg(Register.RSI);
+        var rdx = arg.reg(Register.RDX);
+        var rcx = arg.reg(Register.RCX);
+        var r8 = arg.reg(Register.R8);
+        var r9 = arg.reg(Register.R9);
+        var rax = arg.reg(Register.RAX);
 
-                int i = 0;
-                try {
-                    i = Integer.parseInt(index);
-                } catch (NumberFormatException e) {
-                    // should never happen, but what if?
-                }
-
+        TilerData result;
+        if (n.target() instanceof IRTemp
+                && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
+            // Handle in CallStmt
+            result = new TilerData(0, List.of(), Optional.empty());
+        }
+        else if (n.source() instanceof IRTemp
+                && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
+            String index = ((IRTemp) n.source()).name()
+                    .substring(ARG_PREFIX.length());
+            int i = Integer.parseInt(index);
+            ASMArg targetTemp = target.result.get();
+            if (this.numRetValues > 2) {
                 switch (i) {
-                    case 0:
-                        instrs.add(make.Mov(new ASMRegArg(Register.RAX), target.result.get()));
-                        break;
-                    case 1:
-                        instrs.add(make.Mov(new ASMRegArg(Register.RDX), target.result.get()));
-                        break;
-                    default:
-                        break;
-                    // asdlkfjasdlkfjasdflkjasdflkjasdflkjasdflvaj;sn;lfajsdfal;jdfalvjadfl;jna
-                    // sdvjhafoha sgihesjof wefioj oighwraoig waouhfawouhaoshaskjgh aksfvhakbh akh
+                case 0:
+                    instrs.add(make.Mov(targetTemp, rsi));
+                    break;
+                case 1:
+                    instrs.add(make.Mov(targetTemp, rdx));
+                    break;
+                case 2:
+                    instrs.add(make.Mov(targetTemp, rcx));
+                    break;
+                case 3:
+                    instrs.add(make.Mov(targetTemp, r8));
+                    break;
+                case 4:
+                    instrs.add(make.Mov(targetTemp, r9));
+                    break;
+                default:
+                    int offset = 8 * (i - 6);
+                    var addr = arg.addr(Optional.of(Register.RBP),
+                            ScaleValues.ONE, Optional.empty(), offset);
+                    var mem = arg.mem(addr);
+                    instrs.add(make.Mov(targetTemp, mem));
+                    break;
+                }
+            } else {
+                switch (i) {
+                case 0:
+                    instrs.add(make.Mov(targetTemp, rdi));
+                    break;
+                case 1:
+                    instrs.add(make.Mov(targetTemp, rsi));
+                    break;
+                case 2:
+                    instrs.add(make.Mov(targetTemp, rdx));
+                    break;
+                case 3:
+                    instrs.add(make.Mov(targetTemp, rcx));
+                    break;
+                case 4:
+                    instrs.add(make.Mov(targetTemp, r8));
+                    break;
+                case 5:
+                    instrs.add(make.Mov(targetTemp, r9));
+                    break;
+                default:
+                    int offset = 8 * (i - 5);
+                    var addr = arg.addr(Optional.of(Register.RBP),
+                            ScaleValues.ONE, Optional.empty(), offset);
+                    var mem = arg.mem(addr);
+                    instrs.add(make.Mov(targetTemp, mem));
+                    break;
                 }
             }
-        } else if (n.target() instanceof IRTemp) {
-        } else {
-            List<ASMLine> instructions = new ArrayList<>();
-            instructions.add(make.Mov(target.result.get(), source.result.get()));
-            return new TilerData(1 + target.tileCost + source.tileCost, instructions, Optional.empty());
+            result = new TilerData(1 + target.tileCost, instrs,
+                    Optional.empty());
         }
-        return null;
+        else if (n.source() instanceof IRTemp
+                && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
+            String index = ((IRTemp) n.source()).name()
+                    .substring(RET_PREFIX.length());
+            int i = Integer.parseInt(index);
+            switch (i) {
+            case 0:
+                instrs.add(make.Mov(rax, source.result.get()));
+                break;
+            case 1:
+                instrs.add(make.Mov(rdx, source.result.get()));
+                break;
+            default:
+                int offset = 8 * (i - 1);
+                var addr = arg.addr(Optional.of(Register.RDI),
+                        ScaleValues.ONE, Optional.empty(), offset);
+                var mem = arg.mem(addr);
+                instrs.add(make.Mov(mem, source.result.get()));
+                break;
+            }
+            result = new TilerData(1 + source.tileCost, instrs,
+                    Optional.empty());
+        }
+        else if (n.target() instanceof IRTemp
+                && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
+            String index = ((IRTemp) n.target()).name()
+                    .substring(RET_PREFIX.length());
+            int i = Integer.parseInt(index);
+            switch (i) {
+            case 0:
+                instrs.add(make.Mov(target.result.get(), rax));
+                break;
+            case 1:
+                instrs.add(make.Mov(target.result.get(), rdx));
+                break;
+            default:
+                int offset = 8 * (i - 1);
+                var addr = arg.addr(Optional.of(Register.RDI),
+                        ScaleValues.ONE, Optional.empty(), offset);
+                var mem = arg.mem(addr);
+                instrs.add(make.Mov(target.result.get(), mem));
+                break;
+            }
+            result = new TilerData(1 + target.tileCost, instrs,
+                    Optional.empty());
+        } else {
+            instrs.add(make.Mov(target.result.get(), source.result.get()));
+            result = new TilerData(1 + target.tileCost + source.tileCost,
+                    instrs, Optional.empty());
+        }
+        n.setOptimalTilingOnce(result);
+        return result;
     }
 
     @Override
@@ -443,9 +540,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        List<ASMLine> instructions = new ArrayList<>();
-        instructions.add(make.Jump(new ASMLabelArg(this.returnLbl)));
-        TilerData result = new TilerData(instructions.size(), instructions, Optional.empty());
+        List<ASMLine> instrs = new ArrayList<>();
+        instrs.add(make.Jump(new ASMLabelArg(this.returnLbl)));
+        TilerData result = new TilerData(instrs.size(), instrs,
+                Optional.empty());
         n.setOptimalTilingOnce(result);
         return result;
     }
@@ -465,7 +563,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             instructions.addAll(data.optimalInstructions);
             sumCosts += data.tileCost;
         }
-        TilerData result = new TilerData(1 + sumCosts, instructions, Optional.empty());
+        TilerData result = new TilerData(1 + sumCosts, instructions,
+                Optional.empty());
         n.setOptimalTilingOnce(result);
         return result;
     }
