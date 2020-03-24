@@ -1,22 +1,47 @@
 package cyr7.x86;
 
-import cyr7.ir.nodes.*;
-import cyr7.semantics.types.FunctionType;
-import cyr7.visitor.MyIRVisitor;
-import cyr7.x86.asm.*;
-import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
-import java_cup.internal_error;
-import cyr7.x86.TilerData;
-import cyr7.exceptions.semantics.UnsummableValuesException;
-import cyr7.ir.IdGenerator;
-import cyr7.ir.interpret.Configuration;
-
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Map;
+import java.util.Optional;
+
+import cyr7.ir.IdGenerator;
+import cyr7.ir.interpret.Configuration;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRCJump;
+import cyr7.ir.nodes.IRCall;
+import cyr7.ir.nodes.IRCallStmt;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRConst;
+import cyr7.ir.nodes.IRESeq;
+import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRFuncDecl;
+import cyr7.ir.nodes.IRJump;
+import cyr7.ir.nodes.IRLabel;
+import cyr7.ir.nodes.IRMem;
+import cyr7.ir.nodes.IRMove;
+import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRReturn;
+import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRStmt;
+import cyr7.ir.nodes.IRTemp;
+import cyr7.semantics.types.FunctionType;
+import cyr7.visitor.MyIRVisitor;
+import cyr7.x86.asm.ASMAddrExpr;
+import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
+import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMArgFactory;
+import cyr7.x86.asm.ASMConstArg;
+import cyr7.x86.asm.ASMLabel;
+import cyr7.x86.asm.ASMLabelArg;
+import cyr7.x86.asm.ASMLine;
+import cyr7.x86.asm.ASMLineFactory;
+import cyr7.x86.asm.ASMMemArg;
+import cyr7.x86.asm.ASMRegArg;
+import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.asm.Register;
 
 public class BasicTiler implements MyIRVisitor<TilerData> {
 
@@ -25,6 +50,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final int numRetValues;
     private final String returnLbl;
     private final ASMArgFactory arg;
+    private final ASMLineFactory make;
 
     public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap) {
         this.generator = generator;
@@ -32,6 +58,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes().size();
         this.returnLbl = "end_" + tiledFunctionName;
         this.arg = ASMArgFactory.instance;
+        this.make = ASMLineFactory.instance;
     }
 
     @Override
@@ -50,20 +77,20 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         switch (n.opType()) {
             case ADD:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.Add(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Add(ret, right.result.get()));
                 break;
             case AND:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.And(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.And(ret, right.result.get()));
                 break;
             case ARSHIFT:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.ARShift(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.ARShift(ret, right.result.get()));
                 break;
             case DIV:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.Div(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Div(ret, right.result.get()));
                 break;
             case EQ:
                 break;
@@ -76,34 +103,34 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             case LEQ:
                 break;
             case LSHIFT:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.LShift(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.LShift(ret, right.result.get()));
                 break;
             case LT:
                 break;
             case MOD:
                 break;
             case MUL:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.Mul(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Mul(ret, right.result.get()));
                 break;
             case NEQ:
                 break;
             case OR:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.Or(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Or(ret, right.result.get()));
                 break;
             case RSHIFT:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.RShift(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.RShift(ret, right.result.get()));
                 break;
             case SUB:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.Sub(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Sub(ret, right.result.get()));
                 break;
             case XOR:
-                insns.add(ASMFactory.Mov(ret, left.result.get()));
-                insns.add(ASMFactory.Xor(ret, right.result.get()));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Xor(ret, right.result.get()));
                 break;
             default:
                 throw new UnsupportedOperationException("No case found.");
@@ -125,7 +152,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = new ASMTempArg(generator.newTemp());
-        List<ASMLine> insns = List.of(ASMFactory.Mov(ret, new ASMConstArg(n.constant())));
+        List<ASMLine> insns = List
+                .of(make.Mov(ret, new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;
@@ -148,7 +176,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         // TODO: Figure out the correct address
         ASMAddrExpr address = new ASMAddrExpr(Optional.empty(), ScaleValues.ONE, Optional.empty(), 0);
-        List.of(ASMFactory.Mov(ret, new ASMMemArg(address)));
+        List.of(make.Mov(ret, new ASMMemArg(address)));
 
         TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
@@ -187,7 +215,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<IRExpr> args = n.args();
         if (this.numRetValues > 2) {
             long size = (this.numRetValues - 2) * 8;
-            ASMFactory.Lea(new ASMRegArg(Register.RDI), new ASMConstArg(size));
+            make.Lea(arg.reg(Register.RDI), arg.constant(size));
         } else {
 
         }
@@ -206,8 +234,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         ASMArg temp = cond.result.map(r -> r)
                 .orElseThrow(() -> new RuntimeException("Expected a temporary but was not found."));
         insn.addAll(cond.optimalInstructions);
-        insn.add(ASMFactory.Cmp(temp, new ASMConstArg(1)));
-        insn.add(ASMFactory.JumpE(new ASMLabelArg(n.trueLabel())));
+        insn.add(make.Cmp(temp, new ASMConstArg(1)));
+        insn.add(make.JumpE(new ASMLabelArg(n.trueLabel())));
 
         TilerData result = new TilerData(1 + cond.tileCost, insn, Optional.empty());
         n.setOptimalTilingOnce(result);
@@ -262,7 +290,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         TilerData result = new TilerData(target.tileCost, instructions, Optional.empty());
         if (target.result.isPresent()) {
-            instructions.add(ASMFactory.Jump(target.result.get()));
+            instructions.add(make.Jump(target.result.get()));
             result = new TilerData(1 + target.tileCost, instructions, Optional.empty());
         }
         n.setOptimalTilingOnce(result);
@@ -292,7 +320,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> instrs = new ArrayList<>();
         instrs.addAll(target.optimalInstructions);
         instrs.addAll(source.optimalInstructions);
-        
+
         if (n.source() instanceof IRTemp) {
             IRTemp sourceTemp = (IRTemp) n.source();
             String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
@@ -308,22 +336,26 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
                 switch (i) {
                     case 0:
-                        instrs.add(ASMFactory.Mov(new ASMRegArg(Register.RAX), target.result.get()));
+                    instrs.add(make.Mov(new ASMRegArg(Register.RAX),
+                            target.result.get()));
                         break;
                     case 1:
-                        instrs.add(ASMFactory.Mov(new ASMRegArg(Register.RDX), target.result.get()));
+                    instrs.add(make.Mov(new ASMRegArg(Register.RDX),
+                            target.result.get()));
                         break;
                     default:
-                        asdlkfjasdlkfjasdflkjasdflkjasdflkjasdflvaj;sn;lfajsdfal;jdfalvjadfl;jna sdvjhafoha sgihesjof wefioj oighwraoig waouhfawouhaoshaskjgh aksfvhakbh akh
+                    break;
+//                        asdlkfjasdlkfjasdflkjasdflkjasdflkjasdflvaj;sn;lfajsdfal;jdfalvjadfl;jna sdvjhafoha sgihesjof wefioj oighwraoig waouhfawouhaoshaskjgh aksfvhakbh akh
                 }
             }
         } else if (n.target() instanceof IRTemp) {
-
         } else {
             List<ASMLine> instructions = new ArrayList<>();
-            instructions.add(ASMFactory.Mov(target.result.get(), source.result.get()));
+            instructions
+                    .add(make.Mov(target.result.get(), source.result.get()));
             return new TilerData(1 + target.tileCost + source.tileCost, instructions, Optional.empty());
         }
+        return null;
     }
 
     @Override
@@ -332,7 +364,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         List<ASMLine> instructions = new ArrayList<>();
-        instructions.add(ASMFactory.Jump(new ASMLabelArg(this.returnLbl)));
+        instructions.add(make.Jump(new ASMLabelArg(this.returnLbl)));
         TilerData result = new TilerData(instructions.size(), instructions, Optional.empty());
         n.setOptimalTilingOnce(result);
         return result;
