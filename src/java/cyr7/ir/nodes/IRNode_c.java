@@ -33,12 +33,20 @@ public abstract class IRNode_c implements IRNode {
         this.optimalTiling = Optional.empty();
     }
 
-    private void setOptimalTilingOnce(TilerData tilerData) {
+    public void setOptimalTilingOnce(TilerData tilerData) {
         if (optimalTiling.isPresent()) {
             throw new UnsupportedOperationException();
         }
 
         optimalTiling = Optional.of(tilerData);
+    }
+    
+    public TilerData getOptimalTiling() {
+        return optimalTiling.get();
+    }
+    
+    public boolean hasOptimalTiling() {
+        return optimalTiling.isPresent();
     }
 
     @Override
