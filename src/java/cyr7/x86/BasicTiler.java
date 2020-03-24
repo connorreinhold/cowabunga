@@ -23,11 +23,33 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final IdGenerator generator;
     private final Map<String, FunctionType> fMap;
     private final int numRetValues;
+    private final String returnLbl;
 
-    public BasicTiler(IdGenerator generator, String tiledFunction, Map<String, FunctionType> fMap) {
+    public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap) {
         this.generator = generator;
         this.fMap = Collections.unmodifiableMap(fMap);
-        this.numRetValues = this.fMap.get(tiledFunction).output.getTypes().size();
+        this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes().size();
+        this.returnLbl = "end_" + tiledFunctionName;
+    }
+
+    private ASMConstArg constant(long n) {
+        return new ASMConstArg(n);
+    }
+
+    private ASMLabelArg label(String name) {
+        return new ASMLabelArg(name);
+    }
+
+    private ASMRegArg reg(Register reg) {
+        return new ASMRegArg(reg);
+    }
+
+    private ASMAddrExpr addr(Optional<Register> base, ScaleValues scale, Optional<Register> index, int displacement) {
+        return new ASMAddrExpr(base, scale, index, displacement);
+    }
+
+    private ASMMemArg mem(ASMAddrExpr addr) {
+        return new ASMMemArg(addr);
     }
 
     @Override
@@ -156,7 +178,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        TilerData result = new TilerData(1, List.of(), Optional.of(new ASMLabelArg(n.name())));
+        Optional<ASMArg> lbl = Optional.of(new ASMLabelArg(n.name()));
+        TilerData result = new TilerData(1, List.of(), lbl);
         n.setOptimalTilingOnce(result);
         return result;
     }
@@ -178,11 +201,15 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
 
-        List<String> collectors = n.collectors()
         IRExpr target = n.target();
         List<IRExpr> args = n.args();
-        if (collectors.length > )
-        
+        if (this.numRetValues > 2) {
+            long size = (this.numRetValues - 2) * 8;
+            ASMFactory.Lea(new ASMRegArg(Register.RDI), new ASMConstArg(size));
+        } else {
+
+        }
+
         return null;
     }
 
@@ -212,15 +239,14 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         List<ASMLine> insns = new ArrayList<ASMLine>();
         int tileCosts = 0;
-        for(Map.Entry<String, IRFuncDecl> functionDecl: n.functions().entrySet()) {
-            TileData functionResult = functionDecl.getValue().accept(this)
+        for (Map.Entry<String, IRFuncDecl> functionDecl : n.functions().entrySet()) {
+            TilerData functionResult = functionDecl.getValue().accept(this);
             insns.addAll(functionResult.optimalInstructions);
             tileCosts += functionResult.tileCost;
         }
         TilerData result = new TilerData(tileCosts, insns, Optional.empty());
         n.setOptimalTilingOnce(result);
-        return null;
-
+        return result;
     }
 
     @Override
@@ -235,12 +261,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         List<ASMLine> instructions = new ArrayList<>();
         instructions.add(new ASMLabel(n.name()));
-        // add prologue
+        // TODO: add prologue
         TilerData body = n.body().accept(this);
         instructions.addAll(body.optimalInstructions);
-        // add epilogue
-
-        TilerData result = new TilerData (instructions.size(), instructions, Optional.empty());
+        // TODO: add epilogue
+        TilerData result = new TilerData(instructions.size(), instructions, Optional.empty());
         return result;
     }
 
@@ -282,7 +307,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         TilerData target = n.target().accept(this);
         TilerData source = n.source().accept(this);
-        List<ASMLine> instrs = new ArayList<>();
+        List<ASMLine> instrs = new ArrayList<>();
         instrs.addAll(target.optimalInstructions);
         instrs.addAll(source.optimalInstructions);
         
@@ -325,10 +350,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         List<ASMLine> instructions = new ArrayList<>();
-        instructions.add(ASMFactory.Mov(new ASMRegArg(Register.RSP), new ASMRegArg(Register.RBP)));
-        instructions.add(ASMFactory.Pop(new ASMRegArg(Register.RBP)));
-        instructions.add(ASMFactory.Ret());
-
+        instructions.add(ASMFactory.Jump(new ASMLabelArg(this.returnLbl)));
         TilerData result = new TilerData(instructions.size(), instructions, Optional.empty());
         n.setOptimalTilingOnce(result);
         return result;
