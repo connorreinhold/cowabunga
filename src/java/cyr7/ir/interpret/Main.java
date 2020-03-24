@@ -16,6 +16,9 @@ import cyr7.ir.parse.IRLexer;
 import cyr7.ir.parse.IRParser;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
+import cyr7.semantics.types.ExpandedType;
+import cyr7.semantics.types.FunctionType;
+import cyr7.semantics.types.PrimitiveType;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -48,7 +51,16 @@ public class Main {
                         make.IRMove(make.IRTemp(ret1), make.IRBinOp(OpType.MUL,
                                 make.IRConst(2), make.IRTemp("j"))),
                         make.IRReturn());
-        IRFuncDecl aFunc = make.IRFuncDecl("a", aBody);
+
+        IRFuncDecl aFunc = make
+                    .IRFuncDecl("a", aBody,
+                            new FunctionType(
+                                    new ExpandedType(
+                                            List.of(PrimitiveType.intDefault,
+                                                    PrimitiveType.intDefault)),
+                                    new ExpandedType(List.of(
+                                            PrimitiveType.intDefault,
+                                            PrimitiveType.intDefault))));
 
         IRStmt bBody =
                     make.IRSeq(
@@ -61,7 +73,11 @@ public class Main {
                                 make.IRTemp("x"), make.IRBinOp(OpType.MUL,
                                         make.IRConst(5), make.IRTemp("y")))),
                         make.IRReturn());
-        IRFuncDecl bFunc = make.IRFuncDecl("b", bBody);
+            IRFuncDecl bFunc = make.IRFuncDecl("b", bBody,
+                    new FunctionType(
+                            new ExpandedType(List.of(PrimitiveType.intDefault,
+                                    PrimitiveType.intDefault)),
+                            new ExpandedType(PrimitiveType.intDefault)));
 
         IRCompUnit compUnit = make.IRCompUnit("test");
         compUnit.appendFunc(aFunc);
@@ -161,7 +177,15 @@ public class Main {
                         make.IRMove(make.IRTemp(ret1), make.IRBinOp(OpType.MUL,
                                 make.IRConst(2), make.IRTemp("j"))),
                         make.IRReturn());
-        IRFuncDecl aFunc = make.IRFuncDecl("a", aBody);
+        IRFuncDecl aFunc = make
+                .IRFuncDecl("a", aBody,
+                        new FunctionType(
+                                new ExpandedType(
+                                        List.of(PrimitiveType.intDefault,
+                                                PrimitiveType.intDefault)),
+                                new ExpandedType(List.of(
+                                        PrimitiveType.intDefault,
+                                        PrimitiveType.intDefault))));
 
         IRStmt bBody =
                     make.IRSeq(
@@ -175,7 +199,11 @@ public class Main {
                                         make.IRConst(5), make.IRTemp("y")))),
                         make.IRReturn());
 
-        IRFuncDecl bFunc = make.IRFuncDecl("b", bBody);
+            IRFuncDecl bFunc = make.IRFuncDecl("b", bBody,
+                    new FunctionType(
+                            new ExpandedType(List.of(PrimitiveType.intDefault,
+                                    PrimitiveType.intDefault)),
+                            new ExpandedType(PrimitiveType.intDefault)));
 
         IRCompUnit compUnit = make.IRCompUnit("test");
         compUnit.appendFunc(aFunc);

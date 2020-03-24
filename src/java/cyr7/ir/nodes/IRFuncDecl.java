@@ -5,19 +5,30 @@ import java.util.Objects;
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import cyr7.semantics.types.FunctionType;
 import cyr7.visitor.MyIRVisitor;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 /** An IR function declaration */
 public class IRFuncDecl extends IRNode_c {
-    private String name;
-    private IRStmt body;
+    private final String name;
+    private final IRStmt body;
+    private final FunctionType type;
+
+    public IRFuncDecl(Location location, String name, IRStmt body,
+            FunctionType type) {
+        super(location);
+        this.name = name;
+        this.body = body;
+        this.type = type;
+    }
 
     public IRFuncDecl(Location location, String name, IRStmt body) {
         super(location);
         this.name = name;
         this.body = body;
+        this.type = null;
     }
 
     public String name() {
@@ -26,6 +37,18 @@ public class IRFuncDecl extends IRNode_c {
 
     public IRStmt body() {
         return body;
+    }
+
+    public FunctionType type() {
+        return this.type;
+    }
+
+    public int numOfArgs() {
+        return this.type.input.getTypes().size();
+    }
+
+    public int numOfReturnValues() {
+        return this.type.output.getTypes().size();
     }
 
     @Override
@@ -37,7 +60,8 @@ public class IRFuncDecl extends IRNode_c {
     public IRNode visitChildren(IRVisitor v) {
         IRStmt stmt = (IRStmt) v.visit(this, body);
 
-        if (stmt != body) return v.nodeFactory().IRFuncDecl(name, stmt);
+        if (stmt != body)
+            return v.nodeFactory().IRFuncDecl(name, stmt, type);
 
         return this;
     }
