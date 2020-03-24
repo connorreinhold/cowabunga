@@ -24,32 +24,14 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final Map<String, FunctionType> fMap;
     private final int numRetValues;
     private final String returnLbl;
+    private final ASMArgFactory arg;
 
     public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap) {
         this.generator = generator;
         this.fMap = Collections.unmodifiableMap(fMap);
         this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes().size();
         this.returnLbl = "end_" + tiledFunctionName;
-    }
-
-    private ASMConstArg constant(long n) {
-        return new ASMConstArg(n);
-    }
-
-    private ASMLabelArg label(String name) {
-        return new ASMLabelArg(name);
-    }
-
-    private ASMRegArg reg(Register reg) {
-        return new ASMRegArg(reg);
-    }
-
-    private ASMAddrExpr addr(Optional<Register> base, ScaleValues scale, Optional<Register> index, int displacement) {
-        return new ASMAddrExpr(base, scale, index, displacement);
-    }
-
-    private ASMMemArg mem(ASMAddrExpr addr) {
-        return new ASMMemArg(addr);
+        this.arg = ASMArgFactory.instance;
     }
 
     @Override
