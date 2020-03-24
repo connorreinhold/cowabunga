@@ -2,9 +2,13 @@ package cyr7.x86;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import javax.management.RuntimeErrorException;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.interpret.Configuration;
@@ -77,20 +81,20 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         switch (n.opType()) {
             case ADD:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.Add(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Add(ret, right.result.get()));
                 break;
             case AND:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.And(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.And(ret, right.result.get()));
                 break;
             case ARSHIFT:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.ARShift(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.ARShift(ret, right.result.get()));
                 break;
             case DIV:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.Div(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Div(ret, right.result.get()));
                 break;
             case EQ:
                 break;
@@ -103,34 +107,34 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             case LEQ:
                 break;
             case LSHIFT:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.LShift(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.LShift(ret, right.result.get()));
                 break;
             case LT:
                 break;
             case MOD:
                 break;
             case MUL:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.Mul(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mul(ret, right.result.get()));
                 break;
             case NEQ:
                 break;
             case OR:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.Or(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Or(ret, right.result.get()));
                 break;
             case RSHIFT:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.RShift(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.RShift(ret, right.result.get()));
                 break;
             case SUB:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.Sub(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Sub(ret, right.result.get()));
                 break;
             case XOR:
-            insns.add(make.Mov(ret, left.result.get()));
-            insns.add(make.Xor(ret, right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Xor(ret, right.result.get()));
                 break;
             default:
                 throw new UnsupportedOperationException("No case found.");
@@ -152,8 +156,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = new ASMTempArg(generator.newTemp());
-        List<ASMLine> insns = List
-                .of(make.Mov(ret, new ASMConstArg(n.constant())));
+        List<ASMLine> insns = List.of(make.Mov(ret, new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;
@@ -211,16 +214,95 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
 
-        IRExpr target = n.target();
-        List<IRExpr> args = n.args();
-        if (this.numRetValues > 2) {
-            long size = (this.numRetValues - 2) * 8;
-            make.Lea(arg.reg(Register.RDI), arg.constant(size));
-        } else {
+        List<ASMLine> insn = new ArrayList<>();
+        TilerData targetTile = n.target().accept(this);
+        List<TilerData> argTiles = new ArrayList<>(
+                n.args().stream().map(a -> a.accept(this)).collect(Collectors.toList()));
 
+        var rsp = arg.reg(Register.RSP);
+        var rdi = arg.reg(Register.RDI);
+        var rsi = arg.reg(Register.RSI);
+        var rdx = arg.reg(Register.RDX);
+        var rcx = arg.reg(Register.RCX);
+        var r8 = arg.reg(Register.R8);
+        var r9 = arg.reg(Register.R9);
+
+        int lastRegisterArg;
+        int tileCost = 0;
+        if (this.numRetValues > 2) {
+            lastRegisterArg = 5;
+            long size = (this.numRetValues - 2) * 8;
+            insn.add(make.Lea(rdi, arg.constant(size)));
+            insn.add(make.Sub(rsp, rdi));
+            insn.add(make.Mov(rdi, rsp));
+
+            for (int i = 0; i < lastRegisterArg; i++) {
+                TilerData argTile = argTiles.get(i);
+                tileCost += argTile.tileCost;
+                insn.addAll(argTile.optimalInstructions);
+                switch (i) {
+                    case 0:
+                        insn.add(make.Mov(rsi, argTile.result.get()));
+                        break;
+                    case 1:
+                        insn.add(make.Mov(rdx, argTile.result.get()));
+                        break;
+                    case 2:
+                        insn.add(make.Mov(rcx, argTile.result.get()));
+                        break;
+                    case 3:
+                        insn.add(make.Mov(r8, argTile.result.get()));
+                        break;
+                    case 4:
+                        insn.add(make.Mov(r9, argTile.result.get()));
+                        break;
+                    default:
+                        throw new RuntimeException("Unexpected Error with index");
+                }
+            }
+        } else {
+            lastRegisterArg = 6;
+            for (int i = 0; i < lastRegisterArg; i++) {
+                TilerData argTile = argTiles.get(i);
+                tileCost += argTile.tileCost;
+                insn.addAll(argTile.optimalInstructions);
+                switch (i) {
+                    case 0:
+                        insn.add(make.Mov(rdi, argTile.result.get()));
+                        break;
+                    case 1:
+                        insn.add(make.Mov(rsi, argTile.result.get()));
+                        break;
+                    case 2:
+                        insn.add(make.Mov(rdx, argTile.result.get()));
+                        break;
+                    case 3:
+                        insn.add(make.Mov(rcx, argTile.result.get()));
+                        break;
+                    case 4:
+                        insn.add(make.Mov(r8, argTile.result.get()));
+                        break;
+                    case 5:
+                        insn.add(make.Mov(r9, argTile.result.get()));
+                        break;
+                    default:
+                        throw new RuntimeException("Unexpected Error with index");
+                }
+            }
+        }
+        for (int i = argTiles.size() - 1; i >= lastRegisterArg; i--) {
+            TilerData argTile = argTiles.get(i);
+            tileCost += argTile.tileCost;
+            insn.addAll(argTile.optimalInstructions);
+            insn.add(make.Push(argTile.result.get()));
         }
 
-        return null;
+        tileCost += targetTile.tileCost;
+        insn.addAll(targetTile.optimalInstructions);
+        insn.add(make.Call(targetTile.result.get()));
+        TilerData result = new TilerData(tileCost, insn, Optional.empty());
+        n.setOptimalTilingOnce(result);
+        return result;
     }
 
     @Override
@@ -336,23 +418,21 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
                 switch (i) {
                     case 0:
-                    instrs.add(make.Mov(new ASMRegArg(Register.RAX),
-                            target.result.get()));
+                        instrs.add(make.Mov(new ASMRegArg(Register.RAX), target.result.get()));
                         break;
                     case 1:
-                    instrs.add(make.Mov(new ASMRegArg(Register.RDX),
-                            target.result.get()));
+                        instrs.add(make.Mov(new ASMRegArg(Register.RDX), target.result.get()));
                         break;
                     default:
-                    break;
-//                        asdlkfjasdlkfjasdflkjasdflkjasdflkjasdflvaj;sn;lfajsdfal;jdfalvjadfl;jna sdvjhafoha sgihesjof wefioj oighwraoig waouhfawouhaoshaskjgh aksfvhakbh akh
+                        break;
+                    // asdlkfjasdlkfjasdflkjasdflkjasdflkjasdflvaj;sn;lfajsdfal;jdfalvjadfl;jna
+                    // sdvjhafoha sgihesjof wefioj oighwraoig waouhfawouhaoshaskjgh aksfvhakbh akh
                 }
             }
         } else if (n.target() instanceof IRTemp) {
         } else {
             List<ASMLine> instructions = new ArrayList<>();
-            instructions
-                    .add(make.Mov(target.result.get(), source.result.get()));
+            instructions.add(make.Mov(target.result.get(), source.result.get()));
             return new TilerData(1 + target.tileCost + source.tileCost, instructions, Optional.empty());
         }
         return null;

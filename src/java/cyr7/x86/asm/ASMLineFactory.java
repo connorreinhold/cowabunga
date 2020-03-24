@@ -69,7 +69,7 @@ public class ASMLineFactory {
         return new ASMInstr(ASMInstrType.MOVQ, List.of(dest, source));
     }
 
-    public ASMInstr Call(ASMLabelArg label) {
+    public ASMInstr Call(ASMArg label) {
         return new ASMInstr(ASMInstrType.CALLQ, List.of(label));
     }
 
