@@ -1,7 +1,5 @@
 package cyr7.x86.asm;
 
-import cyr7.util.OneOfTwo;
-
 import java.util.List;
 
 public class ASMFactory {
@@ -28,6 +26,10 @@ public class ASMFactory {
 
     public static ASMInstr Or(ASMArg dest, ASMArg source) {
         return new ASMInstr(ASMInstrType.ORQ, List.of(dest, source));
+    }
+    
+    public static ASMInstr Xor(ASMArg dest, ASMArg source) {
+        return new ASMInstr(ASMInstrType.XORQ, List.of(dest, source));
     }
 
     public static ASMInstr ARShift(ASMArg dest, ASMArg source) {
@@ -56,6 +58,10 @@ public class ASMFactory {
 
     public static ASMInstr Cmp(ASMArg left, ASMArg right) {
         return new ASMInstr(ASMInstrType.CMPQ, List.of(left, right));
+    }
+
+    public static ASMInstr Mov(ASMArg dest, ASMArg source) {
+        return new ASMInstr(ASMInstrType.CMPQ, List.of(dest, source));
     }
 
     public static ASMInstr Call(ASMLabelArg label) {
