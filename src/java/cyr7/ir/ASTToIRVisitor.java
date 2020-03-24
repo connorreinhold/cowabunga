@@ -168,8 +168,10 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRCompUnit program = make.IRCompUnit(file);
         for (FunctionDeclNode fun : n.functions) {
             IRStmt funStmts = fun.accept(this).assertSecond();
-            String funcName = this.functionName(fun.header.identifier, fun.header.getType());
-            program.appendFunc(make.IRFuncDecl(funcName, funStmts));
+            String funcName = this.functionName(fun.header.identifier,
+                    fun.header.getType());
+            program.appendFunc(
+                    make.IRFuncDecl(funcName, funStmts, fun.header.getType()));
         }
         return OneOfTwo.ofSecond(program);
     }
@@ -340,19 +342,19 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         List<IRStmt> stmts = new ArrayList<IRStmt>();
         List<IRTemp> returnValTemps = new ArrayList<IRTemp>();
-        
+
         // Move each return arg into a temp representing its value
         for (ExprNode expr: n.exprs) {
             IRTemp valTemp = make.IRTemp(generator.newTemp());
             stmts.add(make.IRMove(valTemp, expr.accept(this).assertFirst()));
             returnValTemps.add(valTemp);
         }
-        
+
         // After calculation, move each of these return values into RET_0, RET_1
         // Need to do this because otherwise "return 1, fun(0)" would overwrite RET_0
         for(int i = 0; i < returnValTemps.size(); i++) {
             stmts.add(make.IRMove(
-                make.IRTemp(generator.retTemp(i)), 
+                make.IRTemp(generator.retTemp(i)),
                 returnValTemps.get(i)));
         }
         stmts.add(make.IRReturn());
@@ -564,7 +566,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         seq.add(make.IRMove(make.IRTemp(i), make.IRConst(0)));
         seq.add(make.IRMove(make.IRTemp(j), make.IRConst(0)));
-        
+
         seq.add(make.IRLabel(leftSumming));
         // While i < leftArrSize
         seq.add(make.IRCJump(

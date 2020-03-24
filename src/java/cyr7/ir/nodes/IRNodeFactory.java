@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
+import cyr7.semantics.types.FunctionType;
 
 public interface IRNodeFactory {
 
@@ -69,6 +70,8 @@ public interface IRNodeFactory {
     IRExp IRExp(IRExpr expr);
 
     IRFuncDecl IRFuncDecl(String name, IRStmt stmt);
+
+    IRFuncDecl IRFuncDecl(String name, IRStmt stmt, FunctionType type);
 
     /**
      *
