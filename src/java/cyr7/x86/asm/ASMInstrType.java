@@ -2,24 +2,28 @@ package cyr7.x86.asm;
 
 enum ASMInstrType {
     // Arithmetic
-    ADD,
-    SUB,
+    ADDQ, SUBQ, IMULQ, IDIVQ, LEAQ,
 
     // Logical
-    AND,
-    OR,
-    XOR,
-    NOT,
+    ANDQ, ORQ, XORQ,
+
+    // Shift Operators
+    SHLQ, SHRQ, SARQ,
 
     // Data Transfer
-    MOV,
-    PUSH,
-    POP,
+    MOVQ, PUSHQ, POPQ,
 
     // Control Flow
-    CMP,
-    CALL,
-    RET;
+    CMPQ, CALLQ, RETQ,
+
+    // Jumps
+    JMP, JE, JNE, JLE, JGE, JL, JG,
+
+    // Set Instructions
+    SETZ, SETNE, SETLE,
+
+    // cqo
+    CQO;
 
     @Override
     public String toString() {

@@ -27,7 +27,7 @@ public class ASMFactory {
     public static ASMInstr Or(ASMArg dest, ASMArg source) {
         return new ASMInstr(ASMInstrType.ORQ, List.of(dest, source));
     }
-    
+
     public static ASMInstr Xor(ASMArg dest, ASMArg source) {
         return new ASMInstr(ASMInstrType.XORQ, List.of(dest, source));
     }
@@ -61,7 +61,7 @@ public class ASMFactory {
     }
 
     public static ASMInstr Mov(ASMArg dest, ASMArg source) {
-        return new ASMInstr(ASMInstrType.CMPQ, List.of(dest, source));
+        return new ASMInstr(ASMInstrType.MOVQ, List.of(dest, source));
     }
 
     public static ASMInstr Call(ASMLabelArg label) {
@@ -85,7 +85,7 @@ public class ASMFactory {
     }
 
     public static ASMInstr Jump(ASMArg target) {
-        return new ASMInstr(ASMInstrType.J, List.of(target));
+        return new ASMInstr(ASMInstrType.JMP, List.of(target));
     }
 
     public static ASMInstr JumpNE(ASMArg target) {
