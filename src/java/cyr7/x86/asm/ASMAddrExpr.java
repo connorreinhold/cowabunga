@@ -4,14 +4,14 @@ package cyr7.x86.asm;
 import java.util.Optional;
 
 public class ASMAddrExpr {
-    //General Memory Access: [base + scale * index + displacement]
+    // General Memory Access: [base + scale * index + displacement]
 
-    enum ScaleValues {
+    public enum ScaleValues {
         ONE, TWO, FOUR, EIGHT;
 
         @Override
         public String toString() {
-            switch(this) {
+            switch (this) {
                 case ONE:
                     return "1";
                 case TWO:
@@ -31,10 +31,7 @@ public class ASMAddrExpr {
     public final Optional<Register> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<Register> base,
-                       ScaleValues scale,
-                       Optional<Register> index,
-                       int displacement) {
+    public ASMAddrExpr(Optional<Register> base, ScaleValues scale, Optional<Register> index, int displacement) {
         this.base = base;
         this.scale = scale;
         this.index = index;
@@ -45,7 +42,6 @@ public class ASMAddrExpr {
     public String toString() {
         String baseString = base.isPresent() ? base.toString() : "";
         String indexString = index.isPresent() ? index.toString() : "1";
-        return "[" + baseString + scale + " * " + indexString + " + " +
-            displacement + "]";
+        return "[" + baseString + scale + " * " + indexString + " + " + displacement + "]";
     }
 }

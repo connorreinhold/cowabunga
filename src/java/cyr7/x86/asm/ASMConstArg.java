@@ -1,9 +1,9 @@
 package cyr7.x86.asm;
 
 public class ASMConstArg extends ASMArg {
-    public final int constant;
+    public final long constant;
 
-    public ASMConstArg(int constant) {
+    public ASMConstArg(long constant) {
         this.constant = constant;
     }
 }
