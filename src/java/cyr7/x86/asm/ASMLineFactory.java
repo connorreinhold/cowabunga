@@ -17,12 +17,12 @@ public class ASMLineFactory {
         return new ASMInstr(ASMInstrType.SUBQ, List.of(dest, source));
     }
 
-    public ASMInstr Mul(ASMArg dest, ASMArg source) {
-        return new ASMInstr(ASMInstrType.IMULQ, List.of(dest, source));
+    public ASMInstr Mul(ASMArg target, ASMArg left, ASMArg right) {
+        return new ASMInstr(ASMInstrType.IMULQ, List.of(target, left, right));
     }
 
-    public ASMInstr Div(ASMArg dest, ASMArg source) {
-        return new ASMInstr(ASMInstrType.IDIVQ, List.of(dest, source));
+    public ASMInstr Div(ASMArg target) {
+        return new ASMInstr(ASMInstrType.IDIVQ, List.of(target));
     }
 
     public ASMInstr And(ASMArg dest, ASMArg source) {
