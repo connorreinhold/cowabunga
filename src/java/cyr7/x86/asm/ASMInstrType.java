@@ -1,6 +1,6 @@
 package cyr7.x86.asm;
 
-enum ASMInstrType {
+public enum ASMInstrType {
     // Arithmetic
     ADDQ, SUBQ, IMULQ, IDIVQ, LEAQ,
 
