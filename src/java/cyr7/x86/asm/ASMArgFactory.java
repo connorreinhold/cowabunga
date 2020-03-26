@@ -12,6 +12,10 @@ public class ASMArgFactory {
     private ASMArgFactory() {
     }
 
+    public ASMTempArg temp(String t) {
+        return new ASMTempArg(t);
+    }
+
     public ASMConstArg constant(long n) {
         return new ASMConstArg(n);
     }

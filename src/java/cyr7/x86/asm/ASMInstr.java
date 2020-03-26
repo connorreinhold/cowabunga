@@ -16,7 +16,7 @@ public class ASMInstr implements ASMLine {
     public String getIntelAssembly() {
         String opCode = type.getIntelOpCode();
         String arguments = String.join(", ", args.stream().map(a -> a.getIntelArg()).collect(Collectors.toList()));
-        return opCode + " " + arguments;
+        return opCode + (arguments.length() != 0 ? " " + arguments : "");
     }
 
     @Override
