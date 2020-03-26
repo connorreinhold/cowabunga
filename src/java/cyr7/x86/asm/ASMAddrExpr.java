@@ -38,10 +38,16 @@ public class ASMAddrExpr {
         this.displacement = displacement;
     }
 
+    public String getIntelExpr() {
+        String baseString = base.isPresent() ? base.get().getIntelArg() : "";
+        String productString = index.isPresent() ? scale + " * " + index.get().getIntelArg() : "";
+        String displacementString = this.displacement == 0 ? "" : " + " + displacement;
+        return baseString + productString + displacementString;
+    }
+
     @Override
     public String toString() {
-        String baseString = base.isPresent() ? base.toString() : "";
-        String indexString = index.isPresent() ? index.toString() : "1";
-        return "[" + baseString + scale + " * " + indexString + " + " + displacement + "]";
+        return "ASMAddrExpr [base=" + base + ", displacement=" + displacement + ", index=" + index + ", scale=" + scale
+                + "]";
     }
 }

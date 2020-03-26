@@ -20,8 +20,7 @@ public class ASMArgFactory {
         return new ASMLabelArg(name);
     }
 
-    public ASMAddrExpr addr(Optional<ASMReg> base, ScaleValues scale,
-                            Optional<ASMReg> index, int displacement) {
+    public ASMAddrExpr addr(Optional<ASMReg> base, ScaleValues scale, Optional<ASMReg> index, int displacement) {
         return new ASMAddrExpr(base, scale, index, displacement);
     }
 
