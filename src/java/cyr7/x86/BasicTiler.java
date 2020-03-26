@@ -458,7 +458,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData target = n.target().accept(this);
         instructions.addAll(target.optimalInstructions);
 
-        TilerData result = new TilerData(target.tileCost, instructions, Optional.empty());
+        TilerData result;
         if (target.result.isPresent()) {
             instructions.add(make.Jump(target.result.get()));
             result = new TilerData(1 + target.tileCost, instructions, Optional.empty());
