@@ -2,12 +2,10 @@ package cyr7.x86.assembly_string;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import java.lang.StackWalker.Option;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLineFactory;
