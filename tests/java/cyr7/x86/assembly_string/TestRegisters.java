@@ -1,20 +1,18 @@
-package cyr7.x86;
+package cyr7.x86.assembly_string;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
 import cyr7.x86.asm.ASMReg;
 
-public class TestAssemblyString {
+public class TestRegisters {
 
     /**
-     * A simple test case checking that the assembly form of registers are correct.
+     * Checks that the Intel syntax assembly form of registers are correct.
      */
     @Test
-    void testRegArgs() {
+    void testIntelRegArgs() {
         var registers = ASMReg.values();
         for (ASMReg r : registers) {
             String intelSyntaxString = r.getIntelArg();
