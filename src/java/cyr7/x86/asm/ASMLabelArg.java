@@ -1,6 +1,6 @@
 package cyr7.x86.asm;
 
-public class ASMLabelArg extends ASMArg {
+public class ASMLabelArg implements ASMArg {
     public final String label;
 
     public ASMLabelArg(String label) {

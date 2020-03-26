@@ -1,6 +1,6 @@
 package cyr7.x86.asm;
 
-public enum Register {
+public enum ASMReg implements ASMArg {
     // Classic Registers
     RAX,        // Accumulator Register
     RCX,        // Counter Register

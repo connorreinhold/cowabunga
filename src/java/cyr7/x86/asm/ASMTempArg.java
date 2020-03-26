@@ -2,7 +2,7 @@ package cyr7.x86.asm;
 
 import java.util.Objects;
 
-public class ASMTempArg extends ASMArg {
+public class ASMTempArg implements ASMArg {
 
     public final String name;
 

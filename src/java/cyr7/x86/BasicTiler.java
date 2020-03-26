@@ -39,9 +39,8 @@ import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
-import cyr7.x86.asm.ASMRegArg;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.Register;
+import cyr7.x86.asm.ASMReg;
 
 public class BasicTiler implements MyIRVisitor<TilerData> {
 
@@ -52,15 +51,15 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final ASMArgFactory arg;
     private final ASMLineFactory make;
 
-    private final ASMArg rbp = new ASMRegArg(Register.RBP);
-    private final ASMArg rax = new ASMRegArg(Register.RAX);
-    private final ASMArg rsp = new ASMRegArg(Register.RSP);
-    private final ASMArg rdi = new ASMRegArg(Register.RDI);
-    private final ASMArg rsi = new ASMRegArg(Register.RSI);
-    private final ASMArg rdx = new ASMRegArg(Register.RDX);
-    private final ASMArg rcx = new ASMRegArg(Register.RCX);
-    private final ASMArg r8 = new ASMRegArg(Register.R8);
-    private final ASMArg r9 = new ASMRegArg(Register.R9);
+    private final ASMArg rbp = ASMReg.RBP;
+    private final ASMArg rax = ASMReg.RAX;
+    private final ASMArg rsp = ASMReg.RSP;
+    private final ASMArg rdi = ASMReg.RDI;
+    private final ASMArg rsi = ASMReg.RSI;
+    private final ASMArg rdx = ASMReg.RDX;
+    private final ASMArg rcx = ASMReg.RCX;
+    private final ASMArg r8 = ASMReg.R8;
+    private final ASMArg r9 = ASMReg.R9;
 
     public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap) {
         this.generator = generator;
@@ -491,13 +490,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         final String ARG_PREFIX = Configuration.ABSTRACT_ARG_PREFIX;
         final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
-        var rdi = arg.reg(Register.RDI);
-        var rsi = arg.reg(Register.RSI);
-        var rdx = arg.reg(Register.RDX);
-        var rcx = arg.reg(Register.RCX);
-        var r8 = arg.reg(Register.R8);
-        var r9 = arg.reg(Register.R9);
-        var rax = arg.reg(Register.RAX);
 
         TilerData result;
         if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
@@ -526,7 +518,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                         break;
                     default:
                         int offset = 8 * (i - 6);
-                        var addr = arg.addr(Optional.of(Register.RBP), ScaleValues.ONE, Optional.empty(), offset);
+                        var addr = arg.addr(Optional.of(ASMReg.RBP), ScaleValues.ONE, Optional.empty(), offset);
                         var mem = arg.mem(addr);
                         instrs.add(make.Mov(targetTemp, mem));
                         break;
@@ -553,7 +545,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                         break;
                     default:
                         int offset = 8 * (i - 5);
-                        var addr = arg.addr(Optional.of(Register.RBP), ScaleValues.ONE, Optional.empty(), offset);
+                        var addr = arg.addr(Optional.of(ASMReg.RBP), ScaleValues.ONE, Optional.empty(), offset);
                         var mem = arg.mem(addr);
                         instrs.add(make.Mov(targetTemp, mem));
                         break;
@@ -572,7 +564,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     break;
                 default:
                     int offset = 8 * (i - 1);
-                    var addr = arg.addr(Optional.of(Register.RDI), ScaleValues.ONE, Optional.empty(), offset);
+                    var addr = arg.addr(Optional.of(ASMReg.RDI), ScaleValues.ONE, Optional.empty(), offset);
                     var mem = arg.mem(addr);
                     instrs.add(make.Mov(mem, source.result.get()));
                     break;
@@ -590,7 +582,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     break;
                 default:
                     int offset = 8 * (i - 1);
-                    var addr = arg.addr(Optional.of(Register.RDI), ScaleValues.ONE, Optional.empty(), offset);
+                    var addr = arg.addr(Optional.of(ASMReg.RDI), ScaleValues.ONE, Optional.empty(), offset);
                     var mem = arg.mem(addr);
                     instrs.add(make.Mov(target.result.get(), mem));
                     break;

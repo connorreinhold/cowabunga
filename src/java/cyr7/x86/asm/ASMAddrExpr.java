@@ -26,12 +26,12 @@ public class ASMAddrExpr {
         }
     }
 
-    public final Optional<Register> base;
+    public final Optional<ASMReg> base;
     public final ScaleValues scale;
-    public final Optional<Register> index;
+    public final Optional<ASMReg> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<Register> base, ScaleValues scale, Optional<Register> index, int displacement) {
+    public ASMAddrExpr(Optional<ASMReg> base, ScaleValues scale, Optional<ASMReg> index, int displacement) {
         this.base = base;
         this.scale = scale;
         this.index = index;
