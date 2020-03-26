@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import cyr7.ir.nodes.IRBinOp.OpType;
+import cyr7.semantics.types.FunctionType;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class IRNodeFactory_c implements IRNodeFactory {
@@ -40,6 +41,7 @@ public class IRNodeFactory_c implements IRNodeFactory {
         return new IRCJump(location, expr, trueLabel, falseLabel);
     }
 
+    @Override
     public IRCJump IRCJump(IRExpr expr, String trueLabel, Optional<String> falseLabel) {
         return new IRCJump(location, expr, trueLabel, falseLabel);
     }
@@ -68,6 +70,11 @@ public class IRNodeFactory_c implements IRNodeFactory {
     @Override
     public IRExp IRExp(IRExpr expr) {
         return new IRExp(location, expr);
+    }
+
+    @Override
+    public IRFuncDecl IRFuncDecl(String name, IRStmt stmt, FunctionType type) {
+        return new IRFuncDecl(location, name, stmt, type);
     }
 
     @Override

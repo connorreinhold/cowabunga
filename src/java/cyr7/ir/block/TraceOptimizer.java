@@ -32,7 +32,8 @@ public final class TraceOptimizer {
             List<IRStmt> flattenedStmts = flatten(optimizedTraces);
             IRSeq newBody = new IRSeq(decl.body().location(), flattenedStmts);
 
-            IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(), newBody);
+            IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(),
+                    newBody, decl.type());
             optimized.appendFunc(funcDecl);
         });
 

@@ -2,12 +2,18 @@ package cyr7.ir.nodes;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
+import cyr7.x86.TilerData;
+import cyr7.x86.asm.ASMInstr;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -19,9 +25,28 @@ public abstract class IRNode_c implements IRNode {
 
     private final Location location;
 
+    private Optional<TilerData> optimalTiling;
+
     public IRNode_c(Location location) {
         assert location != null;
         this.location = location;
+        this.optimalTiling = Optional.empty();
+    }
+
+    public void setOptimalTilingOnce(TilerData tilerData) {
+        if (optimalTiling.isPresent()) {
+            throw new UnsupportedOperationException();
+        }
+
+        optimalTiling = Optional.of(tilerData);
+    }
+    
+    public TilerData getOptimalTiling() {
+        return optimalTiling.get();
+    }
+    
+    public boolean hasOptimalTiling() {
+        return optimalTiling.isPresent();
     }
 
     @Override

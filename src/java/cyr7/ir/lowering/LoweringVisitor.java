@@ -1,11 +1,8 @@
 package cyr7.ir.lowering;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.ir.IdGenerator;
@@ -32,7 +29,6 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
-import cyr7.util.OneOfTwo;
 import cyr7.visitor.MyIRVisitor;
 import polyglot.util.Pair;
 
@@ -175,7 +171,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
                     .assertFirst();
             IRStmt loweredBody = make.IRSeq(loweredStmts);
             IRFuncDecl loweredFuncDecl = make.IRFuncDecl(funcDecl.name(),
-                    loweredBody);
+                    loweredBody, funcDecl.type());
             compUnit.appendFunc(loweredFuncDecl);
         }
         return Result.compUnit(compUnit);
