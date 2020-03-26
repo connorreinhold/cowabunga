@@ -219,10 +219,16 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData expr = n.expr().accept(this);
         List<ASMLine> insns = new ArrayList<ASMLine>();
         insns.addAll(expr.optimalInstructions);
+        
         ASMArg ret = new ASMTempArg(generator.newTemp());
-
-        // TODO: Figure out the correct address
-        ASMAddrExpr address = new ASMAddrExpr(Optional.empty(), ScaleValues.ONE, Optional.empty(), 0);
+        ASMAddrExpr address = new ASMAddrExpr(Optional.of(ASMReg.RAX), ScaleValues.ONE, Optional.empty(), 0);
+        insns.add(make.Push(rax));
+        insns.add(make.Push(expr.result.get()));
+        insns.add(make.Pop(rax));
+        insns.add(make.Mov(ret, new ASMMemArg(address)));
+        insns.add(make.Pop(rax));
+        
+        insns.add(make.Pop(expr.result.get()));
         List.of(make.Mov(ret, new ASMMemArg(address)));
 
         TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(ret));
