@@ -221,15 +221,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         insns.addAll(expr.optimalInstructions);
         
         ASMArg ret = new ASMTempArg(generator.newTemp());
-        ASMAddrExpr address = new ASMAddrExpr(Optional.of(ASMReg.RAX), ScaleValues.ONE, Optional.empty(), 0);
+        
         insns.add(make.Push(rax));
-        insns.add(make.Push(expr.result.get()));
-        insns.add(make.Pop(rax));
+        insns.add(make.Mov(rax, expr.result.get()));
+        ASMAddrExpr address = new ASMAddrExpr(Optional.of(ASMReg.RAX), ScaleValues.ONE, Optional.empty(), 0);
         insns.add(make.Mov(ret, new ASMMemArg(address)));
         insns.add(make.Pop(rax));
-        
-        insns.add(make.Pop(expr.result.get()));
-        List.of(make.Mov(ret, new ASMMemArg(address)));
 
         TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
@@ -368,7 +365,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRCompUnit n) {
-        if (n.hasOptimalTiling()) {
+        throw new UnsupportedOperationException("CompUnit is not translated by the BasicTiler.");
+        /*if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
         List<ASMLine> insns = new ArrayList<ASMLine>();
@@ -380,7 +378,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         TilerData result = new TilerData(tileCosts, insns, Optional.empty());
         n.setOptimalTilingOnce(result);
-        return result;
+        return result;*/
     }
 
     @Override
@@ -394,19 +392,21 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
      * @param instr
      * @return
      */
+    /*
     private int numberOfUniqueTemps(List<ASMLine> instr) {
         throw new UnsupportedOperationException();
-//        Set<ASMTempArg> temps = new HashSet<>();
-//        for (ASMLine line: instr) {
-//            if (line instanceof ASMInstr
-//                    && ((ASMInstr) line).type == ASMInstrType.MOVQ
-//                    && ((ASMInstr) line).args.get(0) instanceof ASMTempArg) {
-//                temps.add((ASMTempArg) ((ASMInstr) line).args.get(0));
-//            }
-//        }
-//        return temps.size();
+        Set<ASMTempArg> temps = new HashSet<>();
+        for (ASMLine line: instr) {
+            if (line instanceof ASMInstr
+                    && ((ASMInstr) line).type == ASMInstrType.MOVQ
+                    && ((ASMInstr) line).args.get(0) instanceof ASMTempArg) {
+                temps.add((ASMTempArg) ((ASMInstr) line).args.get(0));
+            }
+        }
+        return temps.size();
     }
 
+    
     private List<ASMLine> createPrologue(long numberOfTemps) {
         return List.of(
                 make.Push(rbp),
@@ -415,6 +415,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 );
     }
 
+    
     private List<ASMLine> createEpilogue(long numberOfTemps) {
         return List.of(
                 new ASMLabel(returnLbl),
@@ -423,9 +424,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 make.Pop(rbp),
                 make.Ret());
     }
+    */
 
     @Override
     public TilerData visit(IRFuncDecl n) {
+        throw new UnsupportedOperationException("FuncDecl is not translated by the BasicTiler.");
+        /*
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -446,7 +450,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData result = new TilerData(body.tileCost, instructions,
                 Optional.empty());
         n.setOptimalTilingOnce(result);
-        return result;
+        return result;*/
     }
 
     @Override
