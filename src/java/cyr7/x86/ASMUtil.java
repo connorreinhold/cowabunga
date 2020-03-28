@@ -27,6 +27,22 @@ public final class ASMUtil {
         return asmGenerator.generate(compUnit);
     }
 
+    public static void writeASM(
+            Reader reader,
+            Writer writer,
+            String filename,
+            IxiFileOpener fileOpener
+    ) {
+        try{
+            List<ASMLine> lines = generateASM(reader, writer, filename, fileOpener);
+            for (ASMLine line: lines) {
+                writer.append(line.getIntelAssembly()).append(System.lineSeparator());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void printDebugASM(
         Reader reader,
         Writer writer,

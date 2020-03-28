@@ -167,7 +167,7 @@ public class CLI {
                 .builder("d")
                 .longOpt(null)
                 .desc("Specify where to place generated assembly output files")
-                .hasArgs(true)
+                .hasArg(true)
                 .argName("path")
                 .numberOfArgs(1)
                 .required(false)
@@ -423,7 +423,7 @@ public class CLI {
                     debugPrintingEnabled = true;
                     break;
                 case "target":
-                    target = cmd.getOptionValue("target");
+                    target = OperatingSystem.parse(cmd.getOptionValue("target"));
                     break;
                 default:
                     writer.write("No case for given for option: " + opt);
@@ -445,7 +445,7 @@ public class CLI {
                 debugPrint("Lexing file: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "lexed");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "lexed");
                     LexerUtil.lex(input, output, filename);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -457,7 +457,7 @@ public class CLI {
                 debugPrint("Parsing file: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "parsed");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "parsed");
                     ParserUtil.parse(input, output, filename, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -472,7 +472,7 @@ public class CLI {
                 debugPrint("Typechecking file: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "typed");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "typed");
                     TypeCheckUtil.typeCheck(input, output, filename, isIXI,
                         opener);
                 } catch (Exception e) {
@@ -492,7 +492,7 @@ public class CLI {
                 debugPrint("Generate intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "ir");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "ir");
                     IRUtil.irGen(
                         input,
                         output,
@@ -512,7 +512,7 @@ public class CLI {
                     "code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "mir_run");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "mir_run");
                     IRUtil.mirRun(
                             input,
                             output,
@@ -531,7 +531,7 @@ public class CLI {
                 debugPrint("Generate and interpret intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "ir_run");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "ir_run");
                     IRUtil.irRun(
                         input,
                         output,
@@ -551,7 +551,8 @@ public class CLI {
                 debugPrint("Generate and interpret assembly code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(filename, "ir_run");
+                    output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
+                    ASMUtil.generateASM(input, output, filename, opener);
                     System.out.println();
                     ASMUtil.printDebugASM(input, output, filename, opener);
                 } catch (Exception e) {
@@ -571,9 +572,9 @@ public class CLI {
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
 
-    private static Writer getWriter(String relativePath, String fileExtension)
+    private static Writer getWriter(String absolutePath, String relativePath, String fileExtension)
             throws IOException {
-        Path destPath = Paths.get(destinationRoot.getAbsolutePath(),
+        Path destPath = Paths.get(absolutePath,
                 relativePath).getParent();
         File dest = new File(destPath.toFile(), String.format("%s." +
                         fileExtension,
