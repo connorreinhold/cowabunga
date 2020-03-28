@@ -27,7 +27,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public final class ASMTrivialRegAllocGenerator {
+public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
     private static final ASMLineFactory make = ASMLineFactory.instance;
     private static final ASMArgFactory arg = ASMArgFactory.instance;

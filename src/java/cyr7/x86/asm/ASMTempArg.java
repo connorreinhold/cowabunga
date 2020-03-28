@@ -26,4 +26,14 @@ public class ASMTempArg implements ASMArg {
         ASMTempArg other = (ASMTempArg) obj;
         return Objects.equals(name, other.name);
     }
+
+    @Override
+    public String getIntelArg() {
+        return this.name;
+    }
+
+    @Override
+    public String toString() {
+        return "ASMTempArg [name=" + name + "]";
+    }
 }

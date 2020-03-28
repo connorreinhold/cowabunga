@@ -6,4 +6,14 @@ public class ASMMemArg implements ASMArg {
     public ASMMemArg(ASMAddrExpr address) {
         this.address = address;
     }
+
+    @Override
+    public String getIntelArg() {
+        return "[ " + this.address.getIntelExpr() +  " ]";
+    }
+
+    @Override
+    public String toString() {
+        return "ASMMemArg [address=" + address + "]";
+    }
 }

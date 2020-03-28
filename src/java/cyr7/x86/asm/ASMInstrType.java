@@ -11,7 +11,7 @@ public enum ASMInstrType {
     SHLQ, SHRQ, SARQ,
 
     // Data Transfer
-    MOVQ, PUSHQ, POPQ,
+    MOVQ, PUSHQ, POPQ, MOVABSQ,
 
     // Control Flow
     CMPQ, CALLQ, RETQ,
@@ -25,8 +25,12 @@ public enum ASMInstrType {
     // cqo
     CQO;
 
+    public String getIntelOpCode() {
+        return this.name().toLowerCase();
+    }
+
     @Override
     public String toString() {
-        return this.name().toLowerCase();
+        return "ASMInstrType [type=" + this.name() + "]";
     }
 }

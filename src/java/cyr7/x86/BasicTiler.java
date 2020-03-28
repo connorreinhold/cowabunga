@@ -200,7 +200,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = new ASMTempArg(generator.newTemp());
-        List<ASMLine> insns = List.of(make.Mov(ret, new ASMConstArg(n.constant())));
+        List<ASMLine> insns = List.of(make.MovAbs(ret, new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;
@@ -269,7 +269,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         int lastRegisterArg;
         int tileCost = 0;
         if (this.numRetValues > 2) {
-            lastRegisterArg = 5;
+            lastRegisterArg = Math.min(5, argTiles.size());
             long size = (this.numRetValues - 2) * 8;
             insn.add(make.Lea(rdi, arg.constant(size)));
             insn.add(make.Sub(rsp, rdi));
@@ -300,7 +300,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 }
             }
         } else {
-            lastRegisterArg = 6;
+            lastRegisterArg = Math.min(6, argTiles.size());
             for (int i = 0; i < lastRegisterArg; i++) {
                 TilerData argTile = argTiles.get(i);
                 tileCost += argTile.tileCost;

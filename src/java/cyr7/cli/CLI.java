@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
+import cyr7.x86.ASMUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -233,6 +234,15 @@ public class CLI {
                 .required(false)
                 .build();
 
+        Option target = Option
+            .builder("target")
+            .desc("Specify the operating system for which to generate code.")
+            .hasArg(true)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
@@ -412,6 +422,9 @@ public class CLI {
                 case "debug":
                     debugPrintingEnabled = true;
                     break;
+                case "target":
+                    target = cmd.getOptionValue("target");
+                    break;
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -452,14 +465,16 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            IxiFileOpener opener = ixiFilename -> getLibraryReader(ixiFilename + ".ixi");
+            IxiFileOpener opener =
+                ixiFilename -> getLibraryReader(ixiFilename + ".ixi");
 
             if (wantsTypechecking) {
                 debugPrint("Typechecking file: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output, filename, isIXI, opener);
+                    TypeCheckUtil.typeCheck(input, output, filename, isIXI,
+                        opener);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -493,7 +508,8 @@ public class CLI {
             }
 
             if (wantsMirRun) {
-                debugPrint("Generate and interpret middle-level intermediate code for: " + filename);
+                debugPrint("Generate and interpret middle-level intermediate " +
+                    "code for: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "mir_run");
@@ -523,6 +539,21 @@ public class CLI {
                         opener,
                         lowerConfiguration
                     );
+                } catch (Exception e) {
+                    debugPrint(e);
+                    writer.write(e.getMessage());
+                }
+                closeIOStreams(input, output);
+            }
+
+            // By default we always generate assembly
+            {
+                debugPrint("Generate and interpret assembly code for: " + filename);
+                try {
+                    input = getReader(filename);
+                    output = getWriter(filename, "ir_run");
+                    System.out.println();
+                    ASMUtil.printDebugASM(input, output, filename, opener);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());

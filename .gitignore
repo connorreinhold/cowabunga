@@ -182,7 +182,8 @@ buildNumber.properties
 .classpath
 .project
 .settings/
+cs4120.xml
 bin/
 
-
-
+# vscode-related project files
+.vscode/
