@@ -42,17 +42,20 @@ public class CLI {
 
     private static boolean cFoldEnabled = true;
     private static boolean commutativeEnabled = true;
-    
+
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
     private static boolean wantsIrGen = false;
     private static boolean wantsMirRun = false;
     private static boolean wantsIrRun = false;
-    
+
+    private static File assemblyRoot = new File(".");
     private static File sourceRoot = new File(".");
     private static File libRoot = new File(".");
     private static File destinationRoot = new File(".");
+
+    private static OperatingSystem target = OperatingSystem.LINUX;
 
     /**
      * Creates an {@code Options} instance of the CLI parser. <\br> In this
@@ -64,167 +67,189 @@ public class CLI {
         Options options = new Options();
 
         Option help = Option
-            .builder("h")
-            .longOpt("help")
-            .desc("Print a synopsis of options")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("h")
+                .longOpt("help")
+                .desc("Print a synopsis of options")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         Option lex = Option
-            .builder("l")
-            .longOpt("lex")
-            .desc("Generate output from lexical analysis")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("l")
+                .longOpt("lex")
+                .desc("Generate output from lexical analysis")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         Option parse = Option
-            .builder("p")
-            .longOpt("parse")
-            .desc("Generate output from syntactic analysis")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("p")
+                .longOpt("parse")
+                .desc("Generate output from syntactic analysis")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         Option typecheck = Option
-            .builder("t")
-            .longOpt("typecheck")
-            .desc("Generate output from semantic analysis")
-            .hasArg(false)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-        
+                .builder("t")
+                .longOpt("typecheck")
+                .desc("Generate output from semantic analysis")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         Option irGen = Option
-            .builder("ign")
-            .longOpt("irgen")
-            .desc("Generate intermediate code")
-            .hasArg(false)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-        
+                .builder("ign")
+                .longOpt("irgen")
+                .desc("Generate intermediate code")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         // For internal testing
         Option irRun = Option
-            .builder("irn")
-            .longOpt("irrun")
-            .desc("Generate and interpret intermediate code")
-            .hasArg(false)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-        
+                .builder("irn")
+                .longOpt("irrun")
+                .desc("Generate and interpret intermediate code")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         // For internal testing
         Option mirRun = Option
-            .builder("mrn")
-            .longOpt("mirrun")
-            .desc("Generate and interpret middle-level intermediate code ")
-            .hasArg(false)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("mrn")
+                .longOpt("mirrun")
+                .desc("Generate and interpret middle-level intermediate code ")
+                .hasArg(false)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         Option source = Option
-            .builder("sourcepath")
-            .desc("Specify where to find generated diagnostic files")
-            .hasArg(true)
-            .argName("path")
-            .numberOfArgs(1)
-            .required(false)
-            .build();
+                .builder("sourcepath")
+                .desc("Specify where to find generated diagnostic files")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
 
         Option libpath = Option
-            .builder("libpath")
-            .desc("Specify where to find library interface files.")
-            .hasArg(true)
-            .argName("path")
-            .numberOfArgs(1)
-            .required(false)
-            .build();
+                .builder("libpath")
+                .desc("Specify where to find library interface files.")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
 
         Option destination = Option
-            .builder("D")
-            .longOpt(null)
-            .desc("Specify where to place generated diagnostic files")
-            .hasArg(true)
-            .argName("path")
-            .numberOfArgs(1)
-            .required(false)
-            .build();
-        
+                .builder("D")
+                .longOpt(null)
+                .desc("Specify where to place generated diagnostic files")
+                .hasArg(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+
+        Option assemblyDestination = Option
+                .builder("d")
+                .longOpt(null)
+                .desc("Specify where to place generated assembly output files")
+                .hasArgs(true)
+                .argName("path")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+
         Option optimizations = Option
-            .builder("O")
-            .longOpt(null)
-            .desc("Disable optimizations")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-        
+                .builder("O")
+                .longOpt(null)
+                .desc("Disable optimizations")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
+        Option targetOS = Option
+                .builder("tos")
+                .longOpt("target")
+                .desc("Specify the operating system for which to generate code")
+                .hasArg(true)
+                .argName("OS")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+
         // For internal testing
         Option cFoldOpt = Option
-            .builder("cfolddisabled")
-            .longOpt(null)
-            .desc("Disable constant folding optimizations")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-        
+                .builder("cfolddisabled")
+                .longOpt(null)
+                .desc("Disable constant folding optimizations")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
         // For internal testing
         Option commutativeOpt = Option
-            .builder("commutativedisabled")
-            .longOpt(null)
-            .desc("Disable commutative optimizations")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("commutativedisabled")
+                .longOpt(null)
+                .desc("Disable commutative optimizations")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         Option version = Option
-            .builder("v")
-            .longOpt("version")
-            .desc("Version information")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("v")
+                .longOpt("version")
+                .desc("Version information")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         Option debugPrinting = Option
-            .builder("debug")
-            .desc("Print debugging information")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
+                .builder("debug")
+                .desc("Print debugging information")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
 
         return options.addOption(help)
-            .addOption(lex)
-            .addOption(parse)
-            .addOption(typecheck)
-            .addOption(irGen)
-            .addOption(irRun)
-            .addOption(mirRun)
-            .addOption(optimizations)
-            .addOption(cFoldOpt)
-            .addOption(commutativeOpt)
-            .addOption(source)
-            .addOption(libpath)
-            .addOption(destination)
-            .addOption(version)
-            .addOption(debugPrinting);
+                .addOption(lex)
+                .addOption(parse)
+                .addOption(typecheck)
+                .addOption(irGen)
+                .addOption(irRun)
+                .addOption(mirRun)
+                .addOption(optimizations)
+                .addOption(cFoldOpt)
+                .addOption(commutativeOpt)
+                .addOption(source)
+                .addOption(libpath)
+                .addOption(destination)
+                .addOption(assemblyDestination)
+                .addOption(targetOS)
+                .addOption(version)
+                .addOption(debugPrinting);
     }
 
     /**
@@ -232,8 +257,8 @@ public class CLI {
      */
     private static void printHelpMessage() {
         helpFormatter.printHelp(writer, consoleWidth, usage,
-            "where possible options include:", options, 0, leftPadding,
-            "\n");
+                "where possible options include:", options, 0, leftPadding,
+                "\n");
         writer.flush();
     }
 
@@ -242,7 +267,7 @@ public class CLI {
      */
     private static void printVersionMessage() {
         writer.append("xic 1.0")
-            .append(System.lineSeparator());
+                .append(System.lineSeparator());
         writer.flush();
     }
 
@@ -257,7 +282,7 @@ public class CLI {
      *                        of arguments.
      */
     static CommandLine parseCommand(String[] args)
-        throws ParseException {
+            throws ParseException {
         return parser.parse(options, args);
     }
 
@@ -342,7 +367,7 @@ public class CLI {
                 case "ign":
                     wantsIrGen = true;
                     break;
-                case "irn": 
+                case "irn":
                     wantsIrRun = true;
                     break;
                 case "mrn":
@@ -353,18 +378,24 @@ public class CLI {
                     destinationRoot = new File(directory);
                     break;
                 }
-                case "O": {
+                case "d": {
+                    String directory = cmd.getOptionValue("d");
+                    assemblyRoot = new File(directory);
+                    break;
+                }
+                case "O":
                     optimizationsEnabled = false;
                     break;
+                case "tos": {
+                    target= OperatingSystem.parse(cmd.getOptionValue("tos"));
+                    break;
                 }
-                case "cfolddisabled": {
+                case "cfolddisabled":
                     cFoldEnabled = false;
                     break;
-                }
-                case "commutativedisabled": {
+                case "commutativedisabled":
                     commutativeEnabled = false;
                     break;
-                }
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
@@ -460,18 +491,18 @@ public class CLI {
                 }
                 closeIOStreams(input, output);
             }
-            
+
             if (wantsMirRun) {
                 debugPrint("Generate and interpret middle-level intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "mir_run");
                     IRUtil.mirRun(
-                        input,
-                        output,
-                        filename,
-                        isIXI,
-                        opener
+                            input,
+                            output,
+                            filename,
+                            isIXI,
+                            opener
                     );
                 } catch (Exception e) {
                     debugPrint(e);
@@ -479,7 +510,7 @@ public class CLI {
                 }
                 closeIOStreams(input, output);
             }
-            
+
             if (wantsIrRun) {
                 debugPrint("Generate and interpret intermediate code for: " + filename);
                 try {
@@ -510,12 +541,12 @@ public class CLI {
     }
 
     private static Writer getWriter(String relativePath, String fileExtension)
-        throws IOException {
+            throws IOException {
         Path destPath = Paths.get(destinationRoot.getAbsolutePath(),
-            relativePath).getParent();
+                relativePath).getParent();
         File dest = new File(destPath.toFile(), String.format("%s." +
-                fileExtension,
-            getMainFilename(Path.of(relativePath))));
+                        fileExtension,
+                getMainFilename(Path.of(relativePath))));
         if (!dest.exists()) {
             // Create directories if they don't exist
             dest.getParentFile().mkdirs();
@@ -534,7 +565,7 @@ public class CLI {
                 input.close();
             } catch (IOException e) {
                 writer.write("Unexpected error occurred when closing "
-                    + "io stream.");
+                        + "io stream.");
             }
         }
     }
@@ -555,7 +586,6 @@ public class CLI {
         Path sourcePath = Paths.get(libRoot.getAbsolutePath(), filename);
         debugPrint("Opening reader to: " + sourcePath);
         return new BufferedReader(new FileReader(sourcePath.toFile()));
-
     }
 
 }
