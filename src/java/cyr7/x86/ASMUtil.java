@@ -36,7 +36,7 @@ public final class ASMUtil {
         try {
             List<ASMLine> lines = generateASM(reader, writer, filename, fileOpener);
             for (ASMLine line : lines) {
-                System.out.println(line);
+                System.out.println(line.getIntelAssembly());
             }
         } catch (Exception e) {
             e.printStackTrace();
