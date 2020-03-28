@@ -451,7 +451,6 @@ public class CLI {
                         input,
                         output,
                         filename,
-                        isIXI,
                         opener,
                         lowerConfiguration
                     );
@@ -490,7 +489,6 @@ public class CLI {
                         input,
                         output,
                         filename,
-                        isIXI,
                         opener,
                         lowerConfiguration
                     );

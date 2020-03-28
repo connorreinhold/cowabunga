@@ -15,6 +15,7 @@ import cyr7.typecheck.TypeCheckUtil;
 import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
+import javax.xml.crypto.dsig.spec.ExcC14NParameterSpec;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
@@ -41,14 +42,16 @@ public class IRUtil {
 
         CLI.debugPrint("Constant Folding Enabled: " + lowerConfiguration.cFoldEnabled);
 
-        compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
+        compUnit =
+            compUnit.accept(new LoweringVisitor(generator)).assertThird();
 
         if (lowerConfiguration.traceEnabled) {
             compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
         if (lowerConfiguration.cFoldEnabled) {
-            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            IRNode node =
+                compUnit.accept(new ConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -73,7 +76,8 @@ public class IRUtil {
 
         IRCompUnit compUnit;
         {
-            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
+            IRNode node =
+                result.accept(new ASTToIRVisitor(generator)).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -87,23 +91,10 @@ public class IRUtil {
         Reader reader,
         Writer writer,
         String filename,
-        boolean isIXI,
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
-        Node result = ParserUtil.parseNode(reader, filename, isIXI);
-        TypeCheckUtil.typeCheck(result, fileOpener);
-
-        IdGenerator generator = new DefaultIdGenerator();
-
-        IRCompUnit compUnit;
-        {
-            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
-        }
-
-        IRNode lowered = lower(compUnit, generator, lowerConfiguration);
+        IRCompUnit lowered = generateIR(reader, writer, filename, fileOpener, lowerConfiguration);
 
         SExpPrinter printer =
             new CodeWriterSExpPrinter(new PrintWriter(writer));
@@ -115,34 +106,75 @@ public class IRUtil {
         Reader reader,
         Writer writer,
         String filename,
-        boolean isIXI,
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
-        Node result = ParserUtil.parseNode(reader, filename, isIXI);
-        TypeCheckUtil.typeCheck(result, fileOpener);
-
-        IdGenerator generator = new DefaultIdGenerator();
-
-        IRCompUnit compUnit;
-        {
-            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
-        }
-
-        IRCompUnit lowered = lower(compUnit, generator, lowerConfiguration);
+        IRCompUnit lowered = generateIR(reader, writer, filename, fileOpener, lowerConfiguration);
 
         IRSimulator sim = new IRSimulator(lowered);
         long retVal = sim.call("_Imain_paai", 0);
         writer.append(String.valueOf(retVal)).append(System.lineSeparator());
     }
-    
+
     public static String sexpr(IRNode node) {
         StringWriter writer = new StringWriter();
-        SExpPrinter printer = new CodeWriterSExpPrinter(new PrintWriter(writer));
+        SExpPrinter printer =
+            new CodeWriterSExpPrinter(new PrintWriter(writer));
         node.printSExp(printer);
         printer.flush();
         return writer.toString();
     }
+
+    public static IRCompUnit generateIR(
+        Reader reader,
+        Writer writer,
+        String filename,
+        IxiFileOpener fileOpener,
+        LowerConfiguration lowerConfiguration) throws Exception {
+        return generateIR(
+            reader,
+            writer,
+            filename,
+            fileOpener,
+            lowerConfiguration,
+            new DefaultIdGenerator());
+    }
+
+    public static IRCompUnit generateIR(
+        Reader reader,
+        Writer writer,
+        String filename,
+        IxiFileOpener fileOpener,
+        IdGenerator generator) throws Exception {
+        return generateIR(
+            reader,
+            writer,
+            filename,
+            fileOpener,
+            new LowerConfiguration(true, true),
+            generator);
+    }
+
+    public static IRCompUnit generateIR(
+        Reader reader,
+        Writer writer,
+        String filename,
+        IxiFileOpener fileOpener,
+        LowerConfiguration lowerConfiguration,
+        IdGenerator generator) throws Exception {
+
+        Node result = ParserUtil.parseNode(reader, filename, false);
+        TypeCheckUtil.typeCheck(result, fileOpener);
+
+        IRCompUnit compUnit;
+        {
+            IRNode node =
+                result.accept(new ASTToIRVisitor(generator)).assertSecond();
+            assert node instanceof IRCompUnit;
+            compUnit = (IRCompUnit) node;
+        }
+
+        return lower(compUnit, generator, lowerConfiguration);
+    }
+
 }

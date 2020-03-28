@@ -11,6 +11,10 @@ public class ASMInstr implements ASMLine {
         this.args = args;
     }
 
+    public ASMInstr withArgsReplaced(List<ASMArg> newArgs) {
+        return new ASMInstr(type, newArgs);
+    }
+
     @Override
     public String toString() {
         return type.toString();

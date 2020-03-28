@@ -61,11 +61,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final ASMArg r8 = ASMReg.R8;
     private final ASMArg r9 = ASMReg.R9;
 
-    public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap) {
+    public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap, String returnLbl) {
         this.generator = generator;
         this.fMap = Collections.unmodifiableMap(fMap);
         this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes().size();
-        this.returnLbl = "end_" + tiledFunctionName;
+        this.returnLbl = returnLbl;
         this.arg = ASMArgFactory.instance;
         this.make = ASMLineFactory.instance;
     }
@@ -366,19 +366,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     @Override
     public TilerData visit(IRCompUnit n) {
         throw new UnsupportedOperationException("CompUnit is not translated by the BasicTiler.");
-        /*if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-        List<ASMLine> insns = new ArrayList<ASMLine>();
-        int tileCosts = 0;
-        for (Map.Entry<String, IRFuncDecl> functionDecl : n.functions().entrySet()) {
-            TilerData functionResult = functionDecl.getValue().accept(this);
-            insns.addAll(functionResult.optimalInstructions);
-            tileCosts += functionResult.tileCost;
-        }
-        TilerData result = new TilerData(tileCosts, insns, Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;*/
     }
 
     @Override
@@ -386,71 +373,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         throw new UnsupportedOperationException("Exp is not a valid node at this stage.");
     }
 
-    /**
-     * Counts the number of unique temporaries used in a list of instructions.
-     *
-     * @param instr
-     * @return
-     */
-    /*
-    private int numberOfUniqueTemps(List<ASMLine> instr) {
-        throw new UnsupportedOperationException();
-        Set<ASMTempArg> temps = new HashSet<>();
-        for (ASMLine line: instr) {
-            if (line instanceof ASMInstr
-                    && ((ASMInstr) line).type == ASMInstrType.MOVQ
-                    && ((ASMInstr) line).args.get(0) instanceof ASMTempArg) {
-                temps.add((ASMTempArg) ((ASMInstr) line).args.get(0));
-            }
-        }
-        return temps.size();
-    }
-
-    
-    private List<ASMLine> createPrologue(long numberOfTemps) {
-        return List.of(
-                make.Push(rbp),
-                make.Mov(rbp, rsp),
-                make.Sub(rsp, arg.constant(8L * numberOfTemps))
-                );
-    }
-
-    
-    private List<ASMLine> createEpilogue(long numberOfTemps) {
-        return List.of(
-                new ASMLabel(returnLbl),
-                make.Add(rsp, arg.constant(8L * numberOfTemps)),
-                make.Mov(rsp, rbp),
-                make.Pop(rbp),
-                make.Ret());
-    }
-    */
-
     @Override
     public TilerData visit(IRFuncDecl n) {
         throw new UnsupportedOperationException("FuncDecl is not translated by the BasicTiler.");
-        /*
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-        List<ASMLine> instructions = new ArrayList<>();
-        instructions.add(new ASMLabel(n.name()));
-
-        TilerData body = n.body().accept(this);
-        instructions.addAll(body.optimalInstructions);
-        int numberOfTemps = numberOfUniqueTemps(instructions);
-        List<ASMLine> prologue = createPrologue(numberOfTemps);
-        List<ASMLine> epilogue = createEpilogue(numberOfTemps);
-
-        // TODO: add prologue
-        instructions.addAll(0, prologue);
-        // TODO: add epilogue
-        instructions.addAll(epilogue);
-
-        TilerData result = new TilerData(body.tileCost, instructions,
-                Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;*/
     }
 
     @Override
