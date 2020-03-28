@@ -9,8 +9,13 @@ public class ASMLabel implements ASMLine {
     }
 
     @Override
+    public String getIntelAssembly() {
+        return label + ":";
+    }
+
+    @Override
     public String toString() {
-        return "label" + ":";
+        return "ASMLabel [label=" + label + "]";
     }
 
 }
