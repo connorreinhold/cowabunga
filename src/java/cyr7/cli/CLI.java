@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
+import cyr7.x86.ASMUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -42,17 +43,19 @@ public class CLI {
 
     private static boolean cFoldEnabled = true;
     private static boolean commutativeEnabled = true;
-    
+
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
     private static boolean wantsIrGen = false;
     private static boolean wantsMirRun = false;
     private static boolean wantsIrRun = false;
-    
+
     private static File sourceRoot = new File(".");
     private static File libRoot = new File(".");
     private static File destinationRoot = new File(".");
+
+    private static String target = "linux";
 
     /**
      * Creates an {@code Options} instance of the CLI parser. <\br> In this
@@ -101,7 +104,7 @@ public class CLI {
             .numberOfArgs(0)
             .required(false)
             .build();
-        
+
         Option irGen = Option
             .builder("ign")
             .longOpt("irgen")
@@ -110,7 +113,7 @@ public class CLI {
             .numberOfArgs(0)
             .required(false)
             .build();
-        
+
         // For internal testing
         Option irRun = Option
             .builder("irn")
@@ -120,7 +123,7 @@ public class CLI {
             .numberOfArgs(0)
             .required(false)
             .build();
-        
+
         // For internal testing
         Option mirRun = Option
             .builder("mrn")
@@ -158,7 +161,7 @@ public class CLI {
             .numberOfArgs(1)
             .required(false)
             .build();
-        
+
         Option optimizations = Option
             .builder("O")
             .longOpt(null)
@@ -168,7 +171,7 @@ public class CLI {
             .numberOfArgs(0)
             .required(false)
             .build();
-        
+
         // For internal testing
         Option cFoldOpt = Option
             .builder("cfolddisabled")
@@ -179,7 +182,7 @@ public class CLI {
             .numberOfArgs(0)
             .required(false)
             .build();
-        
+
         // For internal testing
         Option commutativeOpt = Option
             .builder("commutativedisabled")
@@ -210,6 +213,15 @@ public class CLI {
             .required(false)
             .build();
 
+        Option target = Option
+            .builder("target")
+            .desc("Specify the operating system for which to generate code.")
+            .hasArg(true)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+
         return options.addOption(help)
             .addOption(lex)
             .addOption(parse)
@@ -224,7 +236,8 @@ public class CLI {
             .addOption(libpath)
             .addOption(destination)
             .addOption(version)
-            .addOption(debugPrinting);
+            .addOption(debugPrinting)
+            .addOption(target);
     }
 
     /**
@@ -342,7 +355,7 @@ public class CLI {
                 case "ign":
                     wantsIrGen = true;
                     break;
-                case "irn": 
+                case "irn":
                     wantsIrRun = true;
                     break;
                 case "mrn":
@@ -380,6 +393,9 @@ public class CLI {
                     break;
                 case "debug":
                     debugPrintingEnabled = true;
+                    break;
+                case "target":
+                    target = cmd.getOptionValue("target");
                     break;
                 default:
                     writer.write("No case for given for option: " + opt);
@@ -421,14 +437,16 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            IxiFileOpener opener = ixiFilename -> getLibraryReader(ixiFilename + ".ixi");
+            IxiFileOpener opener =
+                ixiFilename -> getLibraryReader(ixiFilename + ".ixi");
 
             if (wantsTypechecking) {
                 debugPrint("Typechecking file: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output, filename, isIXI, opener);
+                    TypeCheckUtil.typeCheck(input, output, filename, isIXI,
+                        opener);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
                 }
@@ -460,9 +478,10 @@ public class CLI {
                 }
                 closeIOStreams(input, output);
             }
-            
+
             if (wantsMirRun) {
-                debugPrint("Generate and interpret middle-level intermediate code for: " + filename);
+                debugPrint("Generate and interpret middle-level intermediate " +
+                    "code for: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(filename, "mir_run");
@@ -479,7 +498,7 @@ public class CLI {
                 }
                 closeIOStreams(input, output);
             }
-            
+
             if (wantsIrRun) {
                 debugPrint("Generate and interpret intermediate code for: " + filename);
                 try {
@@ -492,6 +511,21 @@ public class CLI {
                         opener,
                         lowerConfiguration
                     );
+                } catch (Exception e) {
+                    debugPrint(e);
+                    writer.write(e.getMessage());
+                }
+                closeIOStreams(input, output);
+            }
+
+            // By default we always generate assembly
+            {
+                debugPrint("Generate and interpret assembly code for: " + filename);
+                try {
+                    input = getReader(filename);
+                    output = getWriter(filename, "ir_run");
+                    System.out.println();
+                    ASMUtil.printDebugASM(input, output, filename, opener);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
