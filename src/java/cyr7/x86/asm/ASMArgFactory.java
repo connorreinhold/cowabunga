@@ -12,6 +12,10 @@ public class ASMArgFactory {
     private ASMArgFactory() {
     }
 
+    public ASMTempArg temp(String t) {
+        return new ASMTempArg(t);
+    }
+
     public ASMConstArg constant(long n) {
         return new ASMConstArg(n);
     }
@@ -20,8 +24,7 @@ public class ASMArgFactory {
         return new ASMLabelArg(name);
     }
 
-    public ASMAddrExpr addr(Optional<ASMReg> base, ScaleValues scale,
-                            Optional<ASMReg> index, int displacement) {
+    public ASMAddrExpr addr(Optional<ASMReg> base, ScaleValues scale, Optional<ASMReg> index, int displacement) {
         return new ASMAddrExpr(base, scale, index, displacement);
     }
 

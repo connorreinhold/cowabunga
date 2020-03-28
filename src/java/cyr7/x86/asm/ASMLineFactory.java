@@ -69,6 +69,10 @@ public class ASMLineFactory {
         return new ASMInstr(ASMInstrType.MOVQ, List.of(dest, source));
     }
 
+    public ASMInstr MovAbs(ASMArg dest, ASMArg source) {
+        return new ASMInstr(ASMInstrType.MOVABSQ, List.of(dest, source));
+    }
+
     public ASMInstr Call(ASMArg label) {
         return new ASMInstr(ASMInstrType.CALLQ, List.of(label));
     }

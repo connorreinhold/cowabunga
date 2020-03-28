@@ -6,4 +6,14 @@ public class ASMConstArg implements ASMArg {
     public ASMConstArg(long constant) {
         this.constant = constant;
     }
+
+    @Override
+    public String getIntelArg() {
+        return String.valueOf(constant);
+    }
+
+    @Override
+    public String toString() {
+        return "ASMConstArg [constant=" + constant + "]";
+    }
 }

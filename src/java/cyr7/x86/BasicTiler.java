@@ -200,7 +200,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = new ASMTempArg(generator.newTemp());
-        List<ASMLine> insns = List.of(make.Mov(ret, new ASMConstArg(n.constant())));
+        List<ASMLine> insns = List.of(make.MovAbs(ret, new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;
