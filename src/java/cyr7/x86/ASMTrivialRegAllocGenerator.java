@@ -26,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
@@ -138,43 +139,56 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
             temporaryToIndexMap.put(tempArg.name, i);
         }
 
-        return lines.stream().map(asmLine -> {
+        return lines.stream().flatMap(asmLine -> {
             if (asmLine instanceof ASMInstr) {
                 return replaceInstrTempArgsWithMemoryAccess(
                     (ASMInstr) asmLine,
-                    temporaryToIndexMap);
+                    temporaryToIndexMap).stream();
             } else {
-                return asmLine;
+                return Stream.of(asmLine);
             }
         }).collect(Collectors.toUnmodifiableList());
     }
 
-    private ASMInstr replaceInstrTempArgsWithMemoryAccess(
+    private List<ASMLine> replaceInstrTempArgsWithMemoryAccess(
         ASMInstr instr,
         Map<String, Integer> temporaryToIndexMap) {
 
-        return instr.withArgsReplaced(instr.args.stream().map(arg -> {
-            return replaceTemporaryWithMemoryAccess(arg, temporaryToIndexMap);
-        }).collect(Collectors.toUnmodifiableList()));
-    }
+        ASMReg[] availableRegisters = {
+            ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14, ASMReg.R15
+        };
+        int indexOfNextAvailableRegister = 0;
 
-    private ASMArg replaceTemporaryWithMemoryAccess(
-        ASMArg arg,
-        Map<String, Integer> temporaryToIndexMap) {
+        List<ASMLine> prelude = new ArrayList<>();
+        List<ASMLine> postlude = new ArrayList<>();
+        List<ASMArg> argsWithTempsReplacedForRegisters = new ArrayList<>();
 
-        if (arg instanceof ASMTempArg) {
-            Optional<ASMAddrExpr> addrExprOpt
-                = addressOfTemporary((ASMTempArg) arg, temporaryToIndexMap);
+        for (ASMArg arg : instr.args) {
+            if (arg instanceof ASMTempArg) {
+                ASMTempArg tempArg = (ASMTempArg) arg;
+                ASMReg reg = availableRegisters[indexOfNextAvailableRegister];
 
-            if (addrExprOpt.isEmpty()) {
-                // guess we'll die
-                throw new RuntimeException();
+                prelude.add(make.Mov(
+                    reg,
+                    new ASMMemArg(addressOfTemporary(tempArg, temporaryToIndexMap).get())));
+
+                postlude.add(make.Mov(
+                    new ASMMemArg(addressOfTemporary(tempArg, temporaryToIndexMap).get()),
+                    reg));
+
+                argsWithTempsReplacedForRegisters.add(reg);
+
+                indexOfNextAvailableRegister++;
+            } else {
+                argsWithTempsReplacedForRegisters.add(arg) ;
             }
-
-            return new ASMMemArg(addrExprOpt.get());
-        } else {
-            return arg;
         }
+
+        List<ASMLine> lines = new ArrayList<>();
+        lines.addAll(prelude);
+        lines.add(instr.withArgsReplaced(argsWithTempsReplacedForRegisters));
+        lines.addAll(postlude);
+        return lines;
     }
 
     private Optional<ASMAddrExpr> addressOfTemporary(

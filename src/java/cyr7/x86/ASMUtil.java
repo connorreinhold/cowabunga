@@ -15,13 +15,12 @@ public final class ASMUtil {
 
     public static List<ASMLine> generateASM(
         Reader reader,
-        Writer writer,
         String filename,
         IxiFileOpener fileOpener
     ) throws Exception {
         IdGenerator idGenerator = new DefaultIdGenerator();
         IRCompUnit compUnit
-            = IRUtil.generateIR(reader, writer, filename, fileOpener, idGenerator);
+            = IRUtil.generateIR(reader, filename, fileOpener, idGenerator);
         ASMGenerator asmGenerator
             = new ASMTrivialRegAllocGenerator(TilerFactory.basicTilerFactory(), idGenerator);
         return asmGenerator.generate(compUnit);
@@ -34,7 +33,7 @@ public final class ASMUtil {
             IxiFileOpener fileOpener
     ) {
         try{
-            List<ASMLine> lines = generateASM(reader, writer, filename, fileOpener);
+            List<ASMLine> lines = generateASM(reader, filename, fileOpener);
             for (ASMLine line: lines) {
                 writer.append(line.getIntelAssembly()).append(System.lineSeparator());
             }
@@ -45,12 +44,11 @@ public final class ASMUtil {
 
     public static void printDebugASM(
         Reader reader,
-        Writer writer,
         String filename,
         IxiFileOpener fileOpener
     ) {
         try {
-            List<ASMLine> lines = generateASM(reader, writer, filename, fileOpener);
+            List<ASMLine> lines = generateASM(reader, filename, fileOpener);
             for (ASMLine line : lines) {
                 System.out.println(line.getIntelAssembly());
             }

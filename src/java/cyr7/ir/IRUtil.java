@@ -94,7 +94,7 @@ public class IRUtil {
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
-        IRCompUnit lowered = generateIR(reader, writer, filename, fileOpener, lowerConfiguration);
+        IRCompUnit lowered = generateIR(reader, filename, fileOpener, lowerConfiguration);
 
         SExpPrinter printer =
             new CodeWriterSExpPrinter(new PrintWriter(writer));
@@ -109,7 +109,7 @@ public class IRUtil {
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
-        IRCompUnit lowered = generateIR(reader, writer, filename, fileOpener, lowerConfiguration);
+        IRCompUnit lowered = generateIR(reader, filename, fileOpener, lowerConfiguration);
 
         IRSimulator sim = new IRSimulator(lowered);
         long retVal = sim.call("_Imain_paai", 0);
@@ -127,13 +127,11 @@ public class IRUtil {
 
     public static IRCompUnit generateIR(
         Reader reader,
-        Writer writer,
         String filename,
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
         return generateIR(
             reader,
-            writer,
             filename,
             fileOpener,
             lowerConfiguration,
@@ -142,13 +140,11 @@ public class IRUtil {
 
     public static IRCompUnit generateIR(
         Reader reader,
-        Writer writer,
         String filename,
         IxiFileOpener fileOpener,
         IdGenerator generator) throws Exception {
         return generateIR(
             reader,
-            writer,
             filename,
             fileOpener,
             new LowerConfiguration(true, true),
@@ -157,7 +153,6 @@ public class IRUtil {
 
     public static IRCompUnit generateIR(
         Reader reader,
-        Writer writer,
         String filename,
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration,
