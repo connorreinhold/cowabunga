@@ -548,9 +548,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
-                    ASMUtil.generateASM(input, output, filename, opener);
-                    System.out.println();
-                    ASMUtil.printDebugASM(input, output, filename, opener);
+                    ASMUtil.writeASM(input, output, filename, opener);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
