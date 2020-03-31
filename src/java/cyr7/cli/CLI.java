@@ -429,6 +429,14 @@ public class CLI {
 
             Reader input = null;
             Writer output = null;
+
+            if (target == OperatingSystem.UNSUPPORTED) {
+                writer.write("Target operating system specified is unsupported.");
+                writer.flush();
+                writer.close();
+                return;
+            }
+
             if (wantsLexing) {
                 debugPrint("Lexing file: " + filename);
                 try {
