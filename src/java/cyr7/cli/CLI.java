@@ -234,15 +234,6 @@ public class CLI {
                 .required(false)
                 .build();
 
-        Option target = Option
-            .builder("target")
-            .desc("Specify the operating system for which to generate code.")
-            .hasArg(true)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
@@ -421,9 +412,6 @@ public class CLI {
                     break;
                 case "debug":
                     debugPrintingEnabled = true;
-                    break;
-                case "target":
-                    target = OperatingSystem.parse(cmd.getOptionValue("target"));
                     break;
                 default:
                     writer.write("No case for given for option: " + opt);
