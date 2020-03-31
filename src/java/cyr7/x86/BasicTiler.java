@@ -49,7 +49,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final int numRetValues;
     private final String returnLbl;
     private final ASMArgFactory arg;
-    private final ASMLineFactory make;
 
     private final ASMArg rbp = ASMReg.RBP;
     private final ASMArg rax = ASMReg.RAX;
@@ -67,11 +66,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes().size();
         this.returnLbl = returnLbl;
         this.arg = ASMArgFactory.instance;
-        this.make = ASMLineFactory.instance;
     }
 
     @Override
     public TilerData visit(IRBinOp n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -196,6 +195,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRConst n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -213,6 +213,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRMem n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -235,6 +236,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRName n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -257,6 +259,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRCallStmt n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -346,6 +349,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRCJump n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -380,6 +384,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRJump n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -400,6 +405,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRLabel n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -413,6 +419,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRMove n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -533,6 +540,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRReturn n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -545,6 +553,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRSeq n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }

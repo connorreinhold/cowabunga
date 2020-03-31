@@ -120,7 +120,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
             new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),
             make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RBP, arg.constant(8L * numberOfTemps)));
+            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
     }
 
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
@@ -206,7 +206,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                 Optional.of(ASMReg.RBP),
                 ScaleValues.ONE,
                 Optional.empty(),
-                8 * (index + 1)));
+                -8 * (index + 1)));
     }
 
 }
