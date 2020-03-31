@@ -14,7 +14,7 @@ public class ParserException extends RuntimeException {
     public final String filename;
 
     ParserException(String msg, Location loc) {
-        super(String.format("%d:%d error:%s", loc.getLine(),
+        super(String.format("%d:%d error:%s\n", loc.getLine(),
             loc.getColumn(), msg));
         this.line = loc.getLine();
         this.column = loc.getColumn();

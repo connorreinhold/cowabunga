@@ -431,7 +431,7 @@ public class CLI {
             Writer output = null;
 
             if (target == OperatingSystem.UNSUPPORTED) {
-                writer.write("Target operating system specified is unsupported.");
+                writer.write("Target operating system specified is unsupported.\n");
                 writer.flush();
                 writer.close();
                 return;
@@ -593,7 +593,7 @@ public class CLI {
                 input.close();
             } catch (IOException e) {
                 writer.write("Unexpected error occurred when closing "
-                        + "io stream.");
+                        + "io stream.\n");
             }
         }
     }
