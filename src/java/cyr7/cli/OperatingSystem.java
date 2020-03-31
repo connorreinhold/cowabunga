@@ -5,7 +5,7 @@ public enum OperatingSystem {
 
     public static OperatingSystem parse(String s) {
         try {
-            return OperatingSystem.valueOf(s);
+            return OperatingSystem.valueOf(s.toUpperCase());
         } catch (IllegalArgumentException e) {
             return UNSUPPORTED;
         }
