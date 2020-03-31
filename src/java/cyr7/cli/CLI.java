@@ -234,15 +234,6 @@ public class CLI {
                 .required(false)
                 .build();
 
-        Option target = Option
-            .builder("target")
-            .desc("Specify the operating system for which to generate code.")
-            .hasArg(true)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
