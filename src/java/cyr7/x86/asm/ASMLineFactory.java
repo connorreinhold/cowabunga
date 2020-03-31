@@ -27,8 +27,8 @@ public class ASMLineFactory {
         return new ASMInstr(ASMInstrType.SUBQ, List.of(dest, source), node);
     }
 
-    public ASMInstr Mul(ASMArg target, ASMArg left, ASMArg right) {
-        return new ASMInstr(ASMInstrType.IMULQ, List.of(target, left, right), node);
+    public ASMInstr Mul(ASMArg target, ASMArg source) {
+        return new ASMInstr(ASMInstrType.IMULQ, List.of(target, source), node);
     }
 
     public ASMInstr Div(ASMArg target) {

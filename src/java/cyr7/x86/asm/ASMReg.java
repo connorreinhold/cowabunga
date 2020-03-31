@@ -12,7 +12,9 @@ public enum ASMReg implements ASMArg {
     RDI, // Destination Register
 
     // Newer Registers
-    R8, R9, R10, R11, R12, R13, R14, R15;
+    R8, R9, R10, R11, R12, R13, R14, R15,
+
+    AL, CL, DL, BL; // 8 bit registers
 
     @Override
     public String getIntelArg() {

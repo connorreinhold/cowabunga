@@ -125,10 +125,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Xor(ret, arg.constant(1)));
                 break;
             case HMUL:
-                insns.add(make.Push(rax));
-                insns.add(make.Mul(ret, left.result.get(), right.result.get()));
-                insns.add(make.Mov(ret, rax));
-                insns.add(make.Pop(rax));
+                insns.add(make.Push(rdx));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mul(ret, right.result.get()));
+                insns.add(make.Mov(ret, rdx));
+                insns.add(make.Pop(rdx));
                 break;
             case LEQ:
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
@@ -157,7 +158,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Pop(rax));
                 break;
             case MUL:
-                insns.add(make.Mul(ret, left.result.get(), right.result.get()));
+                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mul(ret, right.result.get()));
                 break;
             case NEQ:
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
