@@ -179,16 +179,14 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                     ASMReg qwordReg = reg.correspondingQWordReg();
 
                     prelude.add(make.Push(qwordReg));
-                    // clear the upper 7 bytes of the "surrounding" register.
-                    prelude.add(make.Xor(qwordReg, qwordReg)); 
-                    prelude.add(make.Mov(reg,
+                    prelude.add(make.Mov(qwordReg,
                             new ASMMemArg(addressOfTemporary(tempArg,
                                     temporaryToIndexMap).get())));
 
                     postlude.add(0, make.Pop(qwordReg));
                     postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
                             tempArg,
-                            temporaryToIndexMap).get()), reg));
+                            temporaryToIndexMap).get()), qwordReg));
 
                     argsWithTempsReplacedForRegisters.add(reg);
 

@@ -27,7 +27,7 @@ public enum ASMReg implements ASMArg {
     }
 
     public ASMReg correspondingQWordReg() {
-        switch this {
+        switch (this) {
         case AL: return RAX;
         case CL: return RCX;
         case DL: return RDX;

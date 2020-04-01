@@ -11,7 +11,7 @@ public enum ASMInstrType {
     SHLQ, SHRQ, SARQ,
 
     // Data Transfer
-    MOVQ, PUSHQ, POPQ, MOVABSQ,
+    MOV, PUSHQ, POPQ, MOVABSQ, MOVZX,
 
     // Control Flow
     CMPQ, CALLQ, RETQ,

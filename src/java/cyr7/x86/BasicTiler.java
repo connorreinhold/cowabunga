@@ -87,25 +87,21 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         insns.addAll(left.optimalInstructions);
         insns.addAll(right.optimalInstructions);
 
-        ASMArg ret;
+        ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
         switch (n.opType()) {
         case ADD:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.Add(ret, right.result.get()));
             break;
         case AND:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.And(ret, right.result.get()));
             break;
         case ARSHIFT:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.ARShift(ret, right.result.get()));
             break;
         case DIV:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Push(rax));
             insns.add(make.Push(rdx));
             insns.add(make.Mov(rax, left.result.get()));
@@ -115,49 +111,53 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insns.add(make.Pop(rdx));
             insns.add(make.Pop(rax));
             break;
-        case EQ:
-            ret = arg.temp(generator.newTemp(), Size.BYTE);
+        case EQ: {
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
-            insns.add(make.SetZ(ret));
+            insns.add(make.SetZ(byteReg));
+            insns.add(make.MovZX(ret, byteReg));
             break;
+        }
         case GEQ: {
-            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
-            insns.add(make.SetGE(ret));
+            insns.add(make.SetGE(byteReg));
+            insns.add(make.MovZX(ret, byteReg));
         }
             break;
-        case GT:
-            ret = arg.temp(generator.newTemp(), Size.BYTE);
+        case GT: {
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
-            insns.add(make.SetLE(ret));
-            insns.add(make.Xor(ret, arg.constant(1)));
+            insns.add(make.SetG(byteReg));
+            insns.add(make.MovZX(ret, byteReg));
             break;
+        }
         case HMUL:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Push(rdx));
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.Mul(ret, right.result.get()));
             insns.add(make.Mov(ret, rdx));
             insns.add(make.Pop(rdx));
             break;
-        case LEQ:
-            ret = arg.temp(generator.newTemp(), Size.BYTE);
+        case LEQ: {
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
-            insns.add(make.SetLE(ret));
+            insns.add(make.SetLE(byteReg));
+            insns.add(make.MovZX(ret, byteReg));
             break;
+        }
         case LSHIFT:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.LShift(ret, right.result.get()));
             break;
         case LT: {
-            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
-            insns.add(make.SetL(ret));
+            insns.add(make.SetL(byteReg));
+            insns.add(make.MovZX(ret, byteReg));
             break;
         }
         case MOD:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Push(rax));
             insns.add(make.Push(rdx));
             insns.add(make.Mov(rax, left.result.get()));
@@ -168,32 +168,29 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insns.add(make.Pop(rax));
             break;
         case MUL:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.Mul(ret, right.result.get()));
             break;
-        case NEQ:
-            ret = arg.temp(generator.newTemp(), Size.BYTE);
+        case NEQ: {
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
-            insns.add(make.SetNE(ret));
+            insns.add(make.SetNE(byteReg));
+            insns.add(make.MovZX(ret, byteReg));
             break;
+        }
         case OR:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.Or(ret, right.result.get()));
             break;
         case RSHIFT:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.RShift(ret, right.result.get()));
             break;
         case SUB:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.Sub(ret, right.result.get()));
             break;
         case XOR:
-            ret = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(ret, left.result.get()));
             insns.add(make.Xor(ret, right.result.get()));
             break;
