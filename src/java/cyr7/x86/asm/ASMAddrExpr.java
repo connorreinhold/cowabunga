@@ -43,7 +43,7 @@ public class ASMAddrExpr {
         this.displacement = displacement;
     }
 
-    public ASMAddrExpr(ASMArg base) {
+    public ASMAddrExpr(ASMTempArg base) {
         this(Optional.of(base), ScaleValues.ONE, Optional.empty(), 0);
     }
 

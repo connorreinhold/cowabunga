@@ -7,6 +7,7 @@ import cyr7.semantics.types.FunctionType;
 import cyr7.visitor.MyIRVisitor;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
+import cyr7.x86.visitor.TempVisitor;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMInstr;
@@ -97,18 +98,8 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
      */
     private List<ASMTempArg> uniqueTemps(List<ASMLine> lines) {
         Set<ASMTempArg> temps = new HashSet<>();
-
-        for (ASMLine line : lines) {
-            if (line instanceof ASMInstr) {
-                ASMInstr instr = (ASMInstr) line;
-                for (ASMArg arg : instr.args) {
-                    if (arg instanceof ASMTempArg) {
-                        temps.add((ASMTempArg) arg);
-                    }
-                }
-            }
-        }
-
+        var tempVisitor = new TempVisitor();
+        lines.forEach(l -> temps.addAll(l.accept(tempVisitor)));
         return new ArrayList<>(temps);
     }
 
@@ -130,6 +121,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
     private List<ASMLine> replaceTemporariesWithMemoryAccess(
             List<ASMLine> lines, List<ASMTempArg> tempArgs) {
+
         Map<String, Integer> temporaryToIndexMap = new HashMap<>();
         for (int i = 0; i < tempArgs.size(); i++) {
             ASMTempArg tempArg = tempArgs.get(i);
@@ -168,7 +160,58 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         List<ASMArg> argsWithTempsReplacedForRegisters = new ArrayList<>();
 
         for (ASMArg arg : instr.args) {
-            if (arg instanceof ASMTempArg) {
+            if (arg instanceof ASMMemArg) {
+                ASMMemArg memArg = (ASMMemArg) arg;
+
+                Optional<ASMArg> base = Optional.empty();
+                Optional<ASMArg> index = Optional.empty();
+
+                if (memArg.address.base.isPresent()) {
+                    ASMArg b = (ASMArg) memArg.address.base.get();
+                    if (b instanceof ASMMemArg) {
+                        throw new RuntimeException("Bad argument");
+                    } else if (b instanceof ASMReg) {
+                        base = Optional.of(b);
+                    } else if (b instanceof ASMTempArg) {
+                        ASMTempArg tempArg = (ASMTempArg) b;
+                        ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
+
+                        prelude.add(make.Mov(reg,
+                                new ASMMemArg(addressOfTemporary(tempArg,
+                                        temporaryToIndexMap).get())));
+                        postlude.add(0,
+                                make.Mov(new ASMMemArg(addressOfTemporary(
+                                        tempArg,
+                                        temporaryToIndexMap).get()), reg));
+                        base = Optional.of(reg);
+                        indexOfNextAvailableQwordRegister++;
+                    }
+                }
+                if (memArg.address.index.isPresent()) {
+                    ASMArg i = (ASMArg) memArg.address.index.get();
+                    if (i instanceof ASMMemArg) {
+                        throw new RuntimeException("Bad argument");
+                    } else if (i instanceof ASMReg) {
+                        index = Optional.of(i);
+                    } else if (i instanceof ASMTempArg) {
+                        ASMTempArg tempArg = (ASMTempArg) i;
+                        ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
+
+                        prelude.add(make.Mov(reg,
+                                new ASMMemArg(addressOfTemporary(tempArg,
+                                        temporaryToIndexMap).get())));
+                        postlude.add(0,
+                                make.Mov(new ASMMemArg(addressOfTemporary(
+                                        tempArg,
+                                        temporaryToIndexMap).get()), reg));
+                        index = Optional.of(reg);
+                        indexOfNextAvailableQwordRegister++;
+                    }
+                }
+                argsWithTempsReplacedForRegisters.add(new ASMMemArg(
+                        new ASMAddrExpr(base, memArg.address.scale, index,
+                                memArg.address.displacement)));
+            } else if (arg instanceof ASMTempArg) {
                 ASMTempArg tempArg = (ASMTempArg) arg;
 
                 switch (tempArg.size) {

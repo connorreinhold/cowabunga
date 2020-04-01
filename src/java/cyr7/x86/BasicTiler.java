@@ -237,14 +237,19 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         TilerData expr = n.expr()
                           .accept(this);
+
         List<ASMLine> insns = new ArrayList<ASMLine>();
         insns.addAll(expr.optimalInstructions);
 
-        ASMArg ret = new ASMMemArg(expr.result.get());
-        TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(
-                ret));
-        n.setOptimalTilingOnce(result);
-        return result;
+        if (!(expr.result.get() instanceof ASMTempArg)) {
+            throw new RuntimeException("Something bad happened...");
+        } else {
+            ASMArg ret = new ASMMemArg((ASMTempArg) expr.result.get());
+            TilerData result = new TilerData(1 + expr.tileCost, insns, Optional
+                                                                               .of(ret));
+            n.setOptimalTilingOnce(result);
+            return result;
+        }
     }
 
     @Override
@@ -503,7 +508,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     break;
                 default:
                     int offset = 8 * (i - 6);
-                    var addr = arg.addr(Optional.of(ASMReg.RBP),
+                    var addr = arg.addr(Optional.of(rbp),
                             ScaleValues.ONE,
                             Optional.empty(),
                             offset);
