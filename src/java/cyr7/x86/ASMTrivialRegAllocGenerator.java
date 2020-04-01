@@ -18,7 +18,6 @@ import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -184,9 +183,9 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                                     temporaryToIndexMap).get())));
 
                     postlude.add(0, make.Pop(qwordReg));
-                    postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
-                            tempArg,
-                            temporaryToIndexMap).get()), qwordReg));
+                    postlude.add(0,
+                            make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
+                                    temporaryToIndexMap).get()), qwordReg));
 
                     argsWithTempsReplacedForRegisters.add(reg);
 
@@ -201,9 +200,9 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                             new ASMMemArg(addressOfTemporary(tempArg,
                                     temporaryToIndexMap).get())));
 
-                    postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
-                            tempArg,
-                            temporaryToIndexMap).get()), reg));
+                    postlude.add(0,
+                            make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
+                                    temporaryToIndexMap).get()), reg));
 
                     argsWithTempsReplacedForRegisters.add(reg);
 

@@ -232,7 +232,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRMem n) {
-        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -241,15 +240,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> insns = new ArrayList<ASMLine>();
         insns.addAll(expr.optimalInstructions);
 
-        ASMArg ret = new ASMTempArg(generator.newTemp(), Size.QWORD);
-
-        insns.add(make.Push(rax));
-        insns.add(make.Mov(rax, expr.result.get()));
-        ASMAddrExpr address = new ASMAddrExpr(Optional.of(ASMReg.RAX),
-                ScaleValues.ONE, Optional.empty(), 0);
-        insns.add(make.Mov(ret, new ASMMemArg(address)));
-        insns.add(make.Pop(rax));
-
+        ASMArg ret = new ASMMemArg(expr.result.get());
         TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(
                 ret));
         n.setOptimalTilingOnce(result);
@@ -258,7 +249,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRName n) {
-        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -290,8 +280,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> insn = new ArrayList<>();
         TilerData targetTile = n.target()
                                 .accept(this);
-        List<TilerData> argTiles = n.args().stream()
-            .map(a -> a.accept(this)).collect(Collectors.toList());
+        List<TilerData> argTiles = n.args()
+                                    .stream()
+                                    .map(a -> a.accept(this))
+                                    .collect(Collectors.toList());
 
         int lastRegisterArg;
         int tileCost = 0;
@@ -367,10 +359,13 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         insn.addAll(targetTile.optimalInstructions);
         insn.add(make.Call(targetTile.result.get()));
 
-        if (n.collectors().size() == 1) {
-            String resultTemp = n.collectors().get(0);
+        if (n.collectors()
+             .size() == 1) {
+            String resultTemp = n.collectors()
+                                 .get(0);
             insn.add(make.Mov(arg.temp(resultTemp, Size.QWORD), ASMReg.RAX));
-        } else if (n.collectors().size() > 1) {
+        } else if (n.collectors()
+                    .size() > 1) {
             // TODO: FIX ME AHAAAAAHAHAHAHA
             throw new RuntimeException("bleh");
         }

@@ -28,17 +28,21 @@ public class ASMAddrExpr {
         }
     }
 
-    public final Optional<ASMReg> base;
+    public final Optional<ASMArg> base;
     public final ScaleValues scale;
-    public final Optional<ASMReg> index;
+    public final Optional<ASMArg> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<ASMReg> base, ScaleValues scale,
-            Optional<ASMReg> index, int displacement) {
+    public ASMAddrExpr(Optional<ASMArg> base, ScaleValues scale,
+            Optional<ASMArg> index, int displacement) {
         this.base = base;
         this.scale = scale;
         this.index = index;
         this.displacement = displacement;
+    }
+
+    public ASMAddrExpr(ASMArg base) {
+        this(Optional.of(base), ScaleValues.ONE, Optional.empty(), 0);
     }
 
     public String getIntelExpr() {
