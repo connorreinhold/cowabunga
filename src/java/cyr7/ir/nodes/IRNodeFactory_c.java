@@ -108,10 +108,10 @@ public class IRNodeFactory_c implements IRNodeFactory {
         return new IRCallStmt(location, collectors, target, args, 10);
     }
 
-//    @Override
-//    public IRCallStmt IRCallStmt(IRExpr target) {
-//        return new IRCallStmt(location, List.of(), target, List.of());
-//    }
+    @Override
+    public IRCallStmt IRCallStmt(IRExpr target) {
+        return new IRCallStmt(location, List.of(), target, List.of(), 10);
+    }
 
     @Override
     public IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,

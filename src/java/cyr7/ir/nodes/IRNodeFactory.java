@@ -101,7 +101,7 @@ public interface IRNodeFactory {
     IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
             List<IRExpr> args);
 
-//    IRCallStmt IRCallStmt(IRExpr target);
+    IRCallStmt IRCallStmt(IRExpr target);
 
     IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
             List<IRExpr> args, int numOfRV);
