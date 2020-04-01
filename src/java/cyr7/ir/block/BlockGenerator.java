@@ -112,6 +112,7 @@ public final class BlockGenerator {
                     "IRReturn inserted by BlockGenerator", -1, -1
             ));
             currentBlockStmts.add(make.IRReturn());
+            blocks.add(new BasicBlock(currentBlockStmts));
         }
 
         return blocks;
