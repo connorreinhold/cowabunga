@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import cyr7.x86.visitor.AbstractASMVisitor;
+
 public class ASMAddrExpr {
     // General Memory Access: [base + scale * index + displacement]
 
@@ -60,4 +62,9 @@ public class ASMAddrExpr {
         return "ASMAddrExpr [base=" + base + ", displacement=" + displacement
                 + ", index=" + index + ", scale=" + scale + "]";
     }
+
+    public <R> R accept(AbstractASMVisitor<R> visitor) {
+        return visitor.visit(this);
+    }
+
 }

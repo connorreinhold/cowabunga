@@ -101,7 +101,6 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         for (ASMLine line : lines) {
             if (line instanceof ASMInstr) {
                 ASMInstr instr = (ASMInstr) line;
-
                 for (ASMArg arg : instr.args) {
                     if (arg instanceof ASMTempArg) {
                         temps.add((ASMTempArg) arg);

@@ -1,5 +1,7 @@
 package cyr7.x86.asm;
 
+import cyr7.x86.visitor.AbstractASMVisitor;
+
 public class ASMLabelArg implements ASMArg {
     public final String label;
 
@@ -15,5 +17,10 @@ public class ASMLabelArg implements ASMArg {
     @Override
     public String toString() {
         return "ASMLabelArg [label=" + label + "]";
+    }
+
+    @Override
+    public <R> R accept(AbstractASMVisitor<R> visitor) {
+        return visitor.visit(this);
     }
 }

@@ -1,6 +1,7 @@
 package cyr7.x86.asm;
 
 import cyr7.ir.nodes.IRNode;
+import cyr7.x86.visitor.AbstractASMVisitor;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,4 +34,10 @@ public class ASMInstr implements ASMLine {
     public String toString() {
         return "ASMInstr [args=" + args + ", type=" + type + "]";
     }
+
+    @Override
+    public <R> R accept(AbstractASMVisitor<R> visitor) {
+        return visitor.visit(this);
+    }
+
 }
