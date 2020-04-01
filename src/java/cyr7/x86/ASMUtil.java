@@ -46,13 +46,26 @@ public final class ASMUtil {
         }
     }
 
+    public static List<ASMLine> generateAbstractASM(
+        Reader reader,
+        String filename,
+        IxiFileOpener fileOpener
+    ) throws Exception {
+        IdGenerator idGenerator = new DefaultIdGenerator();
+        IRCompUnit compUnit
+            = IRUtil.generateIR(reader, filename, fileOpener, idGenerator);
+        ASMGenerator asmGenerator
+            = new ASMAbstractGenerator(TilerFactory.basicTilerFactory(), idGenerator);
+        return asmGenerator.generate(compUnit);
+    }
+
     public static void printDebugASM(
         Reader reader,
         String filename,
         IxiFileOpener fileOpener
     ) {
         try {
-            List<ASMLine> lines = generateASM(reader, filename, fileOpener);
+            List<ASMLine> lines = generateAbstractASM(reader, filename, fileOpener);
             for (ASMLine line : lines) {
                 System.out.println(line.getIntelAssembly());
             }

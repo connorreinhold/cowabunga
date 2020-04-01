@@ -290,11 +290,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> insn = new ArrayList<>();
         TilerData targetTile = n.target()
                                 .accept(this);
-        List<TilerData> argTiles = new ArrayList<>(n.args()
-                                                    .stream()
-                                                    .map(a -> a.accept(this))
-                                                    .collect(Collectors
-                                                                       .toList()));
+        List<TilerData> argTiles = n.args().stream()
+            .map(a -> a.accept(this)).collect(Collectors.toList());
 
         int lastRegisterArg;
         int tileCost = 0;
@@ -369,6 +366,15 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         tileCost += targetTile.tileCost;
         insn.addAll(targetTile.optimalInstructions);
         insn.add(make.Call(targetTile.result.get()));
+
+        if (n.collectors().size() == 1) {
+            String resultTemp = n.collectors().get(0);
+            insn.add(make.Mov(arg.temp(resultTemp, Size.QWORD), ASMReg.RAX));
+        } else if (n.collectors().size() > 1) {
+            // TODO: FIX ME AHAAAAAHAHAHAHA
+            throw new RuntimeException("bleh");
+        }
+
         TilerData result = new TilerData(tileCost, insn, Optional.empty());
         n.setOptimalTilingOnce(result);
         return result;
