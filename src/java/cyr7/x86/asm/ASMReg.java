@@ -2,7 +2,7 @@ package cyr7.x86.asm;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public enum ASMReg implements ASMArg {
+public enum ASMReg implements ASMTempRegArg {
     // Classic Registers
     RAX, // Accumulator Register
     RCX, // Counter Register

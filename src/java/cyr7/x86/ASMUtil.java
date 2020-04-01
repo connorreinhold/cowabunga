@@ -6,6 +6,10 @@ import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.x86.asm.ASMLine;
+import cyr7.x86.reg_allocator.ASMAbstractGenerator;
+import cyr7.x86.reg_allocator.ASMGenerator;
+import cyr7.x86.reg_allocator.ASMTrivialRegAllocGenerator;
+import cyr7.x86.tiler.TilerFactory;
 
 import java.io.Reader;
 import java.io.Writer;

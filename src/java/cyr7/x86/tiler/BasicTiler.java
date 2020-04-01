@@ -1,4 +1,4 @@
-package cyr7.x86;
+package cyr7.x86.tiler;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -29,7 +29,6 @@ import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.semantics.types.FunctionType;
 import cyr7.visitor.MyIRVisitor;
-import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
@@ -39,9 +38,10 @@ import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
-import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMReg;
+import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempArg.Size;
+import cyr7.x86.asm.ASMTempRegArg;
 
 public class BasicTiler implements MyIRVisitor<TilerData> {
 
@@ -51,15 +51,15 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final String returnLbl;
     private final ASMArgFactory arg;
 
-    private final ASMArg rbp = ASMReg.RBP;
-    private final ASMArg rax = ASMReg.RAX;
-    private final ASMArg rsp = ASMReg.RSP;
-    private final ASMArg rdi = ASMReg.RDI;
-    private final ASMArg rsi = ASMReg.RSI;
-    private final ASMArg rdx = ASMReg.RDX;
-    private final ASMArg rcx = ASMReg.RCX;
-    private final ASMArg r8 = ASMReg.R8;
-    private final ASMArg r9 = ASMReg.R9;
+    private final ASMReg rbp = ASMReg.RBP;
+    private final ASMReg rax = ASMReg.RAX;
+    private final ASMReg rsp = ASMReg.RSP;
+    private final ASMReg rdi = ASMReg.RDI;
+    private final ASMReg rsi = ASMReg.RSI;
+    private final ASMReg rdx = ASMReg.RDX;
+    private final ASMReg rcx = ASMReg.RCX;
+    private final ASMReg r8 = ASMReg.R8;
+    private final ASMReg r9 = ASMReg.R9;
 
     public BasicTiler(IdGenerator generator, String tiledFunctionName,
             Map<String, FunctionType> fMap, String returnLbl) {
@@ -241,10 +241,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> insns = new ArrayList<ASMLine>();
         insns.addAll(expr.optimalInstructions);
 
-        if (!(expr.result.get() instanceof ASMTempArg)) {
+        if (!(expr.result.get() instanceof ASMTempRegArg)) {
             throw new RuntimeException("Something bad happened...");
         } else {
-            ASMArg ret = new ASMMemArg((ASMTempArg) expr.result.get());
+            ASMArg ret = new ASMMemArg((ASMTempRegArg) expr.result.get());
             TilerData result = new TilerData(1 + expr.tileCost, insns, Optional
                                                                                .of(ret));
             n.setOptimalTilingOnce(result);

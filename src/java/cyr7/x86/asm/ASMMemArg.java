@@ -12,7 +12,7 @@ public class ASMMemArg implements ASMArg {
         this.address = address;
     }
 
-    public ASMMemArg(ASMArg arg) {
+    public ASMMemArg(ASMTempRegArg arg) {
         this.address = new ASMAddrExpr(Optional.of(arg), ScaleValues.ONE,
                 Optional.empty(), 0);
     }

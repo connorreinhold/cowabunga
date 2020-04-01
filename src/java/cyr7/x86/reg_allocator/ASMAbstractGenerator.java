@@ -1,4 +1,4 @@
-package cyr7.x86;
+package cyr7.x86.reg_allocator;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
@@ -7,6 +7,8 @@ import cyr7.semantics.types.FunctionType;
 import cyr7.visitor.MyIRVisitor;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.tiler.TilerData;
+import cyr7.x86.tiler.TilerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;

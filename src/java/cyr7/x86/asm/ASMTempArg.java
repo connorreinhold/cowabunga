@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMTempArg implements ASMArg {
+public class ASMTempArg implements ASMTempRegArg {
 
     public enum Size {
         QWORD, BYTE

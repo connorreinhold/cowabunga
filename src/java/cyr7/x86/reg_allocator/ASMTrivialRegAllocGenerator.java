@@ -1,22 +1,4 @@
-package cyr7.x86;
-
-import cyr7.ir.IdGenerator;
-import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRFuncDecl;
-import cyr7.semantics.types.FunctionType;
-import cyr7.visitor.MyIRVisitor;
-import cyr7.x86.asm.ASMAddrExpr;
-import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
-import cyr7.x86.visitor.TempVisitor;
-import cyr7.x86.asm.ASMArg;
-import cyr7.x86.asm.ASMArgFactory;
-import cyr7.x86.asm.ASMInstr;
-import cyr7.x86.asm.ASMLabel;
-import cyr7.x86.asm.ASMLine;
-import cyr7.x86.asm.ASMLineFactory;
-import cyr7.x86.asm.ASMMemArg;
-import cyr7.x86.asm.ASMReg;
-import cyr7.x86.asm.ASMTempArg;
+package cyr7.x86.reg_allocator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,6 +10,27 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import cyr7.ir.IdGenerator;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRFuncDecl;
+import cyr7.semantics.types.FunctionType;
+import cyr7.visitor.MyIRVisitor;
+import cyr7.x86.asm.ASMAddrExpr;
+import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
+import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMArgFactory;
+import cyr7.x86.asm.ASMInstr;
+import cyr7.x86.asm.ASMLabel;
+import cyr7.x86.asm.ASMLine;
+import cyr7.x86.asm.ASMLineFactory;
+import cyr7.x86.asm.ASMMemArg;
+import cyr7.x86.asm.ASMReg;
+import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.asm.ASMTempRegArg;
+import cyr7.x86.tiler.TilerData;
+import cyr7.x86.tiler.TilerFactory;
+import cyr7.x86.visitor.TempVisitor;
 
 public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
@@ -43,6 +46,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         this.generator = generator;
     }
 
+    @Override
     public List<ASMLine> generate(IRCompUnit compUnit) {
         List<ASMLine> lines = new ArrayList<>();
 
@@ -145,15 +149,14 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
             Map<String, Integer> temporaryToIndexMap) {
 
         // assumption: availableQword and availableByte regs are disjoint
-
-        ASMReg[] availableQwordRegisters =
+        ASMReg[] qwordRegisters =
             { ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14,
                     ASMReg.R15 };
-        int indexOfNextAvailableQwordRegister = 0;
+        int indexOfNextQwordReg = 0;
 
-        ASMReg[] availableByteRegisters =
+        ASMReg[] byteRegisters =
             { ASMReg.AL, ASMReg.BL, ASMReg.CL, ASMReg.DL };
-        int indexOfNextAvailableByteRegister = 0;
+        int indexOfNextByteReg = 0;
 
         List<ASMLine> prelude = new ArrayList<>();
         List<ASMLine> postlude = new ArrayList<>();
@@ -163,18 +166,18 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
             if (arg instanceof ASMMemArg) {
                 ASMMemArg memArg = (ASMMemArg) arg;
 
-                Optional<ASMArg> base = Optional.empty();
-                Optional<ASMArg> index = Optional.empty();
+                Optional<ASMTempRegArg> base = Optional.empty();
+                Optional<ASMTempRegArg> index = Optional.empty();
 
                 if (memArg.address.base.isPresent()) {
-                    ASMArg b = (ASMArg) memArg.address.base.get();
+                    ASMArg b = memArg.address.base.get();
                     if (b instanceof ASMMemArg) {
                         throw new RuntimeException("Bad argument");
                     } else if (b instanceof ASMReg) {
-                        base = Optional.of(b);
+                        base = Optional.of((ASMReg) b);
                     } else if (b instanceof ASMTempArg) {
                         ASMTempArg tempArg = (ASMTempArg) b;
-                        ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
+                        ASMReg reg = qwordRegisters[indexOfNextQwordReg];
 
                         prelude.add(make.Mov(reg,
                                 new ASMMemArg(addressOfTemporary(tempArg,
@@ -184,18 +187,18 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                                         tempArg,
                                         temporaryToIndexMap).get()), reg));
                         base = Optional.of(reg);
-                        indexOfNextAvailableQwordRegister++;
+                        indexOfNextQwordReg++;
                     }
                 }
                 if (memArg.address.index.isPresent()) {
-                    ASMArg i = (ASMArg) memArg.address.index.get();
+                    ASMArg i = memArg.address.index.get();
                     if (i instanceof ASMMemArg) {
                         throw new RuntimeException("Bad argument");
                     } else if (i instanceof ASMReg) {
-                        index = Optional.of(i);
+                        index = Optional.of((ASMReg) i);
                     } else if (i instanceof ASMTempArg) {
                         ASMTempArg tempArg = (ASMTempArg) i;
-                        ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
+                        ASMReg reg = qwordRegisters[indexOfNextQwordReg];
 
                         prelude.add(make.Mov(reg,
                                 new ASMMemArg(addressOfTemporary(tempArg,
@@ -205,7 +208,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                                         tempArg,
                                         temporaryToIndexMap).get()), reg));
                         index = Optional.of(reg);
-                        indexOfNextAvailableQwordRegister++;
+                        indexOfNextQwordReg++;
                     }
                 }
                 argsWithTempsReplacedForRegisters.add(new ASMMemArg(
@@ -216,7 +219,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
                 switch (tempArg.size) {
                 case BYTE: {
-                    ASMReg reg = availableByteRegisters[indexOfNextAvailableByteRegister];
+                    ASMReg reg = byteRegisters[indexOfNextByteReg];
                     ASMReg qwordReg = reg.correspondingQWordReg();
 
                     prelude.add(make.Push(qwordReg));
@@ -231,12 +234,12 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
                     argsWithTempsReplacedForRegisters.add(reg);
 
-                    indexOfNextAvailableByteRegister++;
+                    indexOfNextByteReg++;
 
                     break;
                 }
                 case QWORD: {
-                    ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
+                    ASMReg reg = qwordRegisters[indexOfNextQwordReg];
 
                     prelude.add(make.Mov(reg,
                             new ASMMemArg(addressOfTemporary(tempArg,
@@ -248,7 +251,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
                     argsWithTempsReplacedForRegisters.add(reg);
 
-                    indexOfNextAvailableQwordRegister++;
+                    indexOfNextQwordReg++;
 
                     break;
                 }
@@ -279,5 +282,4 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                 Optional.empty(),
                 -8 * (index + 1)));
     }
-
 }
