@@ -6,11 +6,11 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
-import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 
 class TestInstructions {
 
@@ -25,19 +25,19 @@ class TestInstructions {
         var arg = ASMArgFactory.instance;
 
         ASMInstr movabs = make.MovAbs(ASMReg.RAX, arg.constant(12));
-        testIntel("movabsq rax, 12", movabs);
+        testIntel("    movabsq rax, 12", movabs);
 
         ASMInstr memMove = make.Mov(arg.mem(arg.addr(Optional.empty(),
                 ScaleValues.ONE,
                 Optional.empty(),
                 16)), ASMReg.R10);
-        testIntel("movq [ 16 ], r10", memMove);
+        testIntel("    mov [ 16 ], r10", memMove);
 
         ASMInstr cqo = make.CQO();
-        testIntel("cqo", cqo);
+        testIntel("    cqo", cqo);
 
         ASMInstr idiv = make.Div(ASMReg.RAX);
-        testIntel("idivq rax", idiv);
+        testIntel("    idivq rax", idiv);
 
     }
 

@@ -123,8 +123,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insns.add(make.Cmp(left.result.get(), right.result.get()));
             insns.add(make.SetGE(byteReg));
             insns.add(make.MovZX(ret, byteReg));
-        }
             break;
+        }
         case GT: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
             insns.add(make.Cmp(left.result.get(), right.result.get()));
@@ -477,14 +477,13 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
 
         TilerData result;
-        if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
-                                                                 .startsWith(
-                                                                         ARG_PREFIX)) {
+        if (n.target() instanceof IRTemp 
+            && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
-        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
-                                                                        .startsWith(
-                                                                                ARG_PREFIX)) {
+        } else if (n.source() instanceof IRTemp 
+            && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
+
             String index = ((IRTemp) n.source()).name()
                                                 .substring(ARG_PREFIX.length());
             int i = Integer.parseInt(index);
@@ -549,10 +548,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + target.tileCost, instrs, Optional
                                                                         .empty());
-        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
-                                                                        .startsWith(
-                                                                                RET_PREFIX)) {
-            String index = ((IRTemp) n.source()).name()
+        } else if (n.target() instanceof IRTemp 
+            && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
+            String index = ((IRTemp) n.target()).name()
                                                 .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
             switch (i) {
@@ -574,10 +572,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + source.tileCost, instrs, Optional
                                                                         .empty());
-        } else if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
-                                                                        .startsWith(
-                                                                                RET_PREFIX)) {
-            String index = ((IRTemp) n.target()).name()
+        } else if (n.source() instanceof IRTemp 
+            && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
+
+            String index = ((IRTemp) n.source()).name()
                                                 .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
             switch (i) {
