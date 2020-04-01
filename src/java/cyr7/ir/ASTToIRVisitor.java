@@ -129,7 +129,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     make.IRTemp(node.identifier),
                     make.IRTemp(generator.argTemp(i))));
         }
-        
+
         // Add the body of the function.
         seq.add(n.block.accept(this)
                        .assertSecond());
@@ -185,7 +185,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             IRStmt funStmts = fun.accept(this).assertSecond();
             String funcName = this.assemblyFunctionName(fun.header.identifier,
                     fun.header.getType());
-            program.appendFunc(make.IRFuncDecl(funcName, funStmts));
+            program.appendFunc(
+                    make.IRFuncDecl(funcName, funStmts, fun.header.getType()));
         }
         return OneOfTwo.ofSecond(program);
     }

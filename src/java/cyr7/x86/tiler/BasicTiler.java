@@ -65,8 +65,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             Map<String, FunctionType> fMap, String returnLbl) {
         this.generator = generator;
         this.fMap = Collections.unmodifiableMap(fMap);
-        this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes()
-                                                                   .size();
+        this.numRetValues = this.fMap.get(tiledFunctionName)
+                                     .output
+                                     .getTypes()
+                                     .size();
         this.returnLbl = returnLbl;
         this.arg = ASMArgFactory.instance;
     }
