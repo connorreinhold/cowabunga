@@ -20,7 +20,7 @@ public enum ASMInstrType {
     JMP, JE, JNE, JLE, JGE, JL, JG,
 
     // Set Instructions
-    SETZ, SETNE, SETLE,
+    SETZ, SETNE, SETLE, SETL, SETG, SETGE,
 
     // cqo
     CQO;

@@ -4,10 +4,16 @@ import java.util.Objects;
 
 public class ASMTempArg implements ASMArg {
 
-    public final String name;
+    public enum Size {
+        QWORD, BYTE
+    }
 
-    public ASMTempArg(String name) {
+    public final String name;
+    public final Size size;
+
+    public ASMTempArg(String name, Size size) {
         this.name = name;
+        this.size = size;
     }
 
     @Override

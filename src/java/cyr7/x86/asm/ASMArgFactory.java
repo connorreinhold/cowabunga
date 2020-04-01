@@ -4,6 +4,7 @@ package cyr7.x86.asm;
 import java.util.Optional;
 
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
+import cyr7.x86.asm.ASMTempArg.Size;
 
 public class ASMArgFactory {
 
@@ -12,8 +13,8 @@ public class ASMArgFactory {
     private ASMArgFactory() {
     }
 
-    public ASMTempArg temp(String t) {
-        return new ASMTempArg(t);
+    public ASMTempArg temp(String t, Size size) {
+        return new ASMTempArg(t, size);
     }
 
     public ASMConstArg constant(long n) {

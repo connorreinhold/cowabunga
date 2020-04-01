@@ -103,6 +103,18 @@ public class ASMLineFactory {
         return new ASMInstr(ASMInstrType.SETLE, List.of(dest), node);
     }
 
+    public ASMInstr SetGE(ASMArg dest) {
+        return new ASMInstr(ASMInstrType.SETGE, List.of(dest), node);
+    }
+
+    public ASMInstr SetG(ASMArg dest) {
+        return new ASMInstr(ASMInstrType.SETG, List.of(dest), node);
+    }
+
+    public ASMInstr SetL(ASMArg dest) {
+        return new ASMInstr(ASMInstrType.SETL, List.of(dest), node);
+    }
+
     public ASMInstr Jump(ASMArg target) {
         return new ASMInstr(ASMInstrType.JMP, List.of(target), node);
     }
