@@ -294,10 +294,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         int lastRegisterArg;
         int tileCost = 0;
-        if (this.numRetValues > 2) {
+        if (n.numOfReturnValues > 2) {
             lastRegisterArg = Math.min(5, argTiles.size());
-            long size = (this.numRetValues - 2) * 8;
-            insn.add(make.Lea(rdi, arg.constant(size)));
+            long size = (n.numOfReturnValues - 2) * 8;
+            insn.add(make.MovAbs(rdi, arg.constant(size)));
             insn.add(make.Sub(rsp, rdi));
             insn.add(make.Mov(rdi, rsp));
 
@@ -479,11 +479,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
 
         TilerData result;
-        if (n.target() instanceof IRTemp 
+        if (n.target() instanceof IRTemp
             && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
-        } else if (n.source() instanceof IRTemp 
+        } else if (n.source() instanceof IRTemp
             && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
 
             String index = ((IRTemp) n.source()).name()
@@ -550,7 +550,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + target.tileCost, instrs, Optional
                                                                         .empty());
-        } else if (n.target() instanceof IRTemp 
+        } else if (n.target() instanceof IRTemp
             && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
             String index = ((IRTemp) n.target()).name()
                                                 .substring(RET_PREFIX.length());
@@ -574,7 +574,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + source.tileCost, instrs, Optional
                                                                         .empty());
-        } else if (n.source() instanceof IRTemp 
+        } else if (n.source() instanceof IRTemp
             && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
 
             String index = ((IRTemp) n.source()).name()

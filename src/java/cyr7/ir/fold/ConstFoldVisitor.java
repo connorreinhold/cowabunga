@@ -173,7 +173,8 @@ public class ConstFoldVisitor
 
         IRExpr target = n.target().accept(this).assertFirst();
 
-        return OneOfThree.ofFirst(make.IRCall(target, foldedArgs));
+        return OneOfThree
+                .ofFirst(make.IRCall(target, foldedArgs, n.numOfReturnValues));
     }
 
     /**
@@ -247,7 +248,9 @@ public class ConstFoldVisitor
         }).collect(Collectors.toList());
 
         return OneOfThree
-            .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));    }
+                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs,
+                        n.numOfReturnValues));
+    }
 
     /**
      * CFold[CJump(etarget, lt, lf)] ::= CJump(CFold[etarget], lt, lf)

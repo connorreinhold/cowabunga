@@ -17,8 +17,9 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * CALL(e_target, e_1, ..., e_n)
  */
 public class IRCall extends IRExpr_c {
-    protected IRExpr target;
-    protected List<IRExpr> args;
+    protected final IRExpr target;
+    protected final List<IRExpr> args;
+    public final int numOfReturnValues;
 
     /**
      *
@@ -26,7 +27,7 @@ public class IRCall extends IRExpr_c {
      * @param args arguments of this function call
      */
     public IRCall(Location location, IRExpr target, IRExpr... args) {
-        this(location, target, Arrays.asList(args));
+        this(location, target, Arrays.asList(args), 10);
     }
 
     /**
@@ -34,10 +35,12 @@ public class IRCall extends IRExpr_c {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    public IRCall(Location location, IRExpr target, List<IRExpr> args) {
+    public IRCall(Location location, IRExpr target, List<IRExpr> args,
+            int numOfReturnValues) {
         super(location);
         this.target = target;
         this.args = args;
+        this.numOfReturnValues = numOfReturnValues;
     }
 
     public IRExpr target() {
@@ -67,7 +70,9 @@ public class IRCall extends IRExpr_c {
             results.add(newExpr);
         }
 
-        if (modified) return v.nodeFactory().IRCall(target, results);
+        if (modified)
+            return v.nodeFactory().IRCall(target, results,
+                    this.numOfReturnValues);
 
         return this;
     }

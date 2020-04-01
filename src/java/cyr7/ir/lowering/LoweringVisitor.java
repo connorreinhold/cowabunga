@@ -40,7 +40,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         /**
          * Creates a statement result, based on the output when lowering
          * statements.
-         * 
+         *
          * @param statement A list of statements whose child expressions are
          *                  pure expressions.
          * @return
@@ -53,7 +53,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
          * Creates an expression result, based on the output when lowering
          * expressions. This consists of a list of statements and a pure
          * expression.
-         * 
+         *
          * @param sideEffects The list of statements that performs the same
          *                    computations as the side effects in an inpure
          *                    expression.
@@ -138,7 +138,8 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         }
 
         String result = generator.newTemp();
-        stmts.add(make.IRCallStmt(List.of(result), n.target(), args));
+        stmts.add(make.IRCallStmt(List.of(result), n.target(), args,
+                n.numOfReturnValues));
         return Result.expr(stmts, make.IRTemp(result));
     }
 

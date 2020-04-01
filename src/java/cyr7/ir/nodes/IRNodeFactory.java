@@ -25,6 +25,8 @@ public interface IRNodeFactory {
      */
     IRCall IRCall(IRExpr target, List<IRExpr> args);
 
+    IRCall IRCall(IRExpr target, List<IRExpr> args, int numOfRV);
+
     /**
      * Construct a CJUMP instruction with fall-through on false.
      *
@@ -96,12 +98,13 @@ public interface IRNodeFactory {
      * @param target address of the code for this function call
      * @param args arguments of this function call
      */
-    default IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
-            List<IRExpr> args) {
-        throw new UnsupportedOperationException("IRCallStmt should not have children!");
-    }
+    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args);
 
-    IRCallStmt IRCallStmt(IRExpr target);
+//    IRCallStmt IRCallStmt(IRExpr target);
+
+    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args, int numOfRV);
 
     /**
      *
