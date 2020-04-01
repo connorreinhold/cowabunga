@@ -65,10 +65,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             Map<String, FunctionType> fMap, String returnLbl) {
         this.generator = generator;
         this.fMap = Collections.unmodifiableMap(fMap);
-        this.numRetValues = this.fMap.get(tiledFunctionName)
-                                     .output
-                                     .getTypes()
-                                     .size();
+        this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes()
+                                                                   .size();
         this.returnLbl = returnLbl;
         this.arg = ASMArgFactory.instance;
     }
@@ -296,6 +294,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         int tileCost = 0;
         if (n.numOfReturnValues > 2) {
             lastRegisterArg = Math.min(5, argTiles.size());
+
             long size = (n.numOfReturnValues - 2) * 8;
             insn.add(make.MovAbs(rdi, arg.constant(size)));
             insn.add(make.Sub(rsp, rdi));
@@ -359,11 +358,14 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             TilerData argTile = argTiles.get(i);
             tileCost += argTile.tileCost;
             insn.addAll(argTile.optimalInstructions);
-            insn.add(make.Push(argTile.result.get()));
         }
-
         tileCost += targetTile.tileCost;
         insn.addAll(targetTile.optimalInstructions);
+
+        for (int i = argTiles.size() - 1; i >= lastRegisterArg; i--) {
+            TilerData argTile = argTiles.get(i);
+            insn.add(make.Push(argTile.result.get()));
+        }
         insn.add(make.Call(targetTile.result.get()));
 
         if (n.collectors()
@@ -373,7 +375,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insn.add(make.Mov(arg.temp(resultTemp, Size.QWORD), ASMReg.RAX));
         } else if (n.collectors()
                     .size() > 1) {
-            // TODO: FIX ME AHAAAAAHAHAHAHA
+            // TODO: FIX ME AHAAAAAHAHAHAHA :(
             throw new RuntimeException("bleh");
         }
 
@@ -479,12 +481,14 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
 
         TilerData result;
-        if (n.target() instanceof IRTemp
-            && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
+        if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
+                                                                 .startsWith(
+                                                                         ARG_PREFIX)) {
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
-        } else if (n.source() instanceof IRTemp
-            && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
+        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
+                                                                        .startsWith(
+                                                                                ARG_PREFIX)) {
 
             String index = ((IRTemp) n.source()).name()
                                                 .substring(ARG_PREFIX.length());
@@ -508,7 +512,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     instrs.add(make.Mov(targetTemp, r9));
                     break;
                 default:
-                    int offset = 8 * (i - 6);
+                    int offset = 8 * (i - 5 + 2);
                     var addr = arg.addr(Optional.of(rbp),
                             ScaleValues.ONE,
                             Optional.empty(),
@@ -538,7 +542,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     instrs.add(make.Mov(targetTemp, r9));
                     break;
                 default:
-                    int offset = 8 * (i - 5);
+                    int offset = 8 * (i - 6 + 2);
                     var addr = arg.addr(Optional.of(ASMReg.RBP),
                             ScaleValues.ONE,
                             Optional.empty(),
@@ -550,8 +554,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + target.tileCost, instrs, Optional
                                                                         .empty());
-        } else if (n.target() instanceof IRTemp
-            && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
+        } else if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
+                                                                        .startsWith(
+                                                                                RET_PREFIX)) {
             String index = ((IRTemp) n.target()).name()
                                                 .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
@@ -574,8 +579,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + source.tileCost, instrs, Optional
                                                                         .empty());
-        } else if (n.source() instanceof IRTemp
-            && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
+        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
+                                                                        .startsWith(
+                                                                                RET_PREFIX)) {
 
             String index = ((IRTemp) n.source()).name()
                                                 .substring(RET_PREFIX.length());
