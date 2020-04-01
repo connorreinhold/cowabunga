@@ -85,7 +85,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         insns.addAll(right.optimalInstructions);
 
         ASMArg ret;
-
         switch (n.opType()) {
             case ADD:
                 ret = arg.temp(generator.newTemp(), Size.QWORD);
@@ -120,15 +119,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 break;
             case GEQ: {
                 ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.SetGE)
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetLE(ret));
-                insns.add(make.Xor(ret, arg.constant(1)));
-                insns.add(make.SetZ(ret2));
-                insns.add(make.Or(ret, ret2));
+                insns.add(make.SetGE(ret));
             }
                 break;
             case GT:
+                ret = arg.temp(generator.newTemp(), Size.BYTE);
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
                 insns.add(make.SetLE(ret));
                 insns.add(make.Xor(ret, arg.constant(1)));
@@ -142,6 +138,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Pop(rdx));
                 break;
             case LEQ:
+                ret = arg.temp(generator.newTemp(), Size.BYTE);
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
                 insns.add(make.SetLE(ret));
                 break;
@@ -152,11 +149,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 break;
             case LT: {
                 ret = arg.temp(generator.newTemp(), Size.BYTE);
-                ASMArg ret2 = new ASMTempArg(generator.newTemp());
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetLE(ret));
-                insns.add(make.SetNE(ret2));
-                insns.add(make.And(ret, ret2));
+                insns.add(make.SetL(ret));
                 break;
             }
             case MOD:
@@ -176,6 +170,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mul(ret, right.result.get()));
                 break;
             case NEQ:
+                ret = arg.temp(generator.newTemp(), Size.BYTE);
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
                 insns.add(make.SetNE(ret));
                 break;
@@ -241,7 +236,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> insns = new ArrayList<ASMLine>();
         insns.addAll(expr.optimalInstructions);
         
-        ASMArg ret = new ASMTempArg(generator.newTemp());
+        ASMArg ret = new ASMTempArg(generator.newTemp(), Size.QWORD);
         
         insns.add(make.Push(rax));
         insns.add(make.Mov(rax, expr.result.get()));
@@ -271,7 +266,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        ASMArg ret = new ASMTempArg(n.name());
+        ASMArg ret = new ASMTempArg(n.name(), Size.QWORD);
         TilerData result = new TilerData(0, new ArrayList<>(), Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;

@@ -37,7 +37,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     private final IdGenerator generator;
 
     public ASMTrivialRegAllocGenerator(TilerFactory tilerFactory,
-                                       IdGenerator generator) {
+            IdGenerator generator) {
         this.tilerFactory = tilerFactory;
         this.generator = generator;
     }
@@ -45,20 +45,18 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     public List<ASMLine> generate(IRCompUnit compUnit) {
         List<ASMLine> lines = new ArrayList<>();
 
-        Set<Entry<String, IRFuncDecl>> nameFuncDeclPairs
-            = compUnit.functions().entrySet();
+        Set<Entry<String, IRFuncDecl>> nameFuncDeclPairs = compUnit.functions()
+                                                                   .entrySet();
 
         Map<String, FunctionType> fMap = new HashMap<>();
         for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
-            fMap.put(
-                nameFuncDecl.getKey(),
-                nameFuncDecl.getValue().type());
+            fMap.put(nameFuncDecl.getKey(),
+                    nameFuncDecl.getValue()
+                                .type());
         }
 
         for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
-            lines.addAll(
-                generate(
-                    nameFuncDecl.getKey(),
+            lines.addAll(generate(nameFuncDecl.getKey(),
                     nameFuncDecl.getValue(),
                     fMap));
         }
@@ -66,21 +64,22 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         return lines;
     }
 
-    private List<ASMLine> generate(
-        String funcName,
-        IRFuncDecl funcDecl,
-        Map<String, FunctionType> fMap) {
+    private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
+            Map<String, FunctionType> fMap) {
 
         String returnLbl = "end_" + funcName;
 
-        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
-            generator, funcName, fMap, returnLbl);
+        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(generator,
+                funcName,
+                fMap,
+                returnLbl);
 
-        List<ASMLine> functionBody =
-            funcDecl.body().accept(tiler).optimalInstructions;
+        List<ASMLine> functionBody = funcDecl.body()
+                                             .accept(tiler).optimalInstructions;
         List<ASMTempArg> uniqueTemps = uniqueTemps(functionBody);
-        List<ASMLine> concreteFunctionBody =
-            replaceTemporariesWithMemoryAccess(functionBody, uniqueTemps);
+        List<ASMLine> concreteFunctionBody = replaceTemporariesWithMemoryAccess(
+                functionBody,
+                uniqueTemps);
 
         List<ASMLine> lines = new ArrayList<>();
         lines.addAll(createPrologue(funcName, uniqueTemps.size()));
@@ -115,49 +114,53 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     }
 
     private List<ASMLine> createPrologue(String mangledFunctionName,
-                                         long numberOfTemps) {
-        return List.of(
-            new ASMLabel(mangledFunctionName),
-            make.Push(ASMReg.RBP),
-            make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+            long numberOfTemps) {
+        return List.of(new ASMLabel(mangledFunctionName),
+                make.Push(ASMReg.RBP),
+                make.Mov(ASMReg.RBP, ASMReg.RSP),
+                make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
     }
 
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
-        return List.of(
-            new ASMLabel(returnLbl),
-            make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
-            make.Mov(ASMReg.RSP, ASMReg.RBP),
-            make.Pop(ASMReg.RBP),
-            make.Ret());
+        return List.of(new ASMLabel(returnLbl),
+                make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
+                make.Mov(ASMReg.RSP, ASMReg.RBP),
+                make.Pop(ASMReg.RBP),
+                make.Ret());
     }
 
-    private List<ASMLine> replaceTemporariesWithMemoryAccess(List<ASMLine> lines, List<ASMTempArg> tempArgs) {
+    private List<ASMLine> replaceTemporariesWithMemoryAccess(
+            List<ASMLine> lines, List<ASMTempArg> tempArgs) {
         Map<String, Integer> temporaryToIndexMap = new HashMap<>();
         for (int i = 0; i < tempArgs.size(); i++) {
             ASMTempArg tempArg = tempArgs.get(i);
             temporaryToIndexMap.put(tempArg.name, i);
         }
 
-        return lines.stream().flatMap(asmLine -> {
-            if (asmLine instanceof ASMInstr) {
-                return replaceInstrTempArgsWithMemoryAccess(
-                    (ASMInstr) asmLine,
-                    temporaryToIndexMap).stream();
-            } else {
-                return Stream.of(asmLine);
-            }
-        }).collect(Collectors.toUnmodifiableList());
+        return lines.stream()
+                    .flatMap(asmLine -> {
+                        if (asmLine instanceof ASMInstr) {
+                            return replaceInstrTempArgsWithMemoryAccess(
+                                    (ASMInstr) asmLine,
+                                    temporaryToIndexMap).stream();
+                        } else {
+                            return Stream.of(asmLine);
+                        }
+                    })
+                    .collect(Collectors.toUnmodifiableList());
     }
 
-    private List<ASMLine> replaceInstrTempArgsWithMemoryAccess(
-        ASMInstr instr,
-        Map<String, Integer> temporaryToIndexMap) {
+    private List<ASMLine> replaceInstrTempArgsWithMemoryAccess(ASMInstr instr,
+            Map<String, Integer> temporaryToIndexMap) {
 
-        ASMReg[] availableRegisters = {
-            ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14, ASMReg.R15
-        };
-        int indexOfNextAvailableRegister = 0;
+        ASMReg[] availableQwordRegisters =
+            { ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14,
+                    ASMReg.R15 };
+        int indexOfNextAvailableQwordRegister = 0;
+
+        ASMReg[] availableByteRegisters =
+            { ASMReg.AL, ASMReg.BL, ASMReg.CL, ASMReg.DL };
+        int indexOfNextAvailableByteRegister = 0;
 
         List<ASMLine> prelude = new ArrayList<>();
         List<ASMLine> postlude = new ArrayList<>();
@@ -166,21 +169,25 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         for (ASMArg arg : instr.args) {
             if (arg instanceof ASMTempArg) {
                 ASMTempArg tempArg = (ASMTempArg) arg;
-                ASMReg reg = availableRegisters[indexOfNextAvailableRegister];
 
-                prelude.add(make.Mov(
-                    reg,
-                    new ASMMemArg(addressOfTemporary(tempArg, temporaryToIndexMap).get())));
+                switch (tempArg.size) {
+                case BYTE:
+                case 
+                }
+                ASMReg reg = availableQwordRegisters[indexOfNextAvailableRegister];
 
-                postlude.add(make.Mov(
-                    new ASMMemArg(addressOfTemporary(tempArg, temporaryToIndexMap).get()),
-                    reg));
+                prelude.add(make.Mov(reg,
+                        new ASMMemArg(addressOfTemporary(tempArg,
+                                temporaryToIndexMap).get())));
+
+                postlude.add(make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
+                        temporaryToIndexMap).get()), reg));
 
                 argsWithTempsReplacedForRegisters.add(reg);
 
                 indexOfNextAvailableRegister++;
             } else {
-                argsWithTempsReplacedForRegisters.add(arg) ;
+                argsWithTempsReplacedForRegisters.add(arg);
             }
         }
 
@@ -191,9 +198,8 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         return lines;
     }
 
-    private Optional<ASMAddrExpr> addressOfTemporary(
-        ASMTempArg tempArg,
-        Map<String, Integer> temporaryToIndexMap) {
+    private Optional<ASMAddrExpr> addressOfTemporary(ASMTempArg tempArg,
+            Map<String, Integer> temporaryToIndexMap) {
 
         Integer index = temporaryToIndexMap.get(tempArg.name);
         if (index == null) {
@@ -201,9 +207,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         }
 
         // [RBP + 8 * (index + 1)]
-        return Optional.of(
-            arg.addr(
-                Optional.of(ASMReg.RBP),
+        return Optional.of(arg.addr(Optional.of(ASMReg.RBP),
                 ScaleValues.ONE,
                 Optional.empty(),
                 -8 * (index + 1)));
