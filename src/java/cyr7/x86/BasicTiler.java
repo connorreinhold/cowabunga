@@ -61,10 +61,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final ASMArg r8 = ASMReg.R8;
     private final ASMArg r9 = ASMReg.R9;
 
-    public BasicTiler(IdGenerator generator, String tiledFunctionName, Map<String, FunctionType> fMap, String returnLbl) {
+    public BasicTiler(IdGenerator generator, String tiledFunctionName,
+            Map<String, FunctionType> fMap, String returnLbl) {
         this.generator = generator;
         this.fMap = Collections.unmodifiableMap(fMap);
-        this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes().size();
+        this.numRetValues = this.fMap.get(tiledFunctionName).output.getTypes()
+                                                                   .size();
         this.returnLbl = returnLbl;
         this.arg = ASMArgFactory.instance;
     }
@@ -77,135 +79,138 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         List<ASMLine> insns = new ArrayList<>();
 
-
-        TilerData left = n.left().accept(this);
-        TilerData right = n.right().accept(this);
+        TilerData left = n.left()
+                          .accept(this);
+        TilerData right = n.right()
+                           .accept(this);
 
         insns.addAll(left.optimalInstructions);
         insns.addAll(right.optimalInstructions);
 
         ASMArg ret;
         switch (n.opType()) {
-            case ADD:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.Add(ret, right.result.get()));
-                break;
-            case AND:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.And(ret, right.result.get()));
-                break;
-            case ARSHIFT:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.ARShift(ret, right.result.get()));
-                break;
-            case DIV:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Push(rax));
-                insns.add(make.Push(rdx));
-                insns.add(make.Mov(rax, left.result.get()));
-                insns.add(make.CQO());
-                insns.add(make.Div(right.result.get()));
-                insns.add(make.Mov(ret, rax));
-                insns.add(make.Pop(rdx));
-                insns.add(make.Pop(rax));
-                break;
-            case EQ:
-                ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetZ(ret));
-                break;
-            case GEQ: {
-                ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetGE(ret));
-            }
-                break;
-            case GT:
-                ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetLE(ret));
-                insns.add(make.Xor(ret, arg.constant(1)));
-                break;
-            case HMUL:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Push(rdx));
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.Mul(ret, right.result.get()));
-                insns.add(make.Mov(ret, rdx));
-                insns.add(make.Pop(rdx));
-                break;
-            case LEQ:
-                ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetLE(ret));
-                break;
-            case LSHIFT:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.LShift(ret, right.result.get()));
-                break;
-            case LT: {
-                ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetL(ret));
-                break;
-            }
-            case MOD:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Push(rax));
-                insns.add(make.Push(rdx));
-                insns.add(make.Mov(rax, left.result.get()));
-                insns.add(make.CQO());
-                insns.add(make.Div(right.result.get()));
-                insns.add(make.Mov(ret, rdx));
-                insns.add(make.Pop(rdx));
-                insns.add(make.Pop(rax));
-                break;
-            case MUL:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.Mul(ret, right.result.get()));
-                break;
-            case NEQ:
-                ret = arg.temp(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(left.result.get(), right.result.get()));
-                insns.add(make.SetNE(ret));
-                break;
-            case OR:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.Or(ret, right.result.get()));
-                break;
-            case RSHIFT:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.RShift(ret, right.result.get()));
-                break;
-            case SUB:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.Sub(ret, right.result.get()));
-                break;
-            case XOR:
-                ret = arg.temp(generator.newTemp(), Size.QWORD);
-                insns.add(make.Mov(ret, left.result.get()));
-                insns.add(make.Xor(ret, right.result.get()));
-                break;
-            default:
-                throw new UnsupportedOperationException("No case found.");
+        case ADD:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Add(ret, right.result.get()));
+            break;
+        case AND:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.And(ret, right.result.get()));
+            break;
+        case ARSHIFT:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.ARShift(ret, right.result.get()));
+            break;
+        case DIV:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Push(rax));
+            insns.add(make.Push(rdx));
+            insns.add(make.Mov(rax, left.result.get()));
+            insns.add(make.CQO());
+            insns.add(make.Div(right.result.get()));
+            insns.add(make.Mov(ret, rax));
+            insns.add(make.Pop(rdx));
+            insns.add(make.Pop(rax));
+            break;
+        case EQ:
+            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            insns.add(make.Cmp(left.result.get(), right.result.get()));
+            insns.add(make.SetZ(ret));
+            break;
+        case GEQ: {
+            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            insns.add(make.Cmp(left.result.get(), right.result.get()));
+            insns.add(make.SetGE(ret));
+        }
+            break;
+        case GT:
+            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            insns.add(make.Cmp(left.result.get(), right.result.get()));
+            insns.add(make.SetLE(ret));
+            insns.add(make.Xor(ret, arg.constant(1)));
+            break;
+        case HMUL:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Push(rdx));
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Mul(ret, right.result.get()));
+            insns.add(make.Mov(ret, rdx));
+            insns.add(make.Pop(rdx));
+            break;
+        case LEQ:
+            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            insns.add(make.Cmp(left.result.get(), right.result.get()));
+            insns.add(make.SetLE(ret));
+            break;
+        case LSHIFT:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.LShift(ret, right.result.get()));
+            break;
+        case LT: {
+            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            insns.add(make.Cmp(left.result.get(), right.result.get()));
+            insns.add(make.SetL(ret));
+            break;
+        }
+        case MOD:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Push(rax));
+            insns.add(make.Push(rdx));
+            insns.add(make.Mov(rax, left.result.get()));
+            insns.add(make.CQO());
+            insns.add(make.Div(right.result.get()));
+            insns.add(make.Mov(ret, rdx));
+            insns.add(make.Pop(rdx));
+            insns.add(make.Pop(rax));
+            break;
+        case MUL:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Mul(ret, right.result.get()));
+            break;
+        case NEQ:
+            ret = arg.temp(generator.newTemp(), Size.BYTE);
+            insns.add(make.Cmp(left.result.get(), right.result.get()));
+            insns.add(make.SetNE(ret));
+            break;
+        case OR:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Or(ret, right.result.get()));
+            break;
+        case RSHIFT:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.RShift(ret, right.result.get()));
+            break;
+        case SUB:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Sub(ret, right.result.get()));
+            break;
+        case XOR:
+            ret = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(ret, left.result.get()));
+            insns.add(make.Xor(ret, right.result.get()));
+            break;
+        default:
+            throw new UnsupportedOperationException("No case found.");
         }
 
-        TilerData result = new TilerData(1 + left.tileCost + right.tileCost, insns, Optional.of(ret));
+        TilerData result = new TilerData(1 + left.tileCost + right.tileCost,
+                insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;
     }
 
     @Override
     public TilerData visit(IRCall n) {
-        throw new UnsupportedOperationException("Call is not a valid node at this stage.");
+        throw new UnsupportedOperationException(
+                "Call is not a valid node at this stage.");
     }
 
     @Override
@@ -215,7 +220,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
-        List<ASMLine> insns = List.of(make.MovAbs(ret, new ASMConstArg(n.constant())));
+        List<ASMLine> insns = List.of(make.MovAbs(ret,
+                new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
         n.setOptimalTilingOnce(result);
         return result;
@@ -223,7 +229,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRESeq n) {
-        throw new UnsupportedOperationException("ESeq is not a valid node at this stage.");
+        throw new UnsupportedOperationException(
+                "ESeq is not a valid node at this stage.");
     }
 
     @Override
@@ -232,19 +239,22 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        TilerData expr = n.expr().accept(this);
+        TilerData expr = n.expr()
+                          .accept(this);
         List<ASMLine> insns = new ArrayList<ASMLine>();
         insns.addAll(expr.optimalInstructions);
-        
+
         ASMArg ret = new ASMTempArg(generator.newTemp(), Size.QWORD);
-        
+
         insns.add(make.Push(rax));
         insns.add(make.Mov(rax, expr.result.get()));
-        ASMAddrExpr address = new ASMAddrExpr(Optional.of(ASMReg.RAX), ScaleValues.ONE, Optional.empty(), 0);
+        ASMAddrExpr address = new ASMAddrExpr(Optional.of(ASMReg.RAX),
+                ScaleValues.ONE, Optional.empty(), 0);
         insns.add(make.Mov(ret, new ASMMemArg(address)));
         insns.add(make.Pop(rax));
 
-        TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(ret));
+        TilerData result = new TilerData(1 + expr.tileCost, insns, Optional.of(
+                ret));
         n.setOptimalTilingOnce(result);
         return result;
     }
@@ -267,7 +277,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = new ASMTempArg(n.name(), Size.QWORD);
-        TilerData result = new TilerData(0, new ArrayList<>(), Optional.of(ret));
+        TilerData result = new TilerData(0, new ArrayList<>(), Optional.of(
+                ret));
         n.setOptimalTilingOnce(result);
         return result;
     }
@@ -280,9 +291,13 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
 
         List<ASMLine> insn = new ArrayList<>();
-        TilerData targetTile = n.target().accept(this);
-        List<TilerData> argTiles = new ArrayList<>(
-                n.args().stream().map(a -> a.accept(this)).collect(Collectors.toList()));
+        TilerData targetTile = n.target()
+                                .accept(this);
+        List<TilerData> argTiles = new ArrayList<>(n.args()
+                                                    .stream()
+                                                    .map(a -> a.accept(this))
+                                                    .collect(Collectors
+                                                                       .toList()));
 
         int lastRegisterArg;
         int tileCost = 0;
@@ -298,23 +313,23 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 tileCost += argTile.tileCost;
                 insn.addAll(argTile.optimalInstructions);
                 switch (i) {
-                    case 0:
-                        insn.add(make.Mov(rsi, argTile.result.get()));
-                        break;
-                    case 1:
-                        insn.add(make.Mov(rdx, argTile.result.get()));
-                        break;
-                    case 2:
-                        insn.add(make.Mov(rcx, argTile.result.get()));
-                        break;
-                    case 3:
-                        insn.add(make.Mov(r8, argTile.result.get()));
-                        break;
-                    case 4:
-                        insn.add(make.Mov(r9, argTile.result.get()));
-                        break;
-                    default:
-                        throw new RuntimeException("Unexpected Error with index");
+                case 0:
+                    insn.add(make.Mov(rsi, argTile.result.get()));
+                    break;
+                case 1:
+                    insn.add(make.Mov(rdx, argTile.result.get()));
+                    break;
+                case 2:
+                    insn.add(make.Mov(rcx, argTile.result.get()));
+                    break;
+                case 3:
+                    insn.add(make.Mov(r8, argTile.result.get()));
+                    break;
+                case 4:
+                    insn.add(make.Mov(r9, argTile.result.get()));
+                    break;
+                default:
+                    throw new RuntimeException("Unexpected Error with index");
                 }
             }
         } else {
@@ -324,26 +339,26 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 tileCost += argTile.tileCost;
                 insn.addAll(argTile.optimalInstructions);
                 switch (i) {
-                    case 0:
-                        insn.add(make.Mov(rdi, argTile.result.get()));
-                        break;
-                    case 1:
-                        insn.add(make.Mov(rsi, argTile.result.get()));
-                        break;
-                    case 2:
-                        insn.add(make.Mov(rdx, argTile.result.get()));
-                        break;
-                    case 3:
-                        insn.add(make.Mov(rcx, argTile.result.get()));
-                        break;
-                    case 4:
-                        insn.add(make.Mov(r8, argTile.result.get()));
-                        break;
-                    case 5:
-                        insn.add(make.Mov(r9, argTile.result.get()));
-                        break;
-                    default:
-                        throw new RuntimeException("Unexpected Error with index");
+                case 0:
+                    insn.add(make.Mov(rdi, argTile.result.get()));
+                    break;
+                case 1:
+                    insn.add(make.Mov(rsi, argTile.result.get()));
+                    break;
+                case 2:
+                    insn.add(make.Mov(rdx, argTile.result.get()));
+                    break;
+                case 3:
+                    insn.add(make.Mov(rcx, argTile.result.get()));
+                    break;
+                case 4:
+                    insn.add(make.Mov(r8, argTile.result.get()));
+                    break;
+                case 5:
+                    insn.add(make.Mov(r9, argTile.result.get()));
+                    break;
+                default:
+                    throw new RuntimeException("Unexpected Error with index");
                 }
             }
         }
@@ -370,31 +385,37 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
 
         List<ASMLine> insn = new ArrayList<>();
-        TilerData cond = n.cond().accept(this);
+        TilerData cond = n.cond()
+                          .accept(this);
         ASMArg temp = cond.result.map(r -> r)
-                .orElseThrow(() -> new RuntimeException("Expected a temporary but was not found."));
+                                 .orElseThrow(() -> new RuntimeException(
+                                         "Expected a temporary but was not found."));
         insn.addAll(cond.optimalInstructions);
         insn.add(make.Cmp(temp, new ASMConstArg(1)));
         insn.add(make.JumpE(new ASMLabelArg(n.trueLabel())));
 
-        TilerData result = new TilerData(1 + cond.tileCost, insn, Optional.empty());
+        TilerData result = new TilerData(1 + cond.tileCost, insn, Optional
+                                                                          .empty());
         n.setOptimalTilingOnce(result);
         return result;
     }
 
     @Override
     public TilerData visit(IRCompUnit n) {
-        throw new UnsupportedOperationException("CompUnit is not translated by the BasicTiler.");
+        throw new UnsupportedOperationException(
+                "CompUnit is not translated by the BasicTiler.");
     }
 
     @Override
     public TilerData visit(IRExp n) {
-        throw new UnsupportedOperationException("Exp is not a valid node at this stage.");
+        throw new UnsupportedOperationException(
+                "Exp is not a valid node at this stage.");
     }
 
     @Override
     public TilerData visit(IRFuncDecl n) {
-        throw new UnsupportedOperationException("FuncDecl is not translated by the BasicTiler.");
+        throw new UnsupportedOperationException(
+                "FuncDecl is not translated by the BasicTiler.");
     }
 
     @Override
@@ -404,13 +425,15 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         List<ASMLine> instructions = new ArrayList<>();
-        TilerData target = n.target().accept(this);
+        TilerData target = n.target()
+                            .accept(this);
         instructions.addAll(target.optimalInstructions);
 
         TilerData result;
         if (target.result.isPresent()) {
             instructions.add(make.Jump(target.result.get()));
-            result = new TilerData(1 + target.tileCost, instructions, Optional.empty());
+            result = new TilerData(1 + target.tileCost, instructions, Optional
+                                                                              .empty());
         } else {
             throw new RuntimeException("Missing target result");
         }
@@ -439,8 +462,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
 
-        TilerData target = n.target().accept(this);
-        TilerData source = n.source().accept(this);
+        TilerData target = n.target()
+                            .accept(this);
+        TilerData source = n.source()
+                            .accept(this);
         List<ASMLine> instrs = new ArrayList<>();
         instrs.addAll(source.optimalInstructions);
         instrs.addAll(target.optimalInstructions);
@@ -449,105 +474,132 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
 
         TilerData result;
-        if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
+        if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
+                                                                 .startsWith(
+                                                                         ARG_PREFIX)) {
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
-        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
-            String index = ((IRTemp) n.source()).name().substring(ARG_PREFIX.length());
+        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
+                                                                        .startsWith(
+                                                                                ARG_PREFIX)) {
+            String index = ((IRTemp) n.source()).name()
+                                                .substring(ARG_PREFIX.length());
             int i = Integer.parseInt(index);
             ASMArg targetTemp = target.result.get();
             if (this.numRetValues > 2) {
                 switch (i) {
-                    case 0:
-                        instrs.add(make.Mov(targetTemp, rsi));
-                        break;
-                    case 1:
-                        instrs.add(make.Mov(targetTemp, rdx));
-                        break;
-                    case 2:
-                        instrs.add(make.Mov(targetTemp, rcx));
-                        break;
-                    case 3:
-                        instrs.add(make.Mov(targetTemp, r8));
-                        break;
-                    case 4:
-                        instrs.add(make.Mov(targetTemp, r9));
-                        break;
-                    default:
-                        int offset = 8 * (i - 6);
-                        var addr = arg.addr(Optional.of(ASMReg.RBP), ScaleValues.ONE, Optional.empty(), offset);
-                        var mem = arg.mem(addr);
-                        instrs.add(make.Mov(targetTemp, mem));
-                        break;
+                case 0:
+                    instrs.add(make.Mov(targetTemp, rsi));
+                    break;
+                case 1:
+                    instrs.add(make.Mov(targetTemp, rdx));
+                    break;
+                case 2:
+                    instrs.add(make.Mov(targetTemp, rcx));
+                    break;
+                case 3:
+                    instrs.add(make.Mov(targetTemp, r8));
+                    break;
+                case 4:
+                    instrs.add(make.Mov(targetTemp, r9));
+                    break;
+                default:
+                    int offset = 8 * (i - 6);
+                    var addr = arg.addr(Optional.of(ASMReg.RBP),
+                            ScaleValues.ONE,
+                            Optional.empty(),
+                            offset);
+                    var mem = arg.mem(addr);
+                    instrs.add(make.Mov(targetTemp, mem));
+                    break;
                 }
             } else {
                 switch (i) {
-                    case 0:
-                        instrs.add(make.Mov(targetTemp, rdi));
-                        break;
-                    case 1:
-                        instrs.add(make.Mov(targetTemp, rsi));
-                        break;
-                    case 2:
-                        instrs.add(make.Mov(targetTemp, rdx));
-                        break;
-                    case 3:
-                        instrs.add(make.Mov(targetTemp, rcx));
-                        break;
-                    case 4:
-                        instrs.add(make.Mov(targetTemp, r8));
-                        break;
-                    case 5:
-                        instrs.add(make.Mov(targetTemp, r9));
-                        break;
-                    default:
-                        int offset = 8 * (i - 5);
-                        var addr = arg.addr(Optional.of(ASMReg.RBP), ScaleValues.ONE, Optional.empty(), offset);
-                        var mem = arg.mem(addr);
-                        instrs.add(make.Mov(targetTemp, mem));
-                        break;
+                case 0:
+                    instrs.add(make.Mov(targetTemp, rdi));
+                    break;
+                case 1:
+                    instrs.add(make.Mov(targetTemp, rsi));
+                    break;
+                case 2:
+                    instrs.add(make.Mov(targetTemp, rdx));
+                    break;
+                case 3:
+                    instrs.add(make.Mov(targetTemp, rcx));
+                    break;
+                case 4:
+                    instrs.add(make.Mov(targetTemp, r8));
+                    break;
+                case 5:
+                    instrs.add(make.Mov(targetTemp, r9));
+                    break;
+                default:
+                    int offset = 8 * (i - 5);
+                    var addr = arg.addr(Optional.of(ASMReg.RBP),
+                            ScaleValues.ONE,
+                            Optional.empty(),
+                            offset);
+                    var mem = arg.mem(addr);
+                    instrs.add(make.Mov(targetTemp, mem));
+                    break;
                 }
             }
-            result = new TilerData(1 + target.tileCost, instrs, Optional.empty());
-        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
-            String index = ((IRTemp) n.source()).name().substring(RET_PREFIX.length());
+            result = new TilerData(1 + target.tileCost, instrs, Optional
+                                                                        .empty());
+        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
+                                                                        .startsWith(
+                                                                                RET_PREFIX)) {
+            String index = ((IRTemp) n.source()).name()
+                                                .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
             switch (i) {
-                case 0:
-                    instrs.add(make.Mov(rax, source.result.get()));
-                    break;
-                case 1:
-                    instrs.add(make.Mov(rdx, source.result.get()));
-                    break;
-                default:
-                    int offset = 8 * (i - 1);
-                    var addr = arg.addr(Optional.of(ASMReg.RDI), ScaleValues.ONE, Optional.empty(), offset);
-                    var mem = arg.mem(addr);
-                    instrs.add(make.Mov(mem, source.result.get()));
-                    break;
+            case 0:
+                instrs.add(make.Mov(rax, source.result.get()));
+                break;
+            case 1:
+                instrs.add(make.Mov(rdx, source.result.get()));
+                break;
+            default:
+                int offset = 8 * (i - 1);
+                var addr = arg.addr(Optional.of(ASMReg.RDI),
+                        ScaleValues.ONE,
+                        Optional.empty(),
+                        offset);
+                var mem = arg.mem(addr);
+                instrs.add(make.Mov(mem, source.result.get()));
+                break;
             }
-            result = new TilerData(1 + source.tileCost, instrs, Optional.empty());
-        } else if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
-            String index = ((IRTemp) n.target()).name().substring(RET_PREFIX.length());
+            result = new TilerData(1 + source.tileCost, instrs, Optional
+                                                                        .empty());
+        } else if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
+                                                                        .startsWith(
+                                                                                RET_PREFIX)) {
+            String index = ((IRTemp) n.target()).name()
+                                                .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
             switch (i) {
-                case 0:
-                    instrs.add(make.Mov(target.result.get(), rax));
-                    break;
-                case 1:
-                    instrs.add(make.Mov(target.result.get(), rdx));
-                    break;
-                default:
-                    int offset = 8 * (i - 1);
-                    var addr = arg.addr(Optional.of(ASMReg.RDI), ScaleValues.ONE, Optional.empty(), offset);
-                    var mem = arg.mem(addr);
-                    instrs.add(make.Mov(target.result.get(), mem));
-                    break;
+            case 0:
+                instrs.add(make.Mov(target.result.get(), rax));
+                break;
+            case 1:
+                instrs.add(make.Mov(target.result.get(), rdx));
+                break;
+            default:
+                int offset = 8 * (i - 1);
+                var addr = arg.addr(Optional.of(ASMReg.RDI),
+                        ScaleValues.ONE,
+                        Optional.empty(),
+                        offset);
+                var mem = arg.mem(addr);
+                instrs.add(make.Mov(target.result.get(), mem));
+                break;
             }
-            result = new TilerData(1 + target.tileCost, instrs, Optional.empty());
+            result = new TilerData(1 + target.tileCost, instrs, Optional
+                                                                        .empty());
         } else {
             instrs.add(make.Mov(target.result.get(), source.result.get()));
-            result = new TilerData(1 + target.tileCost + source.tileCost, instrs, Optional.empty());
+            result = new TilerData(1 + target.tileCost + source.tileCost,
+                    instrs, Optional.empty());
         }
         n.setOptimalTilingOnce(result);
         return result;
@@ -561,7 +613,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         List<ASMLine> instrs = new ArrayList<>();
         instrs.add(make.Jump(new ASMLabelArg(this.returnLbl)));
-        TilerData result = new TilerData(instrs.size(), instrs, Optional.empty());
+        TilerData result = new TilerData(instrs.size(), instrs, Optional
+                                                                        .empty());
         n.setOptimalTilingOnce(result);
         return result;
     }
@@ -582,7 +635,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             instructions.addAll(data.optimalInstructions);
             sumCosts += data.tileCost;
         }
-        TilerData result = new TilerData(1 + sumCosts, instructions, Optional.empty());
+        TilerData result = new TilerData(1 + sumCosts, instructions, Optional
+                                                                             .empty());
         n.setOptimalTilingOnce(result);
         return result;
     }

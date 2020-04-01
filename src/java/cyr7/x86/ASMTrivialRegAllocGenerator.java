@@ -18,6 +18,7 @@ import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -153,6 +154,8 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     private List<ASMLine> replaceInstrTempArgsWithMemoryAccess(ASMInstr instr,
             Map<String, Integer> temporaryToIndexMap) {
 
+        // assumption: availableQword and availableByte regs are disjoint
+
         ASMReg[] availableQwordRegisters =
             { ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14,
                     ASMReg.R15 };
@@ -171,21 +174,46 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                 ASMTempArg tempArg = (ASMTempArg) arg;
 
                 switch (tempArg.size) {
-                case BYTE:
-                case 
+                case BYTE: {
+                    ASMReg reg = availableByteRegisters[indexOfNextAvailableByteRegister];
+                    ASMReg qwordReg = reg.correspondingQWordReg();
+
+                    prelude.add(make.Push(qwordReg));
+                    // clear the upper 7 bytes of the "surrounding" register.
+                    prelude.add(make.Xor(qwordReg, qwordReg)); 
+                    prelude.add(make.Mov(reg,
+                            new ASMMemArg(addressOfTemporary(tempArg,
+                                    temporaryToIndexMap).get())));
+
+                    postlude.add(0, make.Pop(qwordReg));
+                    postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
+                            tempArg,
+                            temporaryToIndexMap).get()), reg));
+
+                    argsWithTempsReplacedForRegisters.add(reg);
+
+                    indexOfNextAvailableByteRegister++;
+
+                    break;
                 }
-                ASMReg reg = availableQwordRegisters[indexOfNextAvailableRegister];
+                case QWORD: {
+                    ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
 
-                prelude.add(make.Mov(reg,
-                        new ASMMemArg(addressOfTemporary(tempArg,
-                                temporaryToIndexMap).get())));
+                    prelude.add(make.Mov(reg,
+                            new ASMMemArg(addressOfTemporary(tempArg,
+                                    temporaryToIndexMap).get())));
 
-                postlude.add(make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
-                        temporaryToIndexMap).get()), reg));
+                    postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
+                            tempArg,
+                            temporaryToIndexMap).get()), reg));
 
-                argsWithTempsReplacedForRegisters.add(reg);
+                    argsWithTempsReplacedForRegisters.add(reg);
 
-                indexOfNextAvailableRegister++;
+                    indexOfNextAvailableQwordRegister++;
+
+                    break;
+                }
+                }
             } else {
                 argsWithTempsReplacedForRegisters.add(arg);
             }

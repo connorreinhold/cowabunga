@@ -25,4 +25,15 @@ public enum ASMReg implements ASMArg {
     public String toString() {
         return "ASMReg [register=" + this.name() + "]";
     }
+
+    public ASMReg correspondingQWordReg() {
+        switch this {
+        case AL: return RAX;
+        case CL: return RCX;
+        case DL: return RDX;
+        case BL: return RBX;
+        default: return this;
+        }
+    }
+
 }
