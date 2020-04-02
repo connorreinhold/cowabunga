@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import cyr7.exceptions.x86.ASMException;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -41,7 +42,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     private final IdGenerator generator;
 
     public ASMTrivialRegAllocGenerator(TilerFactory tilerFactory,
-            IdGenerator generator) {
+                                       IdGenerator generator) {
         this.tilerFactory = tilerFactory;
         this.generator = generator;
     }
@@ -51,40 +52,40 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         List<ASMLine> lines = new ArrayList<>();
 
         Set<Entry<String, IRFuncDecl>> nameFuncDeclPairs = compUnit.functions()
-                                                                   .entrySet();
+            .entrySet();
 
         Map<String, FunctionType> fMap = new HashMap<>();
         for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
             fMap.put(nameFuncDecl.getKey(),
-                    nameFuncDecl.getValue()
-                                .type());
+                nameFuncDecl.getValue()
+                    .type());
         }
 
         for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
             lines.addAll(generate(nameFuncDecl.getKey(),
-                    nameFuncDecl.getValue(),
-                    fMap));
+                nameFuncDecl.getValue(),
+                fMap));
         }
 
         return lines;
     }
 
     private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
-            Map<String, FunctionType> fMap) {
+                                   Map<String, FunctionType> fMap) {
 
         String returnLbl = "end_" + funcName;
 
         MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(generator,
-                funcName,
-                fMap,
-                returnLbl);
+            funcName,
+            fMap,
+            returnLbl);
 
         List<ASMLine> functionBody = funcDecl.body()
-                                             .accept(tiler).optimalInstructions;
+            .accept(tiler).optimalInstructions;
         List<ASMTempArg> uniqueTemps = uniqueTemps(functionBody);
         List<ASMLine> concreteFunctionBody = replaceTemporariesWithMemoryAccess(
-                functionBody,
-                uniqueTemps);
+            functionBody,
+            uniqueTemps);
 
         List<ASMLine> lines = new ArrayList<>();
         lines.addAll(createPrologue(funcName, uniqueTemps.size()));
@@ -108,23 +109,23 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     }
 
     private List<ASMLine> createPrologue(String mangledFunctionName,
-            long numberOfTemps) {
+                                         long numberOfTemps) {
         return List.of(new ASMLabel(mangledFunctionName),
-                make.Push(ASMReg.RBP),
-                make.Mov(ASMReg.RBP, ASMReg.RSP),
-                make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+            make.Push(ASMReg.RBP),
+            make.Mov(ASMReg.RBP, ASMReg.RSP),
+            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
     }
 
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
         return List.of(new ASMLabel(returnLbl),
-                make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
-                make.Mov(ASMReg.RSP, ASMReg.RBP),
-                make.Pop(ASMReg.RBP),
-                make.Ret());
+            make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
+            make.Mov(ASMReg.RSP, ASMReg.RBP),
+            make.Pop(ASMReg.RBP),
+            make.Ret());
     }
 
     private List<ASMLine> replaceTemporariesWithMemoryAccess(
-            List<ASMLine> lines, List<ASMTempArg> tempArgs) {
+        List<ASMLine> lines, List<ASMTempArg> tempArgs) {
 
         Map<String, Integer> temporaryToIndexMap = new HashMap<>();
         for (int i = 0; i < tempArgs.size(); i++) {
@@ -132,154 +133,163 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
             temporaryToIndexMap.put(tempArg.name, i);
         }
 
-        return lines.stream()
-                    .flatMap(asmLine -> {
-                        if (asmLine instanceof ASMInstr) {
-                            return replaceInstrTempArgsWithMemoryAccess(
-                                    (ASMInstr) asmLine,
-                                    temporaryToIndexMap).stream();
-                        } else {
-                            return Stream.of(asmLine);
-                        }
-                    })
-                    .collect(Collectors.toUnmodifiableList());
+        return lines.stream().flatMap(asmLine -> {
+            if (asmLine instanceof ASMInstr) {
+                return replaceInstrTempArgsWithMemoryAccess(
+                    (ASMInstr) asmLine,
+                    temporaryToIndexMap).stream();
+            } else {
+                return Stream.of(asmLine);
+            }
+        }).collect(Collectors.toUnmodifiableList());
     }
 
-    private List<ASMLine> replaceInstrTempArgsWithMemoryAccess(ASMInstr instr,
-            Map<String, Integer> temporaryToIndexMap) {
+    private List<ASMLine> replaceInstrTempArgsWithMemoryAccess(
+        ASMInstr instr,
+        Map<String, Integer> temporaryToIndexMap) {
 
-        // assumption: availableQword and availableByte regs are disjoint
-        ASMReg[] qwordRegisters =
-            { ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14,
-                    ASMReg.R15 };
-        int indexOfNextQwordReg = 0;
+        TempToMemoryArgTranslator translator
+            = new TempToMemoryArgTranslator(temporaryToIndexMap);
+        return translator.translate(instr);
+    }
 
-        ASMReg[] byteRegisters =
-            { ASMReg.AL, ASMReg.BL, ASMReg.CL, ASMReg.DL };
-        int indexOfNextByteReg = 0;
+    private static final class TempToMemoryArgTranslator {
 
-        List<ASMLine> prelude = new ArrayList<>();
-        List<ASMLine> postlude = new ArrayList<>();
-        List<ASMArg> argsWithTempsReplacedForRegisters = new ArrayList<>();
+        public static final ASMReg[] QWORD_REGS =
+            {ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14,
+                ASMReg.R15};
 
-        for (ASMArg arg : instr.args) {
-            if (arg instanceof ASMMemArg) {
-                ASMMemArg memArg = (ASMMemArg) arg;
+        public static final ASMReg[] BYTE_REGS =
+            {ASMReg.AL, ASMReg.BL, ASMReg.CL, ASMReg.DL};
 
-                Optional<ASMTempRegArg> base = Optional.empty();
-                Optional<ASMTempRegArg> index = Optional.empty();
+        private final List<ASMLine> prelude = new ArrayList<>();
+        private final List<ASMLine> postlude = new ArrayList<>();
+        private final List<ASMArg> newArgs = new ArrayList<>();
 
-                if (memArg.address.base.isPresent()) {
-                    ASMArg b = memArg.address.base.get();
-                    if (b instanceof ASMMemArg) {
-                        throw new RuntimeException("Bad argument");
-                    } else if (b instanceof ASMReg) {
-                        base = Optional.of((ASMReg) b);
-                    } else if (b instanceof ASMTempArg) {
-                        ASMTempArg tempArg = (ASMTempArg) b;
-                        ASMReg reg = qwordRegisters[indexOfNextQwordReg];
+        private int nextQwordReg = 0;
+        private int nextByteReg = 0;
 
-                        prelude.add(make.Mov(reg,
-                                new ASMMemArg(addressOfTemporary(tempArg,
-                                        temporaryToIndexMap).get())));
-                        postlude.add(0,
-                                make.Mov(new ASMMemArg(addressOfTemporary(
-                                        tempArg,
-                                        temporaryToIndexMap).get()), reg));
-                        base = Optional.of(reg);
-                        indexOfNextQwordReg++;
-                    }
+        private final Map<String, Integer> tempToIndexMap;
+
+        TempToMemoryArgTranslator(Map<String, Integer> tempToIndexMap) {
+            this.tempToIndexMap = tempToIndexMap;
+        }
+
+        List<ASMLine> translate(ASMInstr instr) {
+            for (ASMArg arg : instr.args) {
+                if (arg instanceof ASMMemArg) {
+                    ASMMemArg memArg = (ASMMemArg) arg;
+                    allocateRegisterForMemory(memArg);
+                } else if (arg instanceof ASMTempArg) {
+                    ASMTempArg tempArg = (ASMTempArg) arg;
+                    allocateMemoryForNormalTemporary(tempArg);
+                } else {
+                    newArgs.add(arg);
                 }
-                if (memArg.address.index.isPresent()) {
-                    ASMArg i = memArg.address.index.get();
-                    if (i instanceof ASMMemArg) {
-                        throw new RuntimeException("Bad argument");
-                    } else if (i instanceof ASMReg) {
-                        index = Optional.of((ASMReg) i);
-                    } else if (i instanceof ASMTempArg) {
-                        ASMTempArg tempArg = (ASMTempArg) i;
-                        ASMReg reg = qwordRegisters[indexOfNextQwordReg];
+            }
 
-                        prelude.add(make.Mov(reg,
-                                new ASMMemArg(addressOfTemporary(tempArg,
-                                        temporaryToIndexMap).get())));
-                        postlude.add(0,
-                                make.Mov(new ASMMemArg(addressOfTemporary(
-                                        tempArg,
-                                        temporaryToIndexMap).get()), reg));
-                        index = Optional.of(reg);
-                        indexOfNextQwordReg++;
-                    }
-                }
-                argsWithTempsReplacedForRegisters.add(new ASMMemArg(
-                        new ASMAddrExpr(base, memArg.address.scale, index,
-                                memArg.address.displacement)));
-            } else if (arg instanceof ASMTempArg) {
-                ASMTempArg tempArg = (ASMTempArg) arg;
+            List<ASMLine> lines = new ArrayList<>();
+            lines.addAll(prelude);
+            lines.add(instr.withArgsReplaced(newArgs));
+            lines.addAll(postlude);
+            return lines;
+        }
 
-                switch (tempArg.size) {
+        // allocate registers for temporaries inside a mem arg
+        private void allocateRegisterForMemory(ASMMemArg arg) {
+            Optional<ASMTempRegArg> base = Optional.empty();
+            Optional<ASMTempRegArg> index = Optional.empty();
+
+            if (arg.address.base.isPresent()) {
+                ASMTempRegArg b = arg.address.base.get();
+                base = Optional.of(allocateRegisterForMemoryOperand(b));
+            }
+            if (arg.address.index.isPresent()) {
+                ASMTempRegArg i = arg.address.index.get();
+                index = Optional.of(allocateRegisterForMemoryOperand(i));
+            }
+
+            ASMAddrExpr address = new ASMAddrExpr(
+                base,
+                arg.address.scale,
+                index,
+                arg.address.displacement);
+            newArgs.add(new ASMMemArg(address));
+        }
+
+        // allocate registers for temporaries that are regular arguments to an
+        // asm instruction (i.e. not inside memory access)
+        private void allocateMemoryForNormalTemporary(ASMTempArg arg) {
+            switch (arg.size) {
                 case BYTE: {
-                    ASMReg reg = byteRegisters[indexOfNextByteReg];
+                    ASMReg reg = BYTE_REGS[nextByteReg++];
                     ASMReg qwordReg = reg.correspondingQWordReg();
 
                     prelude.add(make.Push(qwordReg));
                     prelude.add(make.Mov(qwordReg,
-                            new ASMMemArg(addressOfTemporary(tempArg,
-                                    temporaryToIndexMap).get())));
+                        new ASMMemArg(addressOfTemporary(arg))));
 
                     postlude.add(0, make.Pop(qwordReg));
                     postlude.add(0,
-                            make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
-                                    temporaryToIndexMap).get()), qwordReg));
+                        make.Mov(new ASMMemArg(addressOfTemporary(arg)), qwordReg));
 
-                    argsWithTempsReplacedForRegisters.add(reg);
-
-                    indexOfNextByteReg++;
+                    newArgs.add(reg);
 
                     break;
                 }
                 case QWORD: {
-                    ASMReg reg = qwordRegisters[indexOfNextQwordReg];
+                    ASMReg reg = QWORD_REGS[nextQwordReg++];
 
                     prelude.add(make.Mov(reg,
-                            new ASMMemArg(addressOfTemporary(tempArg,
-                                    temporaryToIndexMap).get())));
+                        new ASMMemArg(addressOfTemporary(arg))));
 
                     postlude.add(0,
-                            make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
-                                    temporaryToIndexMap).get()), reg));
+                        make.Mov(new ASMMemArg(addressOfTemporary(arg)), reg));
 
-                    argsWithTempsReplacedForRegisters.add(reg);
-
-                    indexOfNextQwordReg++;
+                    newArgs.add(reg);
 
                     break;
                 }
-                }
-            } else {
-                argsWithTempsReplacedForRegisters.add(arg);
             }
         }
 
-        List<ASMLine> lines = new ArrayList<>();
-        lines.addAll(prelude);
-        lines.add(instr.withArgsReplaced(argsWithTempsReplacedForRegisters));
-        lines.addAll(postlude);
-        return lines;
-    }
+        private ASMTempRegArg allocateRegisterForMemoryOperand(ASMTempRegArg arg) {
+            if (arg instanceof ASMReg) {
+                return arg;
+            } else if (arg instanceof ASMTempArg) {
+                ASMTempArg tempArg = (ASMTempArg) arg;
+                ASMReg reg = QWORD_REGS[nextQwordReg];
 
-    private Optional<ASMAddrExpr> addressOfTemporary(ASMTempArg tempArg,
-            Map<String, Integer> temporaryToIndexMap) {
+                ASMAddrExpr address = addressOfTemporary(tempArg);
+                prelude.add(make.Mov(reg, new ASMMemArg(address)));
+                postlude.add(0, make.Mov(new ASMMemArg(address), reg));
+                nextQwordReg++;
+                return reg;
+            } else {
+                throw new ASMException("ASMTempRegArg " + arg + " is neither " +
+                    "a temporary nor a register.");
+            }
 
-        Integer index = temporaryToIndexMap.get(tempArg.name);
-        if (index == null) {
-            return Optional.empty();
         }
 
-        // [RBP + 8 * (index + 1)]
-        return Optional.of(arg.addr(Optional.of(ASMReg.RBP),
+        private ASMAddrExpr addressOfTemporary(ASMTempArg tempArg) {
+            Integer index = tempToIndexMap.get(tempArg.name);
+            if (index == null) {
+                throw new ASMException(
+                    "Could not find index for temporary \""
+                        + tempArg.name
+                        + "\"");
+            }
+
+            // [RBP + 8 * (index + 1)]
+            return arg.addr(
+                Optional.of(ASMReg.RBP),
                 ScaleValues.ONE,
                 Optional.empty(),
-                -8 * (index + 1)));
+                -8 * (index + 1));
+        }
+
     }
+
 }
+
