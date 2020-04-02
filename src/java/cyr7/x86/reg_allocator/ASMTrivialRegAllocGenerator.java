@@ -52,33 +52,27 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         List<ASMLine> lines = new ArrayList<>();
 
         Set<Entry<String, IRFuncDecl>> nameFuncDeclPairs = compUnit.functions()
-            .entrySet();
-
-        Map<String, FunctionType> fMap = new HashMap<>();
-        for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
-            fMap.put(nameFuncDecl.getKey(),
-                nameFuncDecl.getValue()
-                    .type());
-        }
-
+                                                            .entrySet();
         for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
             lines.addAll(generate(nameFuncDecl.getKey(),
-                nameFuncDecl.getValue(),
-                fMap));
+                    nameFuncDecl.getValue(),
+                    nameFuncDecl.getValue()
+                                .numOfReturnValues()));
         }
-
         return lines;
     }
 
     private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
-                                   Map<String, FunctionType> fMap) {
+
+            int numOfReturnValues) {
 
         String returnLbl = "end_" + funcName;
 
         MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(generator,
-            funcName,
-            fMap,
-            returnLbl);
+
+                funcName,
+                numOfReturnValues,
+                returnLbl);
 
         List<ASMLine> functionBody = funcDecl.body()
             .accept(tiler).optimalInstructions;

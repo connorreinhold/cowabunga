@@ -605,6 +605,13 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             result = new TilerData(1 + target.tileCost, instrs,
                     Optional.empty());
+        } else if (target.result.get() instanceof ASMMemArg 
+                && source.result.get() instanceof ASMMemArg) {
+            ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
+            instrs.add(make.Mov(sourceTemp, source.result.get()));
+            instrs.add(make.Mov(target.result.get(), sourceTemp));
+            result = new TilerData(1 + target.tileCost + source.tileCost,
+                    instrs, Optional.empty());
         } else {
             instrs.add(make.Mov(target.result.get(), source.result.get()));
             result = new TilerData(1 + target.tileCost + source.tileCost,
