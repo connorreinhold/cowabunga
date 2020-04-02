@@ -1,9 +1,9 @@
 package cyr7.ir.integration.galeshapley;
 
+import java.util.Scanner;
+
 import cyr7.ir.integration.Run.RunConfiguration;
 import cyr7.ir.integration.TestProgram;
-
-import java.util.Scanner;
 
 public class TestGaleShapley0 extends TestProgram {
 

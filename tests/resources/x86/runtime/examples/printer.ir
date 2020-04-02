@@ -1,0 +1,25 @@
+(COMPUNIT
+ printer
+ (FUNC
+  _Imain_paai
+  (SEQ
+   (LABEL _l0)
+   (MOVE (TEMP args) (TEMP _ARG0))
+   (MOVE (TEMP _t3) (CONST 8))
+   (MOVE (TEMP _t2) (CONST 1))
+   (MOVE (TEMP _t4) (MUL (TEMP _t3) (ADD (TEMP _t2) (CONST 1))))
+   (MOVE (TEMP _ARG0) (TEMP _t4))
+   (CALL_STMT _t5 (NAME _xi_alloc) (TEMP _t4))
+   (MOVE (TEMP _t0) (TEMP _t5))
+   (MOVE (TEMP _t6) (TEMP _t0))
+   (MOVE (MEM (TEMP _t6)) (CONST 1))
+   (MOVE (TEMP _t7) (TEMP _t0))
+   (MOVE (TEMP _t1) (ADD (TEMP _t7) (CONST 8)))
+   (MOVE (TEMP _t9) (TEMP _t1))
+   (MOVE (TEMP _t8) (CONST 8))
+   (MOVE (TEMP _t10) (ADD (TEMP _t9) (MUL (TEMP _t8) (CONST 0))))
+   (MOVE (MEM (TEMP _t10)) (CONST 65))
+   (MOVE (TEMP _t11) (TEMP _t1))
+   (MOVE (TEMP _ARG0) (TEMP _t11))
+   (CALL_STMT _t12 (NAME _Iprintln_pai) (TEMP _t11))
+   (RETURN ()))))
