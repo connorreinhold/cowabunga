@@ -293,6 +293,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         int lastRegisterArg;
         int tileCost = 0;
+
+        /*
+         * If the callee function has more than two return values, then we store
+         * memory address to a "saved stack space" to hold return values onto
+         * the rdi register.
+         */
         if (n.numOfReturnValues > 2) {
             lastRegisterArg = Math.min(5, argTiles.size());
 
@@ -483,18 +489,28 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
 
         TilerData result;
+
         if (n.target() instanceof IRTemp
                 && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
+            // Case: Move(ARG_i, t)
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
 
         } else if (n.source() instanceof IRTemp
                 && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
-
+            // Case Move(t, ARG_i)
             String index = ((IRTemp) n.source()).name()
                     .substring(ARG_PREFIX.length());
 
             int i = Integer.parseInt(index);
+            /*
+             * If the number of return values in this callee function is greater
+             * than 2, then the caller function must had allocated space in the
+             * stack to store the third and onward return values. This address
+             * is stored in the rdi register, the first argument. If this the
+             * case, then the true first argument of the function would be in
+             * rsi, usually used for the second argument.
+             */
             ASMArg targetTemp = target.result.get();
             if (this.numRetValues > 2) {
                 switch (i) {
@@ -558,6 +574,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     Optional.empty());
         } else if (n.target() instanceof IRTemp
                 && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
+            // Case Move(RET_i, t)
             String index = ((IRTemp) n.target()).name()
                     .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
@@ -582,7 +599,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     Optional.empty());
         } else if (n.source() instanceof IRTemp
                 && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
-
+            // Case Move(t, RET_i)
             String index = ((IRTemp) n.source()).name()
                                                 .substring(RET_PREFIX.length());
             int i = Integer.parseInt(index);
