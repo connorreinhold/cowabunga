@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -75,6 +76,26 @@ public abstract class TestProgram {
         return "tests/resources/irgen/lib";
     }
 
+    private String executeCommand(
+            String... command)
+            throws InterruptedException, IOException {
+        System.out.println(Arrays.toString(command));
+        ProcessBuilder process = new ProcessBuilder(command);
+        process.directory(new File("."));
+        Process runner = process.start();
+        InputStream resultStream = new BufferedInputStream(
+                runner.getInputStream());
+
+        runner.waitFor();
+        BufferedReader reader = new BufferedReader(
+                new InputStreamReader(resultStream));
+
+        List<String> output = reader.lines().collect(Collectors.toList());
+        System.out.println("From executeCommand: " + output);
+
+        return String.join("\n", output);
+    }
+
     @Test
     void runAssemblyTest()
             throws IOException, URISyntaxException, InterruptedException {
@@ -100,26 +121,19 @@ public abstract class TestProgram {
             return;
         }
 
-        ProcessBuilder compileFile = new ProcessBuilder("./xic", "-libpath",
-                this.libpath(), this.getTestXiFilename());
-        compileFile.directory(new File("."));
-        Process compileProcess = compileFile.start();
-        compileProcess.waitFor();
+        this.executeCommand("./xic", "-libpath", this.libpath(),
+                this.getTestXiFilename());
+
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
         tmpFile.setReadable(true);
         tmpFile.setWritable(true);
         tmpFile.deleteOnExit();
-
-        ProcessBuilder pb = new ProcessBuilder(
-                linkerFile.getAbsoluteFile().toString(),
+        this.executeCommand(linkerFile.getAbsolutePath(),
                 this.getTestAssemblyFilename(), "-o",
-                tmpFile.getAbsoluteFile().toString());
+                tmpFile.getAbsolutePath());
 
-        pb.directory(new File("."));
-        Process p = pb.start();
-        p.waitFor();
 
         long[][] longArgs = this.configuration().args;
         String[] args = new String[longArgs.length];
@@ -127,7 +141,6 @@ public abstract class TestProgram {
         for (int i = 0; i < longArgs.length; i++) {
             long[] longRep = longArgs[i];
             char[] charRep = new char[longRep.length];
-
             for (int j = 0; j < charRep.length; j++) {
                 charRep[j] = (char) longRep[j];
             }
@@ -140,23 +153,12 @@ public abstract class TestProgram {
             command[i + 1] = args[i];
         }
 
-        System.out.println(Arrays.toString(command));
-        ProcessBuilder loadASM = new ProcessBuilder(command);
-        loadASM.directory(new File("."));
-        Process runASM = loadASM.start();
-        InputStream resultStream = new BufferedInputStream(
-                runASM.getInputStream());
+        String result = this.executeCommand(command);
 
-        runASM.waitFor();
-        BufferedReader reader = new BufferedReader(
-                new InputStreamReader(resultStream));
-
-        String result = String.join("\n",
-                reader.lines().collect(Collectors.toList()));
+        System.out.println(expected());
+        System.out.println("-------------------------");
+        System.out.println(result);
         assertEquals(expected(), result);
-
-        reader.close();
-        resultStream.close();
     }
 
 }
