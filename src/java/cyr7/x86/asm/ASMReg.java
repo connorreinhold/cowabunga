@@ -1,6 +1,8 @@
 package cyr7.x86.asm;
 
-public enum ASMReg implements ASMArg {
+import cyr7.x86.visitor.AbstractASMVisitor;
+
+public enum ASMReg implements ASMTempRegArg {
     // Classic Registers
     RAX, // Accumulator Register
     RCX, // Counter Register
@@ -41,4 +43,8 @@ public enum ASMReg implements ASMArg {
         }
     }
 
+    @Override
+    public <R> R accept(AbstractASMVisitor<R> visitor) {
+        return visitor.visit(this);
+    }
 }

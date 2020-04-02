@@ -1,4 +1,15 @@
-package cyr7.x86;
+package cyr7.x86.reg_allocator;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
@@ -16,18 +27,10 @@ import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+import cyr7.x86.asm.ASMTempRegArg;
+import cyr7.x86.tiler.TilerData;
+import cyr7.x86.tiler.TilerFactory;
+import cyr7.x86.visitor.TempVisitor;
 
 public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
@@ -43,6 +46,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         this.generator = generator;
     }
 
+    @Override
     public List<ASMLine> generate(IRCompUnit compUnit) {
         List<ASMLine> lines = new ArrayList<>();
 
@@ -98,19 +102,8 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
      */
     private List<ASMTempArg> uniqueTemps(List<ASMLine> lines) {
         Set<ASMTempArg> temps = new HashSet<>();
-
-        for (ASMLine line : lines) {
-            if (line instanceof ASMInstr) {
-                ASMInstr instr = (ASMInstr) line;
-
-                for (ASMArg arg : instr.args) {
-                    if (arg instanceof ASMTempArg) {
-                        temps.add((ASMTempArg) arg);
-                    }
-                }
-            }
-        }
-
+        var tempVisitor = new TempVisitor();
+        lines.forEach(l -> temps.addAll(l.accept(tempVisitor)));
         return new ArrayList<>(temps);
     }
 
@@ -132,6 +125,7 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
     private List<ASMLine> replaceTemporariesWithMemoryAccess(
             List<ASMLine> lines, List<ASMTempArg> tempArgs) {
+
         Map<String, Integer> temporaryToIndexMap = new HashMap<>();
         for (int i = 0; i < tempArgs.size(); i++) {
             ASMTempArg tempArg = tempArgs.get(i);
@@ -155,27 +149,77 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
             Map<String, Integer> temporaryToIndexMap) {
 
         // assumption: availableQword and availableByte regs are disjoint
-
-        ASMReg[] availableQwordRegisters =
+        ASMReg[] qwordRegisters =
             { ASMReg.R10, ASMReg.R11, ASMReg.R12, ASMReg.R13, ASMReg.R14,
                     ASMReg.R15 };
-        int indexOfNextAvailableQwordRegister = 0;
+        int indexOfNextQwordReg = 0;
 
-        ASMReg[] availableByteRegisters =
+        ASMReg[] byteRegisters =
             { ASMReg.AL, ASMReg.BL, ASMReg.CL, ASMReg.DL };
-        int indexOfNextAvailableByteRegister = 0;
+        int indexOfNextByteReg = 0;
 
         List<ASMLine> prelude = new ArrayList<>();
         List<ASMLine> postlude = new ArrayList<>();
         List<ASMArg> argsWithTempsReplacedForRegisters = new ArrayList<>();
 
         for (ASMArg arg : instr.args) {
-            if (arg instanceof ASMTempArg) {
+            if (arg instanceof ASMMemArg) {
+                ASMMemArg memArg = (ASMMemArg) arg;
+
+                Optional<ASMTempRegArg> base = Optional.empty();
+                Optional<ASMTempRegArg> index = Optional.empty();
+
+                if (memArg.address.base.isPresent()) {
+                    ASMArg b = memArg.address.base.get();
+                    if (b instanceof ASMMemArg) {
+                        throw new RuntimeException("Bad argument");
+                    } else if (b instanceof ASMReg) {
+                        base = Optional.of((ASMReg) b);
+                    } else if (b instanceof ASMTempArg) {
+                        ASMTempArg tempArg = (ASMTempArg) b;
+                        ASMReg reg = qwordRegisters[indexOfNextQwordReg];
+
+                        prelude.add(make.Mov(reg,
+                                new ASMMemArg(addressOfTemporary(tempArg,
+                                        temporaryToIndexMap).get())));
+                        postlude.add(0,
+                                make.Mov(new ASMMemArg(addressOfTemporary(
+                                        tempArg,
+                                        temporaryToIndexMap).get()), reg));
+                        base = Optional.of(reg);
+                        indexOfNextQwordReg++;
+                    }
+                }
+                if (memArg.address.index.isPresent()) {
+                    ASMArg i = memArg.address.index.get();
+                    if (i instanceof ASMMemArg) {
+                        throw new RuntimeException("Bad argument");
+                    } else if (i instanceof ASMReg) {
+                        index = Optional.of((ASMReg) i);
+                    } else if (i instanceof ASMTempArg) {
+                        ASMTempArg tempArg = (ASMTempArg) i;
+                        ASMReg reg = qwordRegisters[indexOfNextQwordReg];
+
+                        prelude.add(make.Mov(reg,
+                                new ASMMemArg(addressOfTemporary(tempArg,
+                                        temporaryToIndexMap).get())));
+                        postlude.add(0,
+                                make.Mov(new ASMMemArg(addressOfTemporary(
+                                        tempArg,
+                                        temporaryToIndexMap).get()), reg));
+                        index = Optional.of(reg);
+                        indexOfNextQwordReg++;
+                    }
+                }
+                argsWithTempsReplacedForRegisters.add(new ASMMemArg(
+                        new ASMAddrExpr(base, memArg.address.scale, index,
+                                memArg.address.displacement)));
+            } else if (arg instanceof ASMTempArg) {
                 ASMTempArg tempArg = (ASMTempArg) arg;
 
                 switch (tempArg.size) {
                 case BYTE: {
-                    ASMReg reg = availableByteRegisters[indexOfNextAvailableByteRegister];
+                    ASMReg reg = byteRegisters[indexOfNextByteReg];
                     ASMReg qwordReg = reg.correspondingQWordReg();
 
                     prelude.add(make.Push(qwordReg));
@@ -184,30 +228,30 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                                     temporaryToIndexMap).get())));
 
                     postlude.add(0, make.Pop(qwordReg));
-                    postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
-                            tempArg,
-                            temporaryToIndexMap).get()), qwordReg));
+                    postlude.add(0,
+                            make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
+                                    temporaryToIndexMap).get()), qwordReg));
 
                     argsWithTempsReplacedForRegisters.add(reg);
 
-                    indexOfNextAvailableByteRegister++;
+                    indexOfNextByteReg++;
 
                     break;
                 }
                 case QWORD: {
-                    ASMReg reg = availableQwordRegisters[indexOfNextAvailableQwordRegister];
+                    ASMReg reg = qwordRegisters[indexOfNextQwordReg];
 
                     prelude.add(make.Mov(reg,
                             new ASMMemArg(addressOfTemporary(tempArg,
                                     temporaryToIndexMap).get())));
 
-                    postlude.add(0, make.Mov(new ASMMemArg(addressOfTemporary(
-                            tempArg,
-                            temporaryToIndexMap).get()), reg));
+                    postlude.add(0,
+                            make.Mov(new ASMMemArg(addressOfTemporary(tempArg,
+                                    temporaryToIndexMap).get()), reg));
 
                     argsWithTempsReplacedForRegisters.add(reg);
 
-                    indexOfNextAvailableQwordRegister++;
+                    indexOfNextQwordReg++;
 
                     break;
                 }
@@ -238,5 +282,4 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
                 Optional.empty(),
                 -8 * (index + 1)));
     }
-
 }

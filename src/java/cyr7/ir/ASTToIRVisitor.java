@@ -129,7 +129,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     make.IRTemp(node.identifier),
                     make.IRTemp(generator.argTemp(i))));
         }
-        
+
         // Add the body of the function.
         seq.add(n.block.accept(this)
                        .assertSecond());
@@ -185,7 +185,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             IRStmt funStmts = fun.accept(this).assertSecond();
             String funcName = this.assemblyFunctionName(fun.header.identifier,
                     fun.header.getType());
-            program.appendFunc(make.IRFuncDecl(funcName, funStmts));
+            program.appendFunc(
+                    make.IRFuncDecl(funcName, funStmts, fun.header.getType()));
         }
         return OneOfTwo.ofSecond(program);
     }
@@ -224,7 +225,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                         make.IRTemp(arrSize),
                         make.IRConst(1)));
 
-        IRExpr memLoc = make.IRCall(make.IRName("_xi_alloc"), spaceNeeded);
+        IRExpr memLoc = make.IRCall(make.IRName("_xi_alloc"),
+                List.of(spaceNeeded), 1);
         commands.add(make.IRMove(make.IRTemp(memBlockStart), memLoc));
 
         commands.add(make.IRMove(make.IRMem(make.IRTemp(memBlockStart)),
@@ -456,10 +458,10 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                                           .map(stmt -> stmt.accept(this)
                                                            .assertFirst())
                                           .collect(Collectors.toList());
-        String encodedName = assemblyFunctionName(n.identifier,
-                n.getFunctionType()
-                 .get());
-        return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params));
+        var fType = n.getFunctionType().get();
+        String encodedName = assemblyFunctionName(n.identifier, fType);
+        return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params,
+                fType.output.getTypes().size()));
     }
 
     /**
@@ -498,7 +500,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                         make.IRTemp(indexTemp),
                         make.IRTemp(lengthTemp))), lt, lf));
         commands.add(make.IRLabel(lf));
-        commands.add(make.IRExp(make.IRCall(make.IRName("_xi_out_of_bounds"))));
+        commands.add(make.IRExp(
+                make.IRCall(make.IRName("_xi_out_of_bounds"), List.of(), 1)));
         commands.add(make.IRLabel(lt));
 
         IRExpr val = make.IRMem(make.IRBinOp(OpType.ADD,
@@ -561,11 +564,12 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         // Space for concatenated array
         seq.add(make.IRMove(make.IRTemp(summedArrAddr),
                 make.IRCall(make.IRName("_xi_alloc"),
-                        make.IRBinOp(OpType.MUL,
+                        List.of(make.IRBinOp(OpType.MUL,
                                 make.IRConst(8),
                                 make.IRBinOp(OpType.ADD,
                                         make.IRTemp(summedArrSize),
-                                        make.IRConst(1))))));
+                                        make.IRConst(1)))),
+                        1)));
 
         seq.add(make.IRMove(make.IRMem(make.IRTemp(summedArrAddr)),
                 make.IRTemp(summedArrSize)));
@@ -757,7 +761,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
 
         List<IRStmt> commands = new ArrayList<IRStmt>();
 
-        IRExpr memLoc = make.IRCall(make.IRName("_xi_alloc"), spaceNeeded);
+        IRExpr memLoc = make.IRCall(make.IRName("_xi_alloc"),
+                List.of(spaceNeeded), 1);
 
         commands.add(make.IRMove(make.IRTemp(memBlockStart), memLoc));
         commands.add(make.IRMove(make.IRMem(make.IRTemp(memBlockStart)),

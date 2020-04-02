@@ -1,4 +1,4 @@
-package cyr7.x86;
+package cyr7.x86.tiler;
 
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;

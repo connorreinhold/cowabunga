@@ -5,6 +5,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 
+import cyr7.x86.visitor.AbstractASMVisitor;
+
 public class ASMAddrExpr {
     // General Memory Access: [base + scale * index + displacement]
 
@@ -28,17 +30,21 @@ public class ASMAddrExpr {
         }
     }
 
-    public final Optional<ASMReg> base;
+    public final Optional<ASMTempRegArg> base;
     public final ScaleValues scale;
-    public final Optional<ASMReg> index;
+    public final Optional<ASMTempRegArg> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<ASMReg> base, ScaleValues scale,
-            Optional<ASMReg> index, int displacement) {
+    public ASMAddrExpr(Optional<ASMTempRegArg> base, ScaleValues scale,
+            Optional<ASMTempRegArg> index, int displacement) {
         this.base = base;
         this.scale = scale;
         this.index = index;
         this.displacement = displacement;
+    }
+
+    public ASMAddrExpr(ASMTempArg base) {
+        this(Optional.of(base), ScaleValues.ONE, Optional.empty(), 0);
     }
 
     public String getIntelExpr() {
@@ -56,4 +62,9 @@ public class ASMAddrExpr {
         return "ASMAddrExpr [base=" + base + ", displacement=" + displacement
                 + ", index=" + index + ", scale=" + scale + "]";
     }
+
+    public <R> R accept(AbstractASMVisitor<R> visitor) {
+        return visitor.visit(this);
+    }
+
 }

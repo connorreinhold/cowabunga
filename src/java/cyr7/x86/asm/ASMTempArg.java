@@ -2,7 +2,9 @@ package cyr7.x86.asm;
 
 import java.util.Objects;
 
-public class ASMTempArg implements ASMArg {
+import cyr7.x86.visitor.AbstractASMVisitor;
+
+public class ASMTempArg implements ASMTempRegArg {
 
     public enum Size {
         QWORD, BYTE
@@ -41,5 +43,10 @@ public class ASMTempArg implements ASMArg {
     @Override
     public String toString() {
         return "ASMTempArg [name=" + name + "]";
+    }
+
+    @Override
+    public <R> R accept(AbstractASMVisitor<R> visitor) {
+        return visitor.visit(this);
     }
 }

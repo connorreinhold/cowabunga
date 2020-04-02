@@ -28,7 +28,12 @@ public class IRNodeFactory_c implements IRNodeFactory {
 
     @Override
     public IRCall IRCall(IRExpr target, List<IRExpr> args) {
-        return new IRCall(location, target, args);
+        return new IRCall(location, target, args, 10);
+    }
+
+    @Override
+    public IRCall IRCall(IRExpr target, List<IRExpr> args, int numOfRV) {
+        return new IRCall(location, target, args, numOfRV);
     }
 
     @Override
@@ -98,14 +103,22 @@ public class IRNodeFactory_c implements IRNodeFactory {
     }
 
     @Override
-    public IRCallStmt IRCallStmt(List<String> collectors, IRExpr target, List<IRExpr> args) {
-        return new IRCallStmt(location, collectors, target, args);
+    public IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args) {
+        return new IRCallStmt(location, collectors, target, args, 10);
     }
 
     @Override
     public IRCallStmt IRCallStmt(IRExpr target) {
-        return new IRCallStmt(location, List.of(), target, List.of());
+        return new IRCallStmt(location, List.of(), target, List.of(), 10);
     }
+
+    @Override
+    public IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
+            List<IRExpr> args, int numOfRV) {
+        return new IRCallStmt(location, collectors, target, args, numOfRV);
+    }
+
 
     @Override
     public IRMove IRMove(IRExpr target, IRExpr expr) {
