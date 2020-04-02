@@ -12,9 +12,6 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import cyr7.ir.IRUtil.LowerConfiguration;
-import cyr7.typecheck.IxiFileOpener;
-import cyr7.x86.ASMUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -24,9 +21,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import cyr7.ir.IRUtil;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
+import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
+import cyr7.x86.ASMUtil;
 
 public class CLI {
 
