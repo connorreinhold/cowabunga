@@ -26,6 +26,9 @@ tests/xth/xthScriptAll
 *.lexed
 *.parsed
 *.typed
+*.ir
+*.ir_gen 
+*.s
 
 # <-- COWABUNGA SPECIFIC
 
