@@ -29,8 +29,11 @@ parseArgs(args: int[][]): int[] {
     arr: int[size]
     i: int = 0
     while i < size {
-        arr[i] = parseInt(args[i])
+        n: int, _ = parseInt(args[i])
+        arr[i] = n
+        i = i + 1
     }
+    return arr
 }
 
 main(args: int[][]) {

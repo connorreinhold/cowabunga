@@ -126,6 +126,7 @@ public final class Run {
         Location LOC = new Location(-1, -1);
 
         List<ExprNode> exprArgs = new ArrayList<>();
+        exprArgs.add(new LiteralStringExprNode(LOC, "asdlkfjasldfkjdbkljad"));
         for (String arg : args) {
             exprArgs.add(new LiteralStringExprNode(LOC, arg));
         }
