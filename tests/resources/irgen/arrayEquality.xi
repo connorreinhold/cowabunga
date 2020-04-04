@@ -8,7 +8,6 @@ printlnBool(b: bool) {
         println("false")
     }
 }
-
 main(args: int[][]) {
     arr1: int[] = {2,3,5,7};
     arr2: int[] = {2,3,5,7};

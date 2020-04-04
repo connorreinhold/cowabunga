@@ -5,3 +5,4 @@ main(args: int[][]) {
     this_breaks: int[][] = {{}} + {{} + {}}
     this_breaks_2: int[][] = {{} + {}} + {{}}
 }
+
