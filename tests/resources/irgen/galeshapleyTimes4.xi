@@ -9,22 +9,23 @@ main(args: int[][]) {
 
 importData(prefData: int[][]): int[][] {
     i: int = 0
-    lengthPref: int = length(prefData)
+    lengthPref: int = length(prefData) - 1
     data: int[lengthPref][lengthPref/2]
     while i < lengthPref {
+        line: int[] = prefData[i + 1]
         j: int = 0
         start: int = 0
-        lengthOfI: int = length(prefData[i])
-        while start < lengthOfI {
+        lengthOfLine: int = length(line)
+        while start < lengthOfLine {
             end: int = start
-            while end < lengthOfI & prefData[i][end] != ' '{
+            while end < lengthOfLine & line[end] != ' '{
                 end = end + 1
             }
             sizeOfNum: int = end - start
             numString: int[sizeOfNum]
             k: int
             while k < sizeOfNum {
-                numString[k] = prefData[i][start+k]
+                numString[k] = line[start+k]
                 k = k + 1
             }
             num: int, _ = parseInt(numString)
@@ -39,13 +40,13 @@ importData(prefData: int[][]): int[][] {
 
 prefs(prefData: int[][]): int[][], int[][] {
     n: int = length(prefData) / 2
-    
+
     proposerPrefs: int[n][n];
     respondentInvPrefs: int[n][n];
-    
+
     i: int = 0
     j: int = 0
-    
+
     while i < n {
         j = 0
         while j < n {
@@ -54,7 +55,7 @@ prefs(prefData: int[][]): int[][], int[][] {
         }
         i = i + 1
     }
-    
+
     i = 0
     while i < n {
         j = 0
@@ -65,7 +66,7 @@ prefs(prefData: int[][]): int[][], int[][] {
         }
         i = i + 1
     }
-    
+
     return proposerPrefs, respondentInvPrefs
 }
 
