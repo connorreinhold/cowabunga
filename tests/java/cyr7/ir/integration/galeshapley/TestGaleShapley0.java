@@ -3,22 +3,10 @@ package cyr7.ir.integration.galeshapley;
 import cyr7.ir.integration.Run.RunConfiguration;
 import cyr7.ir.integration.TestProgram;
 
-import java.util.Scanner;
-
 public class TestGaleShapley0 extends TestProgram {
 
-    public static long[][] parseGaleShapleyArgs(String input) {
-        Scanner scanner = new Scanner(input);
-        int n = scanner.nextInt();
-        scanner.nextLine();
-        long[][] args = new long[2 * n][n];
-        for (int i = 0; i < 2 * n; i++) {
-            for (int j = 0; j < n; j++) {
-                args[i][j] = scanner.nextInt();
-            }
-            scanner.nextLine();
-        }
-        return args;
+    public static String[] parseGaleShapleyArgs(String input) {
+        return input.split("\n");
     }
 
 
@@ -34,7 +22,7 @@ public class TestGaleShapley0 extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        String test0 = "4\n" +
+        String test0 =
             "1 3 0 2\n" +
             "2 1 3 0\n" +
             "2 3 0 1\n" +

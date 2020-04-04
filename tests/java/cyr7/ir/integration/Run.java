@@ -112,11 +112,11 @@ public final class Run {
         }
         if (lowerConfiguration.traceEnabled) {
             CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-            assertTrue(lowered.aggregateChildren(visitor),
-                "Program is not lowered, but it's supposed to be!: "
+            assertTrue(lowered.aggregateChildren(visitor));
+                /* "Program is not lowered, but it's supposed to be!: "
                     + sexp(lowered)
                     + "\nOffending node: "
-                    + visitor.noncanonical());
+                    + visitor.noncanonical()); */
         }
 
         return lowered;
