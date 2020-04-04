@@ -27,10 +27,10 @@ binarySearch(x: int, arr: int[]): int {
 parseArgs(args: int[][]): int[] {
     size: int = length(args)
     arr: int[size]
-    i: int = 0
-    while i < size {
-        n: int, _ = parseInt(args[i])
-        arr[i] = n
+    i: int = 1
+    while i < size + 1 {
+        n: int, _ = parseInt(args[i - 1])
+        arr[i - 1] = n
         i = i + 1
     }
     return arr

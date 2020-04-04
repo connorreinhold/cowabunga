@@ -10,11 +10,11 @@ public class TestEcho extends TestProgram {
 
     @Override
     protected String expected() {
-        return "Hello world\n";
+        return "asdlkfjasldfkjdbkljad\nHello world\n";
     }
 
     @Override
     protected RunConfiguration configuration() {
-        return new RunConfiguration().args("Hello world\n");
+        return new RunConfiguration().args("Hello world");
     }
 }

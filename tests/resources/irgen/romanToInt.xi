@@ -87,7 +87,7 @@ convert(roman: int[]): int {
 }
 
 main(args: int[][]) {
-    i: int = 0;
+    i: int = 1;
     size: int = length(args);
     while (i < size) {
         println(unparseInt(convert(args[i])))
