@@ -1,0 +1,28 @@
+xic ("Cowabunga IRGen Tests") "--irgen -libpath ./shared/cowabunga/tests/resources/irgen/lib" {
+    ./shared/cowabunga/tests/resources/irgen/factorial.xi;
+    ./shared/cowabunga/tests/resources/irgen/complexCommutability.xi;
+    ./shared/cowabunga/tests/resources/irgen/addMutableArrayValues.xi;
+    ./shared/cowabunga/tests/resources/irgen/ex01.xi;
+    ./shared/cowabunga/tests/resources/irgen/fibonacci.xi;
+    ./shared/cowabunga/tests/resources/irgen/scope.xi;
+    ./shared/cowabunga/tests/resources/irgen/arithmetic.xi;
+    ./shared/cowabunga/tests/resources/irgen/dedupe.xi;
+    ./shared/cowabunga/tests/resources/irgen/startriangle.xi;
+    ./shared/cowabunga/tests/resources/irgen/ack.xi;
+    ./shared/cowabunga/tests/resources/irgen/arrayEquality.xi;
+    ./shared/cowabunga/tests/resources/irgen/arithmetic2.xi;
+    ./shared/cowabunga/tests/resources/irgen/primes.xi;
+    ./shared/cowabunga/tests/resources/irgen/ctranslation.xi;
+    ./shared/cowabunga/tests/resources/irgen/addMutableArray.xi;
+    ./shared/cowabunga/tests/resources/irgen/arrayCloning.xi;
+    ./shared/cowabunga/tests/resources/irgen/arrayalloc.xi;
+    ./shared/cowabunga/tests/resources/irgen/ctranslation2.xi;
+    ./shared/cowabunga/tests/resources/irgen/multidimarray.xi;
+    ./shared/cowabunga/tests/resources/irgen/retFuncCall.xi;
+    ./shared/cowabunga/tests/resources/irgen/ctranslation3.xi;
+}
+xic ("Instructor IRGen Tests") "-libpath ./xth/tests/pa4 --irgen" {
+    ./xth/tests/pa4/ex01.xi;
+    ./xth/tests/pa4/primes.xi;
+    ./xth/tests/pa4/ack.xi;
+}
