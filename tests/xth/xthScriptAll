@@ -1,0 +1,196 @@
+xic ("Cowabunga Lexer Tests") "--lex" {
+    ./shared/cowabunga/tests/resources/lexer/unescapingchar.xi;
+    ./shared/cowabunga/tests/resources/lexer/factorial.xi;
+    ./shared/cowabunga/tests/resources/lexer/leadingzero.xi;
+    ./shared/cowabunga/tests/resources/lexer/fibonacci.xi;
+    ./shared/cowabunga/tests/resources/lexer/singlequotea.xi;
+    ./shared/cowabunga/tests/resources/lexer/unescapingstring.xi;
+}
+xic ("Cowabunga Parser Tests") "--parse" {
+    ./shared/cowabunga/tests/resources/parser/xi/fibonacci.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/arrayDeclSizingFail.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/extrasymbols.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/underscoreDeclFail.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/exprs.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/useStatements.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/arrayDecls.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/underscoreDeclFail2.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/ifelse.xi;
+    ./shared/cowabunga/tests/resources/parser/xi/arrayDeclFunctionFail.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/useNotAtBeginning.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/multipleSemicolon.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/useSemicolon.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/functionDeclParamTrailingComma.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/entireCombo2.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/stringArrayAccess.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/arrayExprAccessAssign2.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/EOF.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/useSemicolon2.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/functionCallParamTrailingComma.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/unaryFuncPrec.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/exprCombo.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/arrayExprAccess.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/EOF2.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/onlyUseFail2.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/functionReturnArrayAccess2.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/onlyUseFail.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/additionArrayAccess.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/entireCombo.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/lengthMultipleArgFail.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/ixiEOF.ixi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/underscoreAssignExpr.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/lengthNotProcedure.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/doubleSemicolon.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/functionEndSemicolonFail.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/arrayExprAccessAssign.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/useDoubleSemicolon.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/integerOverflow.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/lengthNoArgsFail.xi;
+    ./shared/cowabunga/tests/resources/parser/p2feedback/functionReturnArrayAccessAssign.xi;
+    ./shared/cowabunga/tests/resources/parser/ixi/dictionary.ixi;
+    ./shared/cowabunga/tests/resources/parser/ixi/apply.ixi;
+    ./shared/cowabunga/tests/resources/parser/ixi/empty.ixi;
+    ./shared/cowabunga/tests/resources/parser/ixi/collection.ixi;
+    ./shared/cowabunga/tests/resources/parser/ixi/noTypeFail.ixi;
+}
+xic ("Cowabunga Type-checker Tests") "--typecheck -libpath ./shared/cowabunga/tests/resources/typecheck/lib" {
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/doubleSemicolon.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/additionArrayAccess.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/functionReturnArrayAccessAssign.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/entireCombo.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/lengthNoArgsFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/useDoubleSemicolon.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/functionCallParamTrailingComma.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/stringArrayAccess.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/ixiEOF.ixi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/arrayExprAccessAssign2.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/underscoreAssignExpr.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/useSemicolon.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/entireCombo2.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/functionEndSemicolonFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/useNotAtBeginning.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/multipleSemicolon.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/integerOverflow.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/onlyUseFail2.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/lengthMultipleArgFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/functionReturnArrayAccess2.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/EOF2.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/EOF.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/onlyUseFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/useSemicolon2.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/lengthNotProcedure.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/functionDeclParamTrailingComma.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/unaryFuncPrec.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/exprCombo.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/arrayExprAccess.xi;
+    ./shared/cowabunga/tests/resources/typecheck/p2feedback/arrayExprAccessAssign.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/discardMultipleReturnInvalid.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/ixiNameClashFail.ixi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/entireCombo.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/standardIXI.ixi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/functionCallLHS.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/recursiveDeclFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/interfaceClashDeclarations.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/functionAsProcedure.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/interfaceMultFuncDecls.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/echo.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/variableConversionFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/assignLHSLiteral.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/nestedBlockScope.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/ixiFileTypechecks.ixi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/discardMultipleReturn.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/recursiveDeclMultiFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/ixiDuplicateIdentifiers.ixi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/interfaceMethodAccess.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/assignLHSParenExpr.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/assignLHSString.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/nestedBlocks.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/redefineVariableFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/functionreturns.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/undeclaredVariable.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/earlyReturn.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/whileStmtFallthrough.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/assignLHSArrayLiteral.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/ixiFunctionAndArgumentSameName.ixi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/voidtypes.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/genericAddType.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/xiFunctionAndArgumentSameNameFail.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/polymorphic.xi;
+    ./shared/cowabunga/tests/resources/typecheck/custom/identifierScopeFail.xi;
+}
+
+
+xic ("Cowabunga IR Tests") "-libpath ./shared/cowabunga/tests/resources/typecheck/lib --irrun" {
+    ./shared/cowabunga/tests/resources/ir;
+    ./xth/tests/pa4/primes.xi;
+    ./xth/tests/pa4/ack.xi;
+}
+
+
+xic ("Instructor Lexer Tests") "--lex" {
+    ./xth/tests/pa1/ex1.xi;
+    ./xth/tests/pa1/spec3.xi;
+    ./xth/tests/pa1/gcd.xi;
+    ./xth/tests/pa1/arrayinit2.xi;
+    ./xth/tests/pa1/mdarrays.xi;
+    ./xth/tests/pa1/insertionsort.xi;
+    ./xth/tests/pa1/arrayinit.xi;
+    ./xth/tests/pa1/add.xi;
+    ./xth/tests/pa1/ex2.xi;
+    ./xth/tests/pa1/beauty.xi;
+    ./xth/tests/pa1/spec1.xi;
+    ./xth/tests/pa1/ratadduse.xi;
+    ./xth/tests/pa1/spec2.xi;
+    ./xth/tests/pa1/ratadd.xi;
+}
+xic ("Instructor Parser Tests") "--parse" {
+    ./xth/tests/pa2/insertionsort.xi;
+    ./xth/tests/pa2/spec1.xi;
+    ./xth/tests/pa2/ex1.xi;
+    ./xth/tests/pa2/arrayinit2.xi;
+    ./xth/tests/pa2/add.xi;
+    ./xth/tests/pa2/io.ixi;
+    ./xth/tests/pa2/ex2.xi;
+    ./xth/tests/pa2/ratadduse.xi;
+    ./xth/tests/pa2/beauty.xi;
+    ./xth/tests/pa2/ex3.xi;
+    ./xth/tests/pa2/spec3.xi;
+    ./xth/tests/pa2/mdarrays.xi;
+    ./xth/tests/pa2/arrayinit.xi;
+    ./xth/tests/pa2/spec2.xi;
+    ./xth/tests/pa2/ratadd.xi;
+    ./xth/tests/pa2/gcd.xi;
+}
+xic ("Instructor Type-checker Tests") "-libpath ./xth/tests/pa3 --typecheck" {
+    ./xth/tests/pa3/arrayinit2.xi;
+    ./xth/tests/pa3/ex12.xi;
+    ./xth/tests/pa3/spec1.xi;
+    ./xth/tests/pa3/ex04.xi;
+    ./xth/tests/pa3/spec1-full.xi;
+    ./xth/tests/pa3/insertionsort.xi;
+    ./xth/tests/pa3/ex09.xi;
+    ./xth/tests/pa3/arrayinit2-full.xi;
+    ./xth/tests/pa3/ratadduse-full.xi;
+    ./xth/tests/pa3/gcd.xi;
+    ./xth/tests/pa3/ex06.xi;
+    ./xth/tests/pa3/ex11.xi;
+    ./xth/tests/pa3/ex02.xi;
+    ./xth/tests/pa3/arrayinit.xi;
+    ./xth/tests/pa3/ex03.xi;
+    ./xth/tests/pa3/mdarrays.xi;
+    ./xth/tests/pa3/ex07.xi;
+    ./xth/tests/pa3/ratadduse.xi;
+    ./xth/tests/pa3/ratadd.xi;
+    ./xth/tests/pa3/ex01.xi;
+    ./xth/tests/pa3/spec2.xi;
+    ./xth/tests/pa3/ex05.xi;
+    ./xth/tests/pa3/ex10.xi;
+    ./xth/tests/pa3/spec3.xi;
+    ./xth/tests/pa3/ex08.xi;
+    ./xth/tests/pa3/ratadd-full.xi;
+}
+xic ("Instructor IR Tests") "-libpath ./xth/tests/pa4 --irrun" {
+    ./xth/tests/pa4/ex01.xi;
+    ./xth/tests/pa4/primes.xi;
+    ./xth/tests/pa4/ack.xi;
+}
