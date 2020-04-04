@@ -10,12 +10,16 @@ printlnBool(b: bool) {
 }
 
 main(args: int[][]) {
-    arr1: int[] = {2,3,5,7};
-    arr2: int[] = {2,3,5,7};
     
-    printlnBool(arr1 == arr2) // Should be false
-    printlnBool(arr1 == arr1) // Should be true
-    printlnBool(arr2 == arr2) // Should be true
-    printlnBool({1,2,3,4} == {1,2,3,4}) // Should be false
-    printlnBool({} == {}) // Should be false
+    a: int[] = {1,2,3,4,5,6,7,8,9,0};
+    copyOfA: int[] = a + {};
+    
+    printlnBool(a == copyOfA);  // Should be false.
+    i: int = 0;
+    size: int = length(copyOfA)
+    while (i < size) {
+        copyOfA[i] = copyOfA[i] - 1;
+        printlnBool(a[i] - copyOfA[i] == 1)  // Should print true
+        i = i + 1;
+    }
 }

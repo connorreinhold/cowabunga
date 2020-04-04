@@ -121,9 +121,10 @@ xic ("Cowabunga Type-checker Tests") "--typecheck -libpath ./shared/cowabunga/te
 
 
 xic ("Cowabunga IR Tests") "-libpath ./shared/cowabunga/tests/resources/typecheck/lib --irrun" {
-    ./shared/cowabunga/tests/resources/ir;
-    ./xth/tests/pa4/primes.xi;
-    ./xth/tests/pa4/ack.xi;
+    ./shared/cowabunga/tests/resources/irgen/ack.xi;
+    ./shared/cowabunga/tests/resources/irgen/;
+    ./shared/cowabunga/tests/resources/irgen/ack.xi;
+    ./shared/cowabunga/tests/resources/irgen/ack.xi;
 }
 
 
