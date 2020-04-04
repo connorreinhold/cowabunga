@@ -20,8 +20,9 @@ swap(a: int[], i: int, j: int) {
 }
 
 main(args: int[][]) {
-    sort(args[0])
-    printArray(args[0])
+    arr = parseArgs(args)
+    sort(arr)
+    printArray(arr)
 }
 
 sort(a: int[]) {
@@ -32,6 +33,16 @@ sort(a: int[]) {
             swap(a, j, j - 1)
             j = j - 1
         }
+        i = i + 1
+    }
+}
+
+parseArgs(args: int[][]): int[] {
+    size: int = length(args)
+    arr: int[size]
+    i: int = 0
+    while i < size {
+        arr[i] = parseInt(args[i])
         i = i + 1
     }
 }

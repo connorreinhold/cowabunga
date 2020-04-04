@@ -24,8 +24,17 @@ binarySearch(x: int, arr: int[]): int {
     return -1; 
 }
 
+parseArgs(args: int[][]): int[] {
+    size: int = length(args)
+    arr: int[size]
+    i: int = 0
+    while i < size {
+        arr[i] = parseInt(args[i])
+    }
+}
+
 main(args: int[][]) {
-    arr: int[] = args[0]
+    arr: int[] = parseArgs(args)
     size: int = length(arr);
     i: int = 0;
     while (i < size) {

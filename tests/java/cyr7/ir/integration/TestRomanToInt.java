@@ -33,11 +33,11 @@ public class TestRomanToInt extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        return new RunConfiguration().args(new long[][] {
-                parseString("MCMXCIV"),
-                parseString("IV"),
-                parseString("V"),
-                parseString("III"),
-        });
+       return new RunConfiguration().args(
+            "MCMXCIV",
+            "IV",
+            "V",
+            "III"
+        );
     }
 }

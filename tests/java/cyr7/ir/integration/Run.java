@@ -59,7 +59,7 @@ public final class Run {
             this.bigHeap = bigHeap;
         }
 
-        public RunConfiguration args(String[] args) {
+        public RunConfiguration args(String... args) {
             return new RunConfiguration(args, this.bigHeap);
         }
 

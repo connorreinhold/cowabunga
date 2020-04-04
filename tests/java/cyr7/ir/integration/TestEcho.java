@@ -15,7 +15,6 @@ public class TestEcho extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        return new RunConfiguration().args(new long[][] { new long[] { 72, 101,
-                108, 108, 111, 32, 119, 111, 114, 108, 100 } });
+        return new RunConfiguration().args("Hello world\n");
     }
 }
