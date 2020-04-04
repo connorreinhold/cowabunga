@@ -122,9 +122,27 @@ xic ("Cowabunga Type-checker Tests") "--typecheck -libpath ./shared/cowabunga/te
 
 xic ("Cowabunga IR Tests") "-libpath ./shared/cowabunga/tests/resources/typecheck/lib --irrun" {
     ./shared/cowabunga/tests/resources/irgen/ack.xi;
-    ./shared/cowabunga/tests/resources/irgen/;
-    ./shared/cowabunga/tests/resources/irgen/ack.xi;
-    ./shared/cowabunga/tests/resources/irgen/ack.xi;
+    ./shared/cowabunga/tests/resources/irgen/addMutableArray.xi;
+    ./shared/cowabunga/tests/resources/irgen/addMutableArrayValues.xi;
+    ./shared/cowabunga/tests/resources/irgen/arithmetic.xi;
+    ./shared/cowabunga/tests/resources/irgen/arithmetic2.xi;
+    ./shared/cowabunga/tests/resources/irgen/arrayalloc.xi;
+    ./shared/cowabunga/tests/resources/irgen/arrayCloning.xi;
+    ./shared/cowabunga/tests/resources/irgen/arrayEquality.xi;
+    ./shared/cowabunga/tests/resources/irgen/binarySearch.xi;
+    ./shared/cowabunga/tests/resources/irgen/complexCommutability.xi;
+    ./shared/cowabunga/tests/resources/irgen/ctranslation.xi;
+    ./shared/cowabunga/tests/resources/irgen/ctranslation2.xi;
+    ./shared/cowabunga/tests/resources/irgen/ctranslation3.xi;
+    ./shared/cowabunga/tests/resources/irgen/dedupe.xi;
+    ./shared/cowabunga/tests/resources/irgen/dictionary.xi;
+    ./shared/cowabunga/tests/resources/irgen/factorial.xi;
+    ./shared/cowabunga/tests/resources/irgen/fibonacci.xi;
+    ./shared/cowabunga/tests/resources/irgen/multidimarray.xi;
+    ./shared/cowabunga/tests/resources/irgen/retFuncCall.xi;
+    ./shared/cowabunga/tests/resources/irgen/scope.xi;
+    ./shared/cowabunga/tests/resources/irgen/startriangle.xi;
+
 }
 
 
