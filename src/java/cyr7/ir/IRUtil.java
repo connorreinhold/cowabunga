@@ -103,7 +103,17 @@ public class IRUtil {
             compUnit = (IRCompUnit) node;
         }
 
+        CLI.debugPrint("MIR: \n" + compUnit.toString());
+
+        if (lowerConfiguration.cFoldEnabled) {
+            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            compUnit = (IRCompUnit) node;
+            CLI.debugPrint("Constant-Folded MIR: \n" + compUnit.toString());
+        }
+
         IRNode lowered = lower(compUnit, generator, lowerConfiguration);
+
+        CLI.debugPrint("Lowered MIR: \n" + lowered.toString());
 
         SExpPrinter printer =
             new CodeWriterSExpPrinter(new PrintWriter(writer));
