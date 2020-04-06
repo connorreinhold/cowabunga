@@ -4,6 +4,7 @@ import cyr7.ast.expr.ExprNode;
 import cyr7.ast.expr.FunctionCallExprNode;
 import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
 import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
+import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
 import cyr7.ast.stmt.BlockStmtNode;
 import cyr7.ast.stmt.ProcedureStmtNode;
 import cyr7.ast.toplevel.FunctionDeclNode;
@@ -44,21 +45,21 @@ public final class Run {
 
     public static final class RunConfiguration {
 
-        public final long[][] args;
+        public final String[] args;
 
         public final boolean bigHeap;
 
         public RunConfiguration() {
-            this.args = new long[][] { };
+            this.args = new String[] { };
             this.bigHeap = false;
         }
 
-        public RunConfiguration(long[][] args, boolean bigHeap) {
+        public RunConfiguration(String[] args, boolean bigHeap) {
             this.args = args;
             this.bigHeap = bigHeap;
         }
 
-        public RunConfiguration args(long[][] args) {
+        public RunConfiguration args(String... args) {
             return new RunConfiguration(args, this.bigHeap);
         }
 
@@ -111,26 +112,23 @@ public final class Run {
         }
         if (lowerConfiguration.traceEnabled) {
             CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-            assertTrue(lowered.aggregateChildren(visitor),
-                "Program is not lowered, but it's supposed to be!: "
+            assertTrue(lowered.aggregateChildren(visitor));
+                /* "Program is not lowered, but it's supposed to be!: "
                     + sexp(lowered)
                     + "\nOffending node: "
-                    + visitor.noncanonical());
+                    + visitor.noncanonical()); */
         }
 
         return lowered;
     }
 
-    private static XiProgramNode addPremain(XiProgramNode toModify, long[][] args) {
+    private static XiProgramNode addPremain(XiProgramNode toModify, String[] args) {
         Location LOC = new Location(-1, -1);
 
         List<ExprNode> exprArgs = new ArrayList<>();
-        for (long[] arg : args) {
-            List<ExprNode> exprArg = new ArrayList<>();
-            for (long val : arg) {
-                exprArg.add(new LiteralIntExprNode(LOC, Long.toString(val)));
-            }
-            exprArgs.add(new LiteralArrayExprNode(LOC, exprArg));
+        exprArgs.add(new LiteralStringExprNode(LOC, "asdlkfjasldfkjdbkljad"));
+        for (String arg : args) {
+            exprArgs.add(new LiteralStringExprNode(LOC, arg));
         }
 
         FunctionDeclNode premain = new FunctionDeclNode(LOC,

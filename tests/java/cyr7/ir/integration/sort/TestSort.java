@@ -42,7 +42,11 @@ public abstract class TestSort extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        return new RunConfiguration().args(new long[][]{ input });
+        String[] args = new String[input.length];
+        for (int i = 0; i < input.length; i++) {
+            args[i] = Long.toString(input[i]);
+        }
+        return new RunConfiguration().args(args);
     }
 
 }
