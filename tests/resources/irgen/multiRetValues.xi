@@ -18,6 +18,11 @@ main(args: int[][]) {
     println("---")
     printArrayArray({c, h1, h2, h3, h4, h5, h6, h7, h8, h9})
     println("---")
+    a:int, b:int = retValuesLTR();
+    println(unparseInt(a))
+    println("---");
+    
+    
 }
 
 simple_multi_ret(): int, int {
@@ -66,4 +71,14 @@ printArrayArray(c: int[][]) {
         printArray(c[i])
         i = i + 1
     }
+}
+
+retValuesLTR():int,int {
+    a:int[] = {1,2,3};
+    return a[0], modifyArr(a);
+}
+
+modifyArr(a:int[]):int {
+    a[0] = 4;
+    return 5;
 }
