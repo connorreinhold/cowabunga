@@ -21,8 +21,8 @@ main(args: int[][]) {
     a:int, b:int = retValuesLTR();
     println(unparseInt(a))
     println("---");
-    
-    
+    i1: int, i2: int, i3: int = multi_return_value()
+    printArray({ i1, i2, i3 })
 }
 
 simple_multi_ret(): int, int {
@@ -65,6 +65,7 @@ printArray(c: int[]) {
     }
     print(")\n")
 }
+
 printArrayArray(c: int[][]) {
     i: int = 0
     while i < length(c) {
@@ -81,4 +82,17 @@ retValuesLTR():int,int {
 modifyArr(a:int[]):int {
     a[0] = 4;
     return 5;
+}
+
+multi_return_value(): int, int, int {
+    return 0, multi_return_value2(), 1
+}
+
+multi_return_value2(): int {
+    a: int, b: int, c: int = multi_return_value3()
+    return c
+}
+
+multi_return_value3(): int, int, int {
+    return 3, 4, 5
 }
