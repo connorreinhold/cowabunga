@@ -260,7 +260,7 @@ public class IRSimulator {
             }
 
             // Transfer child's return temps to the parent frame, because the child frame is going away
-            for (int i = 0; i <= numReturnVals; i++) {
+            for (int i = 0; i < numReturnVals; i++) {
                 String currRetTmp = Configuration.ABSTRACT_RET_PREFIX + i;
                 CLI.debugPrint("Returning: " + currRetTmp + ", " + frame.get(currRetTmp));
                 parent.put(currRetTmp, frame.get(currRetTmp));
