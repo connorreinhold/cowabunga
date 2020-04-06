@@ -1,11 +1,8 @@
 package cyr7.ir.lowering;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.ir.IdGenerator;
@@ -32,7 +29,6 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfThree;
-import cyr7.util.OneOfTwo;
 import cyr7.visitor.MyIRVisitor;
 import polyglot.util.Pair;
 
@@ -41,10 +37,29 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     public static class Result extends
             OneOfThree<List<IRStmt>, Pair<List<IRStmt>, IRExpr>, IRCompUnit> {
 
+        /**
+         * Creates a statement result, based on the output when lowering
+         * statements.
+         * 
+         * @param statement A list of statements whose child expressions are
+         *                  pure expressions.
+         * @return
+         */
         public static Result stmts(List<IRStmt> statement) {
             return new Result(statement, null, null);
         }
 
+        /**
+         * Creates an expression result, based on the output when lowering
+         * expressions. This consists of a list of statements and a pure
+         * expression.
+         * 
+         * @param sideEffects The list of statements that performs the same
+         *                    computations as the side effects in an inpure
+         *                    expression.
+         * @param expr        A pure expression, i.e. no side effects.
+         * @return
+         */
         public static Result expr(List<IRStmt> sideEffects, IRExpr expr) {
             return new Result(null, new Pair<>(sideEffects, expr), null);
         }
@@ -60,6 +75,10 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     }
 
+    /**
+     * Generates temporary names, argument temps, return value temps, and label
+     * names. No two names created by generator are the same.
+     */
     private final IdGenerator generator;
 
     public LoweringVisitor(IdGenerator generator) {
@@ -71,15 +90,20 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        var leftResult = n.left().accept(this).assertSecond();
-        var rightResult = n.right().accept(this).assertSecond();
+        var leftResult = n.left()
+                          .accept(this)
+                          .assertSecond();
+        var rightResult = n.right()
+                           .accept(this)
+                           .assertSecond();
         List<IRStmt> stmts = new ArrayList<>();
         String t1 = generator.newTemp();
         stmts.addAll(leftResult.part1());
         stmts.add(make.IRMove(make.IRTemp(t1), leftResult.part2()));
         stmts.addAll(rightResult.part1());
 
-        IRExpr expr = make.IRBinOp(n.opType(), make.IRTemp(t1),
+        IRExpr expr = make.IRBinOp(n.opType(),
+                make.IRTemp(t1),
                 rightResult.part2());
 
         return Result.expr(stmts, expr);
@@ -126,8 +150,12 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRESeq n) {
         List<IRStmt> stmts = new ArrayList<>();
-        stmts.addAll(n.stmt().accept(this).assertFirst());
-        var result = n.expr().accept(this).assertSecond();
+        stmts.addAll(n.stmt()
+                      .accept(this)
+                      .assertFirst());
+        var result = n.expr()
+                      .accept(this)
+                      .assertSecond();
         stmts.addAll(result.part1());
         return Result.expr(stmts, result.part2());
     }
@@ -135,7 +163,9 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRMem n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        var index = n.expr().accept(this).assertSecond();
+        var index = n.expr()
+                     .accept(this)
+                     .assertSecond();
         return Result.expr(index.part1(), make.IRMem(index.part2()));
     }
 
@@ -157,7 +187,9 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRCJump n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        var index = n.cond().accept(this).assertSecond();
+        var index = n.cond()
+                     .accept(this)
+                     .assertSecond();
 
         List<IRStmt> stmts = new ArrayList<>(index.part1());
         stmts.add(make.IRCJump(index.part2(), n.trueLabel(), n.falseLabel()));
@@ -169,10 +201,12 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     public Result visit(IRCompUnit n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
         IRCompUnit compUnit = make.IRCompUnit(n.name());
-        var functions = n.functions().values();
+        var functions = n.functions()
+                         .values();
         for (IRFuncDecl funcDecl : functions) {
-            List<IRStmt> loweredStmts = funcDecl.body().accept(this)
-                    .assertFirst();
+            List<IRStmt> loweredStmts = funcDecl.body()
+                                                .accept(this)
+                                                .assertFirst();
             IRStmt loweredBody = make.IRSeq(loweredStmts);
             IRFuncDecl loweredFuncDecl = make.IRFuncDecl(funcDecl.name(),
                     loweredBody);
@@ -183,7 +217,10 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRExp n) {
-        return Result.stmts(n.expr().accept(this).assertSecond().part1());
+        return Result.stmts(n.expr()
+                             .accept(this)
+                             .assertSecond()
+                             .part1());
     }
 
     @Override
@@ -192,7 +229,9 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         List<IRStmt> stmts = new LinkedList<>();
 
         stmts.add(make.IRLabel(n.name()));
-        var body = n.body().accept(this).assertFirst();
+        var body = n.body()
+                    .accept(this)
+                    .assertFirst();
         stmts.addAll(body);
         return Result.stmts(stmts);
     }
@@ -200,7 +239,9 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRJump n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        var index = n.target().accept(this).assertSecond();
+        var index = n.target()
+                     .accept(this)
+                     .assertSecond();
 
         List<IRStmt> stmts = new ArrayList<>(index.part1());
         stmts.add(make.IRJump(index.part2()));
@@ -220,13 +261,18 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRMove n) {
-        IRNodeFactory make = new IRNodeFactory_c(n.target().location());
+        IRNodeFactory make = new IRNodeFactory_c(n.target()
+                                                  .location());
 
-        var targetResult = n.target().accept(this).assertSecond();
+        var targetResult = n.target()
+                            .accept(this)
+                            .assertSecond();
         var targetSideEffects = targetResult.part1();
         var targetExpr = targetResult.part2();
 
-        var sourceResult = n.source().accept(this).assertSecond();
+        var sourceResult = n.source()
+                            .accept(this)
+                            .assertSecond();
         var sourceSideEffects = sourceResult.part1();
         var sourceExpr = sourceResult.part2();
 
@@ -262,9 +308,12 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRSeq n) {
-        return Result.stmts(n.stmts().stream()
-                .flatMap(s -> s.accept(this).assertFirst().stream())
-                .collect(Collectors.toList()));
+        return Result.stmts(n.stmts()
+                             .stream()
+                             .flatMap(s -> s.accept(this)
+                                            .assertFirst()
+                                            .stream())
+                             .collect(Collectors.toList()));
     }
 
 }

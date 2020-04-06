@@ -78,11 +78,20 @@ Temporary Items
 .idea/**/uiDesigner.xml
 .idea/**/dbnavigator.xml
 
+.idea/**/encodings.xml
+.idea/**/Project_Default.xml
+.idea/**/jarRepositories.xml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+.idea
+
 # Gradle
 .idea/**/gradle.xml
 .idea/**/libraries
 
 .idea/
+**/*.iml
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,
@@ -185,6 +194,3 @@ buildNumber.properties
 .project
 .settings/
 bin/
-
-
-

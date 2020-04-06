@@ -445,12 +445,13 @@ public class CLI {
             if (wantsIrGen) {
                 debugPrint("Generate intermediate code for: " + filename);
                 try {
+                    Path path = Path.of(filename);
                     input = getReader(filename);
                     output = getWriter(filename, "ir");
                     IRUtil.irGen(
                         input,
                         output,
-                        filename,
+                        path.getFileName().toString(),
                         isIXI,
                         opener,
                         lowerConfiguration

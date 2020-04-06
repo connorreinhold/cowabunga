@@ -24,7 +24,7 @@ public class TestGaleShapleyTimes4 extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        String test3 = "100\n" +
+        String test3 =
             "0 47 66 26 21 5 2 30 76 61 80 13 71 90 39 59 52 33 25 23 53 46 " +
             "51 18 85 6 64 89 45 99 55 68 19 70 86 92 87 74 24 17 96 1 84 91 " +
             "37 77 81 83 48 50 14 11 88 60 15 56 27 10 16 22 34 42 95 4 7 62 " +

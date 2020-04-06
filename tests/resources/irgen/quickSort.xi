@@ -20,8 +20,9 @@ swap(a: int[], i: int, j: int) {
 }
 
 main(args: int[][]) {
-    sort(args[0], 0, length(args[0]) - 1)
-    printArray(args[0])
+    arr: int[] = parseArgs(args);
+    sort(arr, 0, length(arr) - 1)
+    printArray(arr)
 }
 
 sort(a: int[], lo: int, hi: int) {
@@ -46,3 +47,16 @@ pivot(a: int[], lo: int, hi: int): int {
     swap(a, i, hi)
     return i
 }
+
+parseArgs(args: int[][]): int[] {
+    size: int = length(args);
+    arr: int[size - 1]
+    i: int = 1
+    while i < size {
+        parsedInt: int, _ = parseInt(args[i])
+        arr[i - 1] = parsedInt;
+        i = i + 1
+    }
+    return arr;
+}
+

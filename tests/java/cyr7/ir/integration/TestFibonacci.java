@@ -8,6 +8,6 @@ public class TestFibonacci extends TestProgram {
 
     @Override
     protected String expected() {
-        return "8";
+        return "5";
     }
 }
