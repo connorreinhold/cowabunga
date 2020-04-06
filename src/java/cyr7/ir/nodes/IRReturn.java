@@ -21,9 +21,15 @@ public class IRReturn extends IRStmt {
         p.startList();
         p.printAtom("RETURN");
 
+        /*
+        Update (4/6/2020): Don't include parentheses because course staff
+        updated the IR grammar ¯\_(ツ)_/¯
+
         // Empty list because the s-exp parser is expecting one
         p.startList();
         p.endList();
+         */
+
         p.endList();
     }
 
