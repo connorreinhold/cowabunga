@@ -42,7 +42,6 @@ public class CLI {
     private static boolean optimizationsEnabled = true;
 
     private static boolean cFoldEnabled = true;
-    private static boolean commutativeEnabled = true;
 
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
@@ -204,17 +203,6 @@ public class CLI {
                 .required(false)
                 .build();
 
-        // For internal testing
-        Option commutativeOpt = Option
-                .builder("commutativedisabled")
-                .longOpt(null)
-                .desc("Disable commutative optimizations")
-                .hasArg(false)
-                .argName(null)
-                .numberOfArgs(0)
-                .required(false)
-                .build();
-
         Option version = Option
                 .builder("v")
                 .longOpt("version")
@@ -243,7 +231,6 @@ public class CLI {
                 .addOption(mirRun)
                 .addOption(optimizations)
                 .addOption(cFoldOpt)
-                .addOption(commutativeOpt)
                 .addOption(source)
                 .addOption(libpath)
                 .addOption(destination)
@@ -393,9 +380,6 @@ public class CLI {
                 }
                 case "cfolddisabled":
                     cFoldEnabled = false;
-                    break;
-                case "commutativedisabled":
-                    commutativeEnabled = false;
                     break;
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
