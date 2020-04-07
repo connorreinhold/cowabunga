@@ -535,11 +535,11 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
-                    ASMUtil.writeASM(input, output, filename, opener);
+                    ASMUtil.writeASM(input, output, filename, opener, lowerConfiguration);
 
                     if (debugPrintingEnabled) {
                         input = getReader(filename);
-                        ASMUtil.printDebugASM(input, filename, opener);
+                        ASMUtil.printDebugASM(input, filename, opener, lowerConfiguration);
                     }
                 } catch (Exception e) {
                     debugPrint(e);
