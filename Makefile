@@ -29,7 +29,7 @@ xth.test:
 	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll
 
 zip:
-	rm cowabunga.zip
+	rm -f cowabunga.zip
 	zip -r cowabunga.zip \
 		README.md dependencies src tests xic-build build.gradle Makefile settings.gradle \
-		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi*
+		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi* -x *IRLexer.java* -x *IRParser.java* -x *IRSym.java*

@@ -1,12 +1,42 @@
 use io
 use conv
 
-main(prefData: int[][]) {
-    proposerPrefs: int[][], respondentInvPrefs: int[][] = prefs(prefData)
+main(args: int[][]) {
+    proposerPrefs: int[][], respondentInvPrefs: int[][] = prefs(importData(args))
     result: int[] = galeShapley(proposerPrefs, respondentInvPrefs)
     printArray(result)
 }
 
+importData(prefData: int[][]): int[][] {
+    i: int = 0
+    lengthPref: int = length(prefData) - 1
+    data: int[lengthPref][lengthPref/2]
+    while i < lengthPref {
+        line: int[] = prefData[i + 1]
+        j: int = 0
+        start: int = 0
+        lengthOfLine: int = length(line)
+        while start < lengthOfLine {
+            end: int = start
+            while end < lengthOfLine & line[end] != ' '{
+                end = end + 1
+            }
+            sizeOfNum: int = end - start
+            numString: int[sizeOfNum]
+            k: int
+            while k < sizeOfNum {
+                numString[k] = line[start+k]
+                k = k + 1
+            }
+            num: int, _ = parseInt(numString)
+            data[i][j] = num
+            start = end + 1
+            j = j + 1
+        }
+        i = i + 1
+    }
+    return data
+}
 prefs(prefData: int[][]): int[][], int[][] {
     n: int = length(prefData) / 2
     

@@ -21,10 +21,10 @@ public class TestBinarySearch extends TestProgram {
         return buffer.toString();
     }
 
-
     @Override
     protected RunConfiguration configuration() {
-        return new RunConfiguration()
-                .args(new long[][] { array });
+        return new RunConfiguration().args(
+            "72", "101", "108", "110", "111", "119", "120", "124", "138"
+        );
     }
 }

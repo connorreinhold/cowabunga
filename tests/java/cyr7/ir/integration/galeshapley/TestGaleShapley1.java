@@ -18,7 +18,7 @@ public class TestGaleShapley1 extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        String test1 = "6\n" +
+        String test1 =
             "4 5 1 0 2 3\n" +
             "4 1 2 3 5 0\n" +
             "3 2 5 4 1 0\n" +

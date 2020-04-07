@@ -42,6 +42,14 @@ public class IRUtil {
 
         CLI.debugPrint("Constant Folding Enabled: " + lowerConfiguration.cFoldEnabled);
 
+        CLI.lazyDebugPrint(compUnit, unit -> "MIR: \n" + unit);
+
+        if (lowerConfiguration.cFoldEnabled) {
+            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            compUnit = (IRCompUnit) node;
+            CLI.lazyDebugPrint(compUnit, unit -> "Constant-Folded MIR: \n" + unit);
+        }
+
         compUnit =
             compUnit.accept(new LoweringVisitor(generator)).assertThird();
 
@@ -55,6 +63,8 @@ public class IRUtil {
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
+
+        CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
         CLI.debugPrint("Actually Canonical? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
@@ -73,14 +83,8 @@ public class IRUtil {
         TypeCheckUtil.typeCheck(result, opener);
 
         IdGenerator generator = new DefaultIdGenerator();
-
-        IRCompUnit compUnit;
-        {
-            IRNode node =
-                result.accept(new ASTToIRVisitor(generator)).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
-        }
+        IRCompUnit compUnit = (IRCompUnit)
+            result.accept(new ASTToIRVisitor(generator)).assertSecond();
 
         IRSimulator sim = new IRSimulator(compUnit);
         long retVal = sim.call("_Imain_paai");
@@ -94,10 +98,15 @@ public class IRUtil {
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
-        IRCompUnit lowered = generateIR(reader, filename, fileOpener, lowerConfiguration);
+        IRCompUnit lowered = generateIR(
+            reader,
+            filename,
+            fileOpener,
+            lowerConfiguration,
+            new DefaultIdGenerator());
 
-        SExpPrinter printer =
-            new CodeWriterSExpPrinter(new PrintWriter(writer));
+        SExpPrinter printer
+            = new CodeWriterSExpPrinter(new PrintWriter(writer));
         lowered.printSExp(printer);
         printer.flush();
     }
@@ -109,7 +118,12 @@ public class IRUtil {
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
-        IRCompUnit lowered = generateIR(reader, filename, fileOpener, lowerConfiguration);
+        IRCompUnit lowered = generateIR(
+            reader,
+            filename,
+            fileOpener,
+            lowerConfiguration,
+            new DefaultIdGenerator());
 
         IRSimulator sim = new IRSimulator(lowered);
         long retVal = sim.call("_Imain_paai", 0);
@@ -129,45 +143,14 @@ public class IRUtil {
         Reader reader,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration) throws Exception {
-        return generateIR(
-            reader,
-            filename,
-            fileOpener,
-            lowerConfiguration,
-            new DefaultIdGenerator());
-    }
-
-    public static IRCompUnit generateIR(
-        Reader reader,
-        String filename,
-        IxiFileOpener fileOpener,
-        IdGenerator generator) throws Exception {
-        return generateIR(
-            reader,
-            filename,
-            fileOpener,
-            new LowerConfiguration(true, true),
-            generator);
-    }
-
-    public static IRCompUnit generateIR(
-        Reader reader,
-        String filename,
-        IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration,
         IdGenerator generator) throws Exception {
 
         Node result = ParserUtil.parseNode(reader, filename, false);
         TypeCheckUtil.typeCheck(result, fileOpener);
 
-        IRCompUnit compUnit;
-        {
-            IRNode node =
-                result.accept(new ASTToIRVisitor(generator)).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
-        }
+        IRCompUnit compUnit = (IRCompUnit)
+            result.accept(new ASTToIRVisitor(generator)).assertSecond();
 
         return lower(compUnit, generator, lowerConfiguration);
     }

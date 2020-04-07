@@ -6,3 +6,4 @@ main(args: int[][]) {
     if (b) res2 = 1
     if (c) res3 = 1
 }
+

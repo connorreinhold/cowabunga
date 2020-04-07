@@ -11,6 +11,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -42,8 +44,6 @@ public class CLI {
     private static boolean optimizationsEnabled = true;
 
     private static boolean cFoldEnabled = true;
-    private static boolean commutativeEnabled = true;
-
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
@@ -204,17 +204,6 @@ public class CLI {
                 .required(false)
                 .build();
 
-        // For internal testing
-        Option commutativeOpt = Option
-                .builder("commutativedisabled")
-                .longOpt(null)
-                .desc("Disable commutative optimizations")
-                .hasArg(false)
-                .argName(null)
-                .numberOfArgs(0)
-                .required(false)
-                .build();
-
         Option version = Option
                 .builder("v")
                 .longOpt("version")
@@ -243,7 +232,6 @@ public class CLI {
                 .addOption(mirRun)
                 .addOption(optimizations)
                 .addOption(cFoldOpt)
-                .addOption(commutativeOpt)
                 .addOption(source)
                 .addOption(libpath)
                 .addOption(destination)
@@ -394,9 +382,6 @@ public class CLI {
                 case "cfolddisabled":
                     cFoldEnabled = false;
                     break;
-                case "commutativedisabled":
-                    commutativeEnabled = false;
-                    break;
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
@@ -419,6 +404,7 @@ public class CLI {
                     break;
             }
         });
+
         for (String filename : cmd.getArgs()) {
             boolean isIXI;
             if (filename.endsWith(".xi") || filename.endsWith(".ixi")) {
@@ -487,12 +473,13 @@ public class CLI {
             if (wantsIrGen) {
                 debugPrint("Generate intermediate code for: " + filename);
                 try {
+                    Path path = Path.of(filename);
                     input = getReader(filename);
                     output = getWriter(destinationRoot.getAbsolutePath(), filename, "ir");
                     IRUtil.irGen(
                         input,
                         output,
-                        filename,
+                        path.getFileName().toString(),
                         opener,
                         lowerConfiguration
                     );
@@ -604,6 +591,12 @@ public class CLI {
     public static void debugPrint(String v) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + v);
+        }
+    }
+
+    public static <T> void lazyDebugPrint(T capture, Function<T, String> lazyString) {
+        if (debugPrintingEnabled) {
+            System.err.println("DEBUG: " + lazyString.apply(capture));
         }
     }
 
