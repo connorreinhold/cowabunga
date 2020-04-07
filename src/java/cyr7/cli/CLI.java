@@ -42,7 +42,11 @@ public class CLI {
     private static boolean optimizationsEnabled = true;
 
     private static boolean cFoldEnabled = true;
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> master
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
@@ -194,6 +198,7 @@ public class CLI {
 
         // For internal testing
         Option cFoldOpt = Option
+<<<<<<< HEAD
                 .builder("cfolddisabled")
                 .longOpt(null)
                 .desc("Disable constant folding optimizations")
@@ -202,6 +207,16 @@ public class CLI {
                 .numberOfArgs(0)
                 .required(false)
                 .build();
+=======
+            .builder("cfolddisabled")
+            .longOpt(null)
+            .desc("Disable constant folding optimizations")
+            .hasArg(false)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+>>>>>>> master
 
         Option version = Option
                 .builder("v")
@@ -223,6 +238,7 @@ public class CLI {
                 .build();
 
         return options.addOption(help)
+<<<<<<< HEAD
                 .addOption(lex)
                 .addOption(parse)
                 .addOption(typecheck)
@@ -238,6 +254,21 @@ public class CLI {
                 .addOption(targetOS)
                 .addOption(version)
                 .addOption(debugPrinting);
+=======
+            .addOption(lex)
+            .addOption(parse)
+            .addOption(typecheck)
+            .addOption(irGen)
+            .addOption(irRun)
+            .addOption(mirRun)
+            .addOption(optimizations)
+            .addOption(cFoldOpt)
+            .addOption(source)
+            .addOption(libpath)
+            .addOption(destination)
+            .addOption(version)
+            .addOption(debugPrinting);
+>>>>>>> master
     }
 
     /**
@@ -374,6 +405,7 @@ public class CLI {
                 case "O":
                     optimizationsEnabled = false;
                     break;
+<<<<<<< HEAD
                 case "tos": {
                     target= OperatingSystem.parse(cmd.getOptionValue("tos"));
                     break;
@@ -381,6 +413,9 @@ public class CLI {
                 case "cfolddisabled":
                     cFoldEnabled = false;
                     break;
+=======
+                }
+>>>>>>> master
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
@@ -471,12 +506,18 @@ public class CLI {
             if (wantsIrGen) {
                 debugPrint("Generate intermediate code for: " + filename);
                 try {
+                    Path path = Path.of(filename);
                     input = getReader(filename);
                     output = getWriter(destinationRoot.getAbsolutePath(), filename, "ir");
                     IRUtil.irGen(
                         input,
                         output,
+<<<<<<< HEAD
                         filename,
+=======
+                        path.getFileName().toString(),
+                        isIXI,
+>>>>>>> master
                         opener,
                         lowerConfiguration
                     );

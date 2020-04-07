@@ -94,7 +94,33 @@ public class IRUtil {
         IxiFileOpener fileOpener,
         LowerConfiguration lowerConfiguration) throws Exception {
 
+<<<<<<< HEAD
         IRCompUnit lowered = generateIR(reader, filename, fileOpener, lowerConfiguration);
+=======
+        Node result = ParserUtil.parseNode(reader, filename, isIXI);
+        TypeCheckUtil.typeCheck(result, fileOpener);
+
+        IdGenerator generator = new DefaultIdGenerator();
+
+        IRCompUnit compUnit;
+        {
+            IRNode node = result.accept(new ASTToIRVisitor(generator)).assertSecond();
+            assert node instanceof IRCompUnit;
+            compUnit = (IRCompUnit) node;
+        }
+
+        CLI.debugPrint("MIR: \n" + compUnit.toString());
+
+        if (lowerConfiguration.cFoldEnabled) {
+            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            compUnit = (IRCompUnit) node;
+            CLI.debugPrint("Constant-Folded MIR: \n" + compUnit.toString());
+        }
+
+        IRNode lowered = lower(compUnit, generator, lowerConfiguration);
+>>>>>>> master
+
+        CLI.debugPrint("Lowered MIR: \n" + lowered.toString());
 
         SExpPrinter printer =
             new CodeWriterSExpPrinter(new PrintWriter(writer));

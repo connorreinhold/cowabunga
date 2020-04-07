@@ -18,7 +18,7 @@ public class TestGaleShapley2 extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        String test2 = "10\n" +
+        String test2 =
             "6 5 1 8 2 3 7 0 4 9\n" +
             "0 8 1 3 4 6 5 2 9 7\n" +
             "9 5 6 1 3 7 8 0 2 4\n" +
@@ -41,6 +41,6 @@ public class TestGaleShapley2 extends TestProgram {
             "8 2 9 6 7 4 1 5 0 3\n";
         return new RunConfiguration()
             .args(parseGaleShapleyArgs(test2))
-            .bigHeap(false);
+            .bigHeap(true);
     }
 }

@@ -17,20 +17,6 @@ import cyr7.ir.integration.Run.RunConfiguration;
  */
 public class TestExprInterpreter extends TestProgram {
 
-    private long[] parseString(String s) {
-        Character[] charObjectArray = s.chars().mapToObj(c -> (char) c)
-                .toArray(Character[]::new);
-        Long[] longArray = Arrays.asList(charObjectArray).stream().map(c -> {
-            return Long.valueOf(c.charValue());
-        }).collect(Collectors.toList()).toArray(new Long[] {});
-
-        long[] primArr = new long[longArray.length];
-        for (int i = 0; i < longArray.length; i++) {
-            primArr[i] = longArray[i].longValue();
-        }
-        return primArr;
-    }
-
     @Override
     protected String filename() {
         return "exprInterpreter";
@@ -43,10 +29,12 @@ public class TestExprInterpreter extends TestProgram {
 
     @Override
     protected RunConfiguration configuration() {
-        return new RunConfiguration().args(new long[][] {
-                parseString("2 + 2"), parseString("2-2*3"),
-                parseString("1 + 1"), parseString("2*4"),
-        }).bigHeap(true);
+        return new RunConfiguration().args(
+            "2 + 2",
+            "2-2*3",
+            "1 + 1",
+            "2*4"
+        ).bigHeap(true);
     }
 
 }
