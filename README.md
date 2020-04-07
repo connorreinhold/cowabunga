@@ -4,8 +4,10 @@ As cowabungans, we make compilers in Java
 
 ## Frequent Commands
 
+Generate jflex and cup files: `make cowabunga`
+Run Tests: `make test`
 Build jar: `mvn package`
-Build compiler: `xic-build`
-Run compiler: `xic [args]`
+Build compiler: `./xic-build`
+Run compiler: `./xic [options] <source files>`
 
-Build jflex: `cd ~/shared/cowabunga/src/java/cyr7/lexer; jflex xi.flex && sed -i '1i package cyr7.lexer;' MyLexer.java`
+Prepare Submission: `make zip`
