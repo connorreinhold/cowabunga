@@ -164,18 +164,7 @@ public abstract class TestProgram {
                 "-o",
                 tmpFile.getAbsolutePath());
 
-        long[][] longArgs = this.configuration().args;
-        String[] args = new String[longArgs.length];
-
-        for (int i = 0; i < longArgs.length; i++) {
-            long[] longRep = longArgs[i];
-            char[] charRep = new char[longRep.length];
-            for (int j = 0; j < charRep.length; j++) {
-                charRep[j] = (char) longRep[j];
-            }
-            args[i] = String.valueOf(charRep);
-        }
-
+        String[] args = this.configuration().args;
         String[] command = new String[1 + args.length];
         command[0] = tmpFile.getAbsolutePath()
                             .toString();
