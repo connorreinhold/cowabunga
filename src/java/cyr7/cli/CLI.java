@@ -11,6 +11,8 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
@@ -42,11 +44,6 @@ public class CLI {
     private static boolean optimizationsEnabled = true;
 
     private static boolean cFoldEnabled = true;
-<<<<<<< HEAD
-
-=======
-    
->>>>>>> master
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
@@ -198,7 +195,6 @@ public class CLI {
 
         // For internal testing
         Option cFoldOpt = Option
-<<<<<<< HEAD
                 .builder("cfolddisabled")
                 .longOpt(null)
                 .desc("Disable constant folding optimizations")
@@ -207,16 +203,6 @@ public class CLI {
                 .numberOfArgs(0)
                 .required(false)
                 .build();
-=======
-            .builder("cfolddisabled")
-            .longOpt(null)
-            .desc("Disable constant folding optimizations")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
->>>>>>> master
 
         Option version = Option
                 .builder("v")
@@ -238,7 +224,6 @@ public class CLI {
                 .build();
 
         return options.addOption(help)
-<<<<<<< HEAD
                 .addOption(lex)
                 .addOption(parse)
                 .addOption(typecheck)
@@ -254,21 +239,6 @@ public class CLI {
                 .addOption(targetOS)
                 .addOption(version)
                 .addOption(debugPrinting);
-=======
-            .addOption(lex)
-            .addOption(parse)
-            .addOption(typecheck)
-            .addOption(irGen)
-            .addOption(irRun)
-            .addOption(mirRun)
-            .addOption(optimizations)
-            .addOption(cFoldOpt)
-            .addOption(source)
-            .addOption(libpath)
-            .addOption(destination)
-            .addOption(version)
-            .addOption(debugPrinting);
->>>>>>> master
     }
 
     /**
@@ -405,7 +375,6 @@ public class CLI {
                 case "O":
                     optimizationsEnabled = false;
                     break;
-<<<<<<< HEAD
                 case "tos": {
                     target= OperatingSystem.parse(cmd.getOptionValue("tos"));
                     break;
@@ -413,9 +382,6 @@ public class CLI {
                 case "cfolddisabled":
                     cFoldEnabled = false;
                     break;
-=======
-                }
->>>>>>> master
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
@@ -438,6 +404,7 @@ public class CLI {
                     break;
             }
         });
+
         for (String filename : cmd.getArgs()) {
             boolean isIXI;
             if (filename.endsWith(".xi") || filename.endsWith(".ixi")) {
@@ -512,12 +479,7 @@ public class CLI {
                     IRUtil.irGen(
                         input,
                         output,
-<<<<<<< HEAD
-                        filename,
-=======
                         path.getFileName().toString(),
-                        isIXI,
->>>>>>> master
                         opener,
                         lowerConfiguration
                     );
@@ -629,6 +591,12 @@ public class CLI {
     public static void debugPrint(String v) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + v);
+        }
+    }
+
+    public static <T> void lazyDebugPrint(T capture, Function<T, String> lazyString) {
+        if (debugPrintingEnabled) {
+            System.err.println("DEBUG: " + lazyString.apply(capture));
         }
     }
 
