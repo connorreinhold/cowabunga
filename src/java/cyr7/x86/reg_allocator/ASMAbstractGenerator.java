@@ -46,9 +46,9 @@ public class ASMAbstractGenerator implements ASMGenerator {
 
         String returnLbl = "end_" + funcName;
 
-        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(generator,
-            funcName,
-                numRetValues,
+        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
+            generator,
+            numRetValues,
             returnLbl);
 
         return funcDecl.body().accept(tiler).optimalInstructions;

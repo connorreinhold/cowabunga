@@ -11,8 +11,7 @@ public interface TilerFactory {
 
     MyIRVisitor<TilerData> constructTiler(
         IdGenerator generator,
-        String tiledFunctionName,
-            int numRetValues,
+        int numRetValues,
         String returnLbl);
 
 }
