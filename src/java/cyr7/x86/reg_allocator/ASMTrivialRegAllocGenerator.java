@@ -63,13 +63,11 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
     }
 
     private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
-
             int numOfReturnValues) {
 
         String returnLbl = "end_" + funcName;
 
         MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(generator,
-
                 funcName,
                 numOfReturnValues,
                 returnLbl);
