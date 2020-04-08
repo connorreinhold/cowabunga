@@ -103,9 +103,6 @@ public interface IRNodeFactory {
 
     IRCallStmt IRCallStmt(IRExpr target);
 
-    IRCallStmt IRCallStmt(List<String> collectors, IRExpr target,
-            List<IRExpr> args, int numOfRV);
-
     /**
      *
      * @param target the destination of this move

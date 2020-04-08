@@ -1,6 +1,7 @@
 package cyr7.ir.integration;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -112,11 +113,13 @@ public final class Run {
         }
         if (lowerConfiguration.traceEnabled) {
             CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-            assertTrue(lowered.aggregateChildren(visitor));
-                /* "Program is not lowered, but it's supposed to be!: "
+            boolean checkLowered = lowered.aggregateChildren(visitor);
+            if (!checkLowered) {
+                fail("Program is not lowered, but it's supposed to be!: "
                     + sexp(lowered)
                     + "\nOffending node: "
-                    + visitor.noncanonical()); */
+                    + visitor.noncanonical());
+            }
         }
 
         return lowered;

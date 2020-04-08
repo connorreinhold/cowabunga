@@ -303,10 +303,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
          * memory address to a "saved stack space" to hold return values onto
          * the rdi register.
          */
-        if (n.numOfReturnValues > 2) {
+        final int numReturnValues = n.collectors().size();
+        if (numReturnValues > 2) {
             lastRegisterArg = Math.min(5, argTiles.size());
 
-            long size = (n.numOfReturnValues - 2) * 8;
+            long size = (numReturnValues - 2) * 8;
             insn.add(make.MovAbs(rdi, arg.constant(size)));
             insn.add(make.Sub(rsp, rdi));
             insn.add(make.Mov(rdi, rsp));
@@ -386,10 +387,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         insn.add(make.Call(targetTile.result.get()));
 
-        if (n.collectors()
-             .size() == 1) {
-            String resultTemp = n.collectors()
-                                 .get(0);
+        if (n.collectors().size() == 1) {
+            String resultTemp = n.collectors().get(0);
             insn.add(make.Mov(arg.temp(resultTemp, Size.QWORD), ASMReg.RAX));
         } else if (n.collectors()
                     .size() > 1) {

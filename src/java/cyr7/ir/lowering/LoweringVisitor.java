@@ -22,6 +22,7 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRReturn;
@@ -138,8 +139,7 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         }
 
         String result = generator.newTemp();
-        stmts.add(make.IRCallStmt(List.of(result), n.target(), args,
-                n.numOfReturnValues));
+        stmts.add(make.IRCallStmt(List.of(result), n.target(), args));
         return Result.expr(stmts, make.IRTemp(result));
     }
 
@@ -182,7 +182,39 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCallStmt n) {
-        return Result.stmts(List.of(n));
+        IRNodeFactory make = new IRNodeFactory_c(n.location());
+
+        List<IRExpr> args = new ArrayList<>();
+        List<IRStmt> stmts = new LinkedList<>();
+
+        // List of temps representing the values of each function argument
+        List<IRTemp> argValTemps = new ArrayList<>();
+        for (IRExpr arg : n.args()) {
+            Result argResult = arg.accept(this);
+            var resultPair = argResult.assertSecond();
+            stmts.addAll(resultPair.part1());
+
+            IRTemp argValTemp = make.IRTemp(generator.newTemp());
+            argValTemps.add(argValTemp);
+            // Cannot move directly into ARG_0 as nested function calls will
+            // overwrite the value
+            // i.e. call(1, call(0, 0))
+            stmts.add(make.IRMove(argValTemp, resultPair.part2()));
+            args.add(argValTemp);
+        }
+
+        // Move temps into function ARG_0, ARG_1, etc.
+        for (int i = 0; i < argValTemps.size(); i++) {
+            var argTemp = make.IRTemp(generator.argTemp(i));
+            stmts.add(make.IRMove(argTemp, argValTemps.get(i)));
+        }
+
+        stmts.add(
+            make.IRCallStmt(
+                n.collectors(),
+                n.target(),
+                args));
+        return Result.stmts(stmts);
     }
 
     @Override

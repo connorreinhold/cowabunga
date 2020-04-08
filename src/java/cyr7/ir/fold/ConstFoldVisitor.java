@@ -248,8 +248,7 @@ public class ConstFoldVisitor
         }).collect(Collectors.toList());
 
         return OneOfThree
-                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs,
-                        n.numOfReturnValues));
+                .ofSecond(make.IRCallStmt(n.collectors(), target, foldedArgs));
     }
 
     /**

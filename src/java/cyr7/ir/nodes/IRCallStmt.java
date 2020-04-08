@@ -20,16 +20,6 @@ public class IRCallStmt extends IRStmt {
     protected List<String> collectors;
     protected IRExpr target;
     protected List<IRExpr> args;
-    public final int numOfReturnValues;
-
-    /**
-     * @param collectors a list of temporary names to assign to.
-     * @param target address of the code for this function call
-     * @param args arguments of this function call
-     */
-    public IRCallStmt(Location location, List<String> collectors, IRExpr target, IRExpr... args) {
-        this(location, collectors, target, Arrays.asList(args), 10);
-    }
 
     /**
      * @param collectors a list of temporary names to assign to.
@@ -37,12 +27,11 @@ public class IRCallStmt extends IRStmt {
      * @param args arguments of this function call
      */
     public IRCallStmt(Location location, List<String> collectors, IRExpr target,
-            List<IRExpr> args, int numOfReturnValues) {
+            List<IRExpr> args) {
         super(location);
         this.collectors = collectors;
         this.target = target;
         this.args = args;
-        this.numOfReturnValues = numOfReturnValues;
     }
 
     public List<String> collectors() {
@@ -77,8 +66,7 @@ public class IRCallStmt extends IRStmt {
         }
 
         if (modified)
-            return v.nodeFactory().IRCallStmt(collectors, target, results,
-                    this.numOfReturnValues);
+            return v.nodeFactory().IRCallStmt(collectors, target, results);
 
         return this;
     }

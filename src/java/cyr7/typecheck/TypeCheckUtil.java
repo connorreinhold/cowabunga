@@ -14,13 +14,14 @@ import java.io.Writer;
 
 public class TypeCheckUtil {
 
-    public static void typeCheck(Reader reader, Writer writer, String filename,
+    public static boolean typeCheck(Reader reader, Writer writer, String filename,
             boolean isIXI, IxiFileOpener opener) throws Exception {
         try {
             Node result = ParserUtil.parseNode(reader, filename, isIXI);
             result.accept(new TypeCheckVisitor(opener));
             assert satisfiesInvariants(result);
             writer.append("Valid Xi Program").append(System.lineSeparator());
+            return true;
         } catch (InvalidInterfaceException e) {
             printErrorToStdOut(e.getInterfaceErrorType(),
                     e.getInterfaceFilename(),
@@ -29,6 +30,7 @@ public class TypeCheckUtil {
                     e.getInterfaceErrorMsg());
             writer.append(e.getMessage())
                   .append(System.lineSeparator());
+            return false;
         } catch (ParserException e) {
             printErrorToStdOut(ErrorType.Syntax,
                     e.filename,
@@ -36,6 +38,7 @@ public class TypeCheckUtil {
                     e.column,
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
+            return false;
         } catch (SemanticException e) {
             printErrorToStdOut(ErrorType.Semantic,
                     e.filename,
@@ -43,6 +46,7 @@ public class TypeCheckUtil {
                     e.col,
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
+            return false;
         } catch (LexerException e) {
             printErrorToStdOut(ErrorType.Lexical,
                     e.filename,
@@ -50,6 +54,7 @@ public class TypeCheckUtil {
                     e.col,
                     e.errorMsg);
             writer.append(e.getMessage()).append(System.lineSeparator());
+            return false;
         }
     }
 

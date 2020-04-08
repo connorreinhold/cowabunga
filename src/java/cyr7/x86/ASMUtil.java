@@ -50,7 +50,7 @@ public final class ASMUtil {
                 writer.append(line.getIntelAssembly()).append(System.lineSeparator());
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
     }
 

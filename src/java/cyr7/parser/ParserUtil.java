@@ -15,7 +15,7 @@ import java_cup.runtime.ScannerBuffer;
 
 public class ParserUtil {
 
-    public static void parse(Reader reader, Writer writer, String filename,
+    public static boolean parse(Reader reader, Writer writer, String filename,
             boolean isIXI) throws IOException {
         ScannerBuffer lexer = new ScannerBuffer(
                 new MultiFileLexer(reader, filename, isIXI));
@@ -26,10 +26,13 @@ public class ParserUtil {
             SExpVisitor visitor = new SExpVisitor(writer);
             node.accept(visitor);
             visitor.flush();
+            return true;
         } catch (ParserException | LexerException e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
+            return false;
         } catch (Exception e) {
             writer.append(e.getMessage()).append(System.lineSeparator());
+            return false;
         }
     }
 
