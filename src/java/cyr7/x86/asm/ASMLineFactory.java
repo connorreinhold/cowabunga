@@ -31,6 +31,15 @@ public class ASMLineFactory {
         return new ASMInstr(ASMInstrType.IMULQ, List.of(target, source), node);
     }
 
+    /**
+     * Creates the IMUL ASMInstruction with one operand. The source operand (in
+     * a general-purpose register or memory location) is multiplied by the value
+     * in the RAX register and the product is stored in the RDX:RAX registers.
+     */
+    public ASMInstr Mul(ASMArg source) {
+        return new ASMInstr(ASMInstrType.IMULQ, List.of(source), node);
+    }
+
     public ASMInstr Div(ASMArg target) {
         return new ASMInstr(ASMInstrType.IDIVQ, List.of(target), node);
     }

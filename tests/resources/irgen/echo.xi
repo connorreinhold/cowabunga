@@ -1,7 +1,7 @@
 use io
 
 main(args: int[][]) {
-    i: int = 0
+    i: int = 1
     while i < length(args) {
         println(args[i])
         i = i + 1
