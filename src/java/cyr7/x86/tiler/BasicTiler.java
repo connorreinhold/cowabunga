@@ -294,6 +294,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         int lastRegisterArg;
         int tileCost = 0;
 
+        ASMArg rdiTemp = arg.temp(generator.newTemp(), Size.QWORD);
+        // Save the value from rdi as it is overwritten with each function call (and we need it for RET_2...)
+        insn.add(make.Mov(rdiTemp, rdi));
+        
         /*
          * If the callee function has more than two return values, then we store
          * memory address to a "saved stack space" to hold return values onto
@@ -381,6 +385,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insn.add(make.Push(argTile.result.get()));
         }
         insn.add(make.Call(targetTile.result.get()));
+        insn.add(make.Mov(rdi, rdiTemp));
 
         if (n.collectors().size() == 1) {
             String resultTemp = n.collectors().get(0);
