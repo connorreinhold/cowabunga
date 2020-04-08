@@ -187,7 +187,7 @@ public abstract class TestProgram {
         long fileLength = fileHandler.length() - 1;
         if (fileLength < 0) {
             fileHandler.close();
-            return true;
+            return false;
         }
         fileHandler.seek(fileLength);
         byte readByte = fileHandler.readByte();
