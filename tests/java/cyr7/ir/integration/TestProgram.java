@@ -147,11 +147,12 @@ public abstract class TestProgram {
             return;
         }
 
-        this.executeCommand(false,
-                "./xic",
-                "-libpath",
-                this.libpath(),
-                this.getTestXiFilename());
+        System.out.println(this.executeCommand(
+            true,
+            "./xic",
+            "-libpath",
+            this.libpath(),
+            this.getTestXiFilename()));
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);

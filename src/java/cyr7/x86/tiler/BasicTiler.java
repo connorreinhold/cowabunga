@@ -15,6 +15,7 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
@@ -289,8 +290,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
 
         List<ASMLine> insn = new ArrayList<>();
-        TilerData targetTile = n.target()
-            .accept(this);
+        TilerData targetTile = n.target().accept(this);
         List<TilerData> argTiles = n.args()
             .stream()
             .map(a -> a.accept(this))
@@ -298,11 +298,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         int lastRegisterArg;
         int tileCost = 0;
-
-        ASMArg rdiTemp = arg.temp(generator.newTemp(), Size.QWORD);
-        // Save the value from rdi as it is overwritten with each function
-        // call (and we need it for RET_2...)
-        insn.add(make.Mov(rdiTemp, rdi));
 
         /*
          * If the callee function has more than two return values, then we store
@@ -316,7 +311,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             long size = (numReturnValues - 2) * 8;
             insn.add(make.MovAbs(rdi, arg.constant(size)));
             insn.add(make.Sub(rsp, rdi));
-            insn.add(make.Mov(rdi, rsp));
+            insn.add(make.Mov(rdi, rsp)); // the first argument
 
             for (int i = 0; i < lastRegisterArg; i++) {
                 TilerData argTile = argTiles.get(i);
@@ -393,15 +388,42 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             TilerData argTile = argTiles.get(i);
             insn.add(make.Push(argTile.result.get()));
         }
-        insn.add(make.Call(targetTile.result.get()));
-        insn.add(make.Mov(rdi, rdiTemp));
 
-        if (n.collectors().size() == 1) {
-            String resultTemp = n.collectors().get(0);
-            insn.add(make.Mov(arg.temp(resultTemp, Size.QWORD), ASMReg.RAX));
-        } else if (n.collectors().size() > 1) {
-            // TODO: FIX ME AHAAAAAHAHAHAHA :(
-            throw new RuntimeException("bleh");
+        insn.add(make.Call(targetTile.result.get()));
+
+        for (int i = 0; i < n.collectors().size(); i++) {
+            String tempName = n.collectors().get(i);
+            if (tempName.equals("_")) {
+                continue;
+            }
+
+            ASMArg target = arg.temp(tempName, Size.QWORD);
+            switch (i) {
+                case 0:
+                    insn.add(make.Mov(target, rax));
+                    break;
+                case 1:
+                    insn.add(make.Mov(target, rdx));
+                    break;
+                default:
+                    int offset = 8 * (i - 1);
+                    var addr = arg.addr(
+                        Optional.of(ASMReg.RDI),
+                        ScaleValues.ONE,
+                        Optional.empty(),
+                        offset);
+                    var mem = arg.mem(addr);
+                    insn.add(make.Mov(target, mem));
+                    break;
+            }
+        }
+
+        if (numReturnValues > 2) {
+            // we allocated some space on the stack for additional return values
+            // that we now need to deallocate
+
+            long size = (numReturnValues - 2) * 8;
+            insn.add(make.Add(rsp, arg.constant(size)));
         }
 
         TilerData result = new TilerData(tileCost, insn, Optional.empty());
@@ -506,8 +528,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData result;
 
         if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
-            .startsWith(
-                ARG_PREFIX)) {
+            .startsWith(ARG_PREFIX)) {
             // Case: Move(ARG_i, t)
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
@@ -619,28 +640,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
             .startsWith(RET_PREFIX)) {
             // Case Move(t, RET_i)
-            String index = ((IRTemp) n.source()).name()
-                .substring(RET_PREFIX.length());
-            int i = Integer.parseInt(index);
-            switch (i) {
-                case 0:
-                    instrs.add(make.Mov(target.result.get(), rax));
-                    break;
-                case 1:
-                    instrs.add(make.Mov(target.result.get(), rdx));
-                    break;
-                default:
-                    int offset = 8 * (i - 1);
-                    var addr = arg.addr(Optional.of(ASMReg.RDI),
-                        ScaleValues.ONE,
-                        Optional.empty(),
-                        offset);
-                    var mem = arg.mem(addr);
-                    instrs.add(make.Mov(target.result.get(), mem));
-                    break;
-            }
-            result =
-                new TilerData(1 + target.tileCost, instrs, Optional.empty());
+            // Handle in CallStmt
+            result = new TilerData(0, List.of(), Optional.empty());
+
         } else if (target.result.get() instanceof ASMMemArg
             && source.result.get() instanceof ASMMemArg) {
             ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
@@ -650,6 +652,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 1 + target.tileCost + source.tileCost,
                 instrs,
                 Optional.empty());
+
         } else {
             instrs.add(make.Mov(target.result.get(), source.result.get()));
             result = new TilerData(
@@ -657,6 +660,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 instrs,
                 Optional.empty());
         }
+
         n.setOptimalTilingOnce(result);
         return result;
     }

@@ -184,11 +184,10 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
     public Result visit(IRCallStmt n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
 
-        List<IRExpr> args = new ArrayList<>();
         List<IRStmt> stmts = new LinkedList<>();
 
         // List of temps representing the values of each function argument
-        List<IRTemp> argValTemps = new ArrayList<>();
+        List<IRExpr> argValTemps = new ArrayList<>();
         for (IRExpr arg : n.args()) {
             Result argResult = arg.accept(this);
             var resultPair = argResult.assertSecond();
@@ -200,20 +199,13 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
             // overwrite the value
             // i.e. call(1, call(0, 0))
             stmts.add(make.IRMove(argValTemp, resultPair.part2()));
-            args.add(argValTemp);
-        }
-
-        // Move temps into function ARG_0, ARG_1, etc.
-        for (int i = 0; i < argValTemps.size(); i++) {
-            var argTemp = make.IRTemp(generator.argTemp(i));
-            stmts.add(make.IRMove(argTemp, argValTemps.get(i)));
         }
 
         stmts.add(
             make.IRCallStmt(
                 n.collectors(),
                 n.target(),
-                args));
+                argValTemps));
         return Result.stmts(stmts);
     }
 

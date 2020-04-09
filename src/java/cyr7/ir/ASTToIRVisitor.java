@@ -358,7 +358,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         for (Optional<VarDeclNode> var : n.varDecls) {
             var.ifPresentOrElse(
                 varDecl -> collectors.add(varDecl.identifier),
-                () -> collectors.add(generator.newTemp()));
+                () -> collectors.add("_"));
         }
 
         return OneOfTwo.ofSecond(
