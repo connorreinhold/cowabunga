@@ -532,6 +532,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             // Case: Move(ARG_i, t)
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
+            assert false;
 
         } else if (n.source() instanceof IRTemp
             && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
@@ -642,6 +643,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             // Case Move(t, RET_i)
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
+            assert false;
 
         } else if (target.result.get() instanceof ASMMemArg
             && source.result.get() instanceof ASMMemArg) {
