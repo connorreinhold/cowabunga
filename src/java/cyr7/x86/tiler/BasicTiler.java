@@ -49,10 +49,15 @@ import cyr7.x86.asm.ASMTempRegArg;
  */
 public class BasicTiler implements MyIRVisitor<TilerData> {
 
+    private static final ASMArgFactory arg = ASMArgFactory.instance;
+
     private final IdGenerator generator;
     private final int numRetValues;
     private final String returnLbl;
-    private final ASMArgFactory arg;
+
+    /// This temporary contains the memory address of the space allocated to
+    /// store return values beyond the second.
+    private final Optional<ASMTempArg> additionalRetValAddress;
 
     private final ASMReg rbp = ASMReg.RBP;
     private final ASMReg rax = ASMReg.RAX;
@@ -67,12 +72,13 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     public BasicTiler(
         IdGenerator generator,
         int numRetValues,
-        String returnLbl) {
+        String returnLbl,
+        Optional<ASMTempArg> additionalRetValAddress) {
 
         this.generator = generator;
         this.numRetValues = numRetValues;
         this.returnLbl = returnLbl;
-        this.arg = ASMArgFactory.instance;
+        this.additionalRetValAddress = additionalRetValAddress;
     }
 
     @Override
@@ -628,7 +634,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     break;
                 default:
                     int offset = 8 * (i - 1);
-                    var addr = arg.addr(Optional.of(ASMReg.RDI),
+                    var addr = arg.addr(
+                        Optional.of(additionalRetValAddress.get()),
                         ScaleValues.ONE,
                         Optional.empty(),
                         offset);

@@ -159,11 +159,12 @@ public abstract class TestProgram {
         tmpFile.setReadable(true);
         tmpFile.setWritable(true);
         tmpFile.deleteOnExit();
-        this.executeCommand(false,
-                linkerFile.getAbsolutePath(),
-                this.getTestAssemblyFilename(),
-                "-o",
-                tmpFile.getAbsolutePath());
+        System.out.println(this.executeCommand(
+            true,
+            linkerFile.getAbsolutePath(),
+            this.getTestAssemblyFilename(),
+            "-o",
+            tmpFile.getAbsolutePath()));
 
         String[] args = this.configuration().args;
         String[] command = new String[1 + args.length];

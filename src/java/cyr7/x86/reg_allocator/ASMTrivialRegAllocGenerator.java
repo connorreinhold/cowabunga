@@ -28,6 +28,7 @@ import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.asm.ASMTempRegArg;
 import cyr7.x86.tiler.TilerData;
 import cyr7.x86.tiler.TilerFactory;
@@ -67,24 +68,30 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
         String returnLbl = "end_" + funcName;
 
+        Optional<ASMTempArg> addrOfOverspillRetValues;
+        if (numOfReturnValues > 2) {
+            addrOfOverspillRetValues = Optional.of(arg.temp(generator.newTemp(), Size.QWORD));
+        } else {
+            addrOfOverspillRetValues = Optional.empty();
+        }
+
         MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
             generator,
             numOfReturnValues,
-            returnLbl);
+            returnLbl,
+            addrOfOverspillRetValues);
 
         List<ASMLine> functionBody = funcDecl.body()
             .accept(tiler).optimalInstructions;
         List<ASMTempArg> uniqueTemps = uniqueTemps(functionBody);
-        List<ASMLine> concreteFunctionBody = replaceTemporariesWithMemoryAccess(
-            functionBody,
-            uniqueTemps);
+        addrOfOverspillRetValues.ifPresent(uniqueTemps::add);
 
         List<ASMLine> lines = new ArrayList<>();
-        lines.addAll(createPrologue(funcName, uniqueTemps.size()));
-        lines.addAll(concreteFunctionBody);
+        lines.addAll(createPrologue(funcName, uniqueTemps.size(), addrOfOverspillRetValues));
+        lines.addAll(funcDecl.body().accept(tiler).optimalInstructions);
         lines.addAll(createEpilogue(returnLbl, uniqueTemps.size()));
 
-        return lines;
+        return replaceTemporariesWithMemoryAccess(lines, uniqueTemps);
     }
 
     /**
@@ -100,12 +107,27 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         return new ArrayList<>(temps);
     }
 
-    private List<ASMLine> createPrologue(String mangledFunctionName,
-                                         long numberOfTemps) {
-        return List.of(new ASMLabel(mangledFunctionName),
+    private List<ASMLine> createPrologue(
+        String mangledFunctionName,
+        long numberOfTemps,
+        Optional<ASMTempArg> addrOfOverspillRetValues) {
+
+        List<ASMLine> lines = new ArrayList<>();
+        lines.addAll(List.of(
+            new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),
             make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps))));
+
+        addrOfOverspillRetValues.ifPresent(addr -> {
+            // move the first argument containing the address in the stack where
+            // the caller has allocated space for the overspill return values,
+            // into addr
+
+            lines.add(make.Mov(addr, ASMReg.RDI));
+        });
+
+        return lines;
     }
 
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
