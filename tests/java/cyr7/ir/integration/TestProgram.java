@@ -11,7 +11,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -70,9 +69,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    private final URL linkerFilename = Run.class.getClassLoader()
-                                                .getResource(
-                                                        "x86/runtime/linkxi.sh");
+    private final String linkerFilename = "/home/vagrant/runtime/linkxi.sh";
 
     private String getTestAssemblyFilename() {
         return "tests/resources/irgen/" + filename() + ".s";
@@ -133,38 +130,36 @@ public abstract class TestProgram {
             return;
         }
         if (Objects.isNull(linkerFilename)) {
-            System.out.println("Cannot find linker resource in resources/x86/");
+            System.out.println("Cannot find linker resource in ~/runtime");
             return;
         }
 
-        File linkerFile = new File(linkerFilename.getPath());
+        File linkerFile = new File(linkerFilename);
         if (!linkerFile.exists()) {
-            System.out.println("Cannot find linker file in resources/x86/");
+            System.out.println("Cannot find linker file in ~/runtime");
             return;
         }
         if (!linkerFile.canExecute()) {
-            System.out.println("Cannot execute the linker in resources/x86/");
+            System.out.println("Cannot execute the linker in ~/runtime");
             return;
         }
 
-        System.out.println(this.executeCommand(
-            true,
-            "./xic",
-            "-libpath",
-            this.libpath(),
-            this.getTestXiFilename()));
+        System.out.println(this.executeCommand(true,
+                "./xic",
+                "-libpath",
+                this.libpath(),
+                this.getTestXiFilename()));
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
         tmpFile.setReadable(true);
         tmpFile.setWritable(true);
         tmpFile.deleteOnExit();
-        System.out.println(this.executeCommand(
-            true,
-            linkerFile.getAbsolutePath(),
-            this.getTestAssemblyFilename(),
-            "-o",
-            tmpFile.getAbsolutePath()));
+        System.out.println(this.executeCommand(true,
+                linkerFile.getAbsolutePath(),
+                this.getTestAssemblyFilename(),
+                "-o",
+                tmpFile.getAbsolutePath()));
 
         String[] args = this.configuration().args;
         String[] command = new String[1 + args.length];
