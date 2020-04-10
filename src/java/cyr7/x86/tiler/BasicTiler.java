@@ -414,7 +414,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 default:
                     int offset = 8 * (i - 1);
                     var addr = arg.addr(
-                        Optional.of(ASMReg.RDI),
+                        Optional.of(ASMReg.RSP),
                         ScaleValues.ONE,
                         Optional.empty(),
                         offset);

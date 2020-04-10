@@ -1,28 +1,24 @@
 package cyr7.x86.reg_allocator;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
-import cyr7.visitor.MyIRVisitor;
 import cyr7.x86.asm.ASMLine;
-import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMTempArg.Size;
-import cyr7.x86.tiler.TilerData;
 import cyr7.x86.tiler.TilerFactory;
 
-public class ASMAbstractGenerator implements ASMGenerator {
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.Set;
+
+public class ASMAbstractGenerator extends ASMTrivialRegAllocGenerator {
 
     private final TilerFactory tilerFactory;
     private final IdGenerator generator;
 
     public ASMAbstractGenerator(TilerFactory tilerFactory,
                                        IdGenerator generator) {
+        super(tilerFactory, generator);
         this.tilerFactory = tilerFactory;
         this.generator = generator;
     }
@@ -46,16 +42,7 @@ public class ASMAbstractGenerator implements ASMGenerator {
 
     private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
             int numRetValues) {
-
-        String returnLbl = "end_" + funcName;
-
-        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
-            generator,
-            numRetValues,
-            returnLbl,
-            Optional.of(new ASMTempArg("overspillRetValuesTemp", Size.QWORD)));
-
-        return funcDecl.body().accept(tiler).optimalInstructions;
+        return generateAbstractAssembly(funcName, funcDecl, numRetValues).part1();
     }
 
 }
