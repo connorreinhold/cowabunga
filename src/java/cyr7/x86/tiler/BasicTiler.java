@@ -397,6 +397,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         insn.add(make.Call(targetTile.result.get()));
 
+        // Add back the stack space we used for arguments 7 and beyond
+        if (argTiles.size() > lastRegisterArg) {
+            insn.add(make.Add(rsp, arg.constant(8 * (argTiles.size() - lastRegisterArg))));
+        }
+
         for (int i = 0; i < n.collectors().size(); i++) {
             String tempName = n.collectors().get(i);
             if (tempName.equals("_")) {
