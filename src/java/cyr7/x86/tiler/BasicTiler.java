@@ -412,7 +412,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     insn.add(make.Mov(target, rdx));
                     break;
                 default:
-                    int offset = 8 * (i - 1);
+                    int offset = 8 * (i - 2);
                     var addr = arg.addr(
                         Optional.of(ASMReg.RSP),
                         ScaleValues.ONE,
