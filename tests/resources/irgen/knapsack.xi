@@ -12,7 +12,9 @@ main(args: int[][]) {
     }
     
     _, accValueA: int, knapsackA: bool[] = compute_knapsack(n, W, v, w, indexes, true)
+    println("Size here A: " + unparseInt(length(knapsackA)))
     _, accValueB: int, knapsackB: bool[] = compute_knapsack(n, W, v, w, indexes, false)
+    println("Size here B: " + unparseInt(length(knapsackB)))
     
     if accValueA > accValueB {
         write(accValueA, knapsackA)
@@ -101,6 +103,7 @@ compute_knapsack(n: int, W: int, v: int[], w: int[], indexes: int[], density: bo
         }
         i = i + 1
     }
+    println("Size here: " + unparseInt(length(knapsack)))
     return accWeight, accValue, knapsack
 }
 
