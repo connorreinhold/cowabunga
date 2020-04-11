@@ -633,7 +633,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     instrs.add(make.Mov(rdx, source.result.get()));
                     break;
                 default:
-                    int offset = 8 * (i - 1);
+                    int offset = 8 * (i - 2);
                     var addr = arg.addr(
                         Optional.of(additionalRetValAddress.get()),
                         ScaleValues.ONE,
