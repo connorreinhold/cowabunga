@@ -1,18 +1,12 @@
 package cyr7.x86.tiler;
 
-import cyr7.ir.IdGenerator;
-import cyr7.ir.nodes.*;
-import cyr7.semantics.types.FunctionType;
-import cyr7.visitor.MyIRVisitor;
-import cyr7.x86.asm.ASMArgFactory;
-import cyr7.x86.asm.ASMInstr;
-import cyr7.x86.asm.ASMLineFactory;
-import cyr7.x86.asm.ASMTempArg;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import cyr7.ir.IdGenerator;
+import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRMem;
+import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.pattern.MemAddrPatternChecker;
 
 public class ComplexTiler extends BasicTiler {
 
@@ -23,8 +17,19 @@ public class ComplexTiler extends BasicTiler {
                 stack16ByteAligned);
     }
 
+    @Override
     public TilerData visit(IRBinOp n) {
         return super.visit(n);
     }
-    
+
+    @Override
+    public TilerData visit(IRMem n) {
+        Optional<TilerData> tile = n.expr().accept(new MemAddrPatternChecker());
+        if (tile.isPresent()) {
+            return tile.get();
+        } else {
+            return super.visit(n);
+        }
+    }
+
 }

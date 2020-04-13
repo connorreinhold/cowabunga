@@ -35,11 +35,11 @@ public class ASMAddrExpr {
     public final Optional<ASMTempRegArg> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<ASMTempRegArg> base, ScaleValues scale,
-            Optional<ASMTempRegArg> index, int displacement) {
-        this.base = base;
+    public ASMAddrExpr(Optional<? extends ASMTempRegArg> base, ScaleValues scale,
+            Optional<? extends ASMTempRegArg> index, int displacement) {
+        this.base = base.map(b -> b);
         this.scale = scale;
-        this.index = index;
+        this.index = index.map(i -> i);
         this.displacement = displacement;
     }
 
