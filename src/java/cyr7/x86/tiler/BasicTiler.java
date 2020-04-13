@@ -61,16 +61,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     private final boolean stack16ByteAligned;
 
-    private final ASMReg rbp = ASMReg.RBP;
-    private final ASMReg rax = ASMReg.RAX;
-    private final ASMReg rsp = ASMReg.RSP;
-    private final ASMReg rdi = ASMReg.RDI;
-    private final ASMReg rsi = ASMReg.RSI;
-    private final ASMReg rdx = ASMReg.RDX;
-    private final ASMReg rcx = ASMReg.RCX;
-    private final ASMReg r8 = ASMReg.R8;
-    private final ASMReg r9 = ASMReg.R9;
-
     public BasicTiler(
         IdGenerator generator,
         int numRetValues,
@@ -120,10 +110,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
                 insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
-                insns.add(make.Mov(rax, left.result.get()));
+                insns.add(make.Mov(ASMReg.RAX, left.result.get()));
                 insns.add(make.CQO());
                 insns.add(make.Div(right.result.get()));
-                insns.add(make.Mov(ret, rax));
+                insns.add(make.Mov(ret, ASMReg.RAX));
 
                 insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
                 insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
@@ -157,9 +147,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
                 insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
-                insns.add(make.Mov(rax, left.result.get()));
+                insns.add(make.Mov(ASMReg.RAX, left.result.get()));
                 insns.add(make.Mul(right.result.get()));
-                insns.add(make.Mov(ret, rdx));
+                insns.add(make.Mov(ret, ASMReg.RDX));
 
                 insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
                 insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
@@ -190,10 +180,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
                 insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
-                insns.add(make.Mov(rax, left.result.get()));
+                insns.add(make.Mov(ASMReg.RAX, left.result.get()));
                 insns.add(make.CQO());
                 insns.add(make.Div(right.result.get()));
-                insns.add(make.Mov(ret, rdx));
+                insns.add(make.Mov(ret, ASMReg.RDX));
 
                 insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
                 insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
@@ -343,9 +333,9 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             lastRegisterArg = Math.min(5, argTiles.size());
 
             long size = (numReturnValues - 2) * 8;
-            insn.add(make.MovAbs(rdi, arg.constant(size)));
-            insn.add(make.Sub(rsp, rdi));
-            insn.add(make.Mov(rdi, rsp)); // the first argument
+            insn.add(make.MovAbs(ASMReg.RDI, arg.constant(size)));
+            insn.add(make.Sub(ASMReg.RSP, ASMReg.RDI));
+            insn.add(make.Mov(ASMReg.RDI, ASMReg.RSP)); // the first argument
 
             for (int i = 0; i < lastRegisterArg; i++) {
                 TilerData argTile = argTiles.get(i);
@@ -353,19 +343,19 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insn.addAll(argTile.optimalInstructions);
                 switch (i) {
                     case 0:
-                        insn.add(make.Mov(rsi, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RSI, argTile.result.get()));
                         break;
                     case 1:
-                        insn.add(make.Mov(rdx, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RDX, argTile.result.get()));
                         break;
                     case 2:
-                        insn.add(make.Mov(rcx, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RCX, argTile.result.get()));
                         break;
                     case 3:
-                        insn.add(make.Mov(r8, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.R8, argTile.result.get()));
                         break;
                     case 4:
-                        insn.add(make.Mov(r9, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.R9, argTile.result.get()));
                         break;
                     default:
                         throw new RuntimeException("Unexpected Error with " +
@@ -380,22 +370,22 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insn.addAll(argTile.optimalInstructions);
                 switch (i) {
                     case 0:
-                        insn.add(make.Mov(rdi, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RDI, argTile.result.get()));
                         break;
                     case 1:
-                        insn.add(make.Mov(rsi, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RSI, argTile.result.get()));
                         break;
                     case 2:
-                        insn.add(make.Mov(rdx, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RDX, argTile.result.get()));
                         break;
                     case 3:
-                        insn.add(make.Mov(rcx, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.RCX, argTile.result.get()));
                         break;
                     case 4:
-                        insn.add(make.Mov(r8, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.R8, argTile.result.get()));
                         break;
                     case 5:
-                        insn.add(make.Mov(r9, argTile.result.get()));
+                        insn.add(make.Mov(ASMReg.R9, argTile.result.get()));
                         break;
                     default:
                         throw new RuntimeException("Unexpected Error with " +
@@ -427,7 +417,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         // Add back the stack space we used for arguments 7 and beyond
         if (argTiles.size() > lastRegisterArg) {
-            insn.add(make.Add(rsp,
+            insn.add(make.Add(ASMReg.RSP,
                 arg.constant(8 * (argTiles.size() - lastRegisterArg))));
         }
 
@@ -440,10 +430,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             ASMArg target = arg.temp(tempName, Size.QWORD);
             switch (i) {
                 case 0:
-                    insn.add(make.Mov(target, rax));
+                    insn.add(make.Mov(target, ASMReg.RAX));
                     break;
                 case 1:
-                    insn.add(make.Mov(target, rdx));
+                    insn.add(make.Mov(target, ASMReg.RDX));
                     break;
                 default:
                     int offset = 8 * (i - 2);
@@ -463,7 +453,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             // that we now need to deallocate
 
             long size = (numReturnValues - 2) * 8;
-            insn.add(make.Add(rsp, arg.constant(size)));
+            insn.add(make.Add(ASMReg.RSP, arg.constant(size)));
         }
 
         if (stackNeedsAdjustment) {
@@ -598,24 +588,24 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             if (this.numRetValues > 2) {
                 switch (i) {
                     case 0:
-                        instrs.add(make.Mov(targetTemp, rsi));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RSI));
                         break;
                     case 1:
-                        instrs.add(make.Mov(targetTemp, rdx));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RDX));
                         break;
                     case 2:
-                        instrs.add(make.Mov(targetTemp, rcx));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RCX));
                         break;
                     case 3:
-                        instrs.add(make.Mov(targetTemp, r8));
+                        instrs.add(make.Mov(targetTemp, ASMReg.R8));
                         break;
                     case 4:
-                        instrs.add(make.Mov(targetTemp, r9));
+                        instrs.add(make.Mov(targetTemp, ASMReg.R9));
                         break;
                     default:
                         int offset =
                             8 * (i - 5 + ASMConstants.WORD_OFFSET_TO_ARGS);
-                        var addr = arg.addr(Optional.of(rbp),
+                        var addr = arg.addr(Optional.of(ASMReg.RBP),
                             ScaleValues.ONE,
                             Optional.empty(),
                             offset);
@@ -626,22 +616,22 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             } else {
                 switch (i) {
                     case 0:
-                        instrs.add(make.Mov(targetTemp, rdi));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RDI));
                         break;
                     case 1:
-                        instrs.add(make.Mov(targetTemp, rsi));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RSI));
                         break;
                     case 2:
-                        instrs.add(make.Mov(targetTemp, rdx));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RDX));
                         break;
                     case 3:
-                        instrs.add(make.Mov(targetTemp, rcx));
+                        instrs.add(make.Mov(targetTemp, ASMReg.RCX));
                         break;
                     case 4:
-                        instrs.add(make.Mov(targetTemp, r8));
+                        instrs.add(make.Mov(targetTemp, ASMReg.R8));
                         break;
                     case 5:
-                        instrs.add(make.Mov(targetTemp, r9));
+                        instrs.add(make.Mov(targetTemp, ASMReg.R9));
                         break;
                     default:
                         int offset =
@@ -666,10 +656,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             int i = Integer.parseInt(index);
             switch (i) {
                 case 0:
-                    instrs.add(make.Mov(rax, source.result.get()));
+                    instrs.add(make.Mov(ASMReg.RAX, source.result.get()));
                     break;
                 case 1:
-                    instrs.add(make.Mov(rdx, source.result.get()));
+                    instrs.add(make.Mov(ASMReg.RDX, source.result.get()));
                     break;
                 default:
                     int offset = 8 * (i - 2);
