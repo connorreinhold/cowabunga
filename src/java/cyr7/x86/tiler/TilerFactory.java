@@ -16,6 +16,7 @@ public interface TilerFactory {
         IdGenerator generator,
         int numRetValues,
         String returnLbl,
-        Optional<ASMTempArg> additionalRetValueAddress);
+        Optional<ASMTempArg> additionalRetValueAddress,
+        boolean stack16ByteAligned);
 
 }

@@ -81,7 +81,8 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
             generator,
             numRetValues,
             returnLbl,
-            addrOfOverspillRetValues);
+            addrOfOverspillRetValues,
+            true);
 
         List<ASMLine> functionBody = funcDecl.body()
             .accept(tiler).optimalInstructions;
@@ -90,7 +91,7 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
         List<ASMLine> lines = new ArrayList<>();
         lines.addAll(createPrologue(funcName, uniqueTemps.size(), addrOfOverspillRetValues));
-        lines.addAll(funcDecl.body().accept(tiler).optimalInstructions);
+        lines.addAll(functionBody);
         lines.addAll(createEpilogue(returnLbl, uniqueTemps.size()));
 
         return new Pair<>(lines, uniqueTemps);
@@ -123,6 +124,8 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
         long numberOfTemps,
         Optional<ASMTempArg> addrOfOverspillRetValues) {
 
+        final long numberOfStackPushes = 1 + numberOfTemps + 7;
+
         List<ASMLine> lines = new ArrayList<>();
         lines.addAll(List.of(
             new ASMLabel(mangledFunctionName),
@@ -143,6 +146,10 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
             make.Push(ASMReg.R15)
         ));
 
+        if (numberOfStackPushes % 2 == 0) {
+            lines.add(make.Sub(ASMReg.RSP, arg.constant(8)));
+        }
+
         addrOfOverspillRetValues.ifPresent(addr -> {
             // move the first argument containing the address in the stack where
             // the caller has allocated space for the overspill return values,
@@ -156,6 +163,11 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
         List<ASMLine> lines = new ArrayList<>();
+
+        final long numberOfStackPushes = 1 + numberOfTemps + 7;
+        if (numberOfStackPushes % 2 == 0) {
+            lines.add(make.Add(ASMReg.RSP, arg.constant(8)));
+        }
 
         lines.addAll(List.of(
             make.Pop(ASMReg.R15),

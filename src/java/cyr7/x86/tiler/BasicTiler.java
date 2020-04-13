@@ -59,6 +59,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     /// store return values beyond the second.
     private final Optional<ASMTempArg> additionalRetValAddress;
 
+    private final boolean stack16ByteAligned;
+
     private final ASMReg rbp = ASMReg.RBP;
     private final ASMReg rax = ASMReg.RAX;
     private final ASMReg rsp = ASMReg.RSP;
@@ -73,12 +75,14 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         IdGenerator generator,
         int numRetValues,
         String returnLbl,
-        Optional<ASMTempArg> additionalRetValAddress) {
+        Optional<ASMTempArg> additionalRetValAddress,
+        boolean stack16ByteAligned) {
 
         this.generator = generator;
         this.numRetValues = numRetValues;
         this.returnLbl = returnLbl;
         this.additionalRetValAddress = additionalRetValAddress;
+        this.stack16ByteAligned = stack16ByteAligned;
     }
 
     @Override
@@ -305,6 +309,13 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         int lastRegisterArg;
         int tileCost = 0;
 
+        final boolean stackNeedsAdjustment =
+            (stack16ByteAligned && argTiles.size() % 2 == 1)
+            || (!stack16ByteAligned && argTiles.size() % 2 == 0);
+        if (stackNeedsAdjustment) {
+            insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
+        }
+
         /*
          * If the callee function has more than two return values, then we store
          * memory address to a "saved stack space" to hold return values onto
@@ -399,7 +410,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         // Add back the stack space we used for arguments 7 and beyond
         if (argTiles.size() > lastRegisterArg) {
-            insn.add(make.Add(rsp, arg.constant(8 * (argTiles.size() - lastRegisterArg))));
+            insn.add(make.Add(rsp,
+                arg.constant(8 * (argTiles.size() - lastRegisterArg))));
         }
 
         for (int i = 0; i < n.collectors().size(); i++) {
@@ -435,6 +447,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
             long size = (numReturnValues - 2) * 8;
             insn.add(make.Add(rsp, arg.constant(size)));
+        }
+
+        if (stackNeedsAdjustment) {
+            insn.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
 
         TilerData result = new TilerData(tileCost, insn, Optional.empty());
@@ -514,7 +530,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> instructions = List.of(new ASMLabel(n.name()));
 
         TilerData result
-            = new TilerData(instructions.size(), instructions, Optional.empty());
+            = new TilerData(instructions.size(), instructions,
+            Optional.empty());
         n.setOptimalTilingOnce(result);
         return result;
     }
