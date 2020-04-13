@@ -28,6 +28,7 @@ tests/xth/xthScriptAll
 *.typed
 *.ir
 *.ir_run
+*.s
 
 # <-- COWABUNGA SPECIFIC
 

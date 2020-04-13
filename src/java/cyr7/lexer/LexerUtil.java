@@ -18,7 +18,7 @@ public class LexerUtil {
      * @param writer the place to write
      * @throws IOException if the reader throws an {@code IOException}
      */
-    public static void lex(Reader reader, Writer writer, String filename) 
+    public static boolean lex(Reader reader, Writer writer, String filename)
             throws IOException {
         MyLexer lexer = new MyLexer(new BufferedReader(reader), filename);
         ComplexSymbol token;
@@ -28,9 +28,13 @@ public class LexerUtil {
                 writer.append(fullDescription(token))
                       .append(System.lineSeparator());
             }
+
+            return true;
         } catch (Exception e) {
             writer.append(e.getMessage())
                   .append(System.lineSeparator());
+
+            return false;
         }
     }
 

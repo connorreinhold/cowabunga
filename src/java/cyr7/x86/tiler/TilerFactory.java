@@ -2,6 +2,9 @@ package cyr7.x86.tiler;
 
 import cyr7.ir.IdGenerator;
 import cyr7.visitor.MyIRVisitor;
+import cyr7.x86.asm.ASMTempArg;
+
+import java.util.Optional;
 
 public interface TilerFactory {
 
@@ -11,8 +14,8 @@ public interface TilerFactory {
 
     MyIRVisitor<TilerData> constructTiler(
         IdGenerator generator,
-        String tiledFunctionName,
-            int numRetValues,
-        String returnLbl);
+        int numRetValues,
+        String returnLbl,
+        Optional<ASMTempArg> additionalRetValueAddress);
 
 }

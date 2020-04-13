@@ -12,11 +12,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
-import cyr7.ir.IRUtil.LowerConfiguration;
-import cyr7.typecheck.IxiFileOpener;
-import cyr7.x86.ASMUtil;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -26,9 +22,12 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import cyr7.ir.IRUtil;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
+import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
+import cyr7.x86.ASMUtil;
 
 public class CLI {
 
@@ -50,6 +49,7 @@ public class CLI {
     private static boolean wantsIrGen = false;
     private static boolean wantsMirRun = false;
     private static boolean wantsIrRun = false;
+    private static boolean wantsAssembly = true;
 
     private static File assemblyRoot = new File(".");
     private static File sourceRoot = new File(".");
@@ -223,6 +223,16 @@ public class CLI {
                 .required(false)
                 .build();
 
+        Option noAssembly = Option
+                .builder("noASM")
+                .desc("Do not generate assembly")
+                .hasArg(false)
+                .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
+
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
@@ -238,7 +248,8 @@ public class CLI {
                 .addOption(assemblyDestination)
                 .addOption(targetOS)
                 .addOption(version)
-                .addOption(debugPrinting);
+                .addOption(debugPrinting)
+                .addOption(noAssembly);
     }
 
     /**
@@ -398,6 +409,9 @@ public class CLI {
                 case "debug":
                     debugPrintingEnabled = true;
                     break;
+                case "noASM":
+                    wantsAssembly = false;
+                    break;
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -455,7 +469,11 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(destinationRoot.getAbsolutePath(), filename, "typed");
-                    TypeCheckUtil.typeCheck(input, output, filename, isIXI,
+                    TypeCheckUtil.typeCheck(
+                        input,
+                        output,
+                        filename,
+                        isIXI,
                         opener);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -529,17 +547,16 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            // By default we always generate assembly
-            {
+            if (wantsAssembly) {
                 debugPrint("Generate and interpret assembly code for: " + filename);
                 try {
                     input = getReader(filename);
                     output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
-                    ASMUtil.writeASM(input, output, filename, opener);
+                    ASMUtil.writeASM(input, output, filename, opener, lowerConfiguration);
 
                     if (debugPrintingEnabled) {
                         input = getReader(filename);
-                        ASMUtil.printDebugASM(input, filename, opener);
+                        ASMUtil.printDebugASM(input, filename, opener, lowerConfiguration);
                     }
                 } catch (Exception e) {
                     debugPrint(e);

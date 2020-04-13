@@ -10,7 +10,7 @@ public class TestEcho extends TestProgram {
 
     @Override
     protected String expected() {
-        return "asdlkfjasldfkjdbkljad\nHello world\n";
+        return "Hello world\n";
     }
 
     @Override

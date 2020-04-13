@@ -1,31 +1,7 @@
 package cyr7.ir.integration;
 
-import cyr7.ast.expr.ExprNode;
-import cyr7.ast.expr.FunctionCallExprNode;
-import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
-import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
-import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
-import cyr7.ast.stmt.BlockStmtNode;
-import cyr7.ast.stmt.ProcedureStmtNode;
-import cyr7.ast.toplevel.FunctionDeclNode;
-import cyr7.ast.toplevel.FunctionHeaderDeclNode;
-import cyr7.ast.toplevel.XiProgramNode;
-import cyr7.ir.ASTToIRVisitor;
-import cyr7.ir.DefaultIdGenerator;
-import cyr7.ir.IdGenerator;
-import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.LowerConfiguration;
-import cyr7.ir.interpret.IRSimulator;
-import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRNode;
-import cyr7.ir.visit.CheckCanonicalIRVisitor;
-import cyr7.ir.visit.CheckConstFoldedIRVisitor;
-import cyr7.parser.ParserUtil;
-import cyr7.typecheck.IxiFileOpener;
-import cyr7.typecheck.TypeCheckUtil;
-import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
-import edu.cornell.cs.cs4120.util.SExpPrinter;
-import java_cup.runtime.ComplexSymbolFactory.Location;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
@@ -39,7 +15,32 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import cyr7.ast.expr.ExprNode;
+import cyr7.ast.expr.FunctionCallExprNode;
+import cyr7.ast.expr.literalexpr.LiteralArrayExprNode;
+import cyr7.ast.expr.literalexpr.LiteralIntExprNode;
+import cyr7.ast.expr.literalexpr.LiteralStringExprNode;
+import cyr7.ast.stmt.BlockStmtNode;
+import cyr7.ast.stmt.ProcedureStmtNode;
+import cyr7.ast.toplevel.FunctionDeclNode;
+import cyr7.ast.toplevel.FunctionHeaderDeclNode;
+import cyr7.ast.toplevel.XiProgramNode;
+import cyr7.ir.ASTToIRVisitor;
+import cyr7.ir.DefaultIdGenerator;
+import cyr7.ir.IRUtil;
+import cyr7.ir.IRUtil.LowerConfiguration;
+import cyr7.ir.IdGenerator;
+import cyr7.ir.interpret.IRSimulator;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRNode;
+import cyr7.ir.visit.CheckCanonicalIRVisitor;
+import cyr7.ir.visit.CheckConstFoldedIRVisitor;
+import cyr7.parser.ParserUtil;
+import cyr7.typecheck.IxiFileOpener;
+import cyr7.typecheck.TypeCheckUtil;
+import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
+import edu.cornell.cs.cs4120.util.SExpPrinter;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public final class Run {
 
@@ -112,11 +113,13 @@ public final class Run {
         }
         if (lowerConfiguration.traceEnabled) {
             CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-            assertTrue(lowered.aggregateChildren(visitor));
-                /* "Program is not lowered, but it's supposed to be!: "
+            boolean checkLowered = lowered.aggregateChildren(visitor);
+            if (!checkLowered) {
+                fail("Program is not lowered, but it's supposed to be!: "
                     + sexp(lowered)
                     + "\nOffending node: "
-                    + visitor.noncanonical()); */
+                    + visitor.noncanonical());
+            }
         }
 
         return lowered;

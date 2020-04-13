@@ -63,6 +63,7 @@ import cyr7.ir.nodes.IRTemp;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.semantics.types.FunctionType;
 import cyr7.semantics.types.ResultType;
+import cyr7.util.OneOfThree;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -343,20 +344,28 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public OneOfTwo<IRExpr, IRStmt> visit(MultiAssignStmtNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
-        List<IRStmt> commands = new ArrayList<>();
-        IRExpr functionCall = n.initializer.accept(this)
-                                           .assertFirst();
-        commands.add(make.IRExp(functionCall));
+        List<IRExpr> params = n.initializer.parameters.stream()
+            .map(stmt -> stmt.accept(this).assertFirst())
+            .collect(Collectors.toList());
 
-        int retNum = 0;
+        var fType = n.initializer.getFunctionType().get();
+
+        String encodedName = assemblyFunctionName(
+            n.initializer.identifier,
+            fType);
+
+        List<String> collectors = new ArrayList<>(n.varDecls.size());
         for (Optional<VarDeclNode> var : n.varDecls) {
-            if (var.isPresent()) {
-                commands.add(make.IRMove(make.IRTemp(var.get().identifier),
-                        make.IRTemp(generator.retTemp(retNum))));
-            }
-            retNum++;
+            var.ifPresentOrElse(
+                varDecl -> collectors.add(varDecl.identifier),
+                () -> collectors.add("_"));
         }
-        return OneOfTwo.ofSecond(make.IRSeq(commands));
+
+        return OneOfTwo.ofSecond(
+            make.IRCallStmt(
+                collectors,
+                make.IRName(encodedName),
+                params));
     }
 
     @Override
@@ -455,9 +464,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
         List<IRExpr> params = n.parameters.stream()
-                                          .map(stmt -> stmt.accept(this)
-                                                           .assertFirst())
-                                          .collect(Collectors.toList());
+            .map(stmt -> stmt.accept(this).assertFirst())
+            .collect(Collectors.toList());
         var fType = n.getFunctionType().get();
         String encodedName = assemblyFunctionName(n.identifier, fType);
         return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params,

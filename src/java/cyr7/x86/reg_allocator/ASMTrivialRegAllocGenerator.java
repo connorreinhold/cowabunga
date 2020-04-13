@@ -1,21 +1,9 @@
 package cyr7.x86.reg_allocator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import cyr7.exceptions.x86.ASMException;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
-import cyr7.semantics.types.FunctionType;
 import cyr7.visitor.MyIRVisitor;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
@@ -28,12 +16,25 @@ import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.asm.ASMTempRegArg;
 import cyr7.x86.tiler.TilerData;
 import cyr7.x86.tiler.TilerFactory;
 import cyr7.x86.visitor.TempVisitor;
+import polyglot.util.Pair;
 
-public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
     private static final ASMLineFactory make = ASMLineFactory.instance;
     private static final ASMArgFactory arg = ASMArgFactory.instance;
@@ -62,31 +63,46 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         return lines;
     }
 
-    private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
-
-            int numOfReturnValues) {
+    protected Pair<List<ASMLine>, List<ASMTempArg>> generateAbstractAssembly(
+        String funcName,
+        IRFuncDecl funcDecl,
+        int numRetValues) {
 
         String returnLbl = "end_" + funcName;
 
-        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(generator,
+        Optional<ASMTempArg> addrOfOverspillRetValues;
+        if (numRetValues > 2) {
+            addrOfOverspillRetValues = Optional.of(arg.temp(generator.newTemp(), Size.QWORD));
+        } else {
+            addrOfOverspillRetValues = Optional.empty();
+        }
 
-                funcName,
-                numOfReturnValues,
-                returnLbl);
+        MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
+            generator,
+            numRetValues,
+            returnLbl,
+            addrOfOverspillRetValues);
 
         List<ASMLine> functionBody = funcDecl.body()
             .accept(tiler).optimalInstructions;
         List<ASMTempArg> uniqueTemps = uniqueTemps(functionBody);
-        List<ASMLine> concreteFunctionBody = replaceTemporariesWithMemoryAccess(
-            functionBody,
-            uniqueTemps);
+        addrOfOverspillRetValues.ifPresent(uniqueTemps::add);
 
         List<ASMLine> lines = new ArrayList<>();
-        lines.addAll(createPrologue(funcName, uniqueTemps.size()));
-        lines.addAll(concreteFunctionBody);
+        lines.addAll(createPrologue(funcName, uniqueTemps.size(), addrOfOverspillRetValues));
+        lines.addAll(funcDecl.body().accept(tiler).optimalInstructions);
         lines.addAll(createEpilogue(returnLbl, uniqueTemps.size()));
 
-        return lines;
+        return new Pair<>(lines, uniqueTemps);
+    }
+
+    private List<ASMLine> generate(String funcName, IRFuncDecl funcDecl,
+            int numOfReturnValues) {
+        var result = generateAbstractAssembly(
+            funcName,
+            funcDecl,
+            numOfReturnValues);
+        return replaceTemporariesWithMemoryAccess(result.part1(), result.part2());
     }
 
     /**
@@ -102,20 +118,62 @@ public final class ASMTrivialRegAllocGenerator implements ASMGenerator {
         return new ArrayList<>(temps);
     }
 
-    private List<ASMLine> createPrologue(String mangledFunctionName,
-                                         long numberOfTemps) {
-        return List.of(new ASMLabel(mangledFunctionName),
+    private List<ASMLine> createPrologue(
+        String mangledFunctionName,
+        long numberOfTemps,
+        Optional<ASMTempArg> addrOfOverspillRetValues) {
+
+        List<ASMLine> lines = new ArrayList<>();
+        lines.addAll(List.of(
+            new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),
             make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps))));
+
+        // TODO: Better callee-saved registers
+        // Definitely do not need to save RSP and RBP, but doing it for the sake
+        // of testing for now
+        lines.addAll(List.of(
+            make.Push(ASMReg.RBX),
+            make.Push(ASMReg.RSP),
+            make.Push(ASMReg.RBP),
+            make.Push(ASMReg.R12),
+            make.Push(ASMReg.R13),
+            make.Push(ASMReg.R14),
+            make.Push(ASMReg.R15)
+        ));
+
+        addrOfOverspillRetValues.ifPresent(addr -> {
+            // move the first argument containing the address in the stack where
+            // the caller has allocated space for the overspill return values,
+            // into addr
+
+            lines.add(make.Mov(addr, ASMReg.RDI));
+        });
+
+        return lines;
     }
 
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
-        return List.of(new ASMLabel(returnLbl),
+        List<ASMLine> lines = new ArrayList<>();
+
+        lines.addAll(List.of(
+            make.Pop(ASMReg.R15),
+            make.Pop(ASMReg.R14),
+            make.Pop(ASMReg.R13),
+            make.Pop(ASMReg.R12),
+            make.Pop(ASMReg.RBP),
+            make.Pop(ASMReg.RSP),
+            make.Pop(ASMReg.RBX)
+        ));
+
+        lines.addAll(List.of(new ASMLabel(returnLbl),
             make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
             make.Mov(ASMReg.RSP, ASMReg.RBP),
             make.Pop(ASMReg.RBP),
-            make.Ret());
+            make.Ret()));
+
+        return lines;
     }
 
     private List<ASMLine> replaceTemporariesWithMemoryAccess(
