@@ -113,16 +113,22 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(ret, left.result.get()));
                 insns.add(make.ARShift(ret, right.result.get()));
                 break;
-            case DIV:
-                insns.add(make.Push(rax));
-                insns.add(make.Push(rdx));
+            case DIV: {
+                String raxTemp = generator.newTemp();
+                String rdxTemp = generator.newTemp();
+
+                insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
+                insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
+
                 insns.add(make.Mov(rax, left.result.get()));
                 insns.add(make.CQO());
                 insns.add(make.Div(right.result.get()));
                 insns.add(make.Mov(ret, rax));
-                insns.add(make.Pop(rdx));
-                insns.add(make.Pop(rax));
+
+                insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
+                insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
                 break;
+            }
             case EQ: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
@@ -144,15 +150,21 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.MovZX(ret, byteReg));
                 break;
             }
-            case HMUL:
-                insns.add(make.Push(rax));
-                insns.add(make.Push(rdx));
+            case HMUL: {
+                String raxTemp = generator.newTemp();
+                String rdxTemp = generator.newTemp();
+
+                insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
+                insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
+
                 insns.add(make.Mov(rax, left.result.get()));
                 insns.add(make.Mul(right.result.get()));
                 insns.add(make.Mov(ret, rdx));
-                insns.add(make.Pop(rdx));
-                insns.add(make.Pop(rax));
+
+                insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
+                insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
                 break;
+            }
             case LEQ: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
                 insns.add(make.Cmp(left.result.get(), right.result.get()));
@@ -172,14 +184,19 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 break;
             }
             case MOD:
-                insns.add(make.Push(rax));
-                insns.add(make.Push(rdx));
+                String raxTemp = generator.newTemp();
+                String rdxTemp = generator.newTemp();
+
+                insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
+                insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
+
                 insns.add(make.Mov(rax, left.result.get()));
                 insns.add(make.CQO());
                 insns.add(make.Div(right.result.get()));
                 insns.add(make.Mov(ret, rdx));
-                insns.add(make.Pop(rdx));
-                insns.add(make.Pop(rax));
+
+                insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
+                insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
                 break;
             case MUL:
                 insns.add(make.Mov(ret, left.result.get()));
