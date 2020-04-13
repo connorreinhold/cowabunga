@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import cyr7.x86.ASMUtil.TilerConf;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
@@ -118,15 +119,12 @@ public abstract class TestProgram {
         }
     }
 
-    @Test
-    void runAssemblyTest() throws IOException, URISyntaxException,
-            InterruptedException {
-
+    private void runAssemblyTest(String tilerName) throws Exception {
         if (!System.getProperty("os.name")
-                   .equals("Linux")) {
+            .equals("Linux")) {
             System.out.println("The operating system is not Linux,\n"
-                    + "so this test case will not be performed.\n"
-                    + "To run this test, please use the CS 4120 VM.");
+                + "so this test case will not be performed.\n"
+                + "To run this test, please use the CS 4120 VM.");
             return;
         }
         if (Objects.isNull(linkerFilename)) {
@@ -145,10 +143,12 @@ public abstract class TestProgram {
         }
 
         System.out.println(this.executeCommand(true,
-                "./xic",
-                "-libpath",
-                this.libpath(),
-                this.getTestXiFilename()));
+            "./xic",
+            "-libpath",
+            this.libpath(),
+            "-tiler",
+            tilerName,
+            this.getTestXiFilename()));
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
@@ -156,15 +156,14 @@ public abstract class TestProgram {
         tmpFile.setWritable(true);
         tmpFile.deleteOnExit();
         System.out.println(this.executeCommand(true,
-                linkerFile.getAbsolutePath(),
-                this.getTestAssemblyFilename(),
-                "-o",
-                tmpFile.getAbsolutePath()));
+            linkerFile.getAbsolutePath(),
+            this.getTestAssemblyFilename(),
+            "-o",
+            tmpFile.getAbsolutePath()));
 
         String[] args = this.configuration().args;
         String[] command = new String[1 + args.length];
-        command[0] = tmpFile.getAbsolutePath()
-                            .toString();
+        command[0] = tmpFile.getAbsolutePath();
         for (int i = 0; i < args.length; i++) {
             command[i + 1] = args[i];
         }
@@ -175,6 +174,16 @@ public abstract class TestProgram {
         System.out.println("-------------------------");
         System.out.println(result);
         assertEquals(expected(), result);
+    }
+
+    @Test
+    void runBasicTilerAssemblyTest() throws Exception {
+        runAssemblyTest("basic");
+    }
+
+    @Test
+    void runComplexTilerAssemblyTest() throws Exception {
+        runAssemblyTest("complex");
     }
 
     // Code stolen from StackOverflow.

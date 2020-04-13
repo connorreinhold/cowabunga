@@ -18,34 +18,47 @@ import java.util.List;
 
 public final class ASMUtil {
 
+    public enum TilerConf {
+        BASIC, COMPLEX;
+
+        TilerFactory getFactory() {
+            switch (this) {
+                case BASIC: return TilerFactory.basicTilerFactory();
+                case COMPLEX: return TilerFactory.complexTilerFactory();
+                default: throw new RuntimeException("Unknown tiler conf case: " + this);
+            }
+        }
+    }
+
     public static List<ASMLine> generateASM(
         Reader reader,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration
+        LowerConfiguration lowerConfiguration,
+        TilerConf tiler
     ) throws Exception {
         IdGenerator idGenerator = new DefaultIdGenerator();
         IRCompUnit compUnit
             = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
         ASMGenerator asmGenerator
-            = new ASMTrivialRegAllocGenerator(TilerFactory.complexTilerFactory(), idGenerator);
+            = new ASMTrivialRegAllocGenerator(tiler.getFactory(), idGenerator);
         return asmGenerator.generate(compUnit);
     }
-    
 
     public static void writeASM(
             Reader reader,
             Writer writer,
             String filename,
             IxiFileOpener fileOpener,
-            LowerConfiguration lowerConfiguration
+            LowerConfiguration lowerConfiguration,
+            TilerConf tiler
     ) {
         try {
             writer.append(".intel_syntax noprefix").append(System.lineSeparator());
             writer.append(".globl _Imain_paai").append(System.lineSeparator());
             writer.append(".align 4").append(System.lineSeparator());
 
-            List<ASMLine> lines = generateASM(reader, filename, fileOpener, lowerConfiguration);
+            List<ASMLine> lines = generateASM(reader, filename, fileOpener, lowerConfiguration, tiler);
             for (ASMLine line: lines) {
                 writer.append(line.getIntelAssembly()).append(System.lineSeparator());
             }

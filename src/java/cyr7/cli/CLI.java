@@ -13,6 +13,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Function;
 
+import cyr7.x86.ASMUtil.TilerConf;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -41,6 +42,7 @@ public class CLI {
 
     private static boolean debugPrintingEnabled = false;
     private static boolean optimizationsEnabled = true;
+    private static ASMUtil.TilerConf tiler = TilerConf.COMPLEX;
 
     private static boolean cFoldEnabled = true;
     private static boolean wantsLexing = false;
@@ -232,6 +234,15 @@ public class CLI {
                 .required(false)
                 .build();
 
+        Option tiler = Option
+            .builder("tiler")
+            .desc("Specify the tiler to use")
+            .hasArg(true)
+            .argName("name")
+            .numberOfArgs(1)
+            .required(false)
+            .build();
+
 
         return options.addOption(help)
                 .addOption(lex)
@@ -247,6 +258,7 @@ public class CLI {
                 .addOption(destination)
                 .addOption(assemblyDestination)
                 .addOption(targetOS)
+                .addOption(tiler)
                 .addOption(version)
                 .addOption(debugPrinting)
                 .addOption(noAssembly);
@@ -412,6 +424,14 @@ public class CLI {
                 case "noASM":
                     wantsAssembly = false;
                     break;
+                case "tiler":
+                    switch (cmd.getOptionValue("name").toLowerCase()) {
+                        case "basic": tiler = TilerConf.BASIC; break;
+                        case "complex": tiler = TilerConf.COMPLEX; break;
+                        default: writer.write("Unrecognized tiler option: " + cmd.getOptionValue("name"));
+                    }
+                    break;
+
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -552,7 +572,7 @@ public class CLI {
                 try {
                     input = getReader(filename);
                     output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
-                    ASMUtil.writeASM(input, output, filename, opener, lowerConfiguration);
+                    ASMUtil.writeASM(input, output, filename, opener, lowerConfiguration, tiler);
 
                     if (debugPrintingEnabled) {
                         input = getReader(filename);
