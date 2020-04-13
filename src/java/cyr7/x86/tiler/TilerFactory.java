@@ -11,6 +11,10 @@ public interface TilerFactory {
     static TilerFactory basicTilerFactory() {
         return BasicTiler::new;
     }
+    
+    static TilerFactory complexTilerFactory() {
+        return ComplexTiler::new;
+    }
 
     MyIRVisitor<TilerData> constructTiler(
         IdGenerator generator,

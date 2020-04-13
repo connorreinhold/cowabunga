@@ -28,7 +28,7 @@ public final class ASMUtil {
         IRCompUnit compUnit
             = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
         ASMGenerator asmGenerator
-            = new ASMTrivialRegAllocGenerator(TilerFactory.basicTilerFactory(), idGenerator);
+            = new ASMTrivialRegAllocGenerator(TilerFactory.complexTilerFactory(), idGenerator);
         return asmGenerator.generate(compUnit);
     }
     
@@ -64,7 +64,7 @@ public final class ASMUtil {
         IRCompUnit compUnit
             = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
         ASMGenerator asmGenerator
-            = new ASMAbstractGenerator(TilerFactory.basicTilerFactory(), idGenerator);
+            = new ASMAbstractGenerator(TilerFactory.complexTilerFactory(), idGenerator);
         return asmGenerator.generate(compUnit);
     }
 
