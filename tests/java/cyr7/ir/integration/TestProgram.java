@@ -86,7 +86,6 @@ public abstract class TestProgram {
 
     private String executeCommand(boolean wantsResult, String... command)
             throws InterruptedException, IOException {
-        System.out.println(Arrays.toString(command));
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
         var redirectedTarget = File.createTempFile("redirect", null);

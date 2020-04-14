@@ -261,7 +261,8 @@ public class CLI {
                 .addOption(tiler)
                 .addOption(version)
                 .addOption(debugPrinting)
-                .addOption(noAssembly);
+                .addOption(noAssembly)
+                .addOption(tiler);
     }
 
     /**
@@ -425,7 +426,7 @@ public class CLI {
                     wantsAssembly = false;
                     break;
                 case "tiler":
-                    switch (cmd.getOptionValue("name").toLowerCase()) {
+                    switch (cmd.getOptionValue("tiler").toLowerCase()) {
                         case "basic": tiler = TilerConf.BASIC; break;
                         case "complex": tiler = TilerConf.COMPLEX; break;
                         default: writer.write("Unrecognized tiler option: " + cmd.getOptionValue("name"));

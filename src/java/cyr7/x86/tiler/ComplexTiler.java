@@ -70,7 +70,7 @@ public class ComplexTiler extends BasicTiler {
                         ))
                     );
 
-                    possibleTilings.add(
+                   possibleTilings.add(
                         new TilerData(1,
                             List.of(line),
                             Optional.of(resultTemp)
