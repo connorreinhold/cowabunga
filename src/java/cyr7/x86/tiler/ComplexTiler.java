@@ -80,7 +80,6 @@ public class ComplexTiler extends BasicTiler {
                     ASMTempArg tempArg = pattern.rightObj();
 
                     List<ASMLine> insns = new ArrayList<>();
-                    CLI.debugPrint(pattern.preMapRight().toString());
                     insns.addAll(pattern.preMapRight().getOptimalTiling().optimalInstructions);
 
                     ASMLine line = make.Lea(
