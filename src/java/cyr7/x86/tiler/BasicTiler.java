@@ -744,7 +744,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         return setResult(n, result);
     }
 
-    protected void disableBasicTilerMemoizeResults() {
+    protected final void disableBasicTilerMemoizeResults() {
         shouldMemoizeResult = false;
     }
 

@@ -6,6 +6,7 @@ import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.ir.visit.IRVisitor;
 import cyr7.ir.visit.InsnMapsBuilder;
 import cyr7.visitor.MyIRVisitor;
+import cyr7.x86.tiler.TilerData;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -36,6 +37,12 @@ public interface IRNode {
     String label();
 
     <T> T accept(MyIRVisitor<T> v);
+
+    boolean hasOptimalTiling();
+
+    TilerData getOptimalTiling();
+
+    void setOptimalTilingOnce(TilerData tilerData);
 
     /**
      * Print an S-expression representation of this IR node.
