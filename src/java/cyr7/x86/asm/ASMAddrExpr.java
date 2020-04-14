@@ -29,7 +29,7 @@ public final class ASMAddrExpr {
                 return "";
             }
         }
-
+        
         public static Optional<ScaleValues> fromConst(long constant) {
             switch ((int) constant) {
                 case 1: return Optional.of(ONE);
@@ -39,7 +39,6 @@ public final class ASMAddrExpr {
                 default: return Optional.empty();
             }
         }
-
     }
 
     public final Optional<ASMTempRegArg> base;
@@ -47,8 +46,9 @@ public final class ASMAddrExpr {
     public final Optional<ASMTempRegArg> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<? extends ASMTempRegArg> base, ScaleValues scale,
-            Optional<? extends ASMTempRegArg> index, int displacement) {
+    public ASMAddrExpr(Optional<? extends ASMTempRegArg> base,
+            ScaleValues scale, Optional<? extends ASMTempRegArg> index,
+            int displacement) {
         this.base = base.map(b -> b);
         this.scale = scale;
         this.index = index.map(i -> i);

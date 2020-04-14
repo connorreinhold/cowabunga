@@ -1,26 +1,22 @@
 package cyr7.x86.tiler;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRNode;
-import cyr7.ir.nodes.IRNode_c;
-import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
-import cyr7.x86.asm.ASMArgFactory;
-import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
 
 public class ComplexTiler extends BasicTiler {
 
