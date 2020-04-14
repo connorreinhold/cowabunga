@@ -21,6 +21,8 @@ import org.junit.jupiter.api.Test;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.integration.Run.RunConfiguration;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 public abstract class TestProgram {
 
@@ -32,13 +34,13 @@ public abstract class TestProgram {
         return new RunConfiguration();
     }
 
-    //@Test
+    @Test
     void testMir() throws Exception {
         String result = Run.mirRun(Run.getFile(filename()), configuration());
         assertEquals(expected(), result);
     }
 
-    //@Test
+    @Test
     void testLirNoOptimizations() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(false, false),
@@ -46,7 +48,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    //@Test
+    @Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(true, false),
@@ -54,7 +56,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    //@Test
+    @Test
     void testLirTraceEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(false, true),
@@ -62,7 +64,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    //@Test
+    @Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(true, true),
@@ -120,19 +122,6 @@ public abstract class TestProgram {
     }
 
     private void runAssemblyTest(String tilerName) throws Exception {
-        System.out.println("Seinding.");
-        if (!System.getProperty("os.name")
-            .equals("Linux")) {
-            System.out.println("The operating system is not Linux,\n"
-                + "so this test case will not be performed.\n"
-                + "To run this test, please use the CS 4120 VM.");
-            return;
-        }
-        if (Objects.isNull(linkerFilename)) {
-            System.out.println("Cannot find linker resource in ~/runtime");
-            return;
-        }
-
         File linkerFile = new File(linkerFilename);
         if (!linkerFile.exists()) {
             System.out.println("Cannot find linker file in ~/runtime");
@@ -177,11 +166,13 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    //@Test
+    @EnabledOnOs({OS.LINUX})
+    @Test
     void runBasicTilerAssemblyTest() throws Exception {
         runAssemblyTest("basic");
     }
 
+    @EnabledOnOs({OS.LINUX})
     @Test
     void runComplexTilerAssemblyTest() throws Exception {
         runAssemblyTest("complex");
