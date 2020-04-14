@@ -24,7 +24,7 @@ public final class ASMUtil {
         TilerFactory getFactory() {
             switch (this) {
                 case BASIC: return TilerFactory.basicTilerFactory();
-                case COMPLEX: return TilerFactory.complexTilerFactory();
+                case COMPLEX: return TilerFactory.basicTilerFactory();
                 default: throw new RuntimeException("Unknown tiler conf case: " + this);
             }
         }

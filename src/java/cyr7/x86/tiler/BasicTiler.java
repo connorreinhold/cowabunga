@@ -49,9 +49,8 @@ import cyr7.x86.asm.ASMTempRegArg;
  */
 public class BasicTiler implements MyIRVisitor<TilerData> {
 
-    private static final ASMArgFactory arg = ASMArgFactory.instance;
-
-    private final IdGenerator generator;
+    protected static final ASMArgFactory arg = ASMArgFactory.instance;
+    protected final IdGenerator generator;
     private final int numRetValues;
     private final String returnLbl;
 

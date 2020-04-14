@@ -29,6 +29,7 @@ import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.ir.visit.CheckCanonicalIRVisitor;
 import cyr7.util.OneOfThree;
 import cyr7.visitor.MyIRVisitor;
 import polyglot.util.Pair;
@@ -81,9 +82,11 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
      * names. No two names created by generator are the same.
      */
     private final IdGenerator generator;
+    private final CheckCanonicalIRVisitor cv;
 
     public LoweringVisitor(IdGenerator generator) {
         this.generator = generator;
+        cv = new CheckCanonicalIRVisitor();
     }
 
     // Visitor
@@ -98,13 +101,20 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
                            .accept(this)
                            .assertSecond();
         List<IRStmt> stmts = new ArrayList<>();
-        String t1 = generator.newTemp();
+        
         stmts.addAll(leftResult.part1());
-        stmts.add(make.IRMove(make.IRTemp(t1), leftResult.part2()));
-        stmts.addAll(rightResult.part1());
+        
+        IRExpr lhs = leftResult.part2();
+        if (!cv.visit(rightResult.part2())) {
+            // if the RHS has side effects
+            String t1 = generator.newTemp();
+            stmts.add(make.IRMove(make.IRTemp(t1), leftResult.part2()));
+            stmts.addAll(rightResult.part1());
+            lhs = make.IRTemp(t1);
+        }
 
         IRExpr expr = make.IRBinOp(n.opType(),
-                make.IRTemp(t1),
+                lhs,
                 rightResult.part2());
 
         return Result.expr(stmts, expr);

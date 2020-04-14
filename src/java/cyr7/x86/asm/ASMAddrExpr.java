@@ -28,6 +28,21 @@ public class ASMAddrExpr {
                 return "";
             }
         }
+
+        public static ScaleValues toScaleValue(String s) {
+            switch (s) {
+            case "1":
+                return ScaleValues.ONE;
+            case "2":
+                return ScaleValues.TWO;
+            case "4":
+                return ScaleValues.FOUR;
+            case "8":
+                return ScaleValues.EIGHT;
+            default:
+                return null;
+            }
+        }
     }
 
     public final Optional<ASMTempRegArg> base;
@@ -35,8 +50,9 @@ public class ASMAddrExpr {
     public final Optional<ASMTempRegArg> index;
     public final int displacement;
 
-    public ASMAddrExpr(Optional<? extends ASMTempRegArg> base, ScaleValues scale,
-            Optional<? extends ASMTempRegArg> index, int displacement) {
+    public ASMAddrExpr(Optional<? extends ASMTempRegArg> base,
+            ScaleValues scale, Optional<? extends ASMTempRegArg> index,
+            int displacement) {
         this.base = base.map(b -> b);
         this.scale = scale;
         this.index = index.map(i -> i);
