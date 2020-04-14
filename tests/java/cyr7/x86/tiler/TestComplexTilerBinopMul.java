@@ -38,9 +38,9 @@ public class TestComplexTilerBinopMul {
         return block.apply(lineFactory);
     }
 
-    static ComplexTiler makeTiler(IdGenerator generator) {
+    static ComplexTiler makeTiler() {
         return new ComplexTiler(
-            generator,
+            new DefaultIdGenerator(),
             0,
             "no",
             Optional.empty(),
@@ -49,8 +49,7 @@ public class TestComplexTilerBinopMul {
 
     @Test
     void testConstAndTemp() {
-        LookaheadIdGenerator generator = new LookaheadIdGenerator();
-        ComplexTiler tiler = makeTiler(generator);
+        ComplexTiler tiler = makeTiler();
 
         IRBinOp constTemp = makeIR(make ->
             make.IRBinOp(OpType.MUL,
@@ -64,7 +63,7 @@ public class TestComplexTilerBinopMul {
             makeASM(make ->
                 List.of(
                     make.Lea(
-                        arg.temp(generator.newTemp(), Size.QWORD),
+                        arg.temp("_t0", Size.QWORD),
                         arg.mem(
                             arg.addr(
                                 Optional.empty(),

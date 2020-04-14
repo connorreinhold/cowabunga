@@ -45,6 +45,7 @@ public class BiPatternBuilder<L, R> {
         if (result) {
             leftObj = (L) l;
             rightObj = (R) r;
+            return true;
         }
 
         if (!commutes) {

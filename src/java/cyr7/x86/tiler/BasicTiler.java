@@ -22,6 +22,8 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRNode_c;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
@@ -60,6 +62,8 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     private final Optional<ASMTempArg> additionalRetValAddress;
 
     private final boolean stack16ByteAligned;
+
+    private boolean shouldMemoizeResult = false;
 
     public BasicTiler(
         IdGenerator generator,
@@ -221,8 +225,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         TilerData result = new TilerData(1 + left.tileCost + right.tileCost,
             insns, Optional.of(ret));
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -241,8 +244,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         List<ASMLine> insns = List.of(make.MovAbs(ret,
             new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -271,8 +273,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             ASMArg ret = new ASMMemArg((ASMTempRegArg) expr.result.get());
             TilerData result = new TilerData(1 + expr.tileCost, insns, Optional
                 .of(ret));
-            n.setOptimalTilingOnce(result);
-            return result;
+            return setResult(n, result);
         }
     }
 
@@ -283,8 +284,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         Optional<ASMArg> lbl = Optional.of(new ASMLabelArg(n.name()));
         TilerData result = new TilerData(1, List.of(), lbl);
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -295,8 +295,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         ASMArg ret = new ASMTempArg(n.name(), Size.QWORD);
         TilerData result
             = new TilerData(0, new ArrayList<>(), Optional.of(ret));
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -461,8 +460,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
 
         TilerData result = new TilerData(tileCost, insn, Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -483,8 +481,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         TilerData result
             = new TilerData(1 + cond.tileCost, insn, Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -525,8 +522,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         } else {
             throw new RuntimeException("Missing target result");
         }
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -539,8 +535,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         TilerData result
             = new TilerData(instructions.size(), instructions,
             Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -699,8 +694,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 Optional.empty());
         }
 
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -713,8 +707,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         instrs.add(make.Jump(new ASMLabelArg(this.returnLbl)));
         TilerData result
             = new TilerData(instrs.size(), instrs, Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
 
     @Override
@@ -736,7 +729,18 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             1 + sumCosts,
             instructions,
             Optional.empty());
-        n.setOptimalTilingOnce(result);
-        return result;
+        return setResult(n, result);
     }
+
+    protected void disableBasicTilerMemoizeResults() {
+        shouldMemoizeResult = false;
+    }
+
+    private TilerData setResult(IRNode_c n, TilerData tilerData) {
+        if (shouldMemoizeResult) {
+            n.setOptimalTilingOnce(tilerData);
+        }
+        return tilerData;
+    }
+
 }
