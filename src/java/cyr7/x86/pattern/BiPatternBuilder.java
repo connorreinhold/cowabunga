@@ -19,6 +19,8 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
 
     private L leftObj;
     private R rightObj;
+    private L1 preMapLeft;
+    private R1 preMapRight;
     private boolean commutes = false;
 
     public BiPatternBuilder(Function<Object, Boolean> left,
@@ -46,6 +48,9 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
         boolean result;
         result = left.apply(l) && right.apply(r);
         if (result) {
+            preMapLeft = (L1) preL;
+            preMapRight = (R1) preR;
+
             leftObj = (L) l;
             rightObj = (R) r;
             return true;
@@ -87,6 +92,16 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
     public R rightObj() {
         assert rightObj != null;
         return rightObj;
+    }
+
+    public L1 preMapLeft() {
+        assert preMapLeft != null;
+        return preMapLeft;
+    }
+
+    public R1 preMapRight() {
+        assert preMapRight != null;
+        return preMapRight;
     }
 
     public static class Left<L1> {
