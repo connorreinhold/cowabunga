@@ -3,7 +3,7 @@ package cyr7.x86.pattern;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class BiPatternBuilder<L, R> {
+public class BiPatternBuilder<L, R> implements Pattern {
 
     private static final Function<Object, Boolean> trueFunction = x -> true;
 
@@ -34,16 +34,6 @@ public class BiPatternBuilder<L, R> {
         return this;
     }
 
-    public boolean matchesOpts(Optional<? super L> lOpt, Optional<? super R> rOpt) {
-        if (lOpt.isEmpty() || rOpt.isEmpty()) {
-            return false;
-        }
-
-        Object l = lOpt.get();
-        Object r = rOpt.get();
-        return matches(l, r);
-    }
-
     public boolean matches(Object l, Object r) {
         boolean result = left.apply(l) && right.apply(r);
         if (result) {
@@ -63,6 +53,11 @@ public class BiPatternBuilder<L, R> {
         }
 
         return result;
+    }
+
+    @Override
+    public boolean matches(Object[] objs) {
+        return objs.length == 2 && matches(objs[0], objs[1]);
     }
 
     public L leftObj() {

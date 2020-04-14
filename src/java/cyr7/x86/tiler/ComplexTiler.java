@@ -56,20 +56,18 @@ public class ComplexTiler extends BasicTiler {
 
                 ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
 
-                if (pattern.matches(n.left(), n.right())) {
+                if (pattern.matches(new Object[] { n.left(), n.right() })) {
                     IRConst constArg = pattern.leftObj();
                     IRTemp tempArg = pattern.rightObj();
 
                     ASMLine line = make.Lea(
                         resultTemp,
-                        arg.mem(
-                            arg.addr(
-                                Optional.empty(),
-                                ScaleValues.fromConst(constArg.constant()).get(),
-                                Optional.of(arg.temp(tempArg.name(), Size.QWORD)),
-                                0
-                            )
-                        )
+                        arg.mem(arg.addr(
+                            Optional.empty(),
+                            ScaleValues.fromConst(constArg.constant()).get(),
+                            Optional.of(arg.temp(tempArg.name(), Size.QWORD)),
+                            0
+                        ))
                     );
 
                     possibleTilings.add(

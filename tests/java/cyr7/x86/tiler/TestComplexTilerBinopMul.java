@@ -2,26 +2,18 @@ package cyr7.x86.tiler;
 
 import cyr7.C;
 import cyr7.ir.DefaultIdGenerator;
-import cyr7.ir.IdGenerator;
-import cyr7.ir.ctranslation.LookaheadIdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
-import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
-import cyr7.x86.asm.ASMInstr;
-import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg.Size;
 import org.junit.jupiter.api.Test;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
