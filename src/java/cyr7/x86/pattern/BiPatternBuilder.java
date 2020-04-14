@@ -36,12 +36,11 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
         return this;
     }
 
-    public boolean matches(Object preL, Object preR) {
+    public boolean matches(Object preL, Object preR, boolean recurse) {
         Optional<Object> postL = leftMapping.apply(preL), postR = rightMapping.apply(preR);
         if (postL.isEmpty() || postR.isEmpty()) {
             return false;
         }
-
         Object l = postL.get(), r = postR.get();
 
         boolean result;
@@ -52,17 +51,11 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
             return true;
         }
 
-        if (!commutes) {
-            return result;
+        if (commutes && recurse) {
+            return matches(preR, preL, false);
+        } else {
+            return false;
         }
-
-        result = right.apply(l) && left.apply(r);
-        if (result) {
-            leftObj = (L) r;
-            rightObj = (R) l;
-        }
-
-        return result;
     }
 
     public <L2> BiPatternBuilder<L, R, L2, R1> mappingLeft(Class<L2> l1Class, Function<L2, ? super L> map) {
@@ -83,7 +76,7 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
 
     @Override
     public boolean matches(Object[] objs) {
-        return objs.length == 2 && matches(objs[0], objs[1]);
+        return objs.length == 2 && matches(objs[0], objs[1], true);
     }
 
     public L leftObj() {
