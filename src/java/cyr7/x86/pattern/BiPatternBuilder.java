@@ -39,8 +39,12 @@ public class BiPatternBuilder<L, R> {
             return false;
         }
 
-        Object l = lOpt.get(), r = rOpt.get();
+        Object l = lOpt.get();
+        Object r = rOpt.get();
+        return matches(l, r);
+    }
 
+    public boolean matches(Object l, Object r) {
         boolean result = left.apply(l) && right.apply(r);
         if (result) {
             leftObj = (L) l;

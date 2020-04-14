@@ -12,11 +12,13 @@ import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
+import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg.Size;
 import org.junit.jupiter.api.Test;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -75,6 +77,36 @@ public class TestComplexTilerBinopMul {
                     ))
             ),
             constTemp.getOptimalTiling().optimalInstructions);
+    }
+
+    @Test
+    void testTempAndConst() {
+        ComplexTiler tiler = makeTiler();
+
+        IRBinOp tempConst = makeIR(make ->
+            make.IRBinOp(OpType.MUL,
+                make.IRTemp("bleh"),
+                make.IRConst(4))
+        );
+
+        tempConst.accept(tiler);
+
+        assertEquals(
+            makeASM(make ->
+                List.of(
+                    make.Lea(
+                        arg.temp("_t0", Size.QWORD),
+                        arg.mem(
+                            arg.addr(
+                                Optional.empty(),
+                                ScaleValues.FOUR,
+                                Optional.of(arg.temp("bleh", Size.QWORD)),
+                                0
+                            )
+                        )
+                    ))
+            ),
+            tempConst.getOptimalTiling().optimalInstructions);
     }
 
 }

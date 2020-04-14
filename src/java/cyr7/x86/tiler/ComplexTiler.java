@@ -9,6 +9,7 @@ import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRNode_c;
+import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMConstArg;
@@ -44,25 +45,20 @@ public class ComplexTiler extends BasicTiler {
 
         switch (n.opType()) {
             case MUL:
-                TilerData right = n.right().accept(this);
-
                 var pattern = BiPatternBuilder
                     .left()
                     .instOf(IRConst.class)
                     .and(x -> x.constant() == 1 || x.constant() == 2 || x.constant() == 4 || x.constant() == 8)
                     .right()
-                    .instOf(ASMTempArg.class)
+                    .instOf(IRTemp.class)
                     .finish()
                     .enableCommutes();
 
                 ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
 
-                if (pattern.matchesOpts(Optional.of(n.left()), right.result)) {
+                if (pattern.matches(n.left(), n.right())) {
                     IRConst constArg = pattern.leftObj();
-                    ASMTempArg tempArg = pattern.rightObj();
-
-                    List<ASMLine> insns =
-                        new ArrayList<>(right.optimalInstructions);
+                    IRTemp tempArg = pattern.rightObj();
 
                     ASMLine line = make.Lea(
                         resultTemp,
@@ -70,16 +66,15 @@ public class ComplexTiler extends BasicTiler {
                             arg.addr(
                                 Optional.empty(),
                                 ScaleValues.fromConst(constArg.constant()).get(),
-                                Optional.of(tempArg),
+                                Optional.of(arg.temp(tempArg.name(), Size.QWORD)),
                                 0
                             )
                         )
                     );
-                    insns.add(line);
 
                     possibleTilings.add(
-                        new TilerData(1 + right.tileCost,
-                            insns,
+                        new TilerData(1,
+                            List.of(line),
                             Optional.of(resultTemp)
                         ));
                 }

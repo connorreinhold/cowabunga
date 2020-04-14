@@ -1,11 +1,12 @@
 package cyr7.x86.asm;
 
+import java.util.Objects;
 import java.util.Optional;
 
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMMemArg implements ASMArg {
+public final class ASMMemArg implements ASMArg {
     public final ASMAddrExpr address;
 
     public ASMMemArg(ASMAddrExpr address) {
@@ -30,5 +31,18 @@ public class ASMMemArg implements ASMArg {
     @Override
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMMemArg asmMemArg = (ASMMemArg) o;
+        return Objects.equals(address, asmMemArg.address);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address);
     }
 }

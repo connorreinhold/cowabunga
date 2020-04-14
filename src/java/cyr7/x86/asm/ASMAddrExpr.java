@@ -3,11 +3,12 @@ package cyr7.x86.asm;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMAddrExpr {
+public final class ASMAddrExpr {
     // General Memory Access: [base + scale * index + displacement]
 
     public enum ScaleValues {
@@ -78,4 +79,19 @@ public class ASMAddrExpr {
         return visitor.visit(this);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMAddrExpr that = (ASMAddrExpr) o;
+        return displacement == that.displacement &&
+            Objects.equals(base, that.base) &&
+            scale == that.scale &&
+            Objects.equals(index, that.index);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, scale, index, displacement);
+    }
 }
