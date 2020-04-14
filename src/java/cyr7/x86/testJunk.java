@@ -30,7 +30,7 @@ public class testJunk {
             IxiFileOpener fileOpener,
             LowerConfiguration lowerConfiguration) throws Exception {
         
-        boolean pDebug = true;
+        boolean pDebug = false;
         if (pDebug) {
             ASMUtil.printDebugASM(
                     reader, filename, fileOpener, lowerConfiguration);
