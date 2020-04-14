@@ -400,7 +400,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         tileCost += targetTile.tileCost;
         insn.addAll(targetTile.optimalInstructions);
 
-        // if the stack is 16 byte aligned, we want
+        // align the stack depending on the number of pushes to the stack.
         final boolean stackNeedsAdjustment
             = (Math.max(argTiles.size() - lastRegisterArg, 0) % 2 == 0) == stack16ByteAligned;
         if (stackNeedsAdjustment) {
@@ -420,6 +420,11 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (argTiles.size() > lastRegisterArg) {
             insn.add(make.Add(ASMReg.RSP,
                 arg.constant(8 * (argTiles.size() - lastRegisterArg))));
+        }
+
+        // adjust the stack back
+        if (stackNeedsAdjustment) {
+            insn.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
 
         // Move the temps from the return registers into the collectors
@@ -456,11 +461,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
             long size = (numReturnValues - 2) * 8;
             insn.add(make.Add(ASMReg.RSP, arg.constant(size)));
-        }
-
-        // adjust the stack
-        if (stackNeedsAdjustment) {
-            insn.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
 
         TilerData result = new TilerData(tileCost, insn, Optional.empty());
