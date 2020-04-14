@@ -94,17 +94,25 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         insns.addAll(right.optimalInstructions);
 
         ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
+        
+        ASMArg leftArg = left.result.get();
+        if (left.result.get() instanceof ASMMemArg && right.result.get() instanceof ASMMemArg) {
+            // Move LHS to a temp if there are two memory args
+            ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
+            insns.add(make.Mov(leftTemp, left.result.get()));
+            leftArg = leftTemp;
+        }
         switch (n.opType()) {
             case ADD:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.Add(ret, right.result.get()));
                 break;
             case AND:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.And(ret, right.result.get()));
                 break;
             case ARSHIFT:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.ARShift(ret, right.result.get()));
                 break;
             case DIV: {
@@ -114,7 +122,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
                 insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
-                insns.add(make.Mov(ASMReg.RAX, left.result.get()));
+                insns.add(make.Mov(ASMReg.RAX, leftArg));
                 insns.add(make.CQO());
                 insns.add(make.Div(right.result.get()));
                 insns.add(make.Mov(ret, ASMReg.RAX));
@@ -125,42 +133,21 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             case EQ: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                ASMArg lhs = left.result.get();
-                if (n.left() instanceof IRMem && n.right() instanceof IRMem) {
-                    // Move LHS to a temp if there are two memory args in a cmp
-                    ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                    insns.add(make.Mov(leftTemp, lhs));
-                    lhs = leftTemp;
-                }
-                insns.add(make.Cmp(lhs, right.result.get()));
+                insns.add(make.Cmp(leftArg, right.result.get()));
                 insns.add(make.SetZ(byteReg));
                 insns.add(make.MovZX(ret, byteReg));
                 break;
             }
             case GEQ: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                ASMArg lhs = left.result.get();
-                if (n.left() instanceof IRMem && n.right() instanceof IRMem) {
-                    // Move LHS to a temp if there are two memory args in a cmp
-                    ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                    insns.add(make.Mov(leftTemp, lhs));
-                    lhs = leftTemp;
-                }
-                insns.add(make.Cmp(lhs, right.result.get()));
+                insns.add(make.Cmp(leftArg, right.result.get()));
                 insns.add(make.SetGE(byteReg));
                 insns.add(make.MovZX(ret, byteReg));
                 break;
             }
             case GT: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                ASMArg lhs = left.result.get();
-                if (n.left() instanceof IRMem && n.right() instanceof IRMem) {
-                    // Move LHS to a temp if there are two memory args in a cmp
-                    ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                    insns.add(make.Mov(leftTemp, lhs));
-                    lhs = leftTemp;
-                }
-                insns.add(make.Cmp(lhs, right.result.get()));
+                insns.add(make.Cmp(leftArg, right.result.get()));
                 insns.add(make.SetG(byteReg));
                 insns.add(make.MovZX(ret, byteReg));
                 break;
@@ -172,7 +159,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
                 insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
-                insns.add(make.Mov(ASMReg.RAX, left.result.get()));
+                insns.add(make.Mov(ASMReg.RAX, leftArg));
                 insns.add(make.Mul(right.result.get()));
                 insns.add(make.Mov(ret, ASMReg.RDX));
 
@@ -182,32 +169,18 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             }
             case LEQ: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                ASMArg lhs = left.result.get();
-                if (n.left() instanceof IRMem && n.right() instanceof IRMem) {
-                    // Move LHS to a temp if there are two memory args in a cmp
-                    ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                    insns.add(make.Mov(leftTemp, lhs));
-                    lhs = leftTemp;
-                }
-                insns.add(make.Cmp(lhs, right.result.get()));
+                insns.add(make.Cmp(leftArg, right.result.get()));
                 insns.add(make.SetLE(byteReg));
                 insns.add(make.MovZX(ret, byteReg));
                 break;
             }
             case LSHIFT:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.LShift(ret, right.result.get()));
                 break;
             case LT: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                ASMArg lhs = left.result.get();
-                if (n.left() instanceof IRMem && n.right() instanceof IRMem) {
-                    // Move LHS to a temp if there are two memory args in a cmp
-                    ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                    insns.add(make.Mov(leftTemp, lhs));
-                    lhs = leftTemp;
-                }
-                insns.add(make.Cmp(lhs, right.result.get()));
+                insns.add(make.Cmp(leftArg, right.result.get()));
                 insns.add(make.SetL(byteReg));
                 insns.add(make.MovZX(ret, byteReg));
                 break;
@@ -219,7 +192,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
                 insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
-                insns.add(make.Mov(ASMReg.RAX, left.result.get()));
+                insns.add(make.Mov(ASMReg.RAX, leftArg));
                 insns.add(make.CQO());
                 insns.add(make.Div(right.result.get()));
                 insns.add(make.Mov(ret, ASMReg.RDX));
@@ -228,37 +201,30 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
                 break;
             case MUL:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.Mul(ret, right.result.get()));
                 break;
             case NEQ: {
                 ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                ASMArg lhs = left.result.get();
-                if (n.left() instanceof IRMem && n.right() instanceof IRMem) {
-                    // Move LHS to a temp if there are two memory args in a cmp
-                    ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                    insns.add(make.Mov(leftTemp, lhs));
-                    lhs = leftTemp;
-                }
-                insns.add(make.Cmp(lhs, right.result.get()));
+                insns.add(make.Cmp(leftArg, right.result.get()));
                 insns.add(make.SetNE(byteReg));
                 insns.add(make.MovZX(ret, byteReg));
                 break;
             }
             case OR:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.Or(ret, right.result.get()));
                 break;
             case RSHIFT:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.RShift(ret, right.result.get()));
                 break;
             case SUB:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.Sub(ret, right.result.get()));
                 break;
             case XOR:
-                insns.add(make.Mov(ret, left.result.get()));
+                insns.add(make.Mov(ret, leftArg));
                 insns.add(make.Xor(ret, right.result.get()));
                 break;
             default:
