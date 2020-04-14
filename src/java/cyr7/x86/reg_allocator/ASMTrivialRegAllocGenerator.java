@@ -169,6 +169,8 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
             lines.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
 
+        lines.add(new ASMLabel(returnLbl));
+
         lines.addAll(List.of(
             make.Pop(ASMReg.R15),
             make.Pop(ASMReg.R14),
@@ -179,7 +181,7 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
             make.Pop(ASMReg.RBX)
         ));
 
-        lines.addAll(List.of(new ASMLabel(returnLbl),
+        lines.addAll(List.of(
             make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
             make.Mov(ASMReg.RSP, ASMReg.RBP),
             make.Pop(ASMReg.RBP),

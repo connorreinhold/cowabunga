@@ -8,5 +8,5 @@ main(args: int[][]): int {
 		product = product * i
 		i = i + 1
 	}
-	print("Factorial " + n + " is: " + product)	
+	print("Factorial " + n + " is: " + product)
 }

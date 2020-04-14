@@ -429,7 +429,7 @@ public class CLI {
                     switch (cmd.getOptionValue("tiler").toLowerCase()) {
                         case "basic": tiler = TilerConf.BASIC; break;
                         case "complex": tiler = TilerConf.COMPLEX; break;
-                        default: writer.write("Unrecognized tiler option: " + cmd.getOptionValue("name"));
+                        default: writer.write("Unrecognized tiler option: " + cmd.getOptionValue("tiler"));
                     }
                     break;
 
