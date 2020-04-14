@@ -97,11 +97,18 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         List<IRStmt> stmts = new ArrayList<>();
 
         stmts.addAll(leftResult.part1());
-        IRTemp t1 = make.IRTemp(generator.newTemp());
-        stmts.add(make.IRMove(t1, leftResult.part2()));
+        IRExpr lhs = leftResult.part2();
+        
+        CheckCanonicalIRVisitor cv = new CheckCanonicalIRVisitor();
+        if (!cv.visit(n.right())){
+            // if the RHS has side effects
+            IRTemp t1 = make.IRTemp(generator.newTemp());
+            stmts.add(make.IRMove(t1, leftResult.part2()));
+            lhs = t1;
+        }
         stmts.addAll(rightResult.part1());
 
-        IRExpr expr = make.IRBinOp(n.opType(), t1, rightResult.part2());
+        IRExpr expr = make.IRBinOp(n.opType(), lhs, rightResult.part2());
         return Result.expr(stmts, expr);
     }
 

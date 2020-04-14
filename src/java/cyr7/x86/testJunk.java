@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import cyr7.ir.IRUtil;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.x86.asm.ASMLine;
@@ -31,12 +33,17 @@ public class testJunk {
             LowerConfiguration lowerConfiguration) throws Exception {
         
         boolean pDebug = false;
+        
+        StringWriter hoo = new StringWriter();
+        IRUtil.irGen(reader, hoo, filename, fileOpener, lowerConfiguration);
+        System.out.println(hoo);
+        /*
         if (pDebug) {
             ASMUtil.printDebugASM(
                     reader, filename, fileOpener, lowerConfiguration);
         } else {
             List<ASMLine> lines = ASMUtil.generateAbstractASM(
                     reader, filename, fileOpener, lowerConfiguration);
-        }
+        }*/
     }
 }

@@ -32,13 +32,13 @@ public abstract class TestProgram {
         return new RunConfiguration();
     }
 
-    @Test
+    //@Test
     void testMir() throws Exception {
         String result = Run.mirRun(Run.getFile(filename()), configuration());
         assertEquals(expected(), result);
     }
 
-    @Test
+    //@Test
     void testLirNoOptimizations() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(false, false),
@@ -46,7 +46,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Test
+    //@Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(true, false),
@@ -54,7 +54,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Test
+    //@Test
     void testLirTraceEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(false, true),
@@ -62,7 +62,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Test
+    //@Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
                 new LowerConfiguration(true, true),
@@ -86,6 +86,7 @@ public abstract class TestProgram {
 
     private String executeCommand(boolean wantsResult, String... command)
             throws InterruptedException, IOException {
+        System.out.println("Executing command: "+Arrays.toString(command));
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
         var redirectedTarget = File.createTempFile("redirect", null);
@@ -119,6 +120,7 @@ public abstract class TestProgram {
     }
 
     private void runAssemblyTest(String tilerName) throws Exception {
+        System.out.println("Seinding.");
         if (!System.getProperty("os.name")
             .equals("Linux")) {
             System.out.println("The operating system is not Linux,\n"
@@ -175,7 +177,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Test
+    //@Test
     void runBasicTilerAssemblyTest() throws Exception {
         runAssemblyTest("basic");
     }

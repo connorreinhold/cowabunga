@@ -35,6 +35,7 @@ public class ComplexTiler extends BasicTiler {
 
     @Override
     public TilerData visit(IRBinOp n) {
+        /*
         ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
@@ -83,6 +84,8 @@ public class ComplexTiler extends BasicTiler {
         TilerData optimal = possibleTilings.stream().min(byCost).get();
         n.setOptimalTilingOnce(optimal);
         return optimal;
+        */
+        return super.visit(n);
     }
 
 }
