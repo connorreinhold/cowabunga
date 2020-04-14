@@ -2,7 +2,9 @@ package cyr7.x86.asm;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMLabel implements ASMLine {
+import java.util.Objects;
+
+public final class ASMLabel implements ASMLine {
 
     public final String label;
 
@@ -25,4 +27,16 @@ public class ASMLabel implements ASMLine {
         return visitor.visit(this);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMLabel asmLabel = (ASMLabel) o;
+        return Objects.equals(label, asmLabel.label);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(label);
+    }
 }

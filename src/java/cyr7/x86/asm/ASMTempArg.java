@@ -4,7 +4,7 @@ import java.util.Objects;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMTempArg implements ASMTempRegArg {
+public final class ASMTempArg implements ASMTempRegArg {
 
     public enum Size {
         QWORD, BYTE
@@ -19,20 +19,17 @@ public class ASMTempArg implements ASMTempRegArg {
     }
 
     @Override
-    public int hashCode() {
-        return Objects.hash(name);
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMTempArg that = (ASMTempArg) o;
+        return Objects.equals(name, that.name) &&
+            size == that.size;
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (!(obj instanceof ASMTempArg)) {
-            return false;
-        }
-        ASMTempArg other = (ASMTempArg) obj;
-        return Objects.equals(name, other.name);
+    public int hashCode() {
+        return Objects.hash(name, size);
     }
 
     @Override
@@ -49,4 +46,5 @@ public class ASMTempArg implements ASMTempRegArg {
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
     }
+
 }

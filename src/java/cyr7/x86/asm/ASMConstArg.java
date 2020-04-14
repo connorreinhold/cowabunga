@@ -2,7 +2,9 @@ package cyr7.x86.asm;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMConstArg implements ASMArg {
+import java.util.Objects;
+
+public final class ASMConstArg implements ASMArg {
     public final long constant;
 
     public ASMConstArg(long constant) {
@@ -22,5 +24,18 @@ public class ASMConstArg implements ASMArg {
     @Override
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMConstArg that = (ASMConstArg) o;
+        return constant == that.constant;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(constant);
     }
 }

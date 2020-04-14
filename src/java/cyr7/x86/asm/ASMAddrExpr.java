@@ -3,11 +3,12 @@ package cyr7.x86.asm;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import cyr7.x86.visitor.AbstractASMVisitor;
 
-public class ASMAddrExpr {
+public final class ASMAddrExpr {
     // General Memory Access: [base + scale * index + displacement]
 
     public enum ScaleValues {
@@ -28,19 +29,14 @@ public class ASMAddrExpr {
                 return "";
             }
         }
-
-        public static ScaleValues toScaleValue(String s) {
-            switch (s) {
-            case "1":
-                return ScaleValues.ONE;
-            case "2":
-                return ScaleValues.TWO;
-            case "4":
-                return ScaleValues.FOUR;
-            case "8":
-                return ScaleValues.EIGHT;
-            default:
-                return null;
+        
+        public static Optional<ScaleValues> fromConst(long constant) {
+            switch ((int) constant) {
+                case 1: return Optional.of(ONE);
+                case 2: return Optional.of(TWO);
+                case 4: return Optional.of(FOUR);
+                case 8: return Optional.of(EIGHT);
+                default: return Optional.empty();
             }
         }
     }
@@ -83,4 +79,19 @@ public class ASMAddrExpr {
         return visitor.visit(this);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMAddrExpr that = (ASMAddrExpr) o;
+        return displacement == that.displacement &&
+            Objects.equals(base, that.base) &&
+            scale == that.scale &&
+            Objects.equals(index, that.index);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(base, scale, index, displacement);
+    }
 }

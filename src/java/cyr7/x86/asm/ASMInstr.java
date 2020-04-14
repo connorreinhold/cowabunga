@@ -4,10 +4,11 @@ import cyr7.ir.nodes.IRNode;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class ASMInstr implements ASMLine {
+public final class ASMInstr implements ASMLine {
     public final List<ASMArg> args;
     public final ASMInstrType type;
     public final Optional<IRNode> source;
@@ -40,4 +41,17 @@ public class ASMInstr implements ASMLine {
         return visitor.visit(this);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ASMInstr asmInstr = (ASMInstr) o;
+        return Objects.equals(args, asmInstr.args) &&
+            type == asmInstr.type;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(args, type);
+    }
 }
