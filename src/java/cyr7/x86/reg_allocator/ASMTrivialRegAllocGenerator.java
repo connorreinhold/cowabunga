@@ -124,7 +124,7 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
         long numberOfTemps,
         Optional<ASMTempArg> addrOfOverspillRetValues) {
 
-        final long numberOfStackPushes = 1 + numberOfTemps + 7;
+        final long numberOfStackPushes = 2 + numberOfTemps + 7;
 
         List<ASMLine> lines = new ArrayList<>();
         lines.addAll(List.of(
@@ -146,7 +146,9 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
             make.Push(ASMReg.R15)
         ));
 
-        if (numberOfStackPushes % 2 == 0) {
+        if (!stack16ByteAlignedBeforeAdjustment(numberOfTemps)) {
+            // make it so the stack is always 16-byte aligned on entry to the
+            // function body
             lines.add(make.Sub(ASMReg.RSP, arg.constant(8)));
         }
 
@@ -164,12 +166,11 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
     private List<ASMLine> createEpilogue(String returnLbl, long numberOfTemps) {
         List<ASMLine> lines = new ArrayList<>();
 
-        final long numberOfStackPushes = 1 + numberOfTemps + 7;
-        if (numberOfStackPushes % 2 == 0) {
+        lines.add(new ASMLabel(returnLbl));
+
+        if (!stack16ByteAlignedBeforeAdjustment(numberOfTemps)) {
             lines.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
-
-        lines.add(new ASMLabel(returnLbl));
 
         lines.addAll(List.of(
             make.Pop(ASMReg.R15),
@@ -188,6 +189,14 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
             make.Ret()));
 
         return lines;
+    }
+
+    private boolean stack16ByteAlignedBeforeAdjustment(long numberOfTemps) {
+        return (1 // for when call saves pc onto the stack
+            + 1 // we save rbp onto the stack
+            + numberOfTemps // number of temps we push
+            + 7) // callee-saved registers
+        % 2 == 0;
     }
 
     private List<ASMLine> replaceTemporariesWithMemoryAccess(

@@ -315,13 +315,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         int lastRegisterArg;
         int tileCost = 0;
 
-        final boolean stackNeedsAdjustment =
-            (stack16ByteAligned && argTiles.size() % 2 == 1)
-            || (!stack16ByteAligned && argTiles.size() % 2 == 0);
-        if (stackNeedsAdjustment) {
-            insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
-        }
-
         /*
          * If the callee function has more than two return values, then we store
          * memory address to a "saved stack space" to hold return values onto
@@ -407,11 +400,20 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         tileCost += targetTile.tileCost;
         insn.addAll(targetTile.optimalInstructions);
 
+        // if the stack is 16 byte aligned, we want
+        final boolean stackNeedsAdjustment
+            = (Math.max(argTiles.size() - lastRegisterArg, 0) % 2 == 0) == stack16ByteAligned;
+        if (stackNeedsAdjustment) {
+            insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
+        }
+
+        // push additional arguments onto the stack
         for (int i = argTiles.size() - 1; i >= lastRegisterArg; i--) {
             TilerData argTile = argTiles.get(i);
             insn.add(make.Push(argTile.result.get()));
         }
 
+        // Perform the call
         insn.add(make.Call(targetTile.result.get()));
 
         // Add back the stack space we used for arguments 7 and beyond
@@ -420,6 +422,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 arg.constant(8 * (argTiles.size() - lastRegisterArg))));
         }
 
+        // Move the temps from the return registers into the collectors
         for (int i = 0; i < n.collectors().size(); i++) {
             String tempName = n.collectors().get(i);
             if (tempName.equals("_")) {
@@ -455,6 +458,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insn.add(make.Add(ASMReg.RSP, arg.constant(size)));
         }
 
+        // adjust the stack
         if (stackNeedsAdjustment) {
             insn.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
