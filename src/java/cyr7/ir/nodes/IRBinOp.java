@@ -65,6 +65,11 @@ public class IRBinOp extends IRExpr_c {
             }
             throw new InternalCompilerError("Unknown op type");
         }
+        
+        public boolean isCmpOp() {
+            return this == EQ || this == NEQ || this == LT || 
+                    this == GT || this == LEQ || this == GEQ;
+        }
     };
 
     private OpType type;
