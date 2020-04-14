@@ -100,12 +100,8 @@ public class LoweringVisitor implements MyIRVisitor<Result> {
         IRExpr lhs = leftResult.part2();
         
         CheckCanonicalIRVisitor cv = new CheckCanonicalIRVisitor();
-        boolean canonical = cv.visit(n.right());
-        boolean invalidDoubleMem = n.right() instanceof IRMem && n.left() instanceof IRMem 
-                && n.opType().isCmpOp();
-        if (!canonical || invalidDoubleMem){
-            // if the RHS has side effects or the line is invalid,
-            // we move the LHS into a new temp
+        if (cv.visit(n.right())){
+            // if the RHS has side effects
             IRTemp t1 = make.IRTemp(generator.newTemp());
             stmts.add(make.IRMove(t1, leftResult.part2()));
             lhs = t1;
