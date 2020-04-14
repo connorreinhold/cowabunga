@@ -4,13 +4,16 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRConst;
+import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNode_c;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
+import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMLine;
@@ -50,22 +53,23 @@ public class ComplexTiler extends BasicTiler {
                     .instOf(IRConst.class)
                     .and(x -> x.constant() == 1 || x.constant() == 2 || x.constant() == 4 || x.constant() == 8)
                     .right()
-                    .instOf(IRTemp.class)
+                    .instOf(ASMTempArg.class)
                     .finish()
+                    .mappingRight(IRNode.class, (Function<IRNode, ASMArg>) node -> node.accept(this).result.get())
                     .enableCommutes();
 
                 ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
 
                 if (pattern.matches(new Object[] { n.left(), n.right() })) {
                     IRConst constArg = pattern.leftObj();
-                    IRTemp tempArg = pattern.rightObj();
+                    ASMTempArg tempArg = pattern.rightObj();
 
                     ASMLine line = make.Lea(
                         resultTemp,
                         arg.mem(arg.addr(
                             Optional.empty(),
                             ScaleValues.fromConst(constArg.constant()).get(),
-                            Optional.of(arg.temp(tempArg.name(), Size.QWORD)),
+                            Optional.of(arg.temp(tempArg.name, Size.QWORD)),
                             0
                         ))
                     );
