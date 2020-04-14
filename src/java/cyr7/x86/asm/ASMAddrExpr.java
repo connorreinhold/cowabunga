@@ -28,6 +28,17 @@ public class ASMAddrExpr {
                 return "";
             }
         }
+
+        public static Optional<ScaleValues> fromConst(long constant) {
+            switch ((int) constant) {
+                case 1: return Optional.of(ONE);
+                case 2: return Optional.of(TWO);
+                case 4: return Optional.of(FOUR);
+                case 8: return Optional.of(EIGHT);
+                default: return Optional.empty();
+            }
+        }
+
     }
 
     public final Optional<ASMTempRegArg> base;
