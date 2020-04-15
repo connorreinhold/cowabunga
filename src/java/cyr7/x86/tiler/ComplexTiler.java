@@ -76,7 +76,7 @@ public class ComplexTiler extends BasicTiler {
 
                 ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
 
-                if (pattern.matches(new Object[] { n.left(), n.right() })) {
+                if (pattern.matches(new Object[]{n.left(), n.right()})) {
                     IRConst constArg = pattern.leftObj();
                     ASMTempArg tempArg = pattern.rightObj();
 
@@ -124,7 +124,7 @@ public class ComplexTiler extends BasicTiler {
                     .finish()
                     .enableCommutes();
 
-                if (constTempPlusN.matches(new Object[]{ n.left(), n.right() })) {
+                if (constTempPlusN.matches(new Object[]{n.left(), n.right()})) {
                     IRConst constArg = constTemp.leftObj();
                     ASMTempArg tempArg = constTemp.rightObj();
                     IRConst nArg = constTempPlusN.rightObj();
