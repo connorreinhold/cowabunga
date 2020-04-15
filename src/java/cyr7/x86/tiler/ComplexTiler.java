@@ -95,7 +95,7 @@ public class ComplexTiler extends BasicTiler {
                     insns.add(line);
                     possibleTilings.add(
                         new TilerData(
-                            1,
+                            1 + pattern.preMapRight().getOptimalTiling().tileCost,
                             insns,
                             Optional.of(resultTemp)
                         ));
@@ -136,7 +136,7 @@ public class ComplexTiler extends BasicTiler {
                     insns.add(line);
 
                    possibleTilings.add(
-                        new TilerData(1,
+                        new TilerData(1 + pattern.preMapRight().getOptimalTiling().tileCost,
                             insns,
                             Optional.of(resultTemp)
                         ));
