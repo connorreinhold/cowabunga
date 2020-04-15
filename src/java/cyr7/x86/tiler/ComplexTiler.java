@@ -42,8 +42,50 @@ public class ComplexTiler extends BasicTiler {
         }
 
         List<TilerData> possibleTilings = new ArrayList<>();
+                switch (n.opType()) {
+            case ADD: {
+                List<ASMLine> insnsFromChildTiling = new ArrayList<ASMLine>();
+                ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
 
-        switch (n.opType()) {
+                var pattern =  BiPatternBuilder
+                    .left()
+                    .instOf(IRConst.class)
+                    .right()
+                    .instOf(ASMTempArg.class)
+                    .finish()
+                    .mappingRight(IRNode.class, (Function<IRNode, ASMArg>) node -> {
+                        TilerData child = node.accept(this);
+                        insnsFromChildTiling.removeAll(insnsFromChildTiling);
+                        insnsFromChildTiling.addAll(child.optimalInstructions);
+                        return child.result.get();
+                    });
+
+                if ( pattern.matches(new Object[] { n.left(), n.right() })) {
+                    List<ASMLine> insns = new ArrayList<>();
+                    insns.addAll(insnsFromChildTiling);
+                    
+                    IRConst constArg = pattern.leftObj();
+                    ASMTempArg tempArg = pattern.rightObj();
+
+                    ASMLine line = make.Lea(
+                        resultTemp,
+                        arg.mem(arg.addr(
+                            Optional.of(tempArg),
+                            ScaleValues.ONE,
+                            Optional.empty(),
+                            constArg.constant()
+                        ))
+                    );
+                    insns.add(line);
+                    possibleTilings.add(
+                        new TilerData(
+                            1,
+                            insns,
+                            Optional.of(resultTemp)
+                        ));
+                }
+            }
+            break;
             case MUL:
                 List<ASMLine> insnsFromChildTiling = new ArrayList<ASMLine>();
                 var pattern = BiPatternBuilder
