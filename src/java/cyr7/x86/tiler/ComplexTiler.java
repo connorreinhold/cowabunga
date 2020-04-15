@@ -54,15 +54,14 @@ public class ComplexTiler extends BasicTiler {
         List<TilerData> possibleTilings = new ArrayList<>();
 
         switch (n.opType()) {
-            case MUL:
+            case MUL: 
                 new ConstTimesTemp().match(n, this, make).ifPresent(possibleTilings::add);
-
-            case ADD:
+                break;
+            case ADD: 
                 new ConstTimesTempPlusOffset().match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp().match(n, this, make).ifPresent(possibleTilings::add);
-
+                break;
         }
-
         possibleTilings.add(super.visit(n));
 
         TilerData optimal = possibleTilings.stream().min(byCost).get();

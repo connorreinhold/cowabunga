@@ -59,7 +59,6 @@ public class ConstTimesTemp extends PatternMapper<IRBinOp> {
                 ))
             );
             insns.add(line);
-
             return Optional.of(new TilerData(1,
                 insns,
                 Optional.of(resultTemp)));

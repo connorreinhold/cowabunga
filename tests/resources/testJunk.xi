@@ -1,11 +1,6 @@
-changeA(a: int[]): int[] {
-    a[0] = 123;
-    return a;
-}
-
 main(args: int[][]) {
-    a: int[] = {23, 43, 65};
-    b: int = a[0] + changeA(a)[0];
-    
-    c: int = a[0] * 2;
+    i: int = 1
+    n: int = 10
+    product: int = 1
+    product = product * n
 }

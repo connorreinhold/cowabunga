@@ -34,16 +34,15 @@ public class testJunk {
         
         boolean pDebug = false;
         
-        StringWriter hoo = new StringWriter();
-        IRUtil.irGen(reader, hoo, filename, fileOpener, lowerConfiguration);
-        System.out.println(hoo);
-        /*
+        //StringWriter hoo = new StringWriter();
+        //IRUtil.irGen(reader, hoo, filename, fileOpener, lowerConfiguration);
+        
         if (pDebug) {
             ASMUtil.printDebugASM(
                     reader, filename, fileOpener, lowerConfiguration);
         } else {
             List<ASMLine> lines = ASMUtil.generateAbstractASM(
                     reader, filename, fileOpener, lowerConfiguration);
-        }*/
+        }
     }
 }
