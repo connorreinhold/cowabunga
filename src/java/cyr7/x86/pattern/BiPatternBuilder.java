@@ -74,14 +74,6 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
             rightMapping);
     }
 
-//    public <L2, Const> BiPatternBuilder<L, R, L2, R1> mappingLeft(Class<L2> r1Class, Const userData, BiFunction<L2, Const, ? super R> map) {
-//        return new BiPatternBuilder<>(
-//            left,
-//            right,
-//            leftMapping,
-//            x -> r1Class.isInstance(x) ? Optional.of(map.apply((L2) x, userData)) : Optional.empty());
-//    }
-    
     public <R2> BiPatternBuilder<L, R, L1, R2> mappingRight(Class<R2> r1Class, Function<R2, ? super R> map) {
         return new BiPatternBuilder<>(
             left,
@@ -89,15 +81,7 @@ public class BiPatternBuilder<L, R, L1, R1> implements Pattern {
             leftMapping,
             x -> r1Class.isInstance(x) ? Optional.of(map.apply((R2) x)) : Optional.empty());
     }
-    
-//    public <R2, Const> BiPatternBuilder<L, R, L1, R2> mappingRight(Class<R2> r1Class, Const userData, BiFunction<R2, Const, ? super R> map) {
-//        return new BiPatternBuilder<>(
-//            left,
-//            right,
-//            leftMapping,
-//            x -> r1Class.isInstance(x) ? Optional.of(map.apply((R2) x, userData)) : Optional.empty());
-//    }
-    
+
     @Override
     public boolean matches(Object[] objs) {
         return objs.length == 2 && matches(objs[0], objs[1], true);
