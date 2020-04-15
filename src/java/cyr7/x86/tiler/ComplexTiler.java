@@ -3,6 +3,7 @@ package cyr7.x86.tiler;
 import cyr7.cli.CLI;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRCallStmt;
@@ -28,6 +29,7 @@ import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
+import cyr7.x86.pattern.PatternGenerator;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -48,6 +50,7 @@ public class ComplexTiler extends BasicTiler {
             stack16ByteAligned);
 
         disableBasicTilerMemoizeResults();
+        PatternGenerator.instantiate(this);
     }
 
     @Override
@@ -60,47 +63,13 @@ public class ComplexTiler extends BasicTiler {
         List<TilerData> possibleTilings = new ArrayList<>();
 
         switch (n.opType()) {
-            case MUL: 
-                var pattern = BiPatternBuilder
-                    .left()
-                    .instOf(IRConst.class)
-                    .and(x -> x.constant() == 1 || x.constant() == 2 || x.constant() == 4 || x.constant() == 8)
-                    .right()
-                    .instOf(ASMTempArg.class)
-                    .finish()
-                    .mappingRight(IRExpr.class,
-                        (Function<IRExpr, ASMArg>)
-                            node -> node.accept(this).result.get())
-                    .enableCommutes();
 
-                ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
+            case MUL: {
+                
 
-                if (pattern.matches(new Object[] { n.left(), n.right() })) {
-                    IRConst constArg = pattern.leftObj();
-                    ASMTempArg tempArg = pattern.rightObj();
-
-                    List<ASMLine> insns = new ArrayList<>();
-                    insns.addAll(pattern.preMapRight().getOptimalTiling().optimalInstructions);
-
-                    ASMLine line = make.Lea(
-                        resultTemp,
-                        arg.mem(arg.addr(
-                            Optional.empty(),
-                            ScaleValues.fromConst(constArg.constant()).get(),
-                            Optional.of(arg.temp(tempArg.name, Size.QWORD)),
-                            0
-                        ))
-                    );
-                    insns.add(line);
-
-                   possibleTilings.add(
-                        new TilerData(1,
-                            insns,
-                            Optional.of(resultTemp)
-                        ));
-                }
+                
             
-            case ADD: 
+            case ADD: {     
                 var tempPlusTempPattern = BiPatternBuilder
                 .left()
                 .instOf(ASMTempArg.class)
@@ -114,47 +83,74 @@ public class ComplexTiler extends BasicTiler {
                     (Function<IRExpr, ASMArg>)
                         node -> node.accept(this).result.get());
                 
-                var tempPlusConstTimesTempPattern = BiPatternBuilder
-                .left()
-                .instOf(ASMTempArg.class)
-                .right()
-                .instOf(IRBinOp.class)
-                .and(x -> pattern.matches(new Object[] {x.left(), x.right()}))
-                .finish()
-                .mappingLeft(IRExpr.class,
+               
+                
+                
+                
+                
+                
+                
+
+                var constTemp = BiPatternBuilder
+                    .left()
+                    .instOf(IRConst.class)
+                    .and(x -> x.constant() == 1 || x.constant() == 2 || x.constant() == 4 || x.constant() == 8)
+                    .right()
+                    .instOf(ASMTempArg.class)
+                    .finish()
+                    .mappingRight(IRExpr.class,
                         (Function<IRExpr, ASMArg>)
                             node -> node.accept(this).result.get())
-                .enableCommutes();
-                
-                
-                
-                
-                
-                resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
-                if (tempPlusTempPattern.matches(new Object[] {n.left(), n.right()})) {
-                    ASMTempArg lhs = tempPlusTempPattern.leftObj();
-                    ASMTempArg rhs = tempPlusTempPattern.rightObj();
+                    .enableCommutes();
 
+                var constTempPlusN = BiPatternBuilder
+                    .left()
+                    .instOf(IRBinOp.class)
+                    .and(x -> x.opType() == OpType.MUL)
+                    .and(x -> constTemp.matches(new Object[] { x.left(), x.right() }))
+                    .right()
+                    .instOf(IRConst.class)
+                    .finish()
+                    .enableCommutes();
+
+                if (constTempPlusN.matches(new Object[]{n.left(), n.right()})) {
+                    IRConst constArg = constTemp.leftObj();
+                    ASMTempArg tempArg = constTemp.rightObj();
+                    IRConst nArg = constTempPlusN.rightObj();
+
+                    ASMTempArg resultTemp = arg.temp(generator.newTemp(), Size.QWORD);
                     List<ASMLine> insns = new ArrayList<>();
-                    insns.addAll(tempPlusTempPattern.preMapLeft().getOptimalTiling().optimalInstructions);
-                    insns.addAll(tempPlusTempPattern.preMapRight().getOptimalTiling().optimalInstructions);
+                    insns.addAll(constTemp.preMapRight().getOptimalTiling().optimalInstructions);
+>>>>>>> 5a4ab1483c0110d97068401c87da0a0774233ad5
 
                     ASMLine line = make.Lea(
                         resultTemp,
                         arg.mem(arg.addr(
+<<<<<<< HEAD
                             Optional.of(arg.temp(lhs.name, Size.QWORD)),
                             ScaleValues.ONE,
                             Optional.of(arg.temp(rhs.name, Size.QWORD)),
                             0
+=======
+                            Optional.empty(),
+                            ScaleValues.fromConst(constArg.constant()).get(),
+                            Optional.of(arg.temp(tempArg.name, Size.QWORD)),
+                            nArg.constant()
+>>>>>>> 5a4ab1483c0110d97068401c87da0a0774233ad5
                         ))
                     );
                     insns.add(line);
 
+<<<<<<< HEAD
                    possibleTilings.add(
+=======
+                    possibleTilings.add(
+>>>>>>> 5a4ab1483c0110d97068401c87da0a0774233ad5
                         new TilerData(1,
                             insns,
                             Optional.of(resultTemp)
                         ));
+<<<<<<< HEAD
                 } else if (false) {
                     
                 }
@@ -165,6 +161,10 @@ public class ComplexTiler extends BasicTiler {
                 
                 
             
+=======
+                }
+            }
+>>>>>>> 5a4ab1483c0110d97068401c87da0a0774233ad5
         }
 
         possibleTilings.add(super.visit(n));

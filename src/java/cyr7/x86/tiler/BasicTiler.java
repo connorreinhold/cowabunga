@@ -79,6 +79,10 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         this.stack16ByteAligned = stack16ByteAligned;
     }
 
+    public IdGenerator generator() {
+        return this.generator;
+    }
+    
     @Override
     public TilerData visit(IRBinOp n) {
         ASMLineFactory make = new ASMLineFactory(n);
