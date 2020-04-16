@@ -1,7 +1,9 @@
 package cyr7.x86.tiler;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Assertions;
 
@@ -13,15 +15,6 @@ import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
-<<<<<<< HEAD
-=======
-import org.junit.jupiter.api.Assertions;
-
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
->>>>>>> 2060c5641b8a046ca1afa23e95dad1288bfa2e70
 
 public final class ASMTestUtils {
 
