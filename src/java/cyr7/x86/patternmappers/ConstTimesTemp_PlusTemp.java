@@ -61,7 +61,6 @@ public class ConstTimesTemp_PlusTemp extends MemoryAddrPattern {
             ASMTempArg tempArg1 = constTemp.rightObj();
             ASMTempArg tempArg2 = constTempPlusTemp.rightObj();
 
-            ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), ASMTempArg.Size.QWORD);
             insns.addAll(constTemp.preMapRight().getOptimalTiling().optimalInstructions);
             insns.addAll(constTempPlusTemp.preMapRight().getOptimalTiling().optimalInstructions);
 

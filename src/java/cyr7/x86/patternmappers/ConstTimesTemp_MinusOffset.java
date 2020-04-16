@@ -66,7 +66,7 @@ public class ConstTimesTemp_MinusOffset extends MemoryAddrPattern {
                                   .getOptimalTiling().optimalInstructions);
 
             this.setCost(
-                    1 + constTemp.preMapLeft().getOptimalTiling().tileCost);
+                    1 + constTemp.preMapRight().getOptimalTiling().tileCost);
 
             ASMAddrExpr addrExpr = arg.addr(Optional.empty(),
                     ScaleValues.fromConst(constArg.constant())
