@@ -13,7 +13,8 @@ public final class ASMLabel implements ASMLine {
     }
 
     @Override
-    public String getIntelAssembly() {
+    public String getIntelAssembly(boolean includeWhitespace, boolean includeComments) {
+        // label does not include any comments, we can safely ignore includeComments
         return label + ":";
     }
 

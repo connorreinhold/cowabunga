@@ -9,6 +9,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public final class ASMInstr implements ASMLine {
+
     public final List<ASMArg> args;
     public final ASMInstrType type;
     public final Optional<IRNode> source;
@@ -24,11 +25,17 @@ public final class ASMInstr implements ASMLine {
     }
 
     @Override
-    public String getIntelAssembly() {
+    public String getIntelAssembly(boolean indented, boolean includeComments) {
         String opCode = type.getIntelOpCode();
-        String arguments = String.join(", ", args.stream().map(a -> a.getIntelArg()).collect(Collectors.toList()));
+        String arguments = args.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
         String src = source.map(x -> x.toString().replace("\n", "")).orElse(null);
-        return "    " + opCode + (arguments.length() != 0 ? " " + arguments : "") + (src == null ? "" : " ## " + src);
+
+        StringBuilder result = new StringBuilder();
+        if (indented) result.append("    ");
+        result.append(opCode);
+        if (!arguments.isEmpty()) result.append(" ").append(arguments);
+        if (src != null && includeComments) result.append(" ## ").append(src);
+        return result.toString();
     }
 
     @Override
