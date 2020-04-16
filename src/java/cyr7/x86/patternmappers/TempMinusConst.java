@@ -27,8 +27,11 @@ public class TempMinusConst extends MemoryAddrPattern {
     }
 
     @Override
-    public Optional<TilerData> match(IRBinOp n, ComplexTiler tiler,
-            ASMLineFactory make) {
+    protected Optional<ASMAddrExpr> matchAddress(
+        IRBinOp n,
+        ComplexTiler tiler,
+        ASMLineFactory make,
+        List<ASMLine> insns) {
         var tempMinusConst = BiPatternBuilder.left()
                                              .instOf(ASMTempArg.class)
                                              .right()
@@ -43,7 +46,6 @@ public class TempMinusConst extends MemoryAddrPattern {
             ASMTempArg lhs = tempMinusConst.leftObj();
             IRConst rhs = tempMinusConst.rightObj();
 
-            List<ASMLine> insns = new ArrayList<>();
             insns.addAll(tempMinusConst.preMapLeft()
                                        .getOptimalTiling().optimalInstructions);
 
@@ -52,18 +54,7 @@ public class TempMinusConst extends MemoryAddrPattern {
                     ScaleValues.ONE,
                     Optional.empty(),
                     -rhs.constant());
-            if (this.isMemPattern) {
-                return Optional.of(new TilerData(0, insns, Optional
-                        .of(
-                    new ASMMemArg(addrExpr))));
-            } else {
-                ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(),
-                        Size.QWORD);
-                ASMLine line = make.Lea(resultTemp, arg.mem(addrExpr));
-                insns.add(line);
-                return Optional
-                        .of(new TilerData(1, insns, Optional.of(resultTemp)));
-            }
+            return Optional.of(addrExpr);
         } else {
             return Optional.empty();
         }

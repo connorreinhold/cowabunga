@@ -11,9 +11,7 @@ import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
-import cyr7.x86.tiler.TilerData;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -25,7 +23,11 @@ public class TempPlusTemp extends MemoryAddrPattern {
     }
     
     @Override
-    public Optional<TilerData> match(IRBinOp n, ComplexTiler tiler, ASMLineFactory make) {
+    protected Optional<ASMAddrExpr> matchAddress(
+        IRBinOp n,
+        ComplexTiler tiler,
+        ASMLineFactory make,
+        List<ASMLine> insns) {
         var tempPlusTempPattern = BiPatternBuilder
             .left()
             .instOf(ASMTempArg.class)
@@ -43,7 +45,6 @@ public class TempPlusTemp extends MemoryAddrPattern {
             ASMTempArg lhs = tempPlusTempPattern.leftObj();
             ASMTempArg rhs = tempPlusTempPattern.rightObj();
 
-            List<ASMLine> insns = new ArrayList<>();
             insns.addAll(tempPlusTempPattern.preMapLeft().getOptimalTiling().optimalInstructions);
             insns.addAll(tempPlusTempPattern.preMapRight().getOptimalTiling().optimalInstructions);
 
@@ -53,23 +54,7 @@ public class TempPlusTemp extends MemoryAddrPattern {
                     Optional.of(arg.temp(rhs.name, Size.QWORD)),
                     0
                 );
-            if (this.isMemPattern) {
-                return Optional.of(
-                    new TilerData(1,
-                        insns,
-                        Optional.of(arg.mem(addrExpr))
-                    ));
-            } else {
-                ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
-                ASMLine line = make.Lea(
-                    resultTemp, arg.mem(addrExpr));    
-                insns.add(line);
-                return Optional.of(
-                    new TilerData(1,
-                        insns,
-                        Optional.of(resultTemp)
-                    ));
-            }
+            return Optional.of(addrExpr);
         }
         return Optional.empty();
     }

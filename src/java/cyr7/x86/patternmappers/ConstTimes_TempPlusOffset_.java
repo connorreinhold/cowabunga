@@ -28,13 +28,17 @@ public class ConstTimes_TempPlusOffset_ extends MemoryAddrPattern {
     }
     
     @Override
-    public Optional<TilerData> match(IRBinOp n, ComplexTiler tiler, ASMLineFactory make) {
+    protected Optional<ASMAddrExpr> matchAddress(
+        IRBinOp n,
+        ComplexTiler tiler,
+        ASMLineFactory make,
+        List<ASMLine> insns) {
         if (n.opType() != OpType.MUL) {
             return Optional.empty();
         }
 
         var tempPlusOffset = BiPatternBuilder
-                .left()
+            .left()
                 .instOf(ASMTempArg.class)
                 .right()
                 .instOf(IRConst.class)
@@ -60,7 +64,6 @@ public class ConstTimes_TempPlusOffset_ extends MemoryAddrPattern {
             IRConst offset = tempPlusOffset.rightObj();
             IRConst cArg = constTempOffset.rightObj();
 
-            List<ASMLine> insns = new ArrayList<>();
             insns.addAll(tempPlusOffset.preMapLeft().getOptimalTiling().optimalInstructions);
 
             ASMAddrExpr addrExpr = arg.addr(
@@ -69,23 +72,7 @@ public class ConstTimes_TempPlusOffset_ extends MemoryAddrPattern {
                     Optional.of(arg.temp(tempArg.name, Size.QWORD)),
                     offset.constant()*cArg.constant()
                 );
-            if (this.isMemPattern) {
-                return Optional.of(
-                    new TilerData(1,
-                        insns,
-                        Optional.of(arg.mem(addrExpr))
-                    ));
-            } else {
-                ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
-                ASMLine line = make.Lea(
-                    resultTemp, arg.mem(addrExpr));    
-                insns.add(line);
-                return Optional.of(
-                    new TilerData(1,
-                        insns,
-                        Optional.of(resultTemp)
-                    ));
-            }
+            return Optional.of(addrExpr);
         }
 
         return Optional.empty();

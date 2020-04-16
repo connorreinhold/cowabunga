@@ -28,7 +28,11 @@ public class _ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
     }
     
     @Override
-    public Optional<TilerData> match(IRBinOp n, ComplexTiler tiler, ASMLineFactory make) {
+    protected Optional<ASMAddrExpr> matchAddress(
+        IRBinOp n,
+        ComplexTiler tiler,
+        ASMLineFactory make,
+        List<ASMLine> insns) {
         if (n.opType() != OpType.ADD) {
             return Optional.empty();
         }
@@ -60,7 +64,6 @@ public class _ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
             ASMTempArg tempArg = constTemp.rightObj();
             IRConst nArg = constTempPlusN.rightObj();
 
-            List<ASMLine> insns = new ArrayList<>();
             insns.addAll(constTemp.preMapRight().getOptimalTiling().optimalInstructions);
 
             ASMAddrExpr addrExpr = arg.addr(
@@ -69,23 +72,7 @@ public class _ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
                     Optional.of(arg.temp(tempArg.name, Size.QWORD)),
                     nArg.constant()
                 );
-            if (this.isMemPattern) {
-                return Optional.of(
-                    new TilerData(1,
-                        insns,
-                        Optional.of(arg.mem(addrExpr))
-                    ));
-            } else {
-                ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
-                ASMLine line = make.Lea(
-                    resultTemp, arg.mem(addrExpr));    
-                insns.add(line);
-                return Optional.of(
-                    new TilerData(1,
-                        insns,
-                        Optional.of(resultTemp)
-                    ));
-            }
+            return Optional.of(addrExpr);
         }
 
         return Optional.empty();
