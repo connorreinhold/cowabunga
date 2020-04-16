@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class TempPlusTemp extends MemoryAddrPattern{
+public class TempPlusTemp extends MemoryAddrPattern {
 
     public TempPlusTemp(boolean isMemPattern) {
         super(isMemPattern);

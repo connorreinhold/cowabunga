@@ -1,5 +1,10 @@
 package cyr7.x86.tiler;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Optional;
+
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -22,24 +27,20 @@ import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.patternmappers.ConstTimesTemp;
 import cyr7.x86.patternmappers.ConstTimesTempPlusOffset;
+import cyr7.x86.patternmappers.TempMinusConst;
 import cyr7.x86.patternmappers.TempPlusTemp;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
+import cyr7.x86.patternmappers.TempTimesConstMinusOffset;
 
 public class ComplexTiler extends BasicTiler {
 
-    private static final Comparator<TilerData> byCost
-        = Comparator.comparingInt(lhs -> lhs.tileCost);
+    private static final Comparator<TilerData> byCost = Comparator.comparingInt(
+            lhs -> lhs.tileCost);
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
-                        String returnLbl,
-                        Optional<ASMTempArg> additionalRetValAddress,
-                        boolean stack16ByteAligned) {
+            String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
+            boolean stack16ByteAligned) {
         super(generator, numRetValues, returnLbl, additionalRetValAddress,
-            stack16ByteAligned);
+                stack16ByteAligned);
 
         disableBasicTilerMemoizeResults();
     }
@@ -61,6 +62,9 @@ public class ComplexTiler extends BasicTiler {
                 new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
+            case SUB: 
+                new TempMinusConst(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new TempTimesConstMinusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
         }
         possibleTilings.add(super.visit(n));
 
@@ -68,7 +72,7 @@ public class ComplexTiler extends BasicTiler {
         n.setOptimalTilingOnce(optimal);
         return optimal;
     }
-    
+
     @Override
     public TilerData visit(IRCall n) {
         if (n.hasOptimalTiling()) {
