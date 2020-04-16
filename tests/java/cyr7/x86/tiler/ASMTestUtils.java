@@ -10,6 +10,7 @@ import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 

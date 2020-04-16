@@ -21,7 +21,8 @@ import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.patternmappers.ConstTimesTemp;
-import cyr7.x86.patternmappers.ConstTimesTempPlusOffset;
+import cyr7.x86.patternmappers.ConstTimes_TempPlusOffset_;
+import cyr7.x86.patternmappers._ConstTimesTemp_PlusOffset;
 import cyr7.x86.patternmappers.TempPlusTemp;
 
 import java.util.ArrayList;
@@ -56,14 +57,15 @@ public class ComplexTiler extends BasicTiler {
         switch (n.opType()) {
             case MUL: 
                 new ConstTimesTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstTimes_TempPlusOffset_(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
             case ADD: 
-                new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new _ConstTimesTemp_PlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
         }
+        
         possibleTilings.add(super.visit(n));
-
         TilerData optimal = possibleTilings.stream().min(byCost).get();
         n.setOptimalTilingOnce(optimal);
         return optimal;
