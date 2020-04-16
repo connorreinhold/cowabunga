@@ -15,9 +15,9 @@ import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 
-public class ConstTimesTempPlusTemp extends MemoryAddrPattern {
+public class ConstTimesTemp_PlusTemp extends MemoryAddrPattern {
 
-    public ConstTimesTempPlusTemp(boolean isMemPattern) {
+    public ConstTimesTemp_PlusTemp(boolean isMemPattern) {
         super(isMemPattern);
     }
 

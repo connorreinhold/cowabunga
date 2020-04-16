@@ -18,9 +18,9 @@ import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 
-public class TempTimesConstMinusOffset extends MemoryAddrPattern {
+public class ConstTimesTemp_MinusOffset extends MemoryAddrPattern {
 
-    public TempTimesConstMinusOffset(boolean isMemPattern) {
+    public ConstTimesTemp_MinusOffset(boolean isMemPattern) {
         super(isMemPattern);
     }
 
