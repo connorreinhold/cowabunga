@@ -13,6 +13,15 @@ import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
+<<<<<<< HEAD
+=======
+import org.junit.jupiter.api.Assertions;
+
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+>>>>>>> 2060c5641b8a046ca1afa23e95dad1288bfa2e70
 
 public final class ASMTestUtils {
 
@@ -44,7 +53,17 @@ public final class ASMTestUtils {
     public static void assertEqualsTiled(IRNode node, String... assembly) {
         ComplexTiler tiler = makeTiler();
         node.accept(tiler);
-        Assertions.assertEquals(node.getOptimalTiling().optimalInstructions.size(), assembly.length);
+        Assertions.assertEquals(node.getOptimalTiling().optimalInstructions.size(), assembly.length,
+            "\nTiled Instructions:\n"
+                + node
+                .getOptimalTiling()
+                .optimalInstructions
+                .stream()
+                .map(ASMLine::getIntelAssembly)
+                .collect(Collectors.joining("\n"))
+                + "\nExpected Instructions:\n"
+                + Arrays.toString(assembly)
+                + "\n");
         for (int i = 0; i < assembly.length; i++) {
             System.out.println(node.getOptimalTiling().optimalInstructions.get(i).getIntelAssembly());
             assertEqualsASM(assembly[i], node.getOptimalTiling().optimalInstructions.get(i));

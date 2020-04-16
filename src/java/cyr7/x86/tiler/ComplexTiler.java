@@ -25,16 +25,21 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.patternmappers.ConstPlusTemp;
 import cyr7.x86.patternmappers.ConstTimesTemp;
-import cyr7.x86.patternmappers.ConstTimesTempPlusOffset;
+import cyr7.x86.patternmappers.ConstTimes_TempPlusOffset_;
+import cyr7.x86.patternmappers._ConstTimesTemp_PlusOffset;
 import cyr7.x86.patternmappers.TempMinusConst;
 import cyr7.x86.patternmappers.TempPlusTemp;
 import cyr7.x86.patternmappers.TempTimesConstMinusOffset;
 
 public class ComplexTiler extends BasicTiler {
 
-    private static final Comparator<TilerData> byCost = Comparator.comparingInt(
-            lhs -> lhs.tileCost);
+    private static final Comparator<TilerData> byCost
+        = (lhs, rhs) ->
+        lhs.tileCost == rhs.tileCost
+            ? lhs.optimalInstructions.size() - rhs.optimalInstructions.size()
+            : lhs.tileCost - rhs.tileCost;
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
             String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
@@ -57,18 +62,20 @@ public class ComplexTiler extends BasicTiler {
         switch (n.opType()) {
             case MUL:
                 new ConstTimesTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstTimes_TempPlusOffset_(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
-            case ADD:
-                new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
+            case ADD: 
+                new _ConstTimesTemp_PlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
             case SUB:
                 new TempTimesConstMinusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempMinusConst(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
         }
+        
         possibleTilings.add(super.visit(n));
-
         TilerData optimal = possibleTilings.stream().min(byCost).get();
         n.setOptimalTilingOnce(optimal);
         return optimal;

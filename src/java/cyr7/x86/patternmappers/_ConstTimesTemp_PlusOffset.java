@@ -20,9 +20,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public class ConstTimesTempPlusOffset extends MemoryAddrPattern {
+// This matches c*t + n
+public class _ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
 
-    public ConstTimesTempPlusOffset(boolean isMemPattern) {
+    public _ConstTimesTemp_PlusOffset(boolean isMemPattern) {
         super(isMemPattern);
     }
     
