@@ -19,7 +19,7 @@ public class TestConstTimes_TempPlusOffset_ {
                         make.IRConst(4))
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t5, [ 4 * bleh + 28 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t6, [ 4 * bleh + 28 ]");
     }
 
     @Test
@@ -32,7 +32,7 @@ public class TestConstTimes_TempPlusOffset_ {
                         make.IRConst(8))
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t5, [ 8 * bleh + 16 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t6, [ 8 * bleh + 16 ]");
     }
 
     @Test
@@ -46,7 +46,7 @@ public class TestConstTimes_TempPlusOffset_ {
                 )
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t4, [ 1 * bleh + 3 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t5, [ 1 * bleh + 3 ]");
     }
 
     @Test
@@ -60,6 +60,6 @@ public class TestConstTimes_TempPlusOffset_ {
                 )
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t4, [ 4 * bleh + 12 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t5, [ 4 * bleh + 12 ]");
     }
 }
