@@ -25,12 +25,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.patternmappers.ConstPlusTemp;
-import cyr7.x86.patternmappers.ConstTimesTemp;
-import cyr7.x86.patternmappers.ConstTimesTempPlusOffset;
-import cyr7.x86.patternmappers.TempMinusConst;
-import cyr7.x86.patternmappers.TempPlusTemp;
-import cyr7.x86.patternmappers.TempTimesConstMinusOffset;
+import cyr7.x86.patternmappers.*;
 
 public class ComplexTiler extends BasicTiler {
 
@@ -62,7 +57,8 @@ public class ComplexTiler extends BasicTiler {
             case MUL: 
                 new ConstTimesTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
-            case ADD: 
+            case ADD:
+                new ConstTimesTempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new ConstPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
