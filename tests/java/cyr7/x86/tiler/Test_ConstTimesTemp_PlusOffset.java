@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import static cyr7.x86.tiler.ASMTestUtils.assertEqualsTiled;
 import static cyr7.x86.tiler.ASMTestUtils.makeIR;
 
-public class TestConstTimesTempPlusOffset {
+public class Test_ConstTimesTemp_PlusOffset {
 
     @Test
     void testConstTimesTempAndOffset() {

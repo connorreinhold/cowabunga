@@ -1,5 +1,12 @@
 package cyr7.x86.tiler;
 
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+import org.junit.jupiter.api.Assertions;
+
 import cyr7.C;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.nodes.IRNode;
@@ -8,12 +15,6 @@ import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
-import org.junit.jupiter.api.Assertions;
-
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 public final class ASMTestUtils {
 
@@ -57,6 +58,7 @@ public final class ASMTestUtils {
                 + Arrays.toString(assembly)
                 + "\n");
         for (int i = 0; i < assembly.length; i++) {
+            System.out.println(node.getOptimalTiling().optimalInstructions.get(i).getIntelAssembly());
             assertEqualsASM(assembly[i], node.getOptimalTiling().optimalInstructions.get(i));
         }
     }

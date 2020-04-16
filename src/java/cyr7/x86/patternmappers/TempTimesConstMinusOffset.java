@@ -53,8 +53,7 @@ public class TempTimesConstMinusOffset extends MemoryAddrPattern {
                                                      { x.left(), x.right() }))
                                              .right()
                                              .instOf(IRConst.class)
-                                             .finish()
-                                             .enableCommutes();
+                                             .finish();
 
         if (constTempMinusN.matches(new Object[]
             { n.left(), n.right() })) {
@@ -76,8 +75,7 @@ public class TempTimesConstMinusOffset extends MemoryAddrPattern {
                         Optional.of(arg.mem(
                         addrExpr))));
             } else {
-                ASMTempArg resultTemp = arg.temp(tiler.generator()
-                                                      .newTemp(), Size.QWORD);
+                ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
                 ASMLine line = make.Lea(resultTemp, arg.mem(addrExpr));
                 insns.add(line);
                 return Optional.of(new TilerData(1, insns, Optional.of(
