@@ -4,8 +4,12 @@ import cyr7.x86.visitor.AbstractASMVisitor;
 
 public interface ASMLine {
 
-    public String getIntelAssembly();
+    default String getIntelAssembly() {
+        return getIntelAssembly(true, true);
+    }
 
-    public abstract <R> R accept(AbstractASMVisitor<R> visitor);
+    String getIntelAssembly(boolean indented, boolean withComments);
+
+    <R> R accept(AbstractASMVisitor<R> visitor);
 
 }
