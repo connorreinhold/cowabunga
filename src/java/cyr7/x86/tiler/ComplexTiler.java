@@ -69,33 +69,6 @@ public class ComplexTiler extends BasicTiler {
         return optimal;
     }
     
-    public TilerData visit(IRMem n) {
-        ASMLineFactory make = new ASMLineFactory(n);
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        List<TilerData> possibleTilings = new ArrayList<>();
-
-        if (n.expr() instanceof IRBinOp) {
-            IRBinOp addr = (IRBinOp) n.expr();
-            switch (addr.opType()) {
-                case MUL: 
-                    new ConstTimesTemp(true).match(addr, this, make).ifPresent(possibleTilings::add);
-                    break;
-                case ADD: 
-                    new ConstTimesTempPlusOffset(true).match(addr, this, make).ifPresent(possibleTilings::add);
-                    new TempPlusTemp(true).match(addr, this, make).ifPresent(possibleTilings::add);
-                    break;
-            }
-        }
-        possibleTilings.add(super.visit(n));
-
-        TilerData optimal = possibleTilings.stream().min(byCost).get();
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
-    }
-
     @Override
     public TilerData visit(IRCall n) {
         if (n.hasOptimalTiling()) {
