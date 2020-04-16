@@ -19,7 +19,7 @@ public class TestConstTimesTempPlusTemp {
         );
         ComplexTiler tiler = makeTiler();
         tempConstTemp.accept(tiler);
-        assertEqualsTiled(tempConstTemp, "leaq _t3, [ bleh1 + 4 * bleh2 ]");
+        assertEqualsTiled(tempConstTemp, "leaq _t0, [ bleh1 + 4 * bleh2 ]");
     }
 
     @Test

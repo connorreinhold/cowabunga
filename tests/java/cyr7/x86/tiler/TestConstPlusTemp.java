@@ -18,7 +18,7 @@ public class TestConstPlusTemp {
                 make.IRTemp("bleh")
             ));
 
-        assertEqualsTiled(constTemp, "leaq _t2, [ bleh + 50 ]");
+        assertEqualsTiled(constTemp, "leaq _t0, [ bleh + 50 ]");
     }
 
     @Test
@@ -30,7 +30,7 @@ public class TestConstPlusTemp {
                 make.IRConst(50)
             ));
 
-        assertEqualsTiled(constTemp, "leaq _t2, [ bleh + 50 ]");
+        assertEqualsTiled(constTemp, "leaq _t0, [ bleh + 50 ]");
     }
 
 }

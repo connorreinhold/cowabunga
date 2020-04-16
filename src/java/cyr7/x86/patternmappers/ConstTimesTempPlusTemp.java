@@ -58,7 +58,7 @@ public class ConstTimesTempPlusTemp extends MemoryAddrPattern {
             ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), ASMTempArg.Size.QWORD);
             List<ASMLine> insns = new ArrayList<>();
             insns.addAll(constTemp.preMapRight().getOptimalTiling().optimalInstructions);
-
+            insns.addAll(constTempPlusTemp.preMapRight().getOptimalTiling().optimalInstructions);
             ASMLine line = make.Lea(
                     resultTemp,
                     arg.mem(arg.addr(

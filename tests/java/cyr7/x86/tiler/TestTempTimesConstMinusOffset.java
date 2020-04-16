@@ -35,7 +35,7 @@ class TestTempTimesConstMinusOffset {
                         make.IRConst(8))
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t1, [ 4 * bleh + -8 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t0, [ 4 * bleh + -8 ]");
     }
 
 //    @Test
@@ -50,7 +50,7 @@ class TestTempTimesConstMinusOffset {
                 )
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t1, [ 4 * bleh + -8 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t0, [ 4 * bleh + -8 ]");
     }
 
 //    @Test
@@ -65,7 +65,7 @@ class TestTempTimesConstMinusOffset {
                 )
         );
 
-        assertEqualsTiled(constTempOffset, "leaq _t2, [ 4 * bleh + -8 ]");
+        assertEqualsTiled(constTempOffset, "leaq _t0, [ 4 * bleh + -8 ]");
     }
 
 }

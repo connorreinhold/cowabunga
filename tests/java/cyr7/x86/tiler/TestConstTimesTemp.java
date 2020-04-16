@@ -28,7 +28,7 @@ public class TestConstTimesTemp {
                 make.IRConst(4))
         );
 
-        assertEqualsTiled(tempConst, "leaq _t1, [ 4 * bleh ]");
+        assertEqualsTiled(tempConst, "leaq _t0, [ 4 * bleh ]");
     }
 
 }
