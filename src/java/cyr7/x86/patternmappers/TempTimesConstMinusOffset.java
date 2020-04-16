@@ -1,6 +1,5 @@
 package cyr7.x86.patternmappers;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -18,7 +17,6 @@ import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
-import cyr7.x86.tiler.TilerData;
 
 public class TempTimesConstMinusOffset extends MemoryAddrPattern {
 
@@ -66,6 +64,9 @@ public class TempTimesConstMinusOffset extends MemoryAddrPattern {
 
             insns.addAll(constTemp.preMapRight()
                                   .getOptimalTiling().optimalInstructions);
+
+            this.setCost(
+                    1 + constTemp.preMapLeft().getOptimalTiling().tileCost);
 
             ASMAddrExpr addrExpr = arg.addr(Optional.empty(),
                     ScaleValues.fromConst(constArg.constant())

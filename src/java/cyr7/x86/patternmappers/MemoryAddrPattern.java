@@ -1,7 +1,10 @@
 package cyr7.x86.patternmappers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import cyr7.ir.nodes.IRBinOp;
-import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
@@ -10,15 +13,11 @@ import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 public abstract class MemoryAddrPattern extends PatternMapper<IRBinOp>{
 
     protected boolean isMemPattern;
-    protected int cost = 1;
-    
+    private int cost = 1;
+
     protected MemoryAddrPattern(boolean isMemPattern) {
         this.isMemPattern = isMemPattern;
     }
@@ -51,7 +50,6 @@ public abstract class MemoryAddrPattern extends PatternMapper<IRBinOp>{
                     insns,
                     Optional.of(arg.mem(addrExpr))
                 ));
-
         } else {
             ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
             ASMLine line = make.Lea(resultTemp, arg.mem(addrExpr));

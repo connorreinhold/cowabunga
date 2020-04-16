@@ -1,5 +1,9 @@
 package cyr7.x86.patternmappers;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Function;
+
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.x86.asm.ASMAddrExpr;
@@ -12,16 +16,12 @@ import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Function;
-
 public class TempPlusTemp extends MemoryAddrPattern {
 
     public TempPlusTemp(boolean isMemPattern) {
         super(isMemPattern);
     }
-    
+
     @Override
     protected Optional<ASMAddrExpr> matchAddress(
         IRBinOp n,
@@ -47,6 +47,12 @@ public class TempPlusTemp extends MemoryAddrPattern {
 
             insns.addAll(tempPlusTempPattern.preMapLeft().getOptimalTiling().optimalInstructions);
             insns.addAll(tempPlusTempPattern.preMapRight().getOptimalTiling().optimalInstructions);
+
+            this.setCost(1
+                    + tempPlusTempPattern.preMapLeft()
+                            .getOptimalTiling().tileCost
+                    + tempPlusTempPattern.preMapRight()
+                            .getOptimalTiling().tileCost);
 
             ASMAddrExpr addrExpr = arg.addr(
                     Optional.of(arg.temp(lhs.name, Size.QWORD)),

@@ -1,5 +1,9 @@
 package cyr7.x86.patternmappers;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRConst;
@@ -14,16 +18,13 @@ import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
 public class ConstPlusTemp extends MemoryAddrPattern {
 
     public ConstPlusTemp(boolean isMemPattern) {
         super(isMemPattern);
     }
 
+    @Override
     protected Optional<ASMAddrExpr> matchAddress(
         IRBinOp n,
         ComplexTiler tiler,
@@ -45,6 +46,7 @@ public class ConstPlusTemp extends MemoryAddrPattern {
             IRConst constArg = pattern.leftObj();
             IRTemp tempArg = pattern.rightObj();
 
+            this.setCost(1 + pattern.preMapRight().getOptimalTiling().tileCost);
             return Optional.of(arg.addr(
                 Optional.of(arg.temp(tempArg.name(), Size.QWORD)),
                 ScaleValues.ONE,
