@@ -10,8 +10,10 @@ import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import org.junit.jupiter.api.Assertions;
 
+import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public final class ASMTestUtils {
 
@@ -43,7 +45,17 @@ public final class ASMTestUtils {
     public static void assertEqualsTiled(IRNode node, String... assembly) {
         ComplexTiler tiler = makeTiler();
         node.accept(tiler);
-        Assertions.assertEquals(node.getOptimalTiling().optimalInstructions.size(), assembly.length);
+        Assertions.assertEquals(node.getOptimalTiling().optimalInstructions.size(), assembly.length,
+            "\nTiled Instructions:\n"
+                + node
+                .getOptimalTiling()
+                .optimalInstructions
+                .stream()
+                .map(ASMLine::getIntelAssembly)
+                .collect(Collectors.joining("\n"))
+                + "\nExpected Instructions:\n"
+                + Arrays.toString(assembly)
+                + "\n");
         for (int i = 0; i < assembly.length; i++) {
             assertEqualsASM(assembly[i], node.getOptimalTiling().optimalInstructions.get(i));
         }

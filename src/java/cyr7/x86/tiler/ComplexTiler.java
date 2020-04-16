@@ -20,6 +20,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.patternmappers.ConstPlusTemp;
 import cyr7.x86.patternmappers.ConstTimesTemp;
 import cyr7.x86.patternmappers.ConstTimesTempPlusOffset;
 import cyr7.x86.patternmappers.TempPlusTemp;
@@ -32,7 +33,10 @@ import java.util.Optional;
 public class ComplexTiler extends BasicTiler {
 
     private static final Comparator<TilerData> byCost
-        = Comparator.comparingInt(lhs -> lhs.tileCost);
+        = (lhs, rhs) ->
+        lhs.tileCost == rhs.tileCost
+            ? lhs.optimalInstructions.size() - rhs.optimalInstructions.size()
+            : lhs.tileCost - rhs.tileCost;
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
                         String returnLbl,
@@ -60,6 +64,7 @@ public class ComplexTiler extends BasicTiler {
             case ADD: 
                 new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
         }
         possibleTilings.add(super.visit(n));
