@@ -60,7 +60,7 @@ public class ComplexTiler extends BasicTiler {
                 break;
             case ADD:
                 new ConstTimesTempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
-                new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new _ConstTimesTemp_PlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new ConstPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
