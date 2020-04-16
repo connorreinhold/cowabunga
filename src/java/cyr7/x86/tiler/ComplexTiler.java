@@ -55,11 +55,11 @@ public class ComplexTiler extends BasicTiler {
 
         switch (n.opType()) {
             case MUL: 
-                new ConstTimesTemp().match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstTimesTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
             case ADD: 
-                new ConstTimesTempPlusOffset().match(n, this, make).ifPresent(possibleTilings::add);
-                new TempPlusTemp().match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstTimesTempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
         }
         possibleTilings.add(super.visit(n));

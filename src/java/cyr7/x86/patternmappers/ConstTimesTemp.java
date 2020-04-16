@@ -12,6 +12,7 @@ import cyr7.ir.nodes.IRExpr;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMTempArg.Size;
+import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
@@ -19,8 +20,12 @@ import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
 
-public class ConstTimesTemp extends PatternMapper<IRBinOp> {
+public class ConstTimesTemp extends MemoryAddrPattern {
 
+    public ConstTimesTemp(boolean isMemPattern) {
+        super(isMemPattern);
+    }
+    
     @Override
     public Optional<TilerData> match(IRBinOp n, ComplexTiler tiler, ASMLineFactory make) {
         if (n.opType() != OpType.MUL) {
@@ -39,9 +44,6 @@ public class ConstTimesTemp extends PatternMapper<IRBinOp> {
                     node -> node.accept(tiler).result.get())
             .enableCommutes();
 
-        ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(),
-            Size.QWORD);
-
         if (pattern.matches(new Object[]{n.left(), n.right()})) {
             IRConst constArg = pattern.leftObj();
             ASMTempArg tempArg = pattern.rightObj();
@@ -49,19 +51,30 @@ public class ConstTimesTemp extends PatternMapper<IRBinOp> {
             List<ASMLine> insns = new ArrayList<>();
             insns.addAll(pattern.preMapRight().getOptimalTiling().optimalInstructions);
 
-            ASMLine line = make.Lea(
-                resultTemp,
-                arg.mem(arg.addr(
+            ASMAddrExpr addrExpr = arg.addr(
                     Optional.empty(),
                     ScaleValues.fromConst(constArg.constant()).get(),
                     Optional.of(arg.temp(tempArg.name, Size.QWORD)),
                     0
-                ))
-            );
-            insns.add(line);
-            return Optional.of(new TilerData(1,
-                insns,
-                Optional.of(resultTemp)));
+                );
+
+            if (this.isMemPattern) {
+                return Optional.of(
+                    new TilerData(1,
+                        insns,
+                        Optional.of(arg.mem(addrExpr))
+                    ));
+            } else {
+                ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
+                ASMLine line = make.Lea(
+                    resultTemp, arg.mem(addrExpr));    
+                insns.add(line);
+                return Optional.of(
+                    new TilerData(1,
+                        insns,
+                        Optional.of(resultTemp)
+                    ));
+            }
         }
 
         return Optional.empty();

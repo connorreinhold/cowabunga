@@ -19,6 +19,8 @@ public final class DefaultIdGenerator implements IdGenerator {
 
     @Override
     public String newTemp() {
+        System.out.println(tempCounter);
+        new Exception().printStackTrace();
         return String.format("_t%d", (tempCounter++));
     }
 

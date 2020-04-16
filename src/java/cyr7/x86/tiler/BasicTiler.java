@@ -90,7 +90,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         List<ASMLine> insns = new ArrayList<>();
-
         TilerData left = n.left().accept(this);
         TilerData right = n.right().accept(this);
 
@@ -701,7 +700,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 1 + target.tileCost + source.tileCost,
                 instrs,
                 Optional.empty());
-
         } else {
             instrs.add(make.Mov(target.result.get(), source.result.get()));
             result = new TilerData(
