@@ -124,8 +124,6 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
         long numberOfTemps,
         Optional<ASMTempArg> addrOfOverspillRetValues) {
 
-        final long numberOfStackPushes = 2 + numberOfTemps + 7;
-
         List<ASMLine> lines = new ArrayList<>();
         lines.addAll(List.of(
             new ASMLabel(mangledFunctionName),
