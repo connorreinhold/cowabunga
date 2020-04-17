@@ -19,9 +19,9 @@ import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 
 // This matches c*t + n
-public class _ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
+public class ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
 
-    public _ConstTimesTemp_PlusOffset(boolean isMemPattern) {
+    public ConstTimesTemp_PlusOffset(boolean isMemPattern) {
         super(isMemPattern);
     }
     
