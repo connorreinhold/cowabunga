@@ -63,6 +63,7 @@ public class ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
             IRConst nArg = constTempPlusN.rightObj();
 
             insns.addAll(constTemp.preMapRight().getOptimalTiling().optimalInstructions);
+            this.setCost(1 + constTemp.preMapRight().getOptimalTiling().tileCost);
 
             ASMAddrExpr addrExpr = arg.addr(
                     Optional.empty(),
