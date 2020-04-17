@@ -111,11 +111,39 @@ public class ComplexTiler extends BasicTiler {
 
     @Override
     public TilerData visit(IRMem n) {
+        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
 
-        TilerData optimal = super.visit(n);
+        List<TilerData> possibleTilings = new ArrayList<>();
+
+        if (n.expr() instanceof IRBinOp) {
+            IRBinOp exprBinOp = (IRBinOp) n.expr();
+
+            switch (exprBinOp.opType()) {
+                case MUL:
+                    new ConstTimesTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    new ConstTimes_TempPlusOffset_(true).match(exprBinOp, this,
+                        make).ifPresent(possibleTilings::add);
+                    break;
+                case ADD:
+                    new ConstTimesTemp_PlusTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    new _ConstTimesTemp_PlusOffset(true).match(exprBinOp, this,
+                        make).ifPresent(possibleTilings::add);
+                    new TempPlusTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    new ConstPlusTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    break;
+                case SUB:
+                    new ConstTimesTemp_MinusOffset(true).match(exprBinOp, this,
+                        make).ifPresent(possibleTilings::add);
+                    new TempMinusConst(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    break;
+            }
+        }
+
+        possibleTilings.add(super.visit(n));
+        TilerData optimal = possibleTilings.stream().min(byCost).get();
         n.setOptimalTilingOnce(optimal);
         return optimal;
     }
