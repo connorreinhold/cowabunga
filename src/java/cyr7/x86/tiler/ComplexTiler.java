@@ -56,7 +56,7 @@ public class ComplexTiler extends BasicTiler {
         switch (n.opType()) {
             case MUL:
                 new ConstTimesTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
-                new ConstTimes_TempPlusOffset_(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new ConstTimes_TempPlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new ConstTimes_TempMinusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
             case ADD:
@@ -125,7 +125,7 @@ public class ComplexTiler extends BasicTiler {
             switch (exprBinOp.opType()) {
                 case MUL:
                     new ConstTimesTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
-                    new ConstTimes_TempPlusOffset_(true).match(exprBinOp, this,
+                    new ConstTimes_TempPlusOffset(true).match(exprBinOp, this,
                         make).ifPresent(possibleTilings::add);
                     new ConstTimes_TempMinusOffset(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
                     break;
