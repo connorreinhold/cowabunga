@@ -57,7 +57,7 @@ public enum ASMInstrType implements ASMInstrTypeI {
     // Data Transfer
     MOV {
         public List<Integer> defs() { return List.of(0); }
-        public List<Integer> uses() { return List.of(1); }
+        public List<Integer> uses() { return List.of(0, 1); }
     },
     PUSHQ {
         public List<Integer> defs() { return List.of(); }
@@ -69,7 +69,7 @@ public enum ASMInstrType implements ASMInstrTypeI {
     },
     MOVABSQ {
         public List<Integer> defs() { return List.of(0); }
-        public List<Integer> uses() { return List.of(1); }
+        public List<Integer> uses() { return List.of(0, 1); }
     },
     MOVZX {
         public List<Integer> defs() { return List.of(0); }
