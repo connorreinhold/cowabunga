@@ -13,7 +13,7 @@ import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
 
-public abstract class MemoryAddrPattern extends PatternMapper<IRBinOp>{
+public abstract class MemoryAddrPattern extends PatternMapper<IRBinOp> {
 
     protected boolean isMemPattern;
     private int cost = 1;

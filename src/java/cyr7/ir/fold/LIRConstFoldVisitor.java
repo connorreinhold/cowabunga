@@ -87,7 +87,6 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
             return left;
         }
 
-
         return n;
     }
 
