@@ -83,9 +83,11 @@ public class ComplexTiler extends BasicTiler {
             case SUB:
                 new ConstTimesTemp_MinusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempMinusConst(false).match(n, this, make).ifPresent(possibleTilings::add);
+                break;
             case LSHIFT:
-                new Temp_LShiftConst().match(n, this, make)
+                new Temp_LShiftConst(generator, false).match(n, this, make)
                         .ifPresent(possibleTilings::add);
+                break;
             default:
                 break;
         }
@@ -164,7 +166,7 @@ public class ComplexTiler extends BasicTiler {
                     new TempMinusConst(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
                     break;
                 case LSHIFT:
-                    new Temp_LShiftConst().match(exprBinOp, this,
+                    new Temp_LShiftConst(generator, true).match(exprBinOp, this,
                             make).ifPresent(possibleTilings::add);
                     break;
                 default:
