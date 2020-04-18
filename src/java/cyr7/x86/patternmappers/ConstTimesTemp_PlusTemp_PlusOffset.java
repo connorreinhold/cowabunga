@@ -34,10 +34,7 @@ public class ConstTimesTemp_PlusTemp_PlusOffset extends MemoryAddrPattern {
 
         var constTimesTemp = BiPatternBuilder.left()
                                              .instOf(IRConst.class)
-                                             .and(x -> x.constant() == 1 || x
-                                                                             .constant() == 2
-                                                     || x.constant() == 4 || x
-                                                                              .constant() == 8)
+                                             .and(x -> x.constant() == 1 || x.constant() == 2 || x.constant() == 4 || x.constant() == 8)
                                              .right()
                                              .instOf(ASMTempArg.class)
                                              .finish()
@@ -60,16 +57,13 @@ public class ConstTimesTemp_PlusTemp_PlusOffset extends MemoryAddrPattern {
                                                      .instOf(IRBinOp.class)
                                                      .and(x -> x.opType() == OpType.MUL)
                                                      .and(x -> constTimesTemp.matches(
-                                                             new Object[]
-                                                             { x.left(), x
-                                                                          .right() }))
+                                                             new Object[] { x.left(), x.right() }))
                                                      .right()
                                                      .instOf(IRBinOp.class)
                                                      .and(x -> x.opType() == OpType.ADD)
                                                      .and(x -> tempPlusOffset.matches(
                                                              new Object[]
-                                                             { x.left(), x
-                                                                          .right() }))
+                                                             { x.left(), x.right() }))
                                                      .finish()
                                                      .enableCommutes();
 

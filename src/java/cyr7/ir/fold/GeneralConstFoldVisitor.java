@@ -47,7 +47,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  * @author ayang
  *
  */
-public class ConstFoldVisitor
+public class GeneralConstFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
     /**
@@ -58,7 +58,7 @@ public class ConstFoldVisitor
      *         binary operator's node when the operation type is applied.
      *         Otherwise, this returns the argument {@code n}.
      */
-    private IRExpr performConstantBinop(IRBinOp n) {
+    protected IRExpr performConstantBinop(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
 
         if (!n.left().isConstant() || !n.right().isConstant()) {

@@ -3,7 +3,8 @@ package cyr7.ir;
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
 import cyr7.ir.block.TraceOptimizer;
-import cyr7.ir.fold.ConstFoldVisitor;
+import cyr7.ir.fold.LIRConstFoldVisitor;
+import cyr7.ir.fold.MIRConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
 import cyr7.ir.nodes.IRCompUnit;
@@ -45,7 +46,7 @@ public class IRUtil {
         CLI.lazyDebugPrint(compUnit, unit -> "MIR: \n" + unit);
 
         if (lowerConfiguration.cFoldEnabled) {
-            IRNode node = compUnit.accept(new ConstFoldVisitor()).assertSecond();
+            IRNode node = compUnit.accept(new MIRConstFoldVisitor()).assertSecond();
             compUnit = (IRCompUnit) node;
             CLI.lazyDebugPrint(compUnit, unit -> "Constant-Folded MIR: \n" + unit);
         }
@@ -59,7 +60,7 @@ public class IRUtil {
 
         if (lowerConfiguration.cFoldEnabled) {
             IRNode node =
-                compUnit.accept(new ConstFoldVisitor()).assertSecond();
+                compUnit.accept(new LIRConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }

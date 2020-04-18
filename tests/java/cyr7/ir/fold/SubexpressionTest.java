@@ -29,7 +29,7 @@ class SubexpressionTest {
     private final IRNodeFactory make = new IRNodeFactory_c(
             new Location(-1, -1));
 
-    private final MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> folder = new ConstFoldVisitor();
+    private final MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> folder = new MIRConstFoldVisitor();
 
     private <T, E> Pair<T, E> pairOf(T expected, E test) {
         return new Pair<T, E>(expected, test);
