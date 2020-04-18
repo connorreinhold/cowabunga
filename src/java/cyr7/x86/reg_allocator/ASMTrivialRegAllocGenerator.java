@@ -52,14 +52,15 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
     public List<ASMLine> generate(IRCompUnit compUnit) {
         List<ASMLine> lines = new ArrayList<>();
 
-        Set<Entry<String, IRFuncDecl>> nameFuncDeclPairs = compUnit.functions()
-                                                            .entrySet();
+        Set<Entry<String, IRFuncDecl>> nameFuncDeclPairs =
+            compUnit.functions().entrySet();
         for (Entry<String, IRFuncDecl> nameFuncDecl : nameFuncDeclPairs) {
-            lines.addAll(generate(nameFuncDecl.getKey(),
-                    nameFuncDecl.getValue(),
-                    nameFuncDecl.getValue()
-                                .numOfReturnValues()));
+            lines.addAll(generate(
+                nameFuncDecl.getKey(),
+                nameFuncDecl.getValue(),
+                nameFuncDecl.getValue().numOfReturnValues()));
         }
+
         return lines;
     }
 
