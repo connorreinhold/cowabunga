@@ -87,10 +87,6 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
             return left;
         }
 
-//        if (this.isPowerOfTwo(right)) {
-//            long power = this.logBase2(right);
-//            return make.IRBinOp(OpType.ARSHIFT, left, make.IRConst(power));
-//        }
 
         return n;
     }
