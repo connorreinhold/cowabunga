@@ -16,7 +16,10 @@ public enum ASMReg implements ASMTempRegArg {
     // Newer Registers
     R8, R9, R10, R11, R12, R13, R14, R15,
 
-    AL, CL, DL, BL; // 8 bit registers
+    AL, CL, DL, BL, // 8 bit registers
+
+    // Newer 8 bit registers
+    R8B, R9B, R10B, R11B, R12B, R13B, R14B, R15B;
 
     @Override
     public String getIntelArg() {
