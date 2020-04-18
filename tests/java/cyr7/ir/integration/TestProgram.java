@@ -10,19 +10,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.net.URISyntaxException;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
-import cyr7.x86.ASMUtil.TilerConf;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.integration.Run.RunConfiguration;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
 
 public abstract class TestProgram {
 
@@ -178,7 +175,7 @@ public abstract class TestProgram {
         runAssemblyTest("complex");
     }
 
-    // Code stolen from StackOverflow.
+    // Source:
     // https://stackoverflow.com/questions/28795440/check-if-a-new-line-exists-at-end-of-file
     private boolean newLineExists(File file) throws IOException {
         RandomAccessFile fileHandler = new RandomAccessFile(file, "r");

@@ -87,10 +87,10 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
             return left;
         }
 
-        if (this.isPowerOfTwo(right)) {
-            long power = this.logBase2(right);
-            return make.IRBinOp(OpType.ARSHIFT, left, make.IRConst(power));
-        }
+//        if (this.isPowerOfTwo(right)) {
+//            long power = this.logBase2(right);
+//            return make.IRBinOp(OpType.ARSHIFT, left, make.IRConst(power));
+//        }
 
         return n;
     }
@@ -108,8 +108,8 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
     }
 
     private IRExpr simplifySub(IRBinOp n) {
-        if (this.isZero(n.left())) {
-            return n.right();
+        if (this.isZero(n.right())) {
+            return n.left();
         }
         return n;
     }
@@ -124,20 +124,20 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
             return right;
         }
 
-        if (this.isPowerOfTwo(n.left())) {
-            long power = this.logBase2(left);
-            return make.IRBinOp(OpType.LSHIFT, left, make.IRConst(power));
-        }
-
-        if (this.isPowerOfTwo(n.right())) {
-            long power = this.logBase2(right);
-            return make.IRBinOp(OpType.LSHIFT, right, make.IRConst(power));
-        }
-
         if (this.isOne(left)) {
             return right;
         } else if (this.isOne(right)) {
             return left;
+        }
+
+        if (this.isPowerOfTwo(n.left())) {
+            long power = this.logBase2(left);
+            return make.IRBinOp(OpType.LSHIFT, right, make.IRConst(power));
+        }
+
+        if (this.isPowerOfTwo(n.right())) {
+            long power = this.logBase2(right);
+            return make.IRBinOp(OpType.LSHIFT, left, make.IRConst(power));
         }
 
         return n;
@@ -166,7 +166,7 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
 
     private IRExpr simplifyXOR(IRBinOp binop, IRNodeFactory make) {
         if (binop.left()
-             .equals(binop.right())) {
+                 .equals(binop.right())) {
             return make.IRConst(0);
         }
 
@@ -187,7 +187,7 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
             case NEQ:
                 return make.IRBinOp(OpType.EQ, n.left(), n.right());
             case XOR:
-                return this.isOne(n.left()) ?  n.right() : n;
+                return this.isOne(n.left()) ? n.right() : binop;
             default:
                 break;
             }
@@ -230,24 +230,22 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
      * zero, then return.
      */
     @Override
-    public IRExpr performConstantBinop(IRBinOp n) {
+    protected IRExpr performConstantBinop(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
 
-        if (!n.left()
-              .isConstant() || !n.right()
-                                 .isConstant()) {
-            return n;
-        }
-        if (n.left()
-             .isConstant() && n.right()
-                               .isConstant()) {
-            return super.performConstantBinop(n);
+        final IRExpr left = n.left()
+                             .accept(this)
+                             .assertFirst();
+        final IRExpr right = n.right()
+                              .accept(this)
+                              .assertFirst();
+
+        IRBinOp foldedValue = make.IRBinOp(n.opType(), left, right);
+        if (left.isConstant() && right.isConstant()) {
+            return super.performConstantBinop(foldedValue);
         }
 
-        final IRExpr left = n.left();
-        final IRExpr right = n.right();
-        IRBinOp foldedValue = make.IRBinOp(n.opType(), left, right);
-        // Copied from staff-given interpreter code.
+        // // Copied from staff-given interpreter code.
         switch (n.opType()) {
         case ADD:
             return this.simplifyAdd(foldedValue);
