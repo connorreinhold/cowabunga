@@ -41,9 +41,9 @@ if __name__ == '__main__':
                   './shared/cowabunga/tests/**/*.parsedsol')
     add_xth_block('Cowabunga Type-checker Tests', '--typecheck -libpath ./shared/cowabunga/tests/resources/typecheck/lib',
                   './shared/cowabunga/tests/**/*.typedsol')
-    add_xth_block('Cowabunga IRGen Tests', '--irgen -libpath ./shared/cowabunga/tests/resources/irgen/lib',
+    add_xth_block('Cowabunga IRGen Tests', '--irgen -libpath ./shared/cowabunga/tests/resources/integration/lib',
                   './shared/cowabunga/tests/**/*.irsol.nml')
-    add_xth_block('Cowabunga IRGen Tests (Optimization Disabled)', '--irgen -libpath ./shared/cowabunga/tests/resources/irgen/lib -O',
+    add_xth_block('Cowabunga IRGen Tests (Optimization Disabled)', '--irgen -libpath ./shared/cowabunga/tests/resources/integration/lib -O',
                   './shared/cowabunga/tests/**/*.irsol.nml')
 
     add_xth_block('Instructor Lexer Tests', '--lex',
