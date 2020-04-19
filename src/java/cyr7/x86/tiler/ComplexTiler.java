@@ -25,7 +25,19 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.patternmappers.*;
+import cyr7.x86.patternmappers.ConstPlusTemp;
+import cyr7.x86.patternmappers.ConstTimesTemp;
+import cyr7.x86.patternmappers.ConstTimesTemp_MinusOffset;
+import cyr7.x86.patternmappers.ConstTimesTemp_PlusOffset;
+import cyr7.x86.patternmappers.ConstTimesTemp_PlusTemp;
+import cyr7.x86.patternmappers.ConstTimesTemp_PlusTemp_PlusOffset;
+import cyr7.x86.patternmappers.ConstTimes_TempMinusOffset;
+import cyr7.x86.patternmappers.ConstTimes_TempPlusOffset;
+import cyr7.x86.patternmappers.Const_PlusConstTimesTemp_PlusTemp;
+import cyr7.x86.patternmappers.TempMinusConst;
+import cyr7.x86.patternmappers.TempPlusTemp;
+import cyr7.x86.patternmappers.Temp_LShiftConst;
+import cyr7.x86.patternmappers.Temp_PlusConstTimesTemp_PlusOffset;
 
 public class ComplexTiler extends BasicTiler {
 
@@ -72,8 +84,14 @@ public class ComplexTiler extends BasicTiler {
                 new ConstTimesTemp_MinusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempMinusConst(false).match(n, this, make).ifPresent(possibleTilings::add);
                 break;
+            case LSHIFT:
+                new Temp_LShiftConst(generator, false).match(n, this, make)
+                        .ifPresent(possibleTilings::add);
+                break;
+            default:
+                break;
         }
-        
+
         possibleTilings.add(super.visit(n));
         TilerData optimal = possibleTilings.stream().min(byCost).get();
         n.setOptimalTilingOnce(optimal);
@@ -146,6 +164,12 @@ public class ComplexTiler extends BasicTiler {
                     new ConstTimesTemp_MinusOffset(true).match(exprBinOp, this,
                         make).ifPresent(possibleTilings::add);
                     new TempMinusConst(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    break;
+                case LSHIFT:
+                    new Temp_LShiftConst(generator, true).match(exprBinOp, this,
+                            make).ifPresent(possibleTilings::add);
+                    break;
+                default:
                     break;
             }
         }

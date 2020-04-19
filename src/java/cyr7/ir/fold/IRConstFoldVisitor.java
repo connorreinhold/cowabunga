@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import cyr7.ir.interpret.IRSimulator.Trap;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -47,7 +46,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  * @author ayang
  *
  */
-public class ConstFoldVisitor
+public class IRConstFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
     /**
@@ -58,7 +57,7 @@ public class ConstFoldVisitor
      *         binary operator's node when the operation type is applied.
      *         Otherwise, this returns the argument {@code n}.
      */
-    private IRExpr performConstantBinop(IRBinOp n) {
+    protected IRExpr performConstantBinop(IRBinOp n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
 
         if (!n.left().isConstant() || !n.right().isConstant()) {
@@ -84,13 +83,9 @@ public class ConstFoldVisitor
                     .shiftRight(64).longValue();
             break;
         case DIV:
-            if (r == 0)
-                throw new Trap("Division by zero!");
             value = l / r;
             break;
         case MOD:
-            if (r == 0)
-                throw new Trap("Division by zero!");
             value = l % r;
             break;
         case AND:
