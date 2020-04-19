@@ -27,7 +27,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  * @author ayang
  *
  */
-public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
+public class LIRConstFoldVisitor extends IRConstFoldVisitor {
 
     private boolean isZero(IRExpr n) {
         return n.isConstant() && n.constant() == 0;
@@ -92,13 +92,11 @@ public class LIRConstFoldVisitor extends MIRConstFoldVisitor {
 
     private IRExpr simplifyMod(IRBinOp n) {
         IRExpr left = n.left();
-        IRExpr right = n.right();
 
-        if (this.isZero(right)) {
-            throw new Trap("Division by zero!");
-        } else if (this.isZero(left)) {
+        if (this.isZero(left)) {
             return left;
         }
+
         return n;
     }
 

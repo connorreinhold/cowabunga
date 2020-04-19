@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import cyr7.ir.interpret.IRSimulator.Trap;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -47,7 +46,7 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  * @author ayang
  *
  */
-public class GeneralConstFoldVisitor
+public class IRConstFoldVisitor
         implements MyIRVisitor<OneOfThree<IRExpr, IRStmt, IRFuncDecl>> {
 
     /**
@@ -84,13 +83,9 @@ public class GeneralConstFoldVisitor
                     .shiftRight(64).longValue();
             break;
         case DIV:
-            if (r == 0)
-                throw new Trap("Division by zero!");
             value = l / r;
             break;
         case MOD:
-            if (r == 0)
-                throw new Trap("Division by zero!");
             value = l % r;
             break;
         case AND:
