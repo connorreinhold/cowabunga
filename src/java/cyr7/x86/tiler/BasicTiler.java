@@ -605,6 +605,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         if (n.target() instanceof IRTemp
             && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
+
             // Case: Move(ARG_i, t)
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
@@ -612,6 +613,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         } else if (n.source() instanceof IRTemp
             && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
+
             // Case Move(t, ARG_i)
             String index = ((IRTemp) n.source()).name().substring(ARG_PREFIX.length());
 
@@ -683,14 +685,18 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                     break;
                 }
             }
-            result = new TilerData(1 + target.tileCost, instrs, Optional
-                                                                        .empty());
-        } else if (n.target() instanceof IRTemp && ((IRTemp) n.target()).name()
-                                                                        .startsWith(
-                                                                                RET_PREFIX)) {
+            result = new TilerData(
+                1 + target.tileCost,
+                instrs,
+                Optional.empty());
+
+        } else if (n.target() instanceof IRTemp
+            && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
+
             // Case Move(RET_i, t)
-            String index = ((IRTemp) n.target()).name()
-                                                .substring(RET_PREFIX.length());
+            String index =
+                ((IRTemp) n.target()).name().substring(RET_PREFIX.length());
+
             int i = Integer.parseInt(index);
             switch (i) {
             case 0:
@@ -709,11 +715,14 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 instrs.add(make.Mov(mem, source.result.get()));
                 break;
             }
-            result = new TilerData(1 + source.tileCost, instrs, Optional
-                                                                        .empty());
-        } else if (n.source() instanceof IRTemp && ((IRTemp) n.source()).name()
-                                                                        .startsWith(
-                                                                                RET_PREFIX)) {
+            result = new TilerData(
+                1 + source.tileCost,
+                instrs,
+                Optional.empty());
+
+        } else if (n.source() instanceof IRTemp
+            && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
+
             // Case Move(t, RET_i)
             // Handle in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
@@ -721,6 +730,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
         } else if (target.result.get() instanceof ASMMemArg
             && source.result.get() instanceof ASMMemArg) {
+
             ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
             instrs.add(make.Mov(sourceTemp, source.result.get()));
             instrs.add(make.Mov(target.result.get(), sourceTemp));
@@ -728,6 +738,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
                 1 + target.tileCost + source.tileCost,
                 instrs,
                 Optional.empty());
+
         } else {
             instrs.add(make.Mov(target.result.get(), source.result.get()));
             result = new TilerData(
