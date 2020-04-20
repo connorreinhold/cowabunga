@@ -6,14 +6,14 @@ main(args: int[][]) {
 }
 
 recurse(level: int) {
-    if (level >= 500) {
+    if (level >= 100) {
         return
     }
     recurse(level + 1)
 }
 
 chainRecurse(level: int) {
-    if (level >= 300) {
+    if (level >= 100) {
         return
     }
     print("a")
