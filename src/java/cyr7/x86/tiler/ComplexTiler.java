@@ -117,8 +117,7 @@ public class ComplexTiler extends BasicTiler {
             possibleTilings.add(BinOpInstructionGenerator
                                     .generateInstruction(n, cost,
                                             temp, constant,
-                                            pattern.preMapLeft()
-                                            .getOptimalTiling().optimalInstructions,
+                                            pattern.preMapLeft().getOptimalTiling().optimalInstructions,
                                             generator));
         }
 
