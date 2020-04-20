@@ -108,16 +108,35 @@ public class ComplexTiler extends BasicTiler {
                 .finish()
                 .mappingLeft(IRExpr.class,
                         (Function<IRExpr, ASMArg>)
-                        node -> node.accept(this).result.get())
-                .enableCommutes();
-
+                        node -> node.accept(this).result.get());
 
         if (pattern.matches(new Object[] {n.left(), n.right()})) {
+            List<ASMLine> insns = new ArrayList<>();
             ASMTempArg temp = pattern.leftObj();
             ASMConstArg constant = arg.constant(pattern.rightObj().constant());
-            List<ASMLine> insns = new ArrayList<>();
             insns.addAll(pattern.preMapLeft().getOptimalTiling().optimalInstructions);
             final int cost = 1 + pattern.preMapLeft().getOptimalTiling().tileCost;
+            possibleTilings.add(BinOpInstructionGenerator
+                                    .generateInstruction(n, cost, temp,
+                                            constant, insns, generator));
+        }
+
+        var pattern2 = BiPatternBuilder
+                .left()
+                .instOf(IRConst.class)
+                .right()
+                .instOf(ASMTempArg.class)
+                .finish()
+                .mappingRight(IRExpr.class, (Function<IRExpr, ASMArg>)
+                        node -> node.accept(this).result.get());
+
+        if (pattern2.matches(new Object[] {n.left(), n.right()})) {
+            List<ASMLine> insns = new ArrayList<>();
+            ASMConstArg constant = arg.constant(pattern2.leftObj().constant());
+            ASMTempArg temp = pattern2.rightObj();
+
+            insns.addAll(pattern2.preMapRight().getOptimalTiling().optimalInstructions);
+            final int cost = 1 + pattern2.preMapRight().getOptimalTiling().tileCost;
             possibleTilings.add(BinOpInstructionGenerator
                                     .generateInstruction(n, cost, temp,
                                             constant, insns, generator));

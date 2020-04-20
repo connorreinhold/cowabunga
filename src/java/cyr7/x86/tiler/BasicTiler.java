@@ -99,7 +99,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (leftArg instanceof ASMMemArg && rightArg instanceof ASMMemArg) {
             // Move LHS to a temp if there are two memory args
             ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
-            insns.add(make.Mov(leftTemp, left.result.get()));
+            insns.add(make.Mov(leftTemp, leftArg));
             leftArg = leftTemp;
         }
         final int cost = 1 + left.tileCost + right.tileCost;
