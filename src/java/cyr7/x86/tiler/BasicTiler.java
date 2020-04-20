@@ -6,7 +6,6 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import cyr7.ir.IdGenerator;
-import cyr7.ir.interpret.Configuration;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -27,8 +26,6 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
-import cyr7.x86.ASMConstants;
-import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMConstArg;
@@ -37,7 +34,6 @@ import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
-import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.asm.ASMTempRegArg;
@@ -59,7 +55,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     /// store return values beyond the second.
     private final Optional<ASMTempArg> additionalRetValAddress;
 
-    private final boolean stack16ByteAligned;
+    protected final boolean stack16ByteAligned;
 
     private boolean shouldMemoizeResult = false;
 
@@ -304,7 +300,6 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
 
     @Override
     public TilerData visit(IRMove n) {
-        ASMLineFactory make = new ASMLineFactory(n);
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
@@ -316,156 +311,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         instrs.addAll(source.optimalInstructions);
         instrs.addAll(target.optimalInstructions);
 
-        final String ARG_PREFIX = Configuration.ABSTRACT_ARG_PREFIX;
-        final String RET_PREFIX = Configuration.ABSTRACT_RET_PREFIX;
-
-        TilerData result;
-
-        if (n.target() instanceof IRTemp
-            && ((IRTemp) n.target()).name().startsWith(ARG_PREFIX)) {
-
-            // Case: Move(ARG_i, t)
-            // Handle in CallStmt
-            result = new TilerData(0, List.of(), Optional.empty());
-            assert false;
-
-        } else if (n.source() instanceof IRTemp
-            && ((IRTemp) n.source()).name().startsWith(ARG_PREFIX)) {
-
-            // Case Move(t, ARG_i)
-            String index = ((IRTemp) n.source()).name().substring(ARG_PREFIX.length());
-
-            int i = Integer.parseInt(index);
-            /*
-             * If the number of return values in this callee function is greater
-             * than 2, then the caller function must had allocated space in the
-             * stack to store the third and onward return values. This address
-             * is stored in the rdi register, the first argument. If this the
-             * case, then the true first argument of the function would be in
-             * rsi, usually used for the second argument.
-             */
-            ASMArg targetTemp = target.result.get();
-            if (this.numRetValues > 2) {
-                switch (i) {
-                case 0:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RSI));
-                    break;
-                case 1:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RDX));
-                    break;
-                case 2:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RCX));
-                    break;
-                case 3:
-                    instrs.add(make.Mov(targetTemp, ASMReg.R8));
-                    break;
-                case 4:
-                    instrs.add(make.Mov(targetTemp, ASMReg.R9));
-                    break;
-                default:
-                    int offset = 8 * (i - 5 + ASMConstants.WORD_OFFSET_TO_ARGS);
-                    var addr = arg.addr(Optional.of(ASMReg.RBP),
-                            ScaleValues.ONE,
-                            Optional.empty(),
-                            offset);
-                    var mem = arg.mem(addr);
-                    instrs.add(make.Mov(targetTemp, mem));
-                    break;
-                }
-            } else {
-                switch (i) {
-                case 0:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RDI));
-                    break;
-                case 1:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RSI));
-                    break;
-                case 2:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RDX));
-                    break;
-                case 3:
-                    instrs.add(make.Mov(targetTemp, ASMReg.RCX));
-                    break;
-                case 4:
-                    instrs.add(make.Mov(targetTemp, ASMReg.R8));
-                    break;
-                case 5:
-                    instrs.add(make.Mov(targetTemp, ASMReg.R9));
-                    break;
-                default:
-                    int offset = 8 * (i - 6 + ASMConstants.WORD_OFFSET_TO_ARGS);
-                    var addr = arg.addr(Optional.of(ASMReg.RBP),
-                            ScaleValues.ONE,
-                            Optional.empty(),
-                            offset);
-                    var mem = arg.mem(addr);
-                    instrs.add(make.Mov(targetTemp, mem));
-                    break;
-                }
-            }
-            result = new TilerData(
-                1 + target.tileCost,
-                instrs,
-                Optional.empty());
-
-        } else if (n.target() instanceof IRTemp
-            && ((IRTemp) n.target()).name().startsWith(RET_PREFIX)) {
-
-            // Case Move(RET_i, t)
-            String index =
-                ((IRTemp) n.target()).name().substring(RET_PREFIX.length());
-
-            int i = Integer.parseInt(index);
-            switch (i) {
-            case 0:
-                instrs.add(make.Mov(ASMReg.RAX, source.result.get()));
-                break;
-            case 1:
-                instrs.add(make.Mov(ASMReg.RDX, source.result.get()));
-                break;
-            default:
-                int offset = 8 * (i - 2);
-                var addr = arg.addr(Optional.of(additionalRetValAddress.get()),
-                        ScaleValues.ONE,
-                        Optional.empty(),
-                        offset);
-                var mem = arg.mem(addr);
-                instrs.add(make.Mov(mem, source.result.get()));
-                break;
-            }
-            result = new TilerData(
-                1 + source.tileCost,
-                instrs,
-                Optional.empty());
-
-        } else if (n.source() instanceof IRTemp
-            && ((IRTemp) n.source()).name().startsWith(RET_PREFIX)) {
-
-            // Case Move(t, RET_i)
-            // Handle in CallStmt
-            result = new TilerData(0, List.of(), Optional.empty());
-            assert false;
-
-        } else if (target.result.get() instanceof ASMMemArg
-            && source.result.get() instanceof ASMMemArg) {
-
-            ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
-            instrs.add(make.Mov(sourceTemp, source.result.get()));
-            instrs.add(make.Mov(target.result.get(), sourceTemp));
-            result = new TilerData(
-                1 + target.tileCost + source.tileCost,
-                instrs,
-                Optional.empty());
-
-        } else {
-            instrs.add(make.Mov(target.result.get(), source.result.get()));
-            result = new TilerData(
-                1 + target.tileCost + source.tileCost,
-                instrs,
-                Optional.empty());
-        }
-
-        return setResult(n, result);
+        final int cost = 1 + source.tileCost + target.tileCost;
+        TilerData result = MoveInstructionGenerator.generate(n,
+                cost, target.result.get(), source.result.get(),
+                numRetValues, generator,
+                additionalRetValAddress, instrs);
+        return this.setResult(n, result);
     }
 
     @Override

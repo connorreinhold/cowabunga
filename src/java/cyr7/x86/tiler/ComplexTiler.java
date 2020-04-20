@@ -22,6 +22,7 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode_c;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
@@ -53,6 +54,12 @@ public class ComplexTiler extends BasicTiler {
             ? lhs.optimalInstructions.size() - rhs.optimalInstructions.size()
             : lhs.tileCost - rhs.tileCost;
 
+
+    private TilerData setBestTile(IRNode_c n, List<TilerData> tilings) {
+        TilerData optimal = tilings.stream().min(byCost).get();
+        n.setOptimalTilingOnce(optimal);
+        return optimal;
+    }
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
             String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
@@ -144,9 +151,7 @@ public class ComplexTiler extends BasicTiler {
         }
 
         possibleTilings.add(super.visit(n));
-        TilerData optimal = possibleTilings.stream().min(byCost).get();
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
@@ -212,9 +217,7 @@ public class ComplexTiler extends BasicTiler {
         }
 
         possibleTilings.add(super.visit(n));
-        TilerData optimal = possibleTilings.stream().min(byCost).get();
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
@@ -245,13 +248,31 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
-//        // Optimize the argument expressions using the complex tiler first.
-//        // Then, BasicTiler will be able to use the optimized expressions.
-//        // No significant overhead since tiling is memoized.
-//        n.args().forEach(e -> e.accept(this));
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        List<TilerData> possibleTilings = new ArrayList<>();
+        List<ASMArg> arguments = new ArrayList<>();
+        List<ASMLine> instructions = new ArrayList<>();
+
+        int cost = 1;
+        for (IRExpr a: n.args()) {
+            TilerData argTile = a.accept(this);
+            cost += argTile.tileCost;
+            if (a instanceof IRConst) {
+                arguments.add(arg.constant(((IRConst)a).constant()));
+            } else {
+                arguments.add(argTile.result.get());
+                instructions.addAll(argTile.optimalInstructions);
+            }
+        }
+        TilerData targetTile = n.target().accept(this);
+        cost += targetTile.tileCost;
+        instructions.addAll(targetTile.optimalInstructions);
+
+        possibleTilings.add(CallInstructionGenerator.generate(n, cost,
+                targetTile.result.get(), n.collectors(),
+                arguments, instructions, this.stack16ByteAligned));
+        possibleTilings.add(super.visit(n));
+
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
