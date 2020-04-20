@@ -146,7 +146,7 @@ public abstract class TestProgram {
             return;
         }
 
-        Files.delete(Path.of(getTestAssemblyFilename()));
+        Files.deleteIfExists(Path.of(getTestAssemblyFilename())) ;
 
         Files.copy(
             Path.of(getTestAssemblyFilename(tilerConf)),
