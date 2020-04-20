@@ -15,14 +15,12 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExp;
-import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
-import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRNode_c;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
@@ -96,164 +94,18 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         insns.addAll(left.optimalInstructions);
         insns.addAll(right.optimalInstructions);
 
-        ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
-        
         ASMArg leftArg = left.result.get();
-        if (left.result.get() instanceof ASMMemArg && right.result.get() instanceof ASMMemArg) {
+        ASMArg rightArg = right.result.get();
+        if (leftArg instanceof ASMMemArg && rightArg instanceof ASMMemArg) {
             // Move LHS to a temp if there are two memory args
             ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
             insns.add(make.Mov(leftTemp, left.result.get()));
             leftArg = leftTemp;
         }
-        switch (n.opType()) {
-            case ADD:
-                insns.add(make.Mov(ret, leftArg));
-                insns.add(make.Add(ret, right.result.get()));
-                break;
-            case AND:
-                insns.add(make.Mov(ret, leftArg));
-                insns.add(make.And(ret, right.result.get()));
-                break;
-            case DIV: {
-                String raxTemp = generator.newTemp();
-                String rdxTemp = generator.newTemp();
+        final int cost = 1 + left.tileCost + right.tileCost;
 
-                insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
-                insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
-
-                insns.add(make.Mov(ASMReg.RAX, leftArg));
-                insns.add(make.CQO());
-                insns.add(make.Div(right.result.get()));
-                insns.add(make.Mov(ret, ASMReg.RAX));
-
-                insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
-                insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
-                break;
-            }
-            case EQ: {
-                ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(leftArg, right.result.get()));
-                insns.add(make.SetZ(byteReg));
-                insns.add(make.MovZX(ret, byteReg));
-                break;
-            }
-            case GEQ: {
-                ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(leftArg, right.result.get()));
-                insns.add(make.SetGE(byteReg));
-                insns.add(make.MovZX(ret, byteReg));
-                break;
-            }
-            case GT: {
-                ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(leftArg, right.result.get()));
-                insns.add(make.SetG(byteReg));
-                insns.add(make.MovZX(ret, byteReg));
-                break;
-            }
-            case HMUL: {
-                String raxTemp = generator.newTemp();
-                String rdxTemp = generator.newTemp();
-
-                insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
-                insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
-
-                insns.add(make.Mov(ASMReg.RAX, leftArg));
-                insns.add(make.Mul(right.result.get()));
-                insns.add(make.Mov(ret, ASMReg.RDX));
-
-                insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
-                insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
-                break;
-            }
-            case LEQ: {
-                ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(leftArg, right.result.get()));
-                insns.add(make.SetLE(byteReg));
-                insns.add(make.MovZX(ret, byteReg));
-                break;
-            }
-            case LSHIFT: {
-                insns.add(make.Push(ASMReg.RCX));
-                insns.add(make.Mov(ret, leftArg));
-                ASMArg rightArg = right.result.get().accept(new ReduceTo8BitVisitor());
-                insns.add(make.Mov(ASMReg.CL, rightArg));
-                insns.add(make.LShift(ret, ASMReg.CL));
-                insns.add(make.Pop(ASMReg.RCX));
-                break;
-            }
-            case RSHIFT: {
-                insns.add(make.Push(ASMReg.RCX));
-                insns.add(make.Mov(ret, leftArg));
-                ASMArg rightArg = right.result.get().accept(new ReduceTo8BitVisitor());
-                insns.add(make.Mov(ASMReg.CL, rightArg));
-                insns.add(make.RShift(ret, ASMReg.CL));
-                insns.add(make.Pop(ASMReg.RCX));
-                break;
-            }
-            case ARSHIFT: {
-                insns.add(make.Push(ASMReg.RCX));
-                insns.add(make.Mov(ret, leftArg));
-                ASMArg rightArg = right.result.get().accept(new ReduceTo8BitVisitor());
-                insns.add(make.Mov(ASMReg.CL, rightArg));
-                insns.add(make.ARShift(ret, ASMReg.CL));
-                insns.add(make.Pop(ASMReg.RCX));
-                break;
-            }
-            case LT: {
-                ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(leftArg, right.result.get()));
-                insns.add(make.SetL(byteReg));
-                insns.add(make.MovZX(ret, byteReg));
-                break;
-            }
-            case MOD:
-                String raxTemp = generator.newTemp();
-                String rdxTemp = generator.newTemp();
-
-                insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
-                insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
-
-                insns.add(make.Mov(ASMReg.RAX, leftArg));
-                insns.add(make.CQO());
-                insns.add(make.Div(right.result.get()));
-                insns.add(make.Mov(ret, ASMReg.RDX));
-
-                insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
-                insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
-                break;
-            case MUL:
-                insns.add(make.Mov(ret, leftArg));
-                insns.add(make.Mul(ret, right.result.get()));
-                break;
-            case NEQ: {
-                ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-                insns.add(make.Cmp(leftArg, right.result.get()));
-                insns.add(make.SetNE(byteReg));
-                insns.add(make.MovZX(ret, byteReg));
-                break;
-            }
-            case OR:
-                insns.add(make.Mov(ret, leftArg));
-                insns.add(make.Or(ret, right.result.get()));
-                break;
-            case SUB:
-                insns.add(make.Mov(ret, leftArg));
-                insns.add(make.Sub(ret, right.result.get()));
-                break;
-            case XOR:
-                insns.add(make.Mov(ret, leftArg));
-                insns.add(make.Xor(ret, right.result.get()));
-                break;
-            default:
-                throw new UnsupportedOperationException("No case found.");
-        }
-
-        TilerData result = new TilerData(
-            1 + left.tileCost + right.tileCost,
-            insns,
-            Optional.of(ret));
-        return setResult(n, result);
+        return BinOpInstructionGenerator.generateInstruction(n, cost,
+                leftArg, rightArg, generator);
     }
 
     @Override

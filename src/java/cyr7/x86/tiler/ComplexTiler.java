@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
@@ -14,6 +15,7 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
@@ -23,8 +25,11 @@ import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.patternmappers.ConstPlusTemp;
 import cyr7.x86.patternmappers.ConstTimesTemp;
 import cyr7.x86.patternmappers.ConstTimesTemp_MinusOffset;
@@ -55,6 +60,7 @@ public class ComplexTiler extends BasicTiler {
 
         disableBasicTilerMemoizeResults();
     }
+
 
     @Override
     public TilerData visit(IRBinOp n) {
@@ -88,8 +94,29 @@ public class ComplexTiler extends BasicTiler {
                 new Temp_LShiftConst(generator, false).match(n, this, make)
                         .ifPresent(possibleTilings::add);
                 break;
-            default:
+            default: {
                 break;
+            }
+        }
+
+        var pattern = BiPatternBuilder
+                .left()
+                .instOf(ASMTempArg.class)
+                .right()
+                .instOf(IRConst.class)
+                .finish()
+                .mappingLeft(IRExpr.class,
+                        (Function<IRExpr, ASMArg>)
+                        node -> node.accept(this).result.get())
+                .enableCommutes();
+
+        if (pattern.matches(new Object[] {n.left(), n.right()})) {
+            ASMTempArg temp = pattern.leftObj();
+            ASMConstArg constant = arg.constant(pattern.rightObj().constant());
+            final int cost = 1 + pattern.preMapLeft().getOptimalTiling().tileCost;
+//            possibleTilings.add(BinOpInstructionGenerator
+//                                    .generateInstruction(n, cost,
+//                                            temp, constant, generator));
         }
 
         possibleTilings.add(super.visit(n));
