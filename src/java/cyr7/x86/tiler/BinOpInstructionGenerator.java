@@ -1,6 +1,6 @@
 package cyr7.x86.tiler;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import cyr7.ir.IdGenerator;
@@ -21,9 +21,8 @@ public class BinOpInstructionGenerator {
             final int cost,
             ASMArg leftArg,
             ASMArg rightArg,
+            List<ASMLine> insns,
             IdGenerator generator) {
-
-        ArrayList<ASMLine> insns = new ArrayList<>();
 
         ASMLineFactory make = new ASMLineFactory(n);
         ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);

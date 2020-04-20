@@ -105,7 +105,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         final int cost = 1 + left.tileCost + right.tileCost;
 
         return BinOpInstructionGenerator.generateInstruction(n, cost,
-                leftArg, rightArg, generator);
+                leftArg, rightArg, insns, generator);
     }
 
     @Override

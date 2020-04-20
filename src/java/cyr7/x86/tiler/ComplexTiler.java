@@ -114,9 +114,11 @@ public class ComplexTiler extends BasicTiler {
             ASMTempArg temp = pattern.leftObj();
             ASMConstArg constant = arg.constant(pattern.rightObj().constant());
             final int cost = 1 + pattern.preMapLeft().getOptimalTiling().tileCost;
-//            possibleTilings.add(BinOpInstructionGenerator
-//                                    .generateInstruction(n, cost,
-//                                            temp, constant, generator));
+            possibleTilings.add(BinOpInstructionGenerator
+                                    .generateInstruction(n, cost,
+                                            temp, constant,
+                                            pattern.preMapLeft().getOptimalTiling().optimalInstructions,
+                                            generator));
         }
 
         possibleTilings.add(super.visit(n));
