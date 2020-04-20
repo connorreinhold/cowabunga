@@ -46,7 +46,7 @@ sourceSets {
 
 test {
     useJUnitPlatform {
-        excludeTags 'fullTest'
+        excludeTags 'precompiledAssembly'
     }
     enableAssertions = true
     testLogging {
@@ -57,8 +57,10 @@ test {
     }
 }
 
-task fulltest(type: Test) {
-    useJUnitPlatform()
+task precompiledASMTest(type: Test) {
+    useJUnitPlatform {
+        excludeTags 'compilesAssembly'
+    }
     enableAssertions = true
     testLogging {
         events "passed", "skipped", "failed"

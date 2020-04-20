@@ -35,16 +35,12 @@ public abstract class TestProgram {
         return new RunConfiguration();
     }
 
-    @Tag("integration")
-    @Tag("fullTest")
     @Test
     void testMir() throws Exception {
         String result = Run.mirRun(Run.getFile(filename()), configuration());
         assertEquals(expected(), result);
     }
 
-    @Tag("integration")
-    @Tag("fullTest")
     @Test
     void testLirNoOptimizations() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -53,8 +49,6 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Tag("integration")
-    @Tag("fullTest")
     @Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -63,8 +57,6 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Tag("integration")
-    @Tag("fullTest")
     @Test
     void testLirTraceEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -73,7 +65,6 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Tag("integration")
     @Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -135,7 +126,7 @@ public abstract class TestProgram {
         }
     }
 
-    private void runAssemblyTest(TilerConf tilerConf) throws Exception {
+    private void runAssemblyTest(TilerConf tilerConf, boolean assemblyPrecompiled) throws Exception {
         File linkerFile = new File(linkerFilename);
         if (!linkerFile.exists()) {
             System.out.println("Cannot find linker file in ~/runtime");
@@ -146,11 +137,21 @@ public abstract class TestProgram {
             return;
         }
 
-        Files.deleteIfExists(Path.of(getTestAssemblyFilename())) ;
+        if (assemblyPrecompiled) {
+            Files.deleteIfExists(Path.of(getTestAssemblyFilename())) ;
 
-        Files.copy(
-            Path.of(getTestAssemblyFilename(tilerConf)),
-            Path.of(getTestAssemblyFilename()));
+            Files.copy(
+                Path.of(getTestAssemblyFilename(tilerConf)),
+                Path.of(getTestAssemblyFilename()));
+        } else {
+            System.out.println(this.executeCommand(true,
+                "./xic",
+                "-libpath",
+                this.libpath(),
+                "-tiler",
+                tilerConf.name(),
+                this.getTestXiFilename()));
+        }
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
@@ -178,19 +179,32 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
-    @Tag("fullTest")
-    @Tag("integration")
     @EnabledOnOs({OS.LINUX})
+    @Tag("compilesAssembly")
     @Test
-    void runBasicTilerAssemblyTest() throws Exception {
-        runAssemblyTest(TilerConf.BASIC);
+    void testBasicTilerAssembly() throws Exception {
+        runAssemblyTest(TilerConf.BASIC, false);
     }
 
-    @Tag("integration")
     @EnabledOnOs({OS.LINUX})
+    @Tag("compilesAssembly")
     @Test
-    void runComplexTilerAssemblyTest() throws Exception {
-        runAssemblyTest(TilerConf.COMPLEX);
+    void testComplexTilerAssembly() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, false);
+    }
+
+    @EnabledOnOs({OS.LINUX})
+    @Tag("precompiledAssembly")
+    @Test
+    void testBasicTilerAssemblyPrecompiled() throws Exception {
+        runAssemblyTest(TilerConf.BASIC, true);
+    }
+
+    @EnabledOnOs({OS.LINUX})
+    @Tag("precompiledAssembly")
+    @Test
+    void testComplexTilerAssemblyPrecompiled() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, true);
     }
 
     // Source:
