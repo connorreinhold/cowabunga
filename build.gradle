@@ -45,7 +45,22 @@ sourceSets {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'precompiledAssembly'
+    }
+    enableAssertions = true
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        showStackTraces = true
+        exceptionFormat = 'full'
+    }
+}
+
+task precompiledASMTest(type: Test) {
+    useJUnitPlatform {
+        excludeTags 'compilesAssembly'
+    }
     enableAssertions = true
     testLogging {
         events "passed", "skipped", "failed"

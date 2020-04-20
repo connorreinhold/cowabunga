@@ -10,10 +10,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import cyr7.x86.ASMUtil.TilerConf;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -71,6 +75,10 @@ public abstract class TestProgram {
 
     private final String linkerFilename = "/home/vagrant/runtime/linkxi.sh";
 
+    private String getTestAssemblyFilename(TilerConf tilerConf) {
+        return "tests/resources/integration/" + filename() + ".s" + "_" + tilerConf.name();
+    }
+
     private String getTestAssemblyFilename() {
         return "tests/resources/integration/" + filename() + ".s";
     }
@@ -118,7 +126,7 @@ public abstract class TestProgram {
         }
     }
 
-    private void runAssemblyTest(String tilerName) throws Exception {
+    private void runAssemblyTest(TilerConf tilerConf, boolean assemblyPrecompiled) throws Exception {
         File linkerFile = new File(linkerFilename);
         if (!linkerFile.exists()) {
             System.out.println("Cannot find linker file in ~/runtime");
@@ -129,13 +137,21 @@ public abstract class TestProgram {
             return;
         }
 
-        System.out.println(this.executeCommand(true,
-            "./xic",
-            "-libpath",
-            this.libpath(),
-            "-tiler",
-            tilerName,
-            this.getTestXiFilename()));
+        if (assemblyPrecompiled) {
+            Files.deleteIfExists(Path.of(getTestAssemblyFilename())) ;
+
+            Files.copy(
+                Path.of(getTestAssemblyFilename(tilerConf)),
+                Path.of(getTestAssemblyFilename()));
+        } else {
+            System.out.println(this.executeCommand(true,
+                "./xic",
+                "-libpath",
+                this.libpath(),
+                "-tiler",
+                tilerConf.name(),
+                this.getTestXiFilename()));
+        }
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
@@ -164,15 +180,31 @@ public abstract class TestProgram {
     }
 
     @EnabledOnOs({OS.LINUX})
+    @Tag("compilesAssembly")
     @Test
-    void runBasicTilerAssemblyTest() throws Exception {
-        runAssemblyTest("basic");
+    void testBasicTilerAssembly() throws Exception {
+        runAssemblyTest(TilerConf.BASIC, false);
     }
 
     @EnabledOnOs({OS.LINUX})
+    @Tag("compilesAssembly")
     @Test
-    void runComplexTilerAssemblyTest() throws Exception {
-        runAssemblyTest("complex");
+    void testComplexTilerAssembly() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, false);
+    }
+
+    @EnabledOnOs({OS.LINUX})
+    @Tag("precompiledAssembly")
+    @Test
+    void testBasicTilerAssemblyPrecompiled() throws Exception {
+        runAssemblyTest(TilerConf.BASIC, true);
+    }
+
+    @EnabledOnOs({OS.LINUX})
+    @Tag("precompiledAssembly")
+    @Test
+    void testComplexTilerAssemblyPrecompiled() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, true);
     }
 
     // Source:
