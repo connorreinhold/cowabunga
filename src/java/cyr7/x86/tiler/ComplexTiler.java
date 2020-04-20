@@ -47,11 +47,12 @@ import cyr7.x86.patternmappers.Temp_PlusConstTimesTemp_PlusOffset;
 
 public class ComplexTiler extends BasicTiler {
 
-    private static final Comparator<TilerData> byCost
-        = (lhs, rhs) ->
-        lhs.tileCost == rhs.tileCost
+
+    private final Comparator<TilerData> byCost = (lhs, rhs) ->
+            lhs.tileCost == rhs.tileCost
             ? lhs.optimalInstructions.size() - rhs.optimalInstructions.size()
             : lhs.tileCost - rhs.tileCost;
+
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
             String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
@@ -70,7 +71,7 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
-        List<TilerData> possibleTilings = new ArrayList<>();
+        ArrayList<TilerData> possibleTilings = new ArrayList<>();
 
         switch (n.opType()) {
             case MUL:
@@ -159,7 +160,6 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
         TilerData optimal = super.visit(n);
         n.setOptimalTilingOnce(optimal);
         return optimal;
@@ -177,9 +177,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        List<TilerData> possibleTilings = new ArrayList<>();
-
+        ArrayList<TilerData> possibleTilings = new ArrayList<>();
         if (n.expr() instanceof IRBinOp) {
             IRBinOp exprBinOp = (IRBinOp) n.expr();
             switch (exprBinOp.opType()) {
@@ -261,7 +259,6 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
 
         TilerData optimal = super.visit(n);
         n.setOptimalTilingOnce(optimal);
