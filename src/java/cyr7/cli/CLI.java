@@ -52,6 +52,7 @@ public class CLI {
     private static boolean wantsMirRun = false;
     private static boolean wantsIrRun = false;
     private static boolean wantsAssembly = true;
+    private static boolean wantsTaggedASMFile = false;
 
     private static File assemblyRoot = new File(".");
     private static File sourceRoot = new File(".");
@@ -243,6 +244,14 @@ public class CLI {
             .required(false)
             .build();
 
+        Option taggedAssembly = Option
+            .builder("taggedASMFile")
+            .desc("Change the file extension to .s_basic or .s_complex depending on the tiler used")
+            .hasArg(false)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
 
         return options.addOption(help)
                 .addOption(lex)
@@ -262,7 +271,8 @@ public class CLI {
                 .addOption(version)
                 .addOption(debugPrinting)
                 .addOption(noAssembly)
-                .addOption(tiler);
+                .addOption(tiler)
+                .addOption(taggedAssembly);
     }
 
     /**
@@ -433,6 +443,10 @@ public class CLI {
                     }
                     break;
 
+                case "taggedASMFile":
+                     wantsTaggedASMFile = true;
+                     break;
+
                 default:
                     writer.write("No case for given for option: " + opt);
                     writer.flush();
@@ -572,7 +586,11 @@ public class CLI {
                 debugPrint("Generate and interpret assembly code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
+                    if (!wantsTaggedASMFile) {
+                        output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
+                    } else {
+                        output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s" + "_" + tiler.name());
+                    }
                     ASMUtil.writeASM(input, output, filename, opener, lowerConfiguration, tiler);
 
                     if (debugPrintingEnabled) {

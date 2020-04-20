@@ -14,16 +14,17 @@ cowabunga: myparser mylexer irlexer irparser
 
 test: 
 	./xic-build-daemon -ea \
+	&& ./compile_integration.sh \
 	&& gradle fulltest \
 	&& cd \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
 	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll
 
-gradle.test:
-	./xic-build-daemon -ea && gradle test
+gradle.test: 
+	./xic-build-daemon -ea && make integration.complex && gradle test
 
-gradle.fulltest:
-	./xic-build-daemon -ea && gradle fulltest
+gradle.fulltest: 
+	./xic-build-daemon -ea && make integration.complex && make integration.basic && gradle fulltest
 
 xth.test:
 	./xic-build-daemon -ea \
@@ -36,3 +37,11 @@ zip:
 	zip -r cowabunga.zip \
 		README.md dependencies src tests xic-build build.gradle Makefile settings.gradle \
 		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi* -x *IRLexer.java* -x *IRParser.java* -x *IRSym.java*
+
+integration.complex:
+	echo '\033[0;32m' 'Compiling with complex tiler...' '\033[0m' \
+	&& find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler complex
+
+integration.basic:
+	echo '\033[0;32m' 'Compiling with basic tiler...' '\033[0m' \
+	&& find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler basic

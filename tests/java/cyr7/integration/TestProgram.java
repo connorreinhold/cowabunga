@@ -10,10 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import cyr7.x86.ASMUtil.TilerConf;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -81,6 +84,10 @@ public abstract class TestProgram {
 
     private final String linkerFilename = "/home/vagrant/runtime/linkxi.sh";
 
+    private String getTestAssemblyFilename(TilerConf tilerConf) {
+        return "tests/resources/integration/" + filename() + ".s" + "_" + tilerConf.name();
+    }
+
     private String getTestAssemblyFilename() {
         return "tests/resources/integration/" + filename() + ".s";
     }
@@ -128,7 +135,7 @@ public abstract class TestProgram {
         }
     }
 
-    private void runAssemblyTest(String tilerName) throws Exception {
+    private void runAssemblyTest(TilerConf tilerConf) throws Exception {
         File linkerFile = new File(linkerFilename);
         if (!linkerFile.exists()) {
             System.out.println("Cannot find linker file in ~/runtime");
@@ -139,13 +146,11 @@ public abstract class TestProgram {
             return;
         }
 
-        System.out.println(this.executeCommand(true,
-            "./xic",
-            "-libpath",
-            this.libpath(),
-            "-tiler",
-            tilerName,
-            this.getTestXiFilename()));
+        Files.delete(Path.of(getTestAssemblyFilename()));
+
+        Files.copy(
+            Path.of(getTestAssemblyFilename(tilerConf)),
+            Path.of(getTestAssemblyFilename()));
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
@@ -178,14 +183,14 @@ public abstract class TestProgram {
     @EnabledOnOs({OS.LINUX})
     @Test
     void runBasicTilerAssemblyTest() throws Exception {
-        runAssemblyTest("basic");
+        runAssemblyTest(TilerConf.BASIC);
     }
 
     @Tag("integration")
     @EnabledOnOs({OS.LINUX})
     @Test
     void runComplexTilerAssemblyTest() throws Exception {
-        runAssemblyTest("complex");
+        runAssemblyTest(TilerConf.COMPLEX);
     }
 
     // Source:
