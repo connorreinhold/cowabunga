@@ -27,6 +27,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMConstArg;
+import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.pattern.BiPatternBuilder;
@@ -110,15 +111,16 @@ public class ComplexTiler extends BasicTiler {
                         node -> node.accept(this).result.get())
                 .enableCommutes();
 
+
         if (pattern.matches(new Object[] {n.left(), n.right()})) {
             ASMTempArg temp = pattern.leftObj();
             ASMConstArg constant = arg.constant(pattern.rightObj().constant());
+            List<ASMLine> insns = new ArrayList<>();
+            insns.addAll(pattern.preMapLeft().getOptimalTiling().optimalInstructions);
             final int cost = 1 + pattern.preMapLeft().getOptimalTiling().tileCost;
             possibleTilings.add(BinOpInstructionGenerator
-                                    .generateInstruction(n, cost,
-                                            temp, constant,
-                                            pattern.preMapLeft().getOptimalTiling().optimalInstructions,
-                                            generator));
+                                    .generateInstruction(n, cost, temp,
+                                            constant, insns, generator));
         }
 
         possibleTilings.add(super.visit(n));
