@@ -36,7 +36,7 @@ public class CallInstructionGenerator {
             lastRegisterArg = Math.min(5, arguments.size());
 
             long size = (numReturnValues - 2) * 8;
-            insn.add(make.MovAbs(ASMReg.RDI, arg.constant(size)));
+            insn.add(make.Mov(ASMReg.RDI, arg.constant(size)));
             insn.add(make.Sub(ASMReg.RSP, ASMReg.RDI));
             insn.add(make.Mov(ASMReg.RDI, ASMReg.RSP)); // the first argument
 

@@ -48,12 +48,12 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
     protected static final ASMArgFactory arg = ASMArgFactory.instance;
 
     protected final IdGenerator generator;
-    private final int numRetValues;
+    protected final int numRetValues;
     private final String returnLbl;
 
     /// This temporary contains the memory address of the space allocated to
     /// store return values beyond the second.
-    private final Optional<ASMTempArg> additionalRetValAddress;
+    protected final Optional<ASMTempArg> additionalRetValAddress;
 
     protected final boolean stack16ByteAligned;
 
@@ -126,7 +126,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         }
         ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
         List<ASMLine> insns = List.of(
-            make.MovAbs(ret, new ASMConstArg(n.constant())));
+            make.Mov(ret, new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
         return this.setResult(n, result);
     }

@@ -249,15 +249,16 @@ public class ComplexTiler extends BasicTiler {
         }
 
         List<TilerData> possibleTilings = new ArrayList<>();
+
+
         List<ASMArg> arguments = new ArrayList<>();
         List<ASMLine> instructions = new ArrayList<>();
-
         int cost = 1;
         for (IRExpr a: n.args()) {
             TilerData argTile = a.accept(this);
             cost += argTile.tileCost;
             if (a instanceof IRConst) {
-                arguments.add(arg.constant(((IRConst)a).constant()));
+                arguments.add(arg.constant(a.constant()));
             } else {
                 arguments.add(argTile.result.get());
                 instructions.addAll(argTile.optimalInstructions);
@@ -266,10 +267,11 @@ public class ComplexTiler extends BasicTiler {
         TilerData targetTile = n.target().accept(this);
         cost += targetTile.tileCost;
         instructions.addAll(targetTile.optimalInstructions);
-
         possibleTilings.add(CallInstructionGenerator.generate(n, cost,
                 targetTile.result.get(), n.collectors(),
                 arguments, instructions, this.stack16ByteAligned));
+
+
         possibleTilings.add(super.visit(n));
 
         return this.setBestTile(n, possibleTilings);
@@ -347,9 +349,29 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        List<TilerData> possibleTilings = new ArrayList<>();
+
+
+        List<ASMLine> instructions = new ArrayList<>();
+        TilerData target = n.target().accept(this);
+        ASMArg targetArg = target.result.get();
+        TilerData source = n.source().accept(this);
+        ASMArg sourceArg;
+        if (n.source() instanceof IRConst) {
+            sourceArg = arg.constant(n.source().constant());
+        } else {
+            sourceArg = source.result.get();
+        }
+        instructions.addAll(source.optimalInstructions);
+        instructions.addAll(target.optimalInstructions);
+        final int cost = 1 + target.tileCost + source.tileCost;
+        possibleTilings.add(MoveInstructionGenerator.generate(n, cost,
+                targetArg, sourceArg,
+                numRetValues, generator, additionalRetValAddress, instructions));
+
+        possibleTilings.add(super.visit(n));
+
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override

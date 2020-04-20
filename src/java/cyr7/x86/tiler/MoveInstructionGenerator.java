@@ -12,6 +12,7 @@ import cyr7.x86.ASMConstants;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMArgFactory;
+import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
@@ -166,7 +167,8 @@ public class MoveInstructionGenerator {
             // Handled in CallStmt
             result = new TilerData(0, List.of(), Optional.empty());
             assert false;
-        } else if (target instanceof ASMMemArg && source instanceof ASMMemArg) {
+        } else if (target instanceof ASMMemArg
+                && (source instanceof ASMMemArg || source instanceof ASMConstArg)) {
             ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
             instrs.add(make.Mov(sourceTemp, source));
             instrs.add(make.Mov(target, sourceTemp));
