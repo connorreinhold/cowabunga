@@ -150,13 +150,8 @@ public class ComplexTiler extends BasicTiler {
 
     @Override
     public TilerData visit(IRCall n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "Call is not a valid node at this stage.");
     }
 
     @Override
@@ -172,13 +167,8 @@ public class ComplexTiler extends BasicTiler {
 
     @Override
     public TilerData visit(IRESeq n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "ESeq is not a valid node at this stage.");
     }
 
     @Override
@@ -192,7 +182,6 @@ public class ComplexTiler extends BasicTiler {
 
         if (n.expr() instanceof IRBinOp) {
             IRBinOp exprBinOp = (IRBinOp) n.expr();
-
             switch (exprBinOp.opType()) {
                 case MUL:
                     new ConstTimesTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
@@ -258,6 +247,10 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
+//        // Optimize the argument expressions using the complex tiler first.
+//        // Then, BasicTiler will be able to use the optimized expressions.
+//        // No significant overhead since tiling is memoized.
+//        n.args().forEach(e -> e.accept(this));
         TilerData optimal = super.visit(n);
         n.setOptimalTilingOnce(optimal);
         return optimal;
@@ -268,6 +261,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
+
 
         TilerData optimal = super.visit(n);
         n.setOptimalTilingOnce(optimal);

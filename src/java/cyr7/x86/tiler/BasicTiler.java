@@ -190,170 +190,29 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
 
+        int cost = 0;
         List<ASMLine> insn = new ArrayList<>();
-        TilerData targetTile = n
-            .target()
-            .accept(this);
-        List<TilerData> argTiles = n
-            .args()
+        List<ASMArg> arguments = new ArrayList<>();
+
+        List<TilerData> argTiles = n.args()
             .stream()
-            .map(a -> a.accept(this))
-            .collect(Collectors.toList());
+            .map(a -> a.accept(this)).collect(Collectors.toList());
 
-        int lastRegisterArg;
-        int tileCost = 0;
-
-        /*
-         * If the callee function has more than two return values, then we store
-         * memory address to a "saved stack space" to hold return values onto
-         * the rdi register.
-         */
-        final int numReturnValues = n.collectors().size();
-        if (numReturnValues > 2) {
-            lastRegisterArg = Math.min(5, argTiles.size());
-
-            long size = (numReturnValues - 2) * 8;
-            insn.add(make.MovAbs(ASMReg.RDI, arg.constant(size)));
-            insn.add(make.Sub(ASMReg.RSP, ASMReg.RDI));
-            insn.add(make.Mov(ASMReg.RDI, ASMReg.RSP)); // the first argument
-
-            for (int i = 0; i < lastRegisterArg; i++) {
-                TilerData argTile = argTiles.get(i);
-                tileCost += argTile.tileCost;
-                insn.addAll(argTile.optimalInstructions);
-                switch (i) {
-                case 0:
-                    insn.add(make.Mov(ASMReg.RSI, argTile.result.get()));
-                    break;
-                case 1:
-                    insn.add(make.Mov(ASMReg.RDX, argTile.result.get()));
-                    break;
-                case 2:
-                    insn.add(make.Mov(ASMReg.RCX, argTile.result.get()));
-                    break;
-                case 3:
-                    insn.add(make.Mov(ASMReg.R8, argTile.result.get()));
-                    break;
-                case 4:
-                    insn.add(make.Mov(ASMReg.R9, argTile.result.get()));
-                    break;
-                default:
-                    throw new RuntimeException("Unexpected Error with "
-                            + "index");
-                }
-            }
-        } else {
-            lastRegisterArg = Math.min(6, argTiles.size());
-            for (int i = 0; i < lastRegisterArg; i++) {
-                TilerData argTile = argTiles.get(i);
-                tileCost += argTile.tileCost;
-                insn.addAll(argTile.optimalInstructions);
-                switch (i) {
-                case 0:
-                    insn.add(make.Mov(ASMReg.RDI, argTile.result.get()));
-                    break;
-                case 1:
-                    insn.add(make.Mov(ASMReg.RSI, argTile.result.get()));
-                    break;
-                case 2:
-                    insn.add(make.Mov(ASMReg.RDX, argTile.result.get()));
-                    break;
-                case 3:
-                    insn.add(make.Mov(ASMReg.RCX, argTile.result.get()));
-                    break;
-                case 4:
-                    insn.add(make.Mov(ASMReg.R8, argTile.result.get()));
-                    break;
-                case 5:
-                    insn.add(make.Mov(ASMReg.R9, argTile.result.get()));
-                    break;
-                default:
-                    throw new RuntimeException(
-                        "Unexpected Error with index");
-                }
-            }
+        for (TilerData tile: argTiles) {
+            cost += tile.tileCost;
+            arguments.add(tile.result.get());
+            insn.addAll(tile.optimalInstructions);
         }
 
-        // We add the instructions for argTiles before add the push argument
-        // expressions.
-        // This is to clarify that arguments will be on the top of the stack
-        // when the call statement is executed. However, we may find that this
-        // ordering may not needed if we know that the instructions in
-        // optimalInstructions never alter the size of the stack.
-        for (int i = argTiles.size() - 1; i >= lastRegisterArg; i--) {
-            TilerData argTile = argTiles.get(i);
-            tileCost += argTile.tileCost;
-            insn.addAll(argTile.optimalInstructions);
-        }
-        tileCost += targetTile.tileCost;
+        TilerData targetTile = n
+                .target()
+                .accept(this);
+
+        cost += targetTile.tileCost;
         insn.addAll(targetTile.optimalInstructions);
 
-        // align the stack depending on the number of pushes to the stack.
-        final boolean stackNeedsAdjustment =
-            (Math.max(argTiles.size() - lastRegisterArg, 0) % 2 == 0)
-                == stack16ByteAligned;
-        if (stackNeedsAdjustment) {
-            insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
-        }
-
-        // push additional arguments onto the stack
-        for (int i = argTiles.size() - 1; i >= lastRegisterArg; i--) {
-            TilerData argTile = argTiles.get(i);
-            insn.add(make.Push(argTile.result.get()));
-        }
-
-        // Perform the call
-        insn.add(make.Call(targetTile.result.get()));
-
-        // Add back the stack space we used for arguments 7 and beyond
-        if (argTiles.size() > lastRegisterArg) {
-            insn.add(make.Add(ASMReg.RSP,
-                    arg.constant(8 * (argTiles.size() - lastRegisterArg))));
-        }
-
-        // adjust the stack back
-        if (stackNeedsAdjustment) {
-            insn.add(make.Add(ASMReg.RSP, arg.constant(8)));
-        }
-
-        // Move the temps from the return registers into the collectors
-        for (int i = 0; i < n.collectors()
-                             .size(); i++) {
-            String tempName = n.collectors()
-                               .get(i);
-            if (tempName.equals("_")) {
-                continue;
-            }
-
-            ASMArg target = arg.temp(tempName, Size.QWORD);
-            switch (i) {
-            case 0:
-                insn.add(make.Mov(target, ASMReg.RAX));
-                break;
-            case 1:
-                insn.add(make.Mov(target, ASMReg.RDX));
-                break;
-            default:
-                int offset = 8 * (i - 2);
-                var addr = arg.addr(Optional.of(ASMReg.RSP),
-                        ScaleValues.ONE,
-                        Optional.empty(),
-                        offset);
-                var mem = arg.mem(addr);
-                insn.add(make.Mov(target, mem));
-                break;
-            }
-        }
-
-        if (numReturnValues > 2) {
-            // we allocated some space on the stack for additional return values
-            // that we now need to deallocate
-
-            long size = (numReturnValues - 2) * 8;
-            insn.add(make.Add(ASMReg.RSP, arg.constant(size)));
-        }
-
-        TilerData result = new TilerData(tileCost, insn, Optional.empty());
+        TilerData result = CallInstructionGenerator.generate(n, cost, targetTile.result.get(),
+                n.collectors(), arguments, insn, stack16ByteAligned);
         return setResult(n, result);
     }
 
