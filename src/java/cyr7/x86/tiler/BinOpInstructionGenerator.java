@@ -59,6 +59,16 @@ public class BinOpInstructionGenerator {
         }
         case EQ: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
+            if (!(leftArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, leftArg));
+                leftArg = temp;
+            }
             insns.add(make.Cmp(leftArg, rightArg));
             insns.add(make.SetZ(byteReg));
             insns.add(make.MovZX(ret, byteReg));
@@ -66,6 +76,16 @@ public class BinOpInstructionGenerator {
         }
         case GEQ: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
+            if (!(leftArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, leftArg));
+                leftArg = temp;
+            }
             insns.add(make.Cmp(leftArg, rightArg));
             insns.add(make.SetGE(byteReg));
             insns.add(make.MovZX(ret, byteReg));
@@ -73,6 +93,16 @@ public class BinOpInstructionGenerator {
         }
         case GT: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
+            if (!(leftArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, leftArg));
+                leftArg = temp;
+            }
             insns.add(make.Cmp(leftArg, rightArg));
             insns.add(make.SetG(byteReg));
             insns.add(make.MovZX(ret, byteReg));
@@ -100,6 +130,16 @@ public class BinOpInstructionGenerator {
         }
         case LEQ: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
+            if (!(leftArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, leftArg));
+                leftArg = temp;
+            }
             insns.add(make.Cmp(leftArg, rightArg));
             insns.add(make.SetLE(byteReg));
             insns.add(make.MovZX(ret, byteReg));
@@ -131,6 +171,16 @@ public class BinOpInstructionGenerator {
         }
         case LT: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
+            if (!(leftArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, leftArg));
+                leftArg = temp;
+            }
             insns.add(make.Cmp(leftArg, rightArg));
             insns.add(make.SetL(byteReg));
             insns.add(make.MovZX(ret, byteReg));
@@ -162,6 +212,16 @@ public class BinOpInstructionGenerator {
             break;
         case NEQ: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
+            if (!(leftArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, leftArg));
+                leftArg = temp;
+            }
             insns.add(make.Cmp(leftArg, rightArg));
             insns.add(make.SetNE(byteReg));
             insns.add(make.MovZX(ret, byteReg));
