@@ -61,6 +61,11 @@ public class ComplexTiler extends BasicTiler {
         return optimal;
     }
 
+    private TilerData setBestTile(IRNode_c n, TilerData tile) {
+        n.setOptimalTilingOnce(tile);
+        return tile;
+    }
+
     public ComplexTiler(IdGenerator generator, int numRetValues,
             String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
             boolean stack16ByteAligned) {
@@ -165,9 +170,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -225,10 +228,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -236,10 +236,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -282,43 +279,25 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
     public TilerData visit(IRCompUnit n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "CompUnit cannot be tilied by the ComplexTiler.");
     }
 
     @Override
     public TilerData visit(IRExp n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "Exp is not a valid node at the tiling stage.");
     }
 
     @Override
     public TilerData visit(IRFuncDecl n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "FuncDecl cannot be tiled by the ComplexTiler.");
     }
 
     @Override
@@ -326,10 +305,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -337,10 +313,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -379,10 +352,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -390,10 +360,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
 }
