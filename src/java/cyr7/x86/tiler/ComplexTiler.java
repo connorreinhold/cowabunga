@@ -138,8 +138,8 @@ public class ComplexTiler extends BasicTiler {
             insns.addAll(pattern2.preMapRight().getOptimalTiling().optimalInstructions);
             final int cost = 1 + pattern2.preMapRight().getOptimalTiling().tileCost;
             possibleTilings.add(BinOpInstructionGenerator
-                                    .generateInstruction(n, cost, temp,
-                                            constant, insns, generator));
+                                    .generateInstruction(n, cost, constant,
+                                            temp, insns, generator));
         }
 
         possibleTilings.add(super.visit(n));

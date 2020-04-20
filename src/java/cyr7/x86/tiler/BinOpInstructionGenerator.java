@@ -45,6 +45,11 @@ public class BinOpInstructionGenerator {
 
             insns.add(make.Mov(ASMReg.RAX, leftArg));
             insns.add(make.CQO());
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
             insns.add(make.Div(rightArg));
             insns.add(make.Mov(ret, ASMReg.RAX));
 
@@ -81,6 +86,11 @@ public class BinOpInstructionGenerator {
             insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
 
             insns.add(make.Mov(ASMReg.RAX, leftArg));
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
             insns.add(make.Mul(rightArg));
             insns.add(make.Mov(ret, ASMReg.RDX));
 
@@ -135,6 +145,11 @@ public class BinOpInstructionGenerator {
 
             insns.add(make.Mov(ASMReg.RAX, leftArg));
             insns.add(make.CQO());
+            if (!(rightArg instanceof ASMTempArg)) {
+                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                insns.add(make.Mov(temp, rightArg));
+                rightArg = temp;
+            }
             insns.add(make.Div(rightArg));
             insns.add(make.Mov(ret, ASMReg.RDX));
 
