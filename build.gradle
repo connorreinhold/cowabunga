@@ -45,6 +45,19 @@ sourceSets {
 }
 
 test {
+    useJUnitPlatform {
+        excludeTags 'fullTest'
+    }
+    enableAssertions = true
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        showStackTraces = true
+        exceptionFormat = 'full'
+    }
+}
+
+task fulltest(type: Test) {
     useJUnitPlatform()
     enableAssertions = true
     testLogging {

@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
@@ -31,12 +32,16 @@ public abstract class TestProgram {
         return new RunConfiguration();
     }
 
+    @Tag("integration")
+    @Tag("fullTest")
     @Test
     void testMir() throws Exception {
         String result = Run.mirRun(Run.getFile(filename()), configuration());
         assertEquals(expected(), result);
     }
 
+    @Tag("integration")
+    @Tag("fullTest")
     @Test
     void testLirNoOptimizations() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -45,6 +50,8 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
+    @Tag("integration")
+    @Tag("fullTest")
     @Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -53,6 +60,8 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
+    @Tag("integration")
+    @Tag("fullTest")
     @Test
     void testLirTraceEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -61,6 +70,7 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
+    @Tag("integration")
     @Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
@@ -163,12 +173,15 @@ public abstract class TestProgram {
         assertEquals(expected(), result);
     }
 
+    @Tag("fullTest")
+    @Tag("integration")
     @EnabledOnOs({OS.LINUX})
     @Test
     void runBasicTilerAssemblyTest() throws Exception {
         runAssemblyTest("basic");
     }
 
+    @Tag("integration")
     @EnabledOnOs({OS.LINUX})
     @Test
     void runComplexTilerAssemblyTest() throws Exception {
