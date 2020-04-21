@@ -24,7 +24,7 @@ class TestInstructions {
         var make = ASMLineFactory.instance;
         var arg = ASMArgFactory.instance;
 
-        ASMInstr movabs = make.MovAbs(ASMReg.RAX, arg.constant(12));
+        ASMInstr movabs = make.Mov(ASMReg.RAX, arg.constant(12));
         testIntel("    movabsq rax, 12", movabs);
 
         ASMInstr memMove = make.Mov(arg.mem(arg.addr(Optional.empty(),

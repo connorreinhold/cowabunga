@@ -1,9 +1,9 @@
 package cyr7.x86.asm;
 
-import cyr7.ir.nodes.IRNode;
-
 import java.util.List;
 import java.util.Optional;
+
+import cyr7.ir.nodes.IRNode;
 
 public class ASMLineFactory {
 
@@ -85,11 +85,10 @@ public class ASMLineFactory {
     }
 
     public ASMInstr Mov(ASMArg dest, ASMArg source) {
+        if (source instanceof ASMConstArg) {
+            return new ASMInstr(ASMInstrType.MOVABSQ, List.of(dest, source), node);
+        }
         return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
-    }
-
-    public ASMInstr MovAbs(ASMArg dest, ASMArg source) {
-        return new ASMInstr(ASMInstrType.MOVABSQ, List.of(dest, source), node);
     }
 
     public ASMInstr MovZX(ASMArg dest, ASMArg source) {

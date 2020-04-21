@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
@@ -14,17 +15,23 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRESeq;
 import cyr7.ir.nodes.IRExp;
+import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRJump;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
+import cyr7.ir.nodes.IRNode_c;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMConstArg;
+import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
+import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.patternmappers.ConstPlusTemp;
 import cyr7.x86.patternmappers.ConstTimesTemp;
 import cyr7.x86.patternmappers.ConstTimesTemp_MinusOffset;
@@ -41,11 +48,23 @@ import cyr7.x86.patternmappers.Temp_PlusConstTimesTemp_PlusOffset;
 
 public class ComplexTiler extends BasicTiler {
 
-    private static final Comparator<TilerData> byCost
-        = (lhs, rhs) ->
-        lhs.tileCost == rhs.tileCost
+
+    private final Comparator<TilerData> byCost = (lhs, rhs) ->
+            lhs.tileCost == rhs.tileCost
             ? lhs.optimalInstructions.size() - rhs.optimalInstructions.size()
             : lhs.tileCost - rhs.tileCost;
+
+
+    private TilerData setBestTile(IRNode_c n, List<TilerData> tilings) {
+        TilerData optimal = tilings.stream().min(byCost).get();
+        n.setOptimalTilingOnce(optimal);
+        return optimal;
+    }
+
+    private TilerData setBestTile(IRNode_c n, TilerData tile) {
+        n.setOptimalTilingOnce(tile);
+        return tile;
+    }
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
             String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
@@ -56,6 +75,7 @@ public class ComplexTiler extends BasicTiler {
         disableBasicTilerMemoizeResults();
     }
 
+
     @Override
     public TilerData visit(IRBinOp n) {
         ASMLineFactory make = new ASMLineFactory(n);
@@ -63,7 +83,7 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
-        List<TilerData> possibleTilings = new ArrayList<>();
+        ArrayList<TilerData> possibleTilings = new ArrayList<>();
 
         switch (n.opType()) {
             case MUL:
@@ -88,25 +108,61 @@ public class ComplexTiler extends BasicTiler {
                 new Temp_LShiftConst(generator, false).match(n, this, make)
                         .ifPresent(possibleTilings::add);
                 break;
-            default:
+            default: {
                 break;
+            }
+        }
+
+        var pattern = BiPatternBuilder
+                .left()
+                .instOf(ASMTempArg.class)
+                .right()
+                .instOf(IRConst.class)
+                .finish()
+                .mappingLeft(IRExpr.class,
+                        (Function<IRExpr, ASMArg>)
+                        node -> node.accept(this).result.get());
+
+        if (pattern.matches(new Object[] {n.left(), n.right()})) {
+            List<ASMLine> insns = new ArrayList<>();
+            ASMTempArg temp = pattern.leftObj();
+            ASMConstArg constant = arg.constant(pattern.rightObj().constant());
+            insns.addAll(pattern.preMapLeft().getOptimalTiling().optimalInstructions);
+            final int cost = 1 + pattern.preMapLeft().getOptimalTiling().tileCost;
+            possibleTilings.add(BinOpInstructionGenerator
+                                    .generateInstruction(n, cost, temp,
+                                            constant, insns, generator));
+        }
+
+        var pattern2 = BiPatternBuilder
+                .left()
+                .instOf(IRConst.class)
+                .right()
+                .instOf(ASMTempArg.class)
+                .finish()
+                .mappingRight(IRExpr.class, (Function<IRExpr, ASMArg>)
+                        node -> node.accept(this).result.get());
+
+        if (pattern2.matches(new Object[] {n.left(), n.right()})) {
+            List<ASMLine> insns = new ArrayList<>();
+            ASMConstArg constant = arg.constant(pattern2.leftObj().constant());
+            ASMTempArg temp = pattern2.rightObj();
+
+            insns.addAll(pattern2.preMapRight().getOptimalTiling().optimalInstructions);
+            final int cost = 1 + pattern2.preMapRight().getOptimalTiling().tileCost;
+            possibleTilings.add(BinOpInstructionGenerator
+                                    .generateInstruction(n, cost, constant,
+                                            temp, insns, generator));
         }
 
         possibleTilings.add(super.visit(n));
-        TilerData optimal = possibleTilings.stream().min(byCost).get();
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
     public TilerData visit(IRCall n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "Call is not a valid node at this stage.");
     }
 
     @Override
@@ -114,21 +170,13 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
     public TilerData visit(IRESeq n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "ESeq is not a valid node at this stage.");
     }
 
     @Override
@@ -137,12 +185,9 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        List<TilerData> possibleTilings = new ArrayList<>();
-
+        ArrayList<TilerData> possibleTilings = new ArrayList<>();
         if (n.expr() instanceof IRBinOp) {
             IRBinOp exprBinOp = (IRBinOp) n.expr();
-
             switch (exprBinOp.opType()) {
                 case MUL:
                     new ConstTimesTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
@@ -175,9 +220,7 @@ public class ComplexTiler extends BasicTiler {
         }
 
         possibleTilings.add(super.visit(n));
-        TilerData optimal = possibleTilings.stream().min(byCost).get();
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
@@ -185,10 +228,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -196,10 +236,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -208,9 +245,33 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        List<TilerData> possibleTilings = new ArrayList<>();
+
+
+        List<ASMArg> arguments = new ArrayList<>();
+        List<ASMLine> instructions = new ArrayList<>();
+        int cost = 1;
+        for (IRExpr a: n.args()) {
+            TilerData argTile = a.accept(this);
+            cost += argTile.tileCost;
+            if (a instanceof IRConst) {
+                arguments.add(arg.constant(a.constant()));
+            } else {
+                arguments.add(argTile.result.get());
+                instructions.addAll(argTile.optimalInstructions);
+            }
+        }
+        TilerData targetTile = n.target().accept(this);
+        cost += targetTile.tileCost;
+        instructions.addAll(targetTile.optimalInstructions);
+        possibleTilings.add(CallInstructionGenerator.generate(n, cost,
+                targetTile.result.get(), n.collectors(),
+                arguments, instructions, this.stack16ByteAligned));
+
+
+        possibleTilings.add(super.visit(n));
+
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
@@ -218,43 +279,25 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
     public TilerData visit(IRCompUnit n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "CompUnit cannot be tilied by the ComplexTiler.");
     }
 
     @Override
     public TilerData visit(IRExp n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "Exp is not a valid node at the tiling stage.");
     }
 
     @Override
     public TilerData visit(IRFuncDecl n) {
-        if (n.hasOptimalTiling()) {
-            return n.getOptimalTiling();
-        }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        throw new UnsupportedOperationException(
+                "FuncDecl cannot be tiled by the ComplexTiler.");
     }
 
     @Override
@@ -262,10 +305,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -273,10 +313,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -285,9 +322,29 @@ public class ComplexTiler extends BasicTiler {
             return n.getOptimalTiling();
         }
 
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        List<TilerData> possibleTilings = new ArrayList<>();
+
+
+        List<ASMLine> instructions = new ArrayList<>();
+        TilerData target = n.target().accept(this);
+        ASMArg targetArg = target.result.get();
+        TilerData source = n.source().accept(this);
+        ASMArg sourceArg;
+        if (n.source() instanceof IRConst) {
+            sourceArg = arg.constant(n.source().constant());
+        } else {
+            sourceArg = source.result.get();
+        }
+        instructions.addAll(source.optimalInstructions);
+        instructions.addAll(target.optimalInstructions);
+        final int cost = 1 + target.tileCost + source.tileCost;
+        possibleTilings.add(MoveInstructionGenerator.generate(n, cost,
+                targetArg, sourceArg,
+                numRetValues, generator, additionalRetValAddress, instructions));
+
+        possibleTilings.add(super.visit(n));
+
+        return this.setBestTile(n, possibleTilings);
     }
 
     @Override
@@ -295,10 +352,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
     @Override
@@ -306,10 +360,7 @@ public class ComplexTiler extends BasicTiler {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-
-        TilerData optimal = super.visit(n);
-        n.setOptimalTilingOnce(optimal);
-        return optimal;
+        return this.setBestTile(n, super.visit(n));
     }
 
 }
