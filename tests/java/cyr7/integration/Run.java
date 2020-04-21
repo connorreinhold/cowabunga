@@ -3,12 +3,14 @@ package cyr7.integration;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringBufferInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
@@ -49,22 +51,30 @@ public final class Run {
 
         public final boolean bigHeap;
 
+        public final String stdin;
+
         public RunConfiguration() {
             this.args = new String[] { };
             this.bigHeap = false;
+            this.stdin = "";
         }
 
-        public RunConfiguration(String[] args, boolean bigHeap) {
+        public RunConfiguration(String[] args, boolean bigHeap, String stdin) {
             this.args = args;
             this.bigHeap = bigHeap;
+            this.stdin = stdin;
         }
 
         public RunConfiguration args(String... args) {
-            return new RunConfiguration(args, this.bigHeap);
+            return new RunConfiguration(args, this.bigHeap, this.stdin);
         }
 
         public RunConfiguration bigHeap(boolean bigHeap) {
-            return new RunConfiguration(this.args, bigHeap);
+            return new RunConfiguration(this.args, bigHeap, this.stdin);
+        }
+
+        public RunConfiguration stdin(String stdin) {
+            return new RunConfiguration(this.args, this.bigHeap, stdin);
         }
 
     }
@@ -170,12 +180,17 @@ public final class Run {
             compUnit = (IRCompUnit) node;
         }
 
+        InputStream systemIn = System.in;
+        InputStream inputStream = new ByteArrayInputStream(runConfiguration.stdin.getBytes());
+        System.setIn(inputStream);
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         IRSimulator sim = new IRSimulator(
             compUnit,
             runConfiguration.bigHeap ? IRSimulator.BIG_HEAP_SIZE : IRSimulator.DEFAULT_HEAP_SIZE,
             new PrintStream(outputStream)
         );
+        System.setIn(systemIn);
         sim.call("_Ipremain_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
@@ -198,12 +213,18 @@ public final class Run {
 
         IRCompUnit lowered = lower(compUnit, generator, lowerConfiguration);
 
+        InputStream systemIn = System.in;
+        InputStream inputStream = new ByteArrayInputStream(runConfiguration.stdin.getBytes());
+        System.setIn(inputStream);
+
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         IRSimulator sim = new IRSimulator(
             lowered,
             runConfiguration.bigHeap ? IRSimulator.BIG_HEAP_SIZE : IRSimulator.DEFAULT_HEAP_SIZE,
             new PrintStream(outputStream)
         );
+        System.setIn(systemIn);
+
         sim.call("_Ipremain_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }

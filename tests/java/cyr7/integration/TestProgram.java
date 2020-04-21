@@ -6,6 +6,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,6 +15,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import cyr7.x86.ASMUtil.TilerConf;
@@ -91,8 +93,12 @@ public abstract class TestProgram {
         return "tests/resources/integration/lib";
     }
 
-    private String executeCommand(boolean wantsResult, String... command)
-            throws InterruptedException, IOException {
+    private String executeCommand(
+        boolean wantsResult,
+        Optional<File> stdin,
+        String... command)
+        throws InterruptedException, IOException {
+
         System.out.println("Executing command: "+Arrays.toString(command));
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
@@ -100,6 +106,8 @@ public abstract class TestProgram {
         redirectedTarget.setExecutable(true);
         redirectedTarget.setReadable(true);
         redirectedTarget.setWritable(true);
+
+        stdin.ifPresent(process::redirectInput);
 
         process.redirectOutput(redirectedTarget);
         Process runner = process.start();
@@ -145,6 +153,7 @@ public abstract class TestProgram {
                 Path.of(getTestAssemblyFilename()));
         } else {
             System.out.println(this.executeCommand(true,
+                Optional.empty(),
                 "./xic",
                 "-libpath",
                 this.libpath(),
@@ -158,20 +167,41 @@ public abstract class TestProgram {
         tmpFile.setReadable(true);
         tmpFile.setWritable(true);
         tmpFile.deleteOnExit();
-        System.out.println(this.executeCommand(true,
+        System.out.println(this.executeCommand(
+            true,
+            Optional.empty(),
             linkerFile.getAbsolutePath(),
             this.getTestAssemblyFilename(),
             "-o",
             tmpFile.getAbsolutePath()));
 
-        String[] args = this.configuration().args;
-        String[] command = new String[1 + args.length];
-        command[0] = tmpFile.getAbsolutePath();
-        for (int i = 0; i < args.length; i++) {
-            command[i + 1] = args[i];
+        Optional<File> stdinFile;
+        RunConfiguration configuration = configuration();
+        if (!configuration.stdin.isEmpty()) {
+            File stdinFileReal = File.createTempFile("temp_stdin_" + filename(), "");
+            stdinFileReal.setReadable(true);
+            stdinFileReal.setWritable(true);
+            tmpFile.deleteOnExit();
+
+            stdinFile = Optional.of(stdinFileReal);
+
+            FileWriter writer = new FileWriter(stdinFileReal);
+            writer.write(configuration.stdin);
+            writer.flush();
+            writer.close();
+        } else {
+            stdinFile = Optional.empty();
         }
 
-        String result = this.executeCommand(true, command);
+        String[] args = configuration.args;
+        String[] command = new String[1 + args.length];
+        command[0] = tmpFile.getAbsolutePath();
+        System.arraycopy(args, 0, command, 1, args.length);
+
+        String result = this.executeCommand(
+            true,
+            stdinFile,
+            command);
 
         System.out.println(expected());
         System.out.println("-------------------------");
