@@ -33,9 +33,11 @@ zip:
 		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi* -x *IRLexer.java* -x *IRParser.java* -x *IRSym.java*
 
 integration.complex:
-	echo '\033[0;32m' 'Precompiling assembly with complex tiler...' '\033[0m' \
-	&& find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler complex
+	echo '\033[0;32m' 'Precompiling assembly with complex tiler...' '\033[0m' 
+	find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler complex
+	find tests/resources/integration/ -name '*.s_COMPLEX' -print0 | sort -z | xargs -0 wc -l
 
 integration.basic:
-	echo '\033[0;32m' 'Precompiling assembly with basic tiler...' '\033[0m' \
-	&& find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler basic
+	echo '\033[0;32m' 'Precompiling assembly with basic tiler...' '\033[0m'
+	find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler basic
+	find tests/resources/integration/ -name '*.s_BASIC' -print0 | sort -z | xargs -0 wc -l	
