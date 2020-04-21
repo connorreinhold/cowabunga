@@ -5,6 +5,7 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.visitor.MyIRVisitor;
 import cyr7.x86.asm.ASMArgFactory;
+import cyr7.x86.asm.ASMAssemblerDirective;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLabel;
 import cyr7.x86.asm.ASMLine;
@@ -120,6 +121,7 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
         Optional<ASMTempArg> addrOfOverspillRetValues) {
 
         List<ASMLine> lines = new ArrayList<>();
+        lines.add(new ASMAssemblerDirective("globl", mangledFunctionName));
         lines.addAll(List.of(
             new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),

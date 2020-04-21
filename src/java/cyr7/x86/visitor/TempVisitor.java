@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import cyr7.x86.asm.ASMAddrExpr;
+import cyr7.x86.asm.ASMAssemblerDirective;
 import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLabel;
@@ -59,4 +60,8 @@ public class TempVisitor extends AbstractASMVisitor<Set<ASMTempArg>> {
         return Set.of();
     }
 
+    @Override
+    public Set<ASMTempArg> visit(ASMAssemblerDirective l) {
+        return Set.of();
+    }
 }

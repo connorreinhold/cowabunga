@@ -55,8 +55,6 @@ public final class ASMUtil {
     ) {
         try {
             writer.append(".intel_syntax noprefix").append(System.lineSeparator());
-            writer.append(".globl _Imain_paai").append(System.lineSeparator());
-            writer.append(".align 4").append(System.lineSeparator());
 
             List<ASMLine> lines = generateASM(reader, filename, fileOpener, lowerConfiguration, tiler);
             for (ASMLine line: lines) {
