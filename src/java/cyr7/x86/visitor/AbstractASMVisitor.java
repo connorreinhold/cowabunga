@@ -1,12 +1,9 @@
 package cyr7.x86.visitor;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import cyr7.x86.asm.ASMAddrExpr;
+import cyr7.x86.asm.ASMAssemblerDirective;
 import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMInstr;
-import cyr7.x86.asm.ASMInstrType;
 import cyr7.x86.asm.ASMLabel;
 import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMMemArg;
@@ -30,5 +27,7 @@ public abstract class AbstractASMVisitor<R> {
     public abstract R visit(ASMConstArg c);
 
     public abstract R visit(ASMLabelArg l);
+
+    public abstract R visit(ASMAssemblerDirective l);
 
 }

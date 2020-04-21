@@ -2,6 +2,7 @@ package cyr7.x86.tiler;
 
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMAssemblerDirective;
 import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLabel;
@@ -108,4 +109,9 @@ public class ReduceTo8BitVisitor extends AbstractASMVisitor<ASMArg> {
                 "Cannot reduce a label to 8 bit");
     }
 
+    @Override
+    public ASMArg visit(ASMAssemblerDirective l) {
+        throw new UnsupportedOperationException(
+            "Cannot reduce a directive to 8 bit");
+    }
 }
