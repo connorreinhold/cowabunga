@@ -21,10 +21,11 @@ gradle.test:
 	gradle precompiledASMTest
 
 xth.test:
+	mkdir -p ~/xth_workpath
 	./xic-build-daemon -ea \
 	&& cd \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
-	&& xth -testpath . -workpath .  -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll
+	&& xth -testpath ~ -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll -workpath . -pdf shared/cowabunga/xthreport.pdf
 
 zip:
 	rm -f cowabunga.zip
