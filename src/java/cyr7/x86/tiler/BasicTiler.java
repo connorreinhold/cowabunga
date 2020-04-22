@@ -180,8 +180,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             return n.getOptimalTiling();
         }
         ASMArg ret = new ASMTempArg(n.name(), Size.QWORD);
-        TilerData result = new TilerData(
-            0,
+        TilerData result = new TilerData(1,
             new ArrayList<>(),
             Optional.of(ret));
         return this.setResult(n, result);
