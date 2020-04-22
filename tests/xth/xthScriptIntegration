@@ -1,0 +1,30 @@
+xic ("Cowabunga ASM Tests") "-libpath ./runtime/include" {
+    arrayEquality.xi;
+    fibonacci.xi;
+    complexCommutability.xi;
+    ex01.xi;
+    primes.xi;
+    intervalScheduling.xi;
+    arithmetic2.xi;
+    functionNames.xi;
+    retFuncCall.xi;
+    factorial.xi;
+    startriangle.xi;
+    ctranslation.xi;
+    functionTypes.xi;
+    arrConcatFuncMutability.xi;
+    binopMath.xi;
+    ack.xi;
+    scope.xi;
+    integralEstimation.xi;
+    addMutableArrayValues.xi;
+    arrayalloc.xi;
+    addMutableArray.xi;
+    multiRetValues.xi;
+    arithmetic.xi;
+    dedupe.xi;
+    arrayCloning.xi;
+    multidimarray.xi;
+    ctranslation3.xi;
+    ctranslation2.xi;
+}

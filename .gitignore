@@ -21,7 +21,7 @@ cowabunga.zip
 **/xthScript*.results
 tests/xth/xthScriptAll
 
-xthreport.pdf
+*.pdf
 
 # CLI-generated files
 

@@ -21,16 +21,16 @@ gradle.test:
 	gradle precompiledASMTest
 
 xth.test:
-	mkdir -p ~/xth_workpath
-	./xic-build-daemon -ea \
-	&& cd \
+	cd \
+	&& xth -testpath ~/xth/tests/pa5 -compilerpath ~/shared/cowabunga ~/xth/tests/pa5/xthScript -pdf ~/shared/cowabunga/instructor.pdf \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
-	&& xth -testpath ~ -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll -workpath . -pdf shared/cowabunga/xthreport.pdf
+	&& xth -testpath . -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll -pdf ~/shared/cowabunga/unit.pdf  \
+	&& xth -testpath ~/shared/cowabunga/tests/resources/integration -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptIntegration -pdf ~/shared/cowabunga/integration.pdf
 
 zip:
 	rm -f cowabunga.zip
 	zip -r cowabunga.zip \
-		README.md dependencies src tests xic-build build.gradle Makefile settings.gradle \
+		README.md dependecies src tests xic-build build.gradle Makefile settings.gradle \
 		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi* -x *IRLexer.java* -x *IRParser.java* -x *IRSym.java*
 
 integration.complex:
