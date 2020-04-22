@@ -22,16 +22,14 @@ gradle.test:
 
 xth.test:
 	cd \
-	&& xth -testpath ~/xth/tests/pa5 -compilerpath ~/shared/cowabunga ~/xth/tests/pa5/xthScript -pdf ~/shared/cowabunga/instructor.pdf \
+	&& xth -ec -testpath ~/xth/tests/pa5 -compilerpath ~/shared/cowabunga ~/xth/tests/pa5/xthScript -pdf ~/shared/cowabunga/instructor.pdf \
 	&& python3 ~/shared/cowabunga/tests/xth/build.py \
-	&& xth -testpath . -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll -pdf ~/shared/cowabunga/unit.pdf  \
-	&& xth -testpath ~/shared/cowabunga/tests/resources/integration -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptIntegration -pdf ~/shared/cowabunga/integration.pdf
+	&& xth -ec -testpath . -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptAll -pdf ~/shared/cowabunga/unit.pdf  \
+	&& xth -ec -testpath ~/shared/cowabunga/tests/resources/integration -compilerpath ~/shared/cowabunga ~/shared/cowabunga/tests/xth/xthScriptIntegration -pdf ~/shared/cowabunga/integration.pdf
 
 zip:
 	rm -f cowabunga.zip
-	zip -r cowabunga.zip \
-		README.md dependecies src tests xic-build build.gradle Makefile settings.gradle \
-		-x *.DS_Store* -x *MyLexer.java* -x *XiParser.java* -x *sym.java* -x *test_JUNK.java* -x *xthScript.results* -x *testjunk.ixi* -x *testjunk.xi* -x *IRLexer.java* -x *IRParser.java* -x *IRSym.java*
+	git archive HEAD -o cowabunga.zip
 
 integration.complex:
 	echo '\033[0;32m' 'Precompiling assembly with complex tiler...' '\033[0m' 
