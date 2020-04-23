@@ -10,8 +10,8 @@ import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
+import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMTempArg.Size;
 
 public class BinOpInstructionGenerator {
 

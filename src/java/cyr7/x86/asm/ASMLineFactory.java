@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import cyr7.ir.nodes.IRNode;
+import cyr7.x86.asm.ASMReg.Size;
 
 public class ASMLineFactory {
 
@@ -85,10 +86,17 @@ public class ASMLineFactory {
     }
 
     public ASMInstr Mov(ASMArg dest, ASMArg source) {
-        if (source instanceof ASMConstArg) {
-            return new ASMInstr(ASMInstrType.MOVABSQ, List.of(dest, source), node);
+        if (dest instanceof ASMReg && ((ASMReg) dest).size() == Size.BYTE) {
+            return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
+        } else if (source instanceof ASMReg && ((ASMReg) source).size() == Size.BYTE) {
+            return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
+        } else {
+            return new ASMInstr(ASMInstrType.MOVQ, List.of(dest, source), node);
         }
-        return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
+    }
+
+    public ASMInstr MovAbs(ASMArg dest, ASMArg source) {
+        return new ASMInstr(ASMInstrType.MOVABSQ, List.of(dest, source), node);
     }
 
     public ASMInstr MovZX(ASMArg dest, ASMArg source) {

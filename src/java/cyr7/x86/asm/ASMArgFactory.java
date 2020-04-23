@@ -4,7 +4,7 @@ package cyr7.x86.asm;
 import java.util.Optional;
 
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
-import cyr7.x86.asm.ASMTempArg.Size;
+import cyr7.x86.asm.ASMReg.Size;
 
 public class ASMArgFactory {
 

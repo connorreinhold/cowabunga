@@ -27,4 +27,5 @@ xic ("Cowabunga ASM Tests") "-libpath ./runtime/include" {
     multidimarray.xi;
     ctranslation3.xi;
     ctranslation2.xi;
+    movingStuffAround.xi;
 }

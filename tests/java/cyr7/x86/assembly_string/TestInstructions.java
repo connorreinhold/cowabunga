@@ -24,14 +24,20 @@ class TestInstructions {
         var make = ASMLineFactory.instance;
         var arg = ASMArgFactory.instance;
 
-        ASMInstr movabs = make.Mov(ASMReg.RAX, arg.constant(12));
+        ASMInstr mov = make.Mov(ASMReg.R8B, arg.constant(12));
+        testIntel("    mov r8b, 12", mov);
+
+        ASMInstr movq = make.Mov(ASMReg.RAX, arg.constant(12));
+        testIntel("    movq rax, 12", movq);
+
+        ASMInstr movabs = make.MovAbs(ASMReg.RAX, arg.constant(12));
         testIntel("    movabsq rax, 12", movabs);
 
         ASMInstr memMove = make.Mov(arg.mem(arg.addr(Optional.empty(),
                 ScaleValues.ONE,
                 Optional.empty(),
                 16)), ASMReg.R10);
-        testIntel("    mov [ 16 ], r10", memMove);
+        testIntel("    movq [ 16 ], r10", memMove);
 
         ASMInstr cqo = make.CQO();
         testIntel("    cqo", cqo);

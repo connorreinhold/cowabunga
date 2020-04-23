@@ -2,13 +2,10 @@ package cyr7.x86.asm;
 
 import java.util.Objects;
 
+import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 public final class ASMTempArg implements ASMTempRegArg {
-
-    public enum Size {
-        QWORD, BYTE
-    }
 
     public final String name;
     public final Size size;

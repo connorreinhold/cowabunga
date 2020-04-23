@@ -11,6 +11,7 @@ import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
+import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
@@ -69,9 +70,9 @@ public class ConstTimesTemp_PlusTemp extends MemoryAddrPattern {
                             .getOptimalTiling().tileCost);
 
             ASMAddrExpr addrExpr = arg.addr(
-                Optional.of(arg.temp(tempArg2.name, ASMTempArg.Size.QWORD)),
+                Optional.of(arg.temp(tempArg2.name, Size.QWORD)),
                 ASMAddrExpr.ScaleValues.fromConst(constArg.constant()).get(),
-                Optional.of(arg.temp(tempArg1.name, ASMTempArg.Size.QWORD)),
+                Optional.of(arg.temp(tempArg1.name, Size.QWORD)),
                 0
             );
             return Optional.of(addrExpr);

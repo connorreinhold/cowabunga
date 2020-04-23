@@ -11,8 +11,8 @@ import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
+import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMTempArg.Size;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 

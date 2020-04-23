@@ -83,6 +83,12 @@ public enum ASMInstrType implements ASMInstrTypeI {
         @Override
         public List<Integer> uses() { return List.of(0, 1); }
     },
+    MOV {
+        @Override
+        public List<Integer> defs() { return List.of(0); }
+        @Override
+        public List<Integer> uses() { return List.of(0, 1); }
+    },
     PUSHQ {
         @Override
         public List<Integer> defs() { return List.of(); }

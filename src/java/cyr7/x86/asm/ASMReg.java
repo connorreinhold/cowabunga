@@ -3,6 +3,7 @@ package cyr7.x86.asm;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 public enum ASMReg implements ASMTempRegArg {
+
     // Classic Registers
     RAX, // Accumulator Register
     RCX, // Counter Register
@@ -20,6 +21,10 @@ public enum ASMReg implements ASMTempRegArg {
 
     // Newer 8 bit registers
     R8B, R9B, R10B, R11B, R12B, R13B, R14B, R15B;
+
+    public enum Size {
+        QWORD, BYTE
+    }
 
     @Override
     public String getIntelArg() {
@@ -50,4 +55,42 @@ public enum ASMReg implements ASMTempRegArg {
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
     }
+
+    Size size() {
+        switch (this) {
+            case RAX:
+            case RCX:
+            case RDX:
+            case RBX:
+            case RSP:
+            case RBP:
+            case RSI:
+            case RDI:
+            case R8:
+            case R9:
+            case R10:
+            case R11:
+            case R12:
+            case R13:
+            case R14:
+            case R15:
+                return Size.QWORD;
+            case AL:
+            case CL:
+            case DL:
+            case BL:
+            case R8B:
+            case R9B:
+            case R10B:
+            case R11B:
+            case R12B:
+            case R13B:
+            case R14B:
+            case R15B:
+                return Size.BYTE;
+            default:
+                return Size.QWORD;
+        }
+    }
+
 }

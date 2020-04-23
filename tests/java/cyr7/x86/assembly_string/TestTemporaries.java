@@ -2,10 +2,10 @@ package cyr7.x86.assembly_string;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import cyr7.x86.asm.ASMReg.Size;
 import org.junit.jupiter.api.Test;
 
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMTempArg.Size;
 
 class TestTemporaries {
 

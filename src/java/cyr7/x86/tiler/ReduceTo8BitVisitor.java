@@ -10,7 +10,7 @@ import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMTempArg.Size;
+import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 public class ReduceTo8BitVisitor extends AbstractASMVisitor<ASMArg> {
