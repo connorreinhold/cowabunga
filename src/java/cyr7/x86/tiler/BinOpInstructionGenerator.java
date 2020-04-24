@@ -152,11 +152,6 @@ public class BinOpInstructionGenerator {
         }
         case LT: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-//            if (!(rightArg instanceof ASMTempArg)) {
-//                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
-//                insns.add(make.Mov(temp, rightArg));
-//                rightArg = temp;
-//            }
             if (!(leftArg instanceof ASMTempArg)) {
                 ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
                 insns.add(make.Mov(temp, leftArg));
@@ -193,11 +188,6 @@ public class BinOpInstructionGenerator {
             break;
         case NEQ: {
             ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
-//            if (!(rightArg instanceof ASMTempArg)) {
-//                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
-//                insns.add(make.Mov(temp, rightArg));
-//                rightArg = temp;
-//            }
             if (!(leftArg instanceof ASMTempArg)) {
                 ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
                 insns.add(make.Mov(temp, leftArg));

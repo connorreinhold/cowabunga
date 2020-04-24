@@ -107,6 +107,21 @@ public class CallInstructionGenerator {
         }
 
         // Perform the call
+        if (true)
+        {
+            insn.add(make.Mov(arg.temp("__rax_temp1", Size.QWORD), ASMReg.RAX));
+            insn.add(make.Mov(arg.temp("__rdx_temp1", Size.QWORD), ASMReg.RDX));
+            insn.add(make.Mov(ASMReg.RAX, ASMReg.RSP));
+            insn.add(make.CQO());
+            insn.add(make.Mov(ASMReg.R15, arg.constant(16)));
+            insn.add(make.Div(ASMReg.R15));
+            insn.add(make.Cmp(ASMReg.RDX, arg.constant(0))); // remainder cmp 0
+            insn.add(make.JumpNE(arg.label("_xi_out_of_bounds")));
+
+            insn.add(make.Mov(ASMReg.RAX, arg.temp("__rax_temp1", Size.QWORD)));
+            insn.add(make.Mov(ASMReg.RDX, arg.temp("__rdx_temp1", Size.QWORD)));
+
+        }
         insn.add(make.Call(targetFunction));
 
         // Add back the stack space we used for arguments 7 and beyond
