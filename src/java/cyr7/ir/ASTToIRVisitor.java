@@ -205,7 +205,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(TypeExprArrayNode n) {
         throw new UnsupportedOperationException("TypeExprArrayNode "
-                                    + "visitor should not be  used.");
+                                    + "visitor should not be used.");
     }
 
     private IRExpr allocateArray(TypeExprArrayNode n, Queue<IRTemp> arraySizes) {
@@ -291,7 +291,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                 n = (TypeExprArrayNode)(n.child);
                 sizeExpr = n.size;
             } else {
-                sizeExpr = Optional.empty();
+                return arraySizes;
             }
         }
         return arraySizes;
