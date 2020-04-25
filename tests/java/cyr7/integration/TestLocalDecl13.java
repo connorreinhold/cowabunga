@@ -8,18 +8,14 @@ public class TestLocalDecl13 extends TestProgram {
 
     @Override
     protected String expected() {
-        return "Index: 3\n" +
-                "Index: 2\n" +
-                "Index: 2\n" +
-                "Index: 1\n" +
-                "Index: 1\n" +
+        return "Index: 0\n" +
                 "Index: 0\n" +
-                "1\n" +
+                "Index: 0\n" +
                 "2\n" +
-                "2\n" +
-                "2\n" +
+                "3\n" +
                 "4\n" +
-                "5\n" +
-                "5\n";
+                "4\n" +
+                "2\n" +
+                "3\n";
     }
 }

@@ -3,7 +3,7 @@ package cyr7.integration;
 public class TestAssign09 extends TestProgram {
     @Override
     protected String filename() {
-        return "testassign09";
+        return "assign09";
     }
 
     @Override
