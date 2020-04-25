@@ -31,6 +31,6 @@ public class TestAssign09 extends TestProgram {
                 "4\n" +
                 "5\n" +
                 "6\n" +
-                "7";
+                "7\n";
     }
 }

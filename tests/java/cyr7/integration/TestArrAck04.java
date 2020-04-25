@@ -1,6 +1,6 @@
 package cyr7.integration;
 
-public class TestArrAcc04 extends TestProgram {
+public class TestArrAck04 extends TestProgram {
     @Override
     protected String filename() {
         return "arrack04";
@@ -67,6 +67,6 @@ public class TestArrAcc04 extends TestProgram {
                 "6\n" +
                 "Index: 4\n" +
                 "Index: 3\n" +
-                "7";
+                "7\n";
     }
 }

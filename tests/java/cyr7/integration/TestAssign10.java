@@ -24,7 +24,7 @@ public class TestAssign10 extends TestProgram {
                 "4\n" +
                 "5\n" +
                 "47\n" +
-                "7";
+                "7\n";
     }
 
     @Override

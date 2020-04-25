@@ -63,7 +63,6 @@ import cyr7.ir.nodes.IRTemp;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.semantics.types.FunctionType;
 import cyr7.semantics.types.ResultType;
-import cyr7.util.OneOfThree;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.AbstractVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -491,8 +490,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRExpr arr = n.child.accept(this)
                             .assertFirst();
 
-        commands.add(make.IRMove(make.IRTemp(indexTemp), index));
         commands.add(make.IRMove(make.IRTemp(arrTemp), arr));
+        commands.add(make.IRMove(make.IRTemp(indexTemp), index));
 
         IRExpr length = make.IRMem(make.IRBinOp(OpType.SUB,
                 make.IRTemp(arrTemp),

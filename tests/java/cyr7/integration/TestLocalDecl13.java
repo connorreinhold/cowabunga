@@ -20,6 +20,6 @@ public class TestLocalDecl13 extends TestProgram {
                 "2\n" +
                 "4\n" +
                 "5\n" +
-                "5";
+                "5\n";
     }
 }
