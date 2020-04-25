@@ -69,3 +69,16 @@ task precompiledASMTest(type: Test) {
         exceptionFormat = 'full'
     }
 }
+
+task precompiledASMOnlyTest(type: Test) {
+    useJUnitPlatform {
+        includeTags 'precompiledAssembly'
+    }
+    enableAssertions = true
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        showStackTraces = true
+        exceptionFormat = 'full'
+    }
+}

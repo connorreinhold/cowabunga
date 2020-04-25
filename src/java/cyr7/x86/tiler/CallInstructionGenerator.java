@@ -3,6 +3,7 @@ package cyr7.x86.tiler;
 import java.util.List;
 import java.util.Optional;
 
+import cyr7.cli.CLI;
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
@@ -102,14 +103,6 @@ public class CallInstructionGenerator {
         numberOfValuesPushed += Math.max(arguments.size() - lastRegisterArg, 0);
         final boolean stackNeedsAdjustment = (numberOfValuesPushed % 2 == 0) != stack16ByteAligned;
 
-        // if pushing even number of args, increase stack by 16-byte aligned value
-            // and stack is 16-aligned, then it cannot be adjusted: T , T --> F
-            // and stack is not 16-byte aligned, then we must adjust, T, F --> T
-
-        // if pushing odd number of args, increase stack by non 16-byte aligned value
-            // and stack is 16-aligned, then we must adjust: F, T --> T
-            // and stack is not 16-byte aligned, then it cannot be adjusted: F, F --> F
-
         if (stackNeedsAdjustment) {
             insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
         }
@@ -119,9 +112,7 @@ public class CallInstructionGenerator {
             insn.add(make.Push(arguments.get(i)));
         }
 
-        // Perform the call
-        if (true)
-        {
+        if (CLI.assemblyLevelAssertionsEnabled) {
             insn.add(make.Mov(arg.temp("__rax_temp1", Size.QWORD), ASMReg.RAX));
             insn.add(make.Mov(arg.temp("__rdx_temp1", Size.QWORD), ASMReg.RDX));
             insn.add(make.Mov(ASMReg.RAX, ASMReg.RSP));
@@ -130,11 +121,11 @@ public class CallInstructionGenerator {
             insn.add(make.Div(ASMReg.R15));
             insn.add(make.Cmp(ASMReg.RDX, arg.constant(0))); // remainder cmp 0
             insn.add(make.JumpNE(arg.label("_xi_out_of_bounds")));
-
             insn.add(make.Mov(ASMReg.RAX, arg.temp("__rax_temp1", Size.QWORD)));
             insn.add(make.Mov(ASMReg.RDX, arg.temp("__rdx_temp1", Size.QWORD)));
-
         }
+
+        // Perform the call
         insn.add(make.Call(targetFunction));
 
         // Add back the stack space we used for arguments 7 and beyond

@@ -13,6 +13,7 @@ import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -103,6 +104,7 @@ public abstract class TestProgram {
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
         var redirectedTarget = File.createTempFile("redirect", null);
+        var redirectedError = File.createTempFile("redirectError", null);
         redirectedTarget.setExecutable(true);
         redirectedTarget.setReadable(true);
         redirectedTarget.setWritable(true);
@@ -110,6 +112,7 @@ public abstract class TestProgram {
         stdin.ifPresent(process::redirectInput);
 
         process.redirectOutput(redirectedTarget);
+        process.redirectError(redirectedError);
         Process runner = process.start();
         runner.waitFor();
         if (wantsResult) {
@@ -117,8 +120,17 @@ public abstract class TestProgram {
                     new FileInputStream(redirectedTarget));
             BufferedReader reader = new BufferedReader(new InputStreamReader(
                     resultStream));
-            List<String> output = reader.lines()
-                                        .collect(Collectors.toList());
+            List<String> output = reader
+                .lines().collect(Collectors.toList());
+
+            resultStream = new BufferedInputStream(
+                new FileInputStream(redirectedError));
+            reader = new BufferedReader(new InputStreamReader(
+                resultStream));
+            output.addAll(reader
+                .lines()
+                .map(x -> "ERROR: " + x)
+                .collect(Collectors.toList()));
 
             var builder = new StringBuilder(String.join("\n", output));
             if (this.newLineExists(redirectedTarget)) {

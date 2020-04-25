@@ -54,6 +54,12 @@ public class CLI {
     private static boolean wantsAssembly = true;
     private static boolean wantsTaggedASMFile = false;
 
+    /**
+     * Enable assertions at the assembly level. This specifically enables
+     * checking for 16-byte alignment for function calls.
+     */
+    public static boolean assemblyLevelAssertionsEnabled = false;
+
     private static File assemblyRoot = new File(".");
     private static File sourceRoot = new File(".");
     private static File libRoot = new File(".");
@@ -253,6 +259,15 @@ public class CLI {
             .required(false)
             .build();
 
+        Option enableAssemblyLevelAssertions = Option
+            .builder("enableAssemblyLevelAssertions")
+            .desc("Enable sanity checks for the compiler at the assembly level.")
+            .hasArg(false)
+            .argName(null)
+            .numberOfArgs(0)
+            .required(false)
+            .build();
+
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
@@ -272,7 +287,8 @@ public class CLI {
                 .addOption(debugPrinting)
                 .addOption(noAssembly)
                 .addOption(tiler)
-                .addOption(taggedAssembly);
+                .addOption(taggedAssembly)
+                .addOption(enableAssemblyLevelAssertions);
     }
 
     /**
@@ -446,6 +462,9 @@ public class CLI {
                 case "taggedASMFile":
                      wantsTaggedASMFile = true;
                      break;
+
+                case "enableAssemblyLevelAssertions":
+                    assemblyLevelAssertionsEnabled = true;
 
                 default:
                     writer.write("No case for given for option: " + opt);
