@@ -26,6 +26,9 @@ public class CallInstructionGenerator {
             boolean stack16ByteAligned) {
         ASMLineFactory make = new ASMLineFactory(n);
         int lastRegisterArg;
+
+        int numberOfValuesPushed = 0;
+
         /*
          * If the callee function has more than two return values, then we store
          * memory address to a "saved stack space" to hold return values onto
@@ -36,6 +39,8 @@ public class CallInstructionGenerator {
             lastRegisterArg = Math.min(5, arguments.size());
 
             long size = (numReturnValues - 2) * 8;
+            numberOfValuesPushed += numReturnValues - 2;
+
             insn.add(make.Mov(ASMReg.RDI, arg.constant(size)));
             insn.add(make.Sub(ASMReg.RSP, ASMReg.RDI));
             insn.add(make.Mov(ASMReg.RDI, ASMReg.RSP)); // the first argument
@@ -94,9 +99,17 @@ public class CallInstructionGenerator {
         }
 
         // align the stack depending on the number of pushes to the stack.
-        final boolean stackNeedsAdjustment =
-            (Math.max(arguments.size() - lastRegisterArg, 0) % 2 == 0)
-                == stack16ByteAligned;
+        numberOfValuesPushed += Math.max(arguments.size() - lastRegisterArg, 0);
+        final boolean stackNeedsAdjustment = (numberOfValuesPushed % 2 == 0) != stack16ByteAligned;
+
+        // if pushing even number of args, increase stack by 16-byte aligned value
+            // and stack is 16-aligned, then it cannot be adjusted: T , T --> F
+            // and stack is not 16-byte aligned, then we must adjust, T, F --> T
+
+        // if pushing odd number of args, increase stack by non 16-byte aligned value
+            // and stack is 16-aligned, then we must adjust: F, T --> T
+            // and stack is not 16-byte aligned, then it cannot be adjusted: F, F --> F
+
         if (stackNeedsAdjustment) {
             insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
         }
