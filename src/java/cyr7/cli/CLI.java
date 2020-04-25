@@ -465,6 +465,7 @@ public class CLI {
 
                 case "enableAssemblyLevelAssertions":
                     assemblyLevelAssertionsEnabled = true;
+                    break;
 
                 default:
                     writer.write("No case for given for option: " + opt);
