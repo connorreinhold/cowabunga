@@ -12,13 +12,19 @@ irparser:
 
 cowabunga: myparser mylexer irlexer irparser
 
-test: gradle.test xth.test
+test: gradle.test gradle.asmtest xth.test
 
 gradle.test:
-	./xic-build-daemon -ea
+	./xic-build -ea
 	make integration.complex
 	make integration.basic
 	gradle precompiledASMTest
+
+gradle.asmtest:
+	./xic-build -ea -enableAssemblyLevelAssertions
+	make integration.complex
+	make integration.basic
+	gradle precompiledASMOnlyTest
 
 xth.test:
 	cd \

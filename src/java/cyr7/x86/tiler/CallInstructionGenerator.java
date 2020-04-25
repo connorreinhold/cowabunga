@@ -3,6 +3,7 @@ package cyr7.x86.tiler;
 import java.util.List;
 import java.util.Optional;
 
+import cyr7.cli.CLI;
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
@@ -26,6 +27,9 @@ public class CallInstructionGenerator {
             boolean stack16ByteAligned) {
         ASMLineFactory make = new ASMLineFactory(n);
         int lastRegisterArg;
+
+        int numberOfValuesPushed = 0;
+
         /*
          * If the callee function has more than two return values, then we store
          * memory address to a "saved stack space" to hold return values onto
@@ -36,6 +40,8 @@ public class CallInstructionGenerator {
             lastRegisterArg = Math.min(5, arguments.size());
 
             long size = (numReturnValues - 2) * 8;
+            numberOfValuesPushed += numReturnValues - 2;
+
             insn.add(make.Mov(ASMReg.RDI, arg.constant(size)));
             insn.add(make.Sub(ASMReg.RSP, ASMReg.RDI));
             insn.add(make.Mov(ASMReg.RDI, ASMReg.RSP)); // the first argument
@@ -94,9 +100,9 @@ public class CallInstructionGenerator {
         }
 
         // align the stack depending on the number of pushes to the stack.
-        final boolean stackNeedsAdjustment =
-            (Math.max(arguments.size() - lastRegisterArg, 0) % 2 == 0)
-                == stack16ByteAligned;
+        numberOfValuesPushed += Math.max(arguments.size() - lastRegisterArg, 0);
+        final boolean stackNeedsAdjustment = (numberOfValuesPushed % 2 == 0) != stack16ByteAligned;
+
         if (stackNeedsAdjustment) {
             insn.add(make.Sub(ASMReg.RSP, arg.constant(8)));
         }
@@ -104,6 +110,19 @@ public class CallInstructionGenerator {
         // push additional arguments onto the stack
         for (int i = arguments.size() - 1; i >= lastRegisterArg; i--) {
             insn.add(make.Push(arguments.get(i)));
+        }
+
+        if (CLI.assemblyLevelAssertionsEnabled) {
+            insn.add(make.Mov(arg.temp("__rax_temp1", Size.QWORD), ASMReg.RAX));
+            insn.add(make.Mov(arg.temp("__rdx_temp1", Size.QWORD), ASMReg.RDX));
+            insn.add(make.Mov(ASMReg.RAX, ASMReg.RSP));
+            insn.add(make.CQO());
+            insn.add(make.Mov(ASMReg.R15, arg.constant(16)));
+            insn.add(make.Div(ASMReg.R15));
+            insn.add(make.Cmp(ASMReg.RDX, arg.constant(0))); // remainder cmp 0
+            insn.add(make.JumpNE(arg.label("_xi_out_of_bounds")));
+            insn.add(make.Mov(ASMReg.RAX, arg.temp("__rax_temp1", Size.QWORD)));
+            insn.add(make.Mov(ASMReg.RDX, arg.temp("__rdx_temp1", Size.QWORD)));
         }
 
         // Perform the call

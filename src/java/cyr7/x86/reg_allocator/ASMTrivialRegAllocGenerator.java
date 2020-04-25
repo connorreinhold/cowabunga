@@ -1,5 +1,16 @@
 package cyr7.x86.reg_allocator;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -17,17 +28,6 @@ import cyr7.x86.tiler.TilerData;
 import cyr7.x86.tiler.TilerFactory;
 import cyr7.x86.visitor.TempVisitor;
 import polyglot.util.Pair;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
@@ -122,11 +122,13 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
         List<ASMLine> lines = new ArrayList<>();
         lines.add(new ASMAssemblerDirective("globl", mangledFunctionName));
+
         lines.addAll(List.of(
             new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),
-            make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps))));
+            make.Mov(ASMReg.RBP, ASMReg.RSP)));
+
+        lines.add(make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
 
         // TODO: Better callee-saved registers
         // Definitely do not need to save RSP and RBP, but doing it for the sake
