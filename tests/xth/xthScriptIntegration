@@ -12,6 +12,7 @@ xic ("Cowabunga ASM Tests") "-libpath ./runtime/include" {
     startriangle.xi;
     ctranslation.xi;
     functionTypes.xi;
+    powersOf2.xi;
     arrConcatFuncMutability.xi;
     binopMath.xi;
     ack.xi;
@@ -43,6 +44,7 @@ xic ("Cowabunga ASM Tests (ASM Assertions Enabled)") "-libpath ./runtime/include
     startriangle.xi;
     ctranslation.xi;
     functionTypes.xi;
+    powersOf2.xi;
     arrConcatFuncMutability.xi;
     binopMath.xi;
     ack.xi;
