@@ -67,7 +67,7 @@ public class ConstTimes_TempMinusOffset extends MemoryAddrPattern {
             this.setCost(1 + tempMinusOffset.preMapLeft()
                                            .getOptimalTiling().tileCost);
             long constant = -offset.constant() * cArg.constant();
-            if (Is32Bits.check(constant)) {
+            if (!Is32Bits.check(constant)) {
                 return Optional.empty();
             }
             
