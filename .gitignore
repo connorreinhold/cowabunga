@@ -20,6 +20,7 @@ cowabunga.zip
 
 **/xthScript*.results
 tests/xth/xthScriptAll
+tests/xth/xthScriptIntegration
 
 *.pdf
 

@@ -83,10 +83,18 @@ if __name__ == '__main__':
 
     add_integration_block(
         'Cowabunga ASM Tests',
-        '-libpath ./runtime/include')
+        '-libpath ./runtime/include -target linux')
 
     add_integration_block(
         'Cowabunga ASM Tests (ASM Assertions Enabled)',
-        '-libpath ./runtime/include -enableAssemblyLevelAssertions')
+        '-libpath ./runtime/include -enableAssemblyLevelAssertions -target linux')
+
+    add_integration_block(
+        'Cowabunga ASM Tests (Optimization Disabled)',
+        '-libpath ./runtime/include -O -target linux')
+
+    add_integration_block(
+        'Cowabunga ASM Tests (ASM Assertions Enabled, Optimization Disabled)',
+        '-libpath ./runtime/include -enableAssemblyLevelAssertions -O -target linux')
 
     script_file.close()
