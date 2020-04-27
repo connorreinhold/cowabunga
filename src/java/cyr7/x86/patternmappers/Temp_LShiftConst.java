@@ -31,8 +31,6 @@ public class Temp_LShiftConst extends PatternMapper<IRBinOp> {
         this.isMemoryAccess = isMemoryAccess;
     }
 
-
-    // TODO: Can the right operand be 6 bits
     @Override
     public Optional<TilerData> match(IRBinOp n, ComplexTiler tiler,
             ASMLineFactory make) {
