@@ -61,33 +61,33 @@ def add_integration_block(test_name, cli_arguments):
 
 
 if __name__ == '__main__':
-    add_xth_block(
-        'Cowabunga Lexer Tests', '--lex',
-        './shared/cowabunga/tests/**/*.lexedsol')
-    add_xth_block(
-        'Cowabunga Parser Tests',
-        '--parse',
-        './shared/cowabunga/tests/**/*.parsedsol')
-    add_xth_block(
-        'Cowabunga Type-checker Tests',
-        '--typecheck -libpath ./shared/cowabunga/tests/resources/typecheck/lib',
-        './shared/cowabunga/tests/**/*.typedsol')
-    add_xth_block(
-        'Cowabunga IRGen Tests',
-        '--irgen -libpath ./runtime/include',
-        './shared/cowabunga/tests/**/*.irsol.nml')
-    add_xth_block(
-        'Cowabunga IRGen Tests (Optimization Disabled)',
-        '--irgen -libpath ./runtime/include -O',
-        './shared/cowabunga/tests/**/*.irsol.nml')
+    # add_xth_block(
+    #     'Cowabunga Lexer Tests', '--lex',
+    #     './shared/cowabunga/tests/**/*.lexedsol')
+    # add_xth_block(
+    #     'Cowabunga Parser Tests',
+    #     '--parse',
+    #     './shared/cowabunga/tests/**/*.parsedsol')
+    # add_xth_block(
+    #     'Cowabunga Type-checker Tests',
+    #     '--typecheck -libpath ./shared/cowabunga/tests/resources/typecheck/lib',
+    #     './shared/cowabunga/tests/**/*.typedsol')
+    # add_xth_block(
+    #     'Cowabunga IRGen Tests',
+    #     '--irgen -libpath ./runtime/include',
+    #     './shared/cowabunga/tests/**/*.irsol.nml')
+    # add_xth_block(
+    #     'Cowabunga IRGen Tests (Optimization Disabled)',
+    #     '--irgen -libpath ./runtime/include -O',
+    #     './shared/cowabunga/tests/**/*.irsol.nml')
 
-    add_integration_block(
-        'Cowabunga ASM Tests',
-        '-libpath ./runtime/include -target linux')
+    # add_integration_block(
+    #     'Cowabunga ASM Tests',
+    #     '-libpath ./runtime/include -target linux')
 
-    add_integration_block(
-        'Cowabunga ASM Tests (ASM Assertions Enabled)',
-        '-libpath ./runtime/include -enableAssemblyLevelAssertions -target linux')
+    # add_integration_block(
+    #     'Cowabunga ASM Tests (ASM Assertions Enabled)',
+    #     '-libpath ./runtime/include -enableAssemblyLevelAssertions -target linux')
 
     add_integration_block(
         'Cowabunga ASM Tests (Optimization Disabled)',

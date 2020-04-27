@@ -8,7 +8,6 @@ import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRTemp;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMArg;
@@ -55,6 +54,7 @@ public class Temp_PlusConstTimesTemp_PlusOffset extends MemoryAddrPattern {
             .and(x -> constTimesTemp.matches(new Object[] { x.left(), x.right() }))
             .right()
             .instOf(IRConst.class)
+            .and(x -> Is32Bits.check(x.constant()))
             .finish()
             .enableCommutes();
 

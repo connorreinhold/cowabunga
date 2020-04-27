@@ -66,11 +66,16 @@ public class ConstTimes_TempMinusOffset extends MemoryAddrPattern {
 
             this.setCost(1 + tempMinusOffset.preMapLeft()
                                            .getOptimalTiling().tileCost);
+            long constant = -offset.constant() * cArg.constant();
+            if (Is32Bits.check(constant)) {
+                return Optional.empty();
+            }
+            
             ASMAddrExpr addrExpr = arg.addr(Optional.empty(),
                     ScaleValues.fromConst(cArg.constant())
                                .get(),
                     Optional.of(arg.temp(tempArg.name, Size.QWORD)),
-                    -offset.constant() * cArg.constant());
+                    constant);
             return Optional.of(addrExpr);
         }
 

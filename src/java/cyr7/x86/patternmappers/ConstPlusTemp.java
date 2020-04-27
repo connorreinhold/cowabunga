@@ -37,6 +37,7 @@ public class ConstPlusTemp extends MemoryAddrPattern {
         var pattern = BiPatternBuilder
             .left()
             .instOf(IRConst.class)
+            .and(x -> Is32Bits.check(x.constant()))
             .right()
             .instOf(IRTemp.class)
             .finish()

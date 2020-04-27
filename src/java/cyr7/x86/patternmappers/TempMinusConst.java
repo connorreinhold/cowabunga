@@ -33,6 +33,7 @@ public class TempMinusConst extends MemoryAddrPattern {
                                              .instOf(ASMTempArg.class)
                                              .right()
                                              .instOf(IRConst.class)
+                                             .and(x -> Is32Bits.check(-x.constant()))
                                              .finish()
                                              .mappingLeft(IRExpr.class,
                                                      (Function<IRExpr, ASMArg>) node -> node.accept(

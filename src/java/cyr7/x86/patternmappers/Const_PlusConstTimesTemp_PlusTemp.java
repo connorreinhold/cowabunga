@@ -63,6 +63,7 @@ public class Const_PlusConstTimesTemp_PlusTemp extends MemoryAddrPattern {
         var constPlusRest = BiPatternBuilder
             .left()
             .instOf(IRConst.class)
+            .and(x -> Is32Bits.check(x.constant()))
             .right()
             .instOf(IRBinOp.class)
             .and(x -> x.opType() == OpType.ADD)
