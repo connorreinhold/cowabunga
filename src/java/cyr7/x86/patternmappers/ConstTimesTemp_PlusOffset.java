@@ -54,6 +54,7 @@ public class ConstTimesTemp_PlusOffset extends MemoryAddrPattern {
             .and(x -> constTemp.matches(new Object[] { x.left(), x.right() }))
             .right()
             .instOf(IRConst.class)
+            .and(x -> Is32Bits.check(x.constant()))
             .finish()
             .enableCommutes();
 

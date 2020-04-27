@@ -32,7 +32,21 @@ public class TestConstTimes_TempMinusOffset {
                                 make.IRConst(3))
                 )
         );
-
         assertEqualsTiled(constTempOffset, "leaq _t0, [ 4 * bleh + -12 ]");
     }
+
+    // TODO: Temporaries are not remembered across different lines of instructions
+//     @Test
+//     void testOffsetAndTempTimesOver32Constant() {
+//         IRBinOp constTempOffset = makeIR(make ->
+//                 make.IRBinOp(OpType.MUL,
+//                         make.IRConst(4),
+//                         make.IRBinOp(OpType.SUB,
+//                                 make.IRTemp("bleh"),
+//                                 make.IRConst(1099511627776L)) // 2 ^40
+//                 )
+//         );
+//         assertEqualsTiled(constTempOffset, "movq _t0, 1099511627776", "movq _t1, bleh", "subq _t1, _t0", "leaq _t2, [ 4 * _t1 ]");
+//     }
+
 }

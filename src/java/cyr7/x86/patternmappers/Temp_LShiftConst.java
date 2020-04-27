@@ -10,7 +10,6 @@ import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRExpr;
-import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMLine;
