@@ -1,10 +1,10 @@
 package cyr7.x86.tiler;
 
-        import cyr7.ir.nodes.IRBinOp;
-        import org.junit.jupiter.api.Test;
+import cyr7.ir.nodes.IRBinOp;
+import org.junit.jupiter.api.Test;
 
-        import static cyr7.x86.tiler.ASMTestUtils.assertEqualsTiled;
-        import static cyr7.x86.tiler.ASMTestUtils.makeIR;
+import static cyr7.x86.tiler.ASMTestUtils.assertEqualsTiled;
+import static cyr7.x86.tiler.ASMTestUtils.makeIR;
 
 public class TestTempPlusTemp {
 
