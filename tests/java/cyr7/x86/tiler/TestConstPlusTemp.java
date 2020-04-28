@@ -33,4 +33,18 @@ public class TestConstPlusTemp {
         assertEqualsTiled(constTemp, "leaq _t0, [ bleh + 50 ]");
     }
 
+    @Test
+    void testTempPlusConstOver32Bits() {
+        IRBinOp constTemp = makeIR(make ->
+            make.IRBinOp(
+                OpType.ADD,
+                make.IRTemp("bleh"),
+                make.IRConst(1099511627776L)
+            ));
+
+        assertEqualsTiled(constTemp,
+            "movq _t0, 1099511627776",
+            "leaq _t1, [ bleh + 1 * _t0 ]");
+    }
+
 }

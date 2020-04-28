@@ -51,7 +51,6 @@ public class TestConst_PlusConstTimesTemp_PlusTemp {
         assertEqualsTiled(constTempOffset, "leaq _t0, [ right_bleh + 4 * bleh + 8 ]");
     }
 
-
     @Test
     void testTempTimesConst_PlusTemp_PlusConst() {
         IRBinOp constTempOffset = makeIR(make ->
@@ -64,7 +63,6 @@ public class TestConst_PlusConstTimesTemp_PlusTemp {
                         make.IRConst(8)));
         assertEqualsTiled(constTempOffset, "leaq _t0, [ right_bleh + 4 * bleh + 8 ]");
     }
-
 
     @Test
     void testConst_PlusTemp_PlusConstTimesTemp() {
@@ -106,7 +104,6 @@ public class TestConst_PlusConstTimesTemp_PlusTemp {
         assertEqualsTiled(constTempOffset, "leaq _t0, [ right_bleh + 4 * bleh + 8 ]");
     }
 
-
     @Test
     void testTemp_PlusTempTimesConst_PlusConst() {
         IRBinOp constTempOffset = makeIR(make ->
@@ -120,5 +117,39 @@ public class TestConst_PlusConstTimesTemp_PlusTemp {
         assertEqualsTiled(constTempOffset, "leaq _t0, [ right_bleh + 4 * bleh + 8 ]");
     }
 
+    @Test
+    void testConstMoreThan32Bits_PlusTemp_PlusConstTimesTemp() {
+        IRBinOp constTempOffset = makeIR(make ->
+            make.IRBinOp(OpType.ADD,
+                make.IRConst(1099511627776L),
+                make.IRBinOp(OpType.ADD,
+                    make.IRTemp("left_bleh"),
+                    make.IRBinOp(OpType.MUL,
+                        make.IRConst(4),
+                        make.IRTemp("bleh")))));
+        assertEqualsTiled(constTempOffset,
+            "movq _t0, 1099511627776",
+            "leaq _t1, [ left_bleh + 4 * bleh ]",
+            "leaq _t2, [ _t0 + 1 * _t1 ]");
+    }
+
+    @Test
+    void testConst_PlusTemp_PlusConstOver32BitsTimesTemp() {
+        IRBinOp constTempOffset = makeIR(make ->
+            make.IRBinOp(OpType.ADD,
+                make.IRConst(8),
+                make.IRBinOp(OpType.ADD,
+                    make.IRTemp("left_bleh"),
+                    make.IRBinOp(OpType.MUL,
+                        make.IRConst(1099511627776L),
+                        make.IRTemp("bleh")))));
+        assertEqualsTiled(constTempOffset,
+            "movq _t0, 1099511627776",
+            "movq _t1, _t0",
+            "imulq _t1, bleh",
+            "leaq _t2, [ left_bleh + 1 * _t1 ]",
+            "movq _t3, 8",
+            "addq _t3, _t2");
+    }
 
 }
