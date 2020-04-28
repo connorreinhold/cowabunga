@@ -125,6 +125,25 @@ public class TestTemp_PlusConstTimesTemp_PlusOffset {
                         make.IRTemp("right_bleh")));
         assertEqualsTiled(constTempOffset, "leaq _t0, [ right_bleh + 4 * bleh + 8 ]");
     }
+    
+    
+    @Test
+    void testTempPlusConstTimesTempPlusOver32Constant() {
+        
+        IRBinOp constTempOffset = makeIR(make ->
+            make.IRBinOp(OpType.ADD, 
+                make.IRBinOp(OpType.ADD,
+                    make.IRConst(1099511627776L), // 2 ^ 40
+                    make.IRBinOp(OpType.MUL,
+                        make.IRConst(4),
+                        make.IRTemp("bleh"))), 
+                make.IRTemp("right_bleh")));
+        assertEqualsTiled(constTempOffset,
+            "movq _t0, 1099511627776",
+            "leaq _t1, [ _t0 + 4 * bleh ]",
+            "leaq _t2, [ _t1 + 1 * right_bleh ]"
+        );
+    }
 
 
 }
