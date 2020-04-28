@@ -21,6 +21,8 @@ import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 public final class ASMTestUtils {
 
     public static final IRNodeFactory irNodeFactory = new IRNodeFactory_c(C.LOC);
@@ -44,14 +46,10 @@ public final class ASMTestUtils {
             false);
     }
 
-    public static void assertEqualsASM(String expected, ASMLine line) {
-        Assertions.assertEquals(expected, replaceWithOrderedTemps(line.getIntelAssembly(false, false)));
-    }
-
     public static void assertEqualsTiled(IRNode node, String... assembly) {
         ComplexTiler tiler = makeTiler();
         node.accept(tiler);
-        Assertions.assertEquals(node.getOptimalTiling().optimalInstructions.size(), assembly.length,
+        assertEquals(node.getOptimalTiling().optimalInstructions.size(), assembly.length,
             "\nTiled Instructions:\n"
                 + node
                 .getOptimalTiling()
@@ -62,29 +60,51 @@ public final class ASMTestUtils {
                 + "\nExpected Instructions:\n"
                 + Arrays.toString(assembly)
                 + "\n");
+
+        var actual = node
+            .getOptimalTiling()
+            .optimalInstructions
+            .stream()
+            .map(l -> l.getIntelAssembly(false, false))
+            .toArray(String[]::new);
+        replaceWithOrderedTemps(actual);
+
         for (int i = 0; i < assembly.length; i++) {
-            System.out.println(node.getOptimalTiling().optimalInstructions.get(i).getIntelAssembly());
-            assertEqualsASM(assembly[i], node.getOptimalTiling().optimalInstructions.get(i));
+            System.out.println(actual[i]);
+            assertEquals(assembly[i], actual[i]);
         }
     }
 
-    public static String replaceWithOrderedTemps(String insn) {
-        List<Integer> tempLocations = tempLocations(insn);
-        Collections.reverse(tempLocations);
+    public static void replaceWithOrderedTemps(String[] insns) {
         int orderedTempIndex = 0;
         Map<Integer, Integer> insnTempToOrderedTemps = new HashMap<>();
-        String orderedString = insn;
-        for (Integer location : tempLocations) {
-            int endIndex = location + 2;
-            while ('0' <= insn.charAt(endIndex) && insn.charAt(endIndex) <= '9') {
-                endIndex++;
+
+        for (int i = 0; i < insns.length; i++) {
+            String insn = insns[i];
+            List<Integer> tempLocations = tempLocations(insn);
+            Collections.reverse(tempLocations);
+            String orderedString = insn;
+            for (Integer location : tempLocations) {
+                int endIndex = location + 2;
+                while (endIndex < insn.length()
+                    && '0' <= insn.charAt(endIndex)
+                    && insn.charAt(endIndex) <= '9') {
+                    endIndex++;
+                }
+                int insnTemp = Integer.parseInt(insn.substring(location + 2, endIndex));
+                
+                int orderedTemp = 0;
+                if (insnTempToOrderedTemps.containsKey(insnTemp)) {
+                    orderedTemp = insnTempToOrderedTemps.get(insnTemp);
+                } else {
+                    orderedTemp = orderedTempIndex++;
+                }
+
+                insnTempToOrderedTemps.put(insnTemp, orderedTemp);
+                orderedString = replaceSubstring(orderedString, location + 2, endIndex, Integer.toString(orderedTemp));
             }
-            int insnTemp = Integer.parseInt(insn.substring(location + 2, endIndex));
-            int orderedTemp = insnTempToOrderedTemps.getOrDefault(insnTemp, orderedTempIndex++);
-            insnTempToOrderedTemps.put(insnTemp, orderedTemp);
-            orderedString = replaceSubstring(orderedString, location + 2, endIndex, Integer.toString(orderedTemp));
+            insns[i] = orderedString;
         }
-        return orderedString;
     }
 
     private static List<Integer> tempLocations(String insn) {
