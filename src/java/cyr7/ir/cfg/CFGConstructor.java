@@ -11,8 +11,6 @@ public class CFGConstructor {
 
     public static CFGNode constructCFG(IRCompUnit c) {
 
-        return new CFGStartNode(new CFGReturnNode(List.of()));
-
     }
 
 }

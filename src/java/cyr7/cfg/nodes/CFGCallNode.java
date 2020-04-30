@@ -5,23 +5,20 @@ import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
+import cyr7.ir.nodes.IRNode;
 
 public class CFGCallNode extends CFGNode {
 
     // This includes both procedures and function calls
     public final IRCallStmt call;
-    private final List<CFGNode> in;
     private final CFGNode out;
 
-    public CFGCallNode(IRCallStmt call, CFGNode out) {
+    public CFGCallNode(IRNode source, IRCallStmt call, CFGNode out) {
+        super(source);
         this.call = call;
-        this.in = new ArrayList<>();
         this.out = out;
-    }
 
-    @Override
-    public List<CFGNode> in() {
-        return this.in;
+        this.updateIns();
     }
 
     @Override

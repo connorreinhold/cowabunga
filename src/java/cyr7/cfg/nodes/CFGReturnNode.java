@@ -2,17 +2,13 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.ir.nodes.IRNode;
 
 public class CFGReturnNode extends CFGNode {
-    private final List<CFGNode> in;
 
-    public CFGReturnNode(List<CFGNode> in) {
-        this.in = in;
-    }
-
-    @Override
-    public List<CFGNode> in() {
-        return this.in;
+    public CFGReturnNode(IRNode source, List<CFGNode> in) {
+        super(source);
+        this.updateIns();
     }
 
     @Override

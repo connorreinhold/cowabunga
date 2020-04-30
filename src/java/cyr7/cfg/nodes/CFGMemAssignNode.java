@@ -1,23 +1,26 @@
 package cyr7.cfg.nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRNode;
 
 public class CFGMemAssignNode extends CFGNode {
 
-    private final List<CFGNode> in;
     public final IRExpr location;
     public final IRExpr value;
-    private final List<CFGNode> out;
+    private final CFGNode out;
 
-    public CFGMemAssignNode(List<CFGNode> in, IRExpr location, IRExpr value,
-            List<CFGNode> out) {
-        this.in = in;
+    public CFGMemAssignNode(IRNode source, IRExpr location, IRExpr value,
+            CFGNode out) {
+        super(source);
         this.location = location;
         this.value = value;
         this.out = out;
+
+        this.updateIns();
     }
 
     @Override
@@ -27,7 +30,7 @@ public class CFGMemAssignNode extends CFGNode {
 
     @Override
     public List<CFGNode> out() {
-        return this.out;
+        return List.of(this.out);
     }
 
     @Override
