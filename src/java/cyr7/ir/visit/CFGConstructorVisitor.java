@@ -1,6 +1,14 @@
 package cyr7.ir.visit;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import cyr7.cfg.nodes.CFGCallNode;
+import cyr7.cfg.nodes.CFGMemAssignNode;
 import cyr7.cfg.nodes.CFGNode;
+import cyr7.cfg.nodes.CFGReturnNode;
+import cyr7.cfg.nodes.CFGVarAssignNode;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -18,112 +26,136 @@ import cyr7.ir.nodes.IRMove;
 import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.MyIRVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
+import cyr7.ir.visit.CFGConstructorVisitor.Result;
 
-public class CFGConstructorVisitor implements MyIRVisitor<OneOfTwo<CFGNode, IRExpr>> {
+public class CFGConstructorVisitor implements MyIRVisitor<Result> {
+
+    public static class Result extends OneOfTwo<CFGNode, IRExpr> {
+        private Result(CFGNode first, IRExpr second) {
+            super(first, second);
+        }
+
+        protected static Result cfg(CFGNode c) {
+            return new Result(c, null);
+        }
+
+        protected static Result expr(IRExpr e) {
+            return new Result(null, e);
+        }
+    }
+
+    private final Map<String, CFGNode> labelToCFG;
+    private CFGNode successor;
+
+    public CFGConstructorVisitor() {
+        this.labelToCFG = new HashMap<>();
+    }
 
     @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRBinOp n) {
+    public Result visit(IRSeq n) {
+        ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
+        successor = new CFGReturnNode(new Location(Integer.MAX_VALUE,
+                Integer.MAX_VALUE));
+        for (int i = stmts.size() - 1; i >= 0; i++) {
+            var stmt = stmts.get(i);
+            successor = stmt.accept(this)
+                            .assertFirst();
+        }
+        return Result.cfg(successor);
+    }
+
+    @Override
+    public Result visit(IRBinOp n) {
+        return Result.expr(n);
+    }
+
+    @Override
+    public Result visit(IRCall n) {
+        throw new UnsupportedOperationException("Cannot use IRCall in LIR.");
+    }
+
+    @Override
+    public Result visit(IRConst n) {
+        return Result.expr(n);
+    }
+
+    @Override
+    public Result visit(IRESeq n) {
+        throw new UnsupportedOperationException("Cannot use IRESeq in LIR.");
+    }
+
+    @Override
+    public Result visit(IRMem n) {
+        return Result.expr(n);
+    }
+
+    @Override
+    public Result visit(IRName n) {
+        throw new UnsupportedOperationException(
+                "There are no reasons to use IRName other than it being inside of IRJump or IRCallStmt.");
+    }
+
+    @Override
+    public Result visit(IRTemp n) {
+        return Result.expr(n);
+    }
+
+    @Override
+    public Result visit(IRCallStmt n) {
+        // return Result.expr(IRCallStmt);
+    }
+
+    @Override
+    public Result visit(IRCJump n) {
+        return null;
+    }
+
+    @Override
+    public Result visit(IRCompUnit n) {
+        throw new UnsupportedOperationException(
+                "Cannot use IRCompUnit in this visitor.");
+    }
+
+    @Override
+    public Result visit(IRExp n) {
+        throw new UnsupportedOperationException("Cannot use IRExp in LIR.");
+    }
+
+    @Override
+    public Result visit(IRFuncDecl n) {
+        throw new UnsupportedOperationException(
+                "Cannot use IRFuncDecl in this visitor.");
+    }
+
+    @Override
+    public Result visit(IRJump n) {
         // TODO Auto-generated method stub
         return null;
     }
 
     @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRCall n) {
-        // TODO Auto-generated method stub
-        return null;
+    public Result visit(IRLabel n) {
+        this.labelToCFG.put(n.name(), successor);
     }
 
     @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRConst n) {
-        // TODO Auto-generated method stub
-        return null;
+    public Result visit(IRMove n) {
+        if (n.target() instanceof IRTemp) {
+            IRTemp temp = (IRTemp) n.target();
+            return Result.cfg(new CFGVarAssignNode(n.location(), temp.name(), n.source(), successor));
+        } else {
+            return Result.cfg(new CFGMemAssignNode(n.location(), n.target(), n.source(), successor));
+        }
     }
 
     @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRESeq n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRMem n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRName n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRTemp n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRCallStmt n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRCJump n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRCompUnit n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRExp n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRFuncDecl n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRJump n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRLabel n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRMove n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRReturn n) {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public OneOfTwo<CFGNode, IRExpr> visit(IRSeq n) {
-        // TODO Auto-generated method stub
-        return null;
+    public Result visit(IRReturn n) {
+        return Result.cfg(new CFGReturnNode(n.location()));
     }
 
 }
