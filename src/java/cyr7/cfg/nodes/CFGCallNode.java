@@ -1,5 +1,6 @@
 package cyr7.cfg.nodes;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
@@ -12,9 +13,9 @@ public class CFGCallNode extends CFGNode {
     private final List<CFGNode> in;
     private final CFGNode out;
 
-    public CFGCallNode(IRCallStmt call, List<CFGNode> in, CFGNode out) {
+    public CFGCallNode(IRCallStmt call, CFGNode out) {
         this.call = call;
-        this.in = in;
+        this.in = new ArrayList<>();
         this.out = out;
     }
 
