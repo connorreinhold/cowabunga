@@ -18,7 +18,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-class TestBasicCFG {
+class TestGenerateBasicCFG {
 
     @Test
     void testEmptyFunction() {

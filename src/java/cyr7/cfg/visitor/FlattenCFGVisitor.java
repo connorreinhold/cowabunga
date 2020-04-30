@@ -112,7 +112,8 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
     @Override
     public List<IRStmt> visit(CFGVarAssignNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        List<IRStmt> stmts = List.of(make.IRMove(make.IRTemp(n.variable), n.value));
+        List<IRStmt> stmts = new ArrayList<>();
+        stmts.add(make.IRMove(make.IRTemp(n.variable), n.value));
         stmts.addAll(n.out().get(0).accept(this));
         return stmtsOrAddTranslation(n, stmts);
     }
@@ -120,7 +121,8 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
     @Override
     public List<IRStmt> visit(CFGMemAssignNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        List<IRStmt> stmts = List.of(make.IRMove(n.target, n.value));
+        List<IRStmt> stmts = new ArrayList<IRStmt>();
+        stmts.add(make.IRMove(n.target, n.value));
         stmts.addAll(n.out().get(0).accept(this));
         return stmtsOrAddTranslation(n, stmts);
     }
