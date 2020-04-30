@@ -42,7 +42,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
     public List<IRStmt> visit(CFGCallNode n) {
         List<IRStmt> stmts = List.of(n.call);
         stmts.addAll(n.out().get(0).accept(this));
-        return stmtsOrPushJoin(n, stmts);
+        return stmtsOrAddTranslation(n, stmts);
     }
 
     private enum BranchOrigin {
@@ -69,8 +69,10 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
             Pair<CFGNode, BranchOrigin> current = frontier.poll();
         
             // List of out nodes from current node with the same origin branch as parent
+            // The filtering prevents loops
             List<Pair<CFGNode, BranchOrigin>> outPairs = current
                     .part1().out().stream()
+                    .filter(outNode -> outNode != n)
                     .map(outNode -> new Pair<CFGNode, BranchOrigin>(outNode, current.part2()))
                     .collect(Collectors.toList());
             
@@ -104,7 +106,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         stmts.add(make.IRLabel(end));
         stmts.addAll(joinTranslations.get(joinNode));
         
-        return stmtsOrPushJoin(n,stmts);
+        return stmtsOrAddTranslation(n,stmts);
     }
 
     @Override
@@ -112,7 +114,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         IRNodeFactory make = new IRNodeFactory_c(n.location());
         List<IRStmt> stmts = List.of(make.IRMove(make.IRTemp(n.variable), n.value));
         stmts.addAll(n.out().get(0).accept(this));
-        return stmtsOrPushJoin(n, stmts);
+        return stmtsOrAddTranslation(n, stmts);
     }
 
     @Override
@@ -120,13 +122,13 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         IRNodeFactory make = new IRNodeFactory_c(n.location());
         List<IRStmt> stmts = List.of(make.IRMove(n.target, n.value));
         stmts.addAll(n.out().get(0).accept(this));
-        return stmtsOrPushJoin(n, stmts);
+        return stmtsOrAddTranslation(n, stmts);
     }
 
     @Override
     public List<IRStmt> visit(CFGReturnNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        return stmtsOrPushJoin(n, List.of(make.IRReturn()));
+        return stmtsOrAddTranslation(n, List.of(make.IRReturn()));
     }
 
     @Override
@@ -137,7 +139,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
     // This method ensures that if there are multiple entry points to a node, we save
     // the translation to put it in the correct spot when translating to IR. Currently,
     // joinNodeTranslations will only contain the nodes after an if/else block.
-    private List<IRStmt> stmtsOrPushJoin(CFGNode n, List<IRStmt> stmts) {
+    private List<IRStmt> stmtsOrAddTranslation(CFGNode n, List<IRStmt> stmts) {
         if (!joinNodes.isEmpty() && joinNodes.peek() == n ) {
             joinTranslations.put(n, stmts);
             return List.of();
