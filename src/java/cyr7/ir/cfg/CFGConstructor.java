@@ -10,7 +10,7 @@ import cyr7.ir.nodes.IRCompUnit;
 public class CFGConstructor {
 
     public static CFGNode constructCFG(IRCompUnit c) {
-
+        throw new UnsupportedOperationException();
     }
 
 }

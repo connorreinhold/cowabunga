@@ -3,17 +3,17 @@ package cyr7.cfg.nodes;
 import java.util.ArrayList;
 import java.util.List;
 import cyr7.cfg.visitor.AbstractCFGVisitor;
-import cyr7.ir.nodes.IRNode;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class CFGNode {
 
     protected final List<CFGNode> in;
 
-    private final IRNode source;
+    private final Location location;
 
-    protected CFGNode(IRNode source) {
+    protected CFGNode(Location location) {
         this.in = new ArrayList<>(1);
-        this.source = source;
+        this.location = location;
     }
 
     public List<CFGNode> in() {

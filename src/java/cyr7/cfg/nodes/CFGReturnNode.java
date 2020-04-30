@@ -2,12 +2,12 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 import cyr7.cfg.visitor.AbstractCFGVisitor;
-import cyr7.ir.nodes.IRNode;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGReturnNode extends CFGNode {
 
-    public CFGReturnNode(IRNode source, List<CFGNode> in) {
-        super(source);
+    public CFGReturnNode(Location location, List<CFGNode> in) {
+        super(location);
         this.updateIns();
     }
 

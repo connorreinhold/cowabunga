@@ -1,11 +1,10 @@
 package cyr7.cfg.nodes;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
-import cyr7.ir.nodes.IRNode;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGCallNode extends CFGNode {
 
@@ -13,8 +12,8 @@ public class CFGCallNode extends CFGNode {
     public final IRCallStmt call;
     private final CFGNode out;
 
-    public CFGCallNode(IRNode source, IRCallStmt call, CFGNode out) {
-        super(source);
+    public CFGCallNode(Location location, IRCallStmt call, CFGNode out) {
+        super(location);
         this.call = call;
         this.out = out;
 

@@ -2,13 +2,13 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 import cyr7.cfg.visitor.AbstractCFGVisitor;
-import cyr7.ir.nodes.IRNode;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGStartNode extends CFGNode {
     private final CFGNode out;
 
-    public CFGStartNode(IRNode source, CFGNode out) {
-        super(source);
+    public CFGStartNode(Location location, CFGNode out) {
+        super(location);
         this.out = out;
         this.updateIns();
     }

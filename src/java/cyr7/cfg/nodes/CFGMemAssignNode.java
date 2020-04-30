@@ -5,18 +5,18 @@ import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRNode;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGMemAssignNode extends CFGNode {
 
-    public final IRExpr location;
+    public final IRExpr memAccess;
     public final IRExpr value;
     private final CFGNode out;
 
-    public CFGMemAssignNode(IRNode source, IRExpr location, IRExpr value,
+    public CFGMemAssignNode(Location location, IRExpr memAccess, IRExpr value,
             CFGNode out) {
-        super(source);
-        this.location = location;
+        super(location);
+        this.memAccess = memAccess;
         this.value = value;
         this.out = out;
 

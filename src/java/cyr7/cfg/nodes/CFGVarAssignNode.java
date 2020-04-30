@@ -2,17 +2,17 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRNode;
 import cyr7.cfg.visitor.AbstractCFGVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGVarAssignNode extends CFGNode {
 	public final String variable;
 	public final IRExpr value;
 	private final CFGNode outNode;
 
-	public CFGVarAssignNode(IRNode source, String variable, IRExpr value,
+	public CFGVarAssignNode(Location location, String variable, IRExpr value,
 			CFGNode outNode) {
-		super(source);
+		super(location);
 		this.variable = variable;
 		this.value = value;
 		this.outNode = outNode;
