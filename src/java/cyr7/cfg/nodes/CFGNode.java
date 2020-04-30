@@ -19,6 +19,10 @@ public abstract class CFGNode {
     public List<CFGNode> in() {
         return in;
     }
+    
+    public Location location() {
+        return location;
+    }
 
     public abstract List<CFGNode> out();
 

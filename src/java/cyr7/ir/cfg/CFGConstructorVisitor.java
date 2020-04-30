@@ -132,7 +132,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
                                     // branches are fall-throughs.
         String trueBranch = n.trueLabel();
         CFGIfNode ifNode = new CFGIfNode(n.location(), this.labelToCFG.get(
-                trueBranch), successor);
+                trueBranch), successor, n.cond());
         return Result.cfg(ifNode);
     }
 
