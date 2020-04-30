@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cyr7.cfg.nodes.CFGCallNode;
+import cyr7.cfg.nodes.CFGIfNode;
 import cyr7.cfg.nodes.CFGMemAssignNode;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGReturnNode;
@@ -51,16 +52,31 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
     private final Map<String, CFGNode> labelToCFG;
     private CFGNode successor;
+    private final CFGNode absoluteLastReturn = new CFGReturnNode(new Location(
+            Integer.MAX_VALUE, Integer.MAX_VALUE));
+
+    /**
+     * This boolean is for testing purposes, enforcing that IRSeq is only found
+     * at the top-level of the IRTree.
+     */
+    private boolean hasEnteredIRSeq;
 
     public CFGConstructorVisitor() {
         this.labelToCFG = new HashMap<>();
+        successor = absoluteLastReturn;
+        this.hasEnteredIRSeq = false;
     }
 
     @Override
     public Result visit(IRSeq n) {
+        if (hasEnteredIRSeq) {
+            throw new UnsupportedOperationException(
+                    "Cannot enter the IRSeq visitor twice");
+        } else {
+            this.hasEnteredIRSeq = true;
+        }
+
         ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
-        successor = new CFGReturnNode(new Location(Integer.MAX_VALUE,
-                Integer.MAX_VALUE));
         for (int i = stmts.size() - 1; i >= 0; i++) {
             var stmt = stmts.get(i);
             successor = stmt.accept(this)
@@ -107,12 +123,17 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRCallStmt n) {
-        // return Result.expr(IRCallStmt);
+        return Result.cfg(new CFGCallNode(n.location(), n, successor));
     }
 
     @Override
     public Result visit(IRCJump n) {
-        return null;
+        assert !n.hasFalseLabel();  // IR should be lowered, meaning false
+                                    // branches are fall-throughs.
+        String trueBranch = n.trueLabel();
+        CFGIfNode ifNode = new CFGIfNode(n.location(), this.labelToCFG.get(
+                trueBranch), successor);
+        return Result.cfg(ifNode);
     }
 
     @Override
@@ -134,22 +155,29 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRJump n) {
-        // TODO Auto-generated method stub
-        return null;
+        if (n.target() instanceof IRName) {
+            String target = ((IRName) n.target()).name();
+            return Result.cfg(this.labelToCFG.get(target));
+        }
+        throw new UnsupportedOperationException(
+                "IRJump contains a non-name target.");
     }
 
     @Override
     public Result visit(IRLabel n) {
         this.labelToCFG.put(n.name(), successor);
+        return Result.cfg(absoluteLastReturn);
     }
 
     @Override
     public Result visit(IRMove n) {
         if (n.target() instanceof IRTemp) {
             IRTemp temp = (IRTemp) n.target();
-            return Result.cfg(new CFGVarAssignNode(n.location(), temp.name(), n.source(), successor));
+            return Result.cfg(new CFGVarAssignNode(n.location(), temp.name(), n.source(),
+                    successor));
         } else {
-            return Result.cfg(new CFGMemAssignNode(n.location(), n.target(), n.source(), successor));
+            return Result.cfg(new CFGMemAssignNode(n.location(), n.target(), n.source(),
+                    successor));
         }
     }
 
