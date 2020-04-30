@@ -1,14 +1,13 @@
 package cyr7.ir.cfg;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import cyr7.cfg.nodes.CFGNode;
+import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.visit.CFGConstructorVisitor;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGConstructor {
 
@@ -20,7 +19,8 @@ public class CFGConstructor {
         Map<String, CFGNode> cfgCollection = new HashMap<>();
 
         c.functions().forEach((name, fn) -> {
-            cfgCollection.put(name, fn.body().accept(new CFGConstructorVisitor()).assertFirst());
+            CFGNode fBody = fn.body().accept(new CFGConstructorVisitor()).assertFirst();
+            cfgCollection.put(name, new CFGStartNode(new Location(-1, -1), fBody));
          });
         return cfgCollection;
     }
