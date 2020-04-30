@@ -1,8 +1,15 @@
 package cyr7.cfg.visitor;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.Stack;
+import java.util.stream.Collectors;
 
 import cyr7.cfg.nodes.CFGCallNode;
 import cyr7.cfg.nodes.CFGIfNode;
@@ -16,14 +23,19 @@ import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
 
+import polyglot.util.Pair;
+
 public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
 
     private IdGenerator generator;
-    private Stack<List<IRStmt>> joinNodeTranslations;
+    // each element has its CFGNode and the node translated into a list of IRStmts
+    private Stack<CFGNode> joinNodes;
+    private Map<CFGNode, List<IRStmt>> joinTranslations;
     
     public FlattenCFGVisitor(IdGenerator generator) {
         this.generator = generator;
-        this.joinNodeTranslations = new Stack<List<IRStmt>>();
+        this.joinNodes = new Stack<>();
+        this.joinTranslations = new HashMap<>();
     }
     
     @Override
@@ -33,6 +45,10 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         return stmtsOrPushJoin(n, stmts);
     }
 
+    private enum BranchOrigin {
+        FALSE,
+        TRUE
+    }
     @Override
     public List<IRStmt> visit(CFGIfNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
@@ -41,14 +57,53 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         String end = generator.newLabel();
         List<IRStmt> stmts = new ArrayList<IRStmt>();
     
+        Set<CFGNode> seenFromTrueBranch = new HashSet<CFGNode>();
+        Set<CFGNode> seenFromFalseBranch = new HashSet<CFGNode>();
+        Queue<Pair<CFGNode, BranchOrigin>> frontier = new LinkedList<Pair<CFGNode, BranchOrigin>>();
+        frontier.add(new Pair<CFGNode, BranchOrigin>(n.falseBranch(), BranchOrigin.FALSE));
+        frontier.add(new Pair<CFGNode, BranchOrigin>(n.trueBranch(), BranchOrigin.TRUE));
+        CFGNode joinNode = null;
+        
+        // run bfs to find node where the false and true branches come back together
+        while(joinNode == null && !frontier.isEmpty()) {
+            Pair<CFGNode, BranchOrigin> current = frontier.poll();
+        
+            // List of out nodes from current node with the same origin branch as parent
+            List<Pair<CFGNode, BranchOrigin>> outPairs = current
+                    .part1().out().stream()
+                    .map(outNode -> new Pair<CFGNode, BranchOrigin>(outNode, current.part2()))
+                    .collect(Collectors.toList());
+            
+            if (current.part2() == BranchOrigin.FALSE) {
+                if (seenFromTrueBranch.contains(current.part1())) {
+                    joinNode = current.part1();
+                } else {
+                    seenFromFalseBranch.add(current.part1());
+                    frontier.addAll(outPairs);
+                }
+            } else if (current.part2() == BranchOrigin.TRUE) {
+                if (seenFromFalseBranch.contains(current.part1())) {
+                    joinNode = current.part1();
+                } else {
+                    seenFromTrueBranch.add(current.part1());
+                    frontier.addAll(outPairs);
+                }
+            }
+        }
+        
+        // If the branches come back together
+        if (joinNode != null) {
+            this.joinNodes.push(joinNode);
+        }
+        
         stmts.add(make.IRCJump(n.cond, lt, lf));
         stmts.add(make.IRLabel(lf));
         stmts.addAll(n.falseBranch().accept(this));
         stmts.add(make.IRLabel(lt));
         stmts.addAll(n.trueBranch().accept(this));
         stmts.add(make.IRLabel(end));
-        stmts.addAll(joinNodeTranslations.pop());
-
+        stmts.addAll(joinTranslations.get(joinNode));
+        
         return stmtsOrPushJoin(n,stmts);
     }
 
@@ -83,8 +138,8 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
     // the translation to put it in the correct spot when translating to IR. Currently,
     // joinNodeTranslations will only contain the nodes after an if/else block.
     private List<IRStmt> stmtsOrPushJoin(CFGNode n, List<IRStmt> stmts) {
-        if (n.in().size() > 1) {
-            joinNodeTranslations.push(stmts);
+        if (!joinNodes.isEmpty() && joinNodes.peek() == n ) {
+            joinTranslations.put(n, stmts);
             return List.of();
         }
         return stmts;
