@@ -19,10 +19,14 @@ public abstract class CFGNode {
     public List<CFGNode> in() {
         return in;
     }
+    
+    public Location location() {
+        return location;
+    }
 
     public abstract List<CFGNode> out();
 
-    public abstract <T> void accept(AbstractCFGVisitor<T> visitor);
+    public abstract <T> T accept(AbstractCFGVisitor<T> visitor);
 
     protected final void updateIns() {
         for (CFGNode node : out()) {
