@@ -26,8 +26,8 @@ public class CFGCallNode extends CFGNode {
     }
 
     @Override
-    public <T> void accept(AbstractCFGVisitor<T> visitor) {
-        visitor.visit(this);
+    public <T> T accept(AbstractCFGVisitor<T> visitor) {
+        return visitor.visit(this);
     }
 
 }
