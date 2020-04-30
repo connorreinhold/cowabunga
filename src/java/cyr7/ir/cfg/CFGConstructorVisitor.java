@@ -36,7 +36,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
-    public static class Result extends OneOfTwo<CFGNode, IRExpr> {
+    protected static class Result extends OneOfTwo<CFGNode, IRExpr> {
         private Result(CFGNode first, IRExpr second) {
             super(first, second);
         }
