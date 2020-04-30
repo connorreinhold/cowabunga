@@ -6,7 +6,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGReturnNode extends CFGNode {
 
-    public CFGReturnNode(Location location, List<CFGNode> in) {
+    public CFGReturnNode(Location location) {
         super(location);
         this.updateIns();
     }
