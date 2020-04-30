@@ -10,14 +10,14 @@ public class CFGIfNode extends CFGNode {
 
     private final CFGNode trueBranch;
     private final CFGNode falseBranch;
-    public final IRExpr guard;
+    public final IRExpr cond;
 
     public CFGIfNode(Location location, CFGNode trueBranch,
-            CFGNode falseBranch, IRExpr guard) {
+            CFGNode falseBranch, IRExpr cond) {
         super(location);
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
-        this.guard = guard;
+        this.cond = cond;
 
         this.updateIns();
     }

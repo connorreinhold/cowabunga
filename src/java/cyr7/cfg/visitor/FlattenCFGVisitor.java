@@ -41,7 +41,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         String end = generator.newLabel();
         List<IRStmt> stmts = new ArrayList<IRStmt>();
     
-        stmts.add(make.IRCJump(n.guard, lt, lf));
+        stmts.add(make.IRCJump(n.cond, lt, lf));
         stmts.add(make.IRLabel(lf));
         stmts.addAll(n.falseBranch().accept(this));
         stmts.add(make.IRLabel(lt));
