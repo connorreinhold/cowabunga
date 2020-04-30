@@ -1,4 +1,4 @@
-package cyr7.ir.visit;
+package cyr7.ir.cfg;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -10,6 +10,7 @@ import cyr7.cfg.nodes.CFGMemAssignNode;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
+import cyr7.ir.cfg.CFGConstructorVisitor.Result;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -32,11 +33,10 @@ import cyr7.ir.nodes.IRTemp;
 import cyr7.util.OneOfTwo;
 import cyr7.visitor.MyIRVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
-import cyr7.ir.visit.CFGConstructorVisitor.Result;
 
 public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
-    public static class Result extends OneOfTwo<CFGNode, IRExpr> {
+    protected static class Result extends OneOfTwo<CFGNode, IRExpr> {
         private Result(CFGNode first, IRExpr second) {
             super(first, second);
         }
@@ -61,7 +61,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
      */
     private boolean hasEnteredIRSeq;
 
-    public CFGConstructorVisitor() {
+    protected CFGConstructorVisitor() {
         this.labelToCFG = new HashMap<>();
         successor = absoluteLastReturn;
         this.hasEnteredIRSeq = false;
@@ -77,7 +77,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
         }
 
         ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
-        for (int i = stmts.size() - 1; i >= 0; i++) {
+        for (int i = stmts.size() - 1; i >= 0; i--) {
             var stmt = stmts.get(i);
             successor = stmt.accept(this)
                             .assertFirst();

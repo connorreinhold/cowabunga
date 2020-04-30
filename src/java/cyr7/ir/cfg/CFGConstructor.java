@@ -6,7 +6,6 @@ import java.util.Map;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.visit.CFGConstructorVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGConstructor {
