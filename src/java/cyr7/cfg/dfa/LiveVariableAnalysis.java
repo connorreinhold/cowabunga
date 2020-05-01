@@ -18,8 +18,6 @@ public enum LiveVariableAnalysis implements BackwardDataflowAnalysis<Set<String>
 
     INSTANCE;
 
-    private final TransferFunction transferFunction = new TransferFunction();
-
     @Override
     public Set<String> topValue() {
         return Set.of();
@@ -27,7 +25,7 @@ public enum LiveVariableAnalysis implements BackwardDataflowAnalysis<Set<String>
 
     @Override
     public BackwardTransferFunction<Set<String>> transfer() {
-        return transferFunction;
+        return TransferFunction.INSTANCE;
     }
 
     @Override
@@ -35,7 +33,9 @@ public enum LiveVariableAnalysis implements BackwardDataflowAnalysis<Set<String>
         return Stream.concat(lhs.stream(), rhs.stream()).collect(Collectors.toSet());
     }
 
-    private static class TransferFunction implements BackwardTransferFunction<Set<String>> {
+    private enum TransferFunction implements BackwardTransferFunction<Set<String>> {
+
+        INSTANCE;
 
         private static Set<String> f(CFGNode n, Set<String> in) {
             return Sets.union(
