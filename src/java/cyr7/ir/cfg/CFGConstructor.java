@@ -1,16 +1,27 @@
 package cyr7.ir.cfg;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCompUnit;
+import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGConstructor {
 
-    public static CFGNode constructCFG(IRCompUnit c) {
-        throw new UnsupportedOperationException();
+    /**
+     * Generates a CFG Tree for each function defined in the IRTree.
+     */
+    public static Map<String, CFGNode> constructCFG(IRCompUnit c) {
+
+        Map<String, CFGNode> cfgCollection = new HashMap<>();
+
+        c.functions().forEach((name, fn) -> {
+            CFGNode fBody = fn.body().accept(new CFGConstructorVisitor()).assertFirst();
+            cfgCollection.put(name, new CFGStartNode(new Location(-1, -1), fBody));
+         });
+        return cfgCollection;
     }
 
 }

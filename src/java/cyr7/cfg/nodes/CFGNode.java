@@ -23,6 +23,10 @@ public abstract class CFGNode {
         return in;
     }
 
+    public Location location() {
+        return location;
+    }
+
     public abstract List<CFGNode> out();
 
     public abstract <T> T accept(AbstractCFGVisitor<T> visitor);

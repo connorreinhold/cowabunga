@@ -10,14 +10,18 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGMemAssignNode extends CFGNode {
 
-    public final IRExpr memAccess;
+    public final IRExpr target;
     public final IRExpr value;
     private final CFGNode out;
 
-    public CFGMemAssignNode(Location location, IRExpr memAccess, IRExpr value,
-                            CFGNode out) {
+    public CFGMemAssignNode(
+        Location location,
+        IRExpr target,
+        IRExpr value,
+        CFGNode out) {
+
         super(location);
-        this.memAccess = memAccess;
+        this.target = target;
         this.value = value;
         this.out = out;
 
