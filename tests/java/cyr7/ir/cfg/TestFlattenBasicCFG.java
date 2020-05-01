@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.flatten.CFGFlattener;
@@ -32,7 +31,6 @@ class TestFlattenBasicCFG {
         System.out.println(result);
     }
 
-    @Disabled
     @Test
     void testAssignmentsFunction() {
         Location loc = new Location(-1, -1);
@@ -52,7 +50,6 @@ class TestFlattenBasicCFG {
         // System.out.println(node);
     }
 
-    @Disabled
     @Test
     void testIFElseFunction() {
         Location loc = new Location(-1, -1);
@@ -77,15 +74,56 @@ class TestFlattenBasicCFG {
     @Test
     void testWhileFunction() throws Exception {
 
-        String prgmString = "main(): int { while (false) { while(true) { } }  if (133 > 0) { return 43 } return 12 }";
+        String prgmString = "main(): int { while (false) { while(true) { } } if (133 > 0) { return 43 } return 12 }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
                 "while.xi", null, new IRUtil.LowerConfiguration(true, true),
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        var stuff = new LinkedList<>(result.values()).get(0);
-        System.out.println(stuff);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
+        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
+        // DefaultIdGenerator());
+        // System.out.println(node);
+    }
+
+
+
+    @Test
+    void testJustReturnFunction() throws Exception {
+
+        String prgmString = "main(): int { return 13 }";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "return.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
+        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
+        // DefaultIdGenerator());
+        // System.out.println(node);
+    }
+
+
+    @Test
+    void testNestedControls() throws Exception {
+
+        String prgmString = "main() { i: int = 232 "
+                + "while (i < 32) {"
+                + "    if (i%2 == 0) { i = 32 } else {"
+                + "        k: int = 0"
+                + "        while (k < 12) k = k + 1"
+                + "    }"
+                + "    i = i + 1"
+                + "}"
+                + "}";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "nestedControls.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
         // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
         // DefaultIdGenerator());

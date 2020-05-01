@@ -70,7 +70,6 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
         }
 
         ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
-        System.out.println(stmts);
         for (int i = stmts.size() - 1; i >= 0; i--) {
             var stmt = stmts.get(i);
             successor = stmt.accept(this);
