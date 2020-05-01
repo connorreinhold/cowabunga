@@ -39,8 +39,8 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
     private final Map<String, CFGNode> labelToCFG;
     private final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG;
-    private final CFGNode absoluteLastReturn = new CFGReturnNode(new Location(
-            Integer.MAX_VALUE, Integer.MAX_VALUE));
+    private final CFGNode absoluteLastReturn = new CFGReturnNode(
+        new Location(Integer.MAX_VALUE, Integer.MAX_VALUE), 0);
     private CFGNode successor;
 
     /**
@@ -170,7 +170,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(IRReturn n) {
-        return new CFGReturnNode(n.location());
+        return new CFGReturnNode(n.location(), n.numReturnValues);
     }
 
 
@@ -231,5 +231,5 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
     public CFGNode visit(IRTemp n) {
         throw new UnsupportedOperationException(
                 "Cannot use IR expressions in this visitor.");
-
+    }
 }
