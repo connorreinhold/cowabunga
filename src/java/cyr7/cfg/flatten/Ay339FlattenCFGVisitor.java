@@ -27,7 +27,8 @@ import cyr7.ir.nodes.IRStmt;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
 
-public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>> {
+public class Ay339FlattenCFGVisitor
+        extends AbstractCFGVisitor<Optional<CFGNode>> {
 
     /**
      * A wrapper class so that stmts can be compared via pointer addresses,
@@ -58,7 +59,8 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
 
         public void setLabel(String label) {
             if (this.label.isPresent()) {
-                throw new UnsupportedOperationException("Error: Cannot set label twice.");
+                throw new UnsupportedOperationException(
+                        "Error: Cannot set label twice.");
             }
             var make = new IRNodeFactory_c(this.location());
             this.label = Optional.of(make.IRLabel(label));
@@ -66,7 +68,8 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
 
         public void setJump(String target) {
             if (this.jump.isPresent()) {
-                throw new UnsupportedOperationException("Error: Cannot set jump twice.");
+                throw new UnsupportedOperationException(
+                        "Error: Cannot set jump twice.");
             }
             var make = new IRNodeFactory_c(this.location());
             this.jump = Optional.of(make.IRJump(make.IRName(target)));
@@ -126,6 +129,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     /**
      * Sets node {@code n} to be visited and the predecessor node for the next
      * node.
+     *
      * @param n
      */
     private void epilogueProcess(CFGNode n, IRStmtWrapper stmt) {
@@ -152,10 +156,11 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     /**
      * Inserts a newly-created label before the IRStmt associated to node
      * {@code n}.
+     *
      * @param n
      */
     private String insertLabelForNode(CFGNode n) {
-        IRStmtWrapper stmt = this.cfgNodeToIRStmt.get(n);
+        final var stmt = this.cfgNodeToIRStmt.get(n);
         final String label = generator.newLabel();
         stmt.setLabel(label);
         this.cfgNodeToLabels.put(n, label);
@@ -187,7 +192,6 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         }
     }
 
-
     /**
      * Adds the statement {@code stmt} to the end of the list of statements.
      * <p>
@@ -206,7 +210,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     @Override
     public Optional<CFGNode> visit(CFGCallNode n) {
         if (!this.performProcessIfVisited(n)) {
-            IRStmtWrapper stmt = this.wrapStmt(n.call);
+            final var stmt = this.wrapStmt(n.call);
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
             final CFGNode next = n.out().get(0);
@@ -224,7 +228,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
 
             final var make = this.createMake(n);
             final CFGNode falseBranch = n.falseBranch();
-            var stmt = this.wrapStmt(make.IRCJump(n.cond, trueLabel));
+            final var stmt = this.wrapStmt(make.IRCJump(n.cond, trueLabel));
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
             return Optional.of(falseBranch);
@@ -236,7 +240,8 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     public Optional<CFGNode> visit(CFGVarAssignNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
-            var stmt = this.wrapStmt(make.IRMove(make.IRTemp(n.variable), n.value));
+            final var stmt = this
+                    .wrapStmt(make.IRMove(make.IRTemp(n.variable), n.value));
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
             final CFGNode next = n.out().get(0);
@@ -249,7 +254,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     public Optional<CFGNode> visit(CFGMemAssignNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
-            var stmt = this.wrapStmt(make.IRMove(n.target, n.value));
+            final var stmt = this.wrapStmt(make.IRMove(n.target, n.value));
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
             final CFGNode next = n.out().get(0);
@@ -261,10 +266,10 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     /**
      * Three possibilities:
      * <ol>
-     * <li> This node has never been visited.
-     * <li> This node has been visited but there is no associated label to
-     * jump to.
-     * <li> This node has been visited and there is an associated label.
+     * <li>This node has never been visited.
+     * <li>This node has been visited but there is no associated label to jump
+     * to.
+     * <li>This node has been visited and there is an associated label.
      * </ol>
      */
     @Override
@@ -295,7 +300,8 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
             }
 
             while (!this.trueBranches.isEmpty()) {
-                final Pair<CFGNode, String> nextTrueBranch = trueBranches.poll();
+                final Pair<CFGNode, String> nextTrueBranch = trueBranches
+                        .poll();
                 next = Optional.of(nextTrueBranch.part1());
                 make = this.createMake(next.get());
                 final String trueLabel = nextTrueBranch.part2();
