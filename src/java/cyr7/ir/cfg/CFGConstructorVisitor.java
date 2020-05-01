@@ -79,8 +79,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
         ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
         for (int i = stmts.size() - 1; i >= 0; i--) {
             var stmt = stmts.get(i);
-            successor = stmt.accept(this)
-                            .assertFirst();
+            successor = stmt.accept(this).assertFirst();
         }
         return Result.cfg(successor);
     }
@@ -166,7 +165,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
     @Override
     public Result visit(IRLabel n) {
         this.labelToCFG.put(n.name(), successor);
-        return Result.cfg(absoluteLastReturn);
+        return Result.cfg(successor);
     }
 
     @Override

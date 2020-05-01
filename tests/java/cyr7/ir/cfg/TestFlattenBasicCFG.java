@@ -5,9 +5,8 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.cfg.CFGToIRGenerator;
+import cyr7.cfg.flatten.CFGFlattener;
 import cyr7.cfg.nodes.CFGNode;
-import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -15,38 +14,45 @@ import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
-import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
+import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 class TestFlattenBasicCFG {
 
+    private void testWithAlternateFlattener(CFGNode root) {
+        IRStmt result = CFGFlattener.flatten(root);
+        System.out.println(result);
+    }
+
     @Test
     void testAssignmentsFunction() {
         Location loc = new Location(-1, -1);
-        var func = new IRFuncDecl(loc, "assign", new IRSeq(loc,
-                new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
-                new IRMove(loc, new IRMem(loc, new IRConst(loc, 0)), new IRConst(loc, 0)),
-                new IRReturn(loc)));
+        var func = new IRFuncDecl(loc, "assign", new IRSeq(loc, new IRMove(loc,
+                new IRTemp(loc, "target"), new IRConst(loc, 0)), new IRMove(loc,
+                        new IRMem(loc, new IRConst(loc, 0)), new IRConst(loc,
+                                0)), new IRReturn(loc)));
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("assign", func);
         var comp = new IRCompUnit(loc, "base", map);
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new DefaultIdGenerator());
-        System.out.println(node);
+
+        this.testWithAlternateFlattener(result.get("assign"));
+        // IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new
+        // DefaultIdGenerator());
+        // System.out.println(node);
     }
-    
+
     @Test
     void testIFElseFunction() {
         Location loc = new Location(-1, -1);
-        var func = new IRFuncDecl(loc, "if", new IRSeq(loc,
-                new IRCJump(loc, new IRConst(loc, 0), "Hello_World"),
-                new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
-                new IRLabel(loc, "Hello_World"),
-                new IRReturn(loc)));
+        var func = new IRFuncDecl(loc, "if", new IRSeq(loc, new IRCJump(loc,
+                new IRConst(loc, 0), "Hello_World"), new IRMove(loc, new IRTemp(
+                        loc, "target"), new IRConst(loc, 0)), new IRLabel(loc,
+                                "Hello_World"), new IRReturn(loc)));
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("if", func);
@@ -55,9 +61,10 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
-        IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new DefaultIdGenerator());
-        System.out.println(node);
+        this.testWithAlternateFlattener(result.get("if"));
+        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
+        // DefaultIdGenerator());
+        // System.out.println(node);
     }
-
 
 }
