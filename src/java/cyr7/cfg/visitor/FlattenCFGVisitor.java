@@ -25,7 +25,7 @@ import cyr7.ir.nodes.IRStmt;
 
 import polyglot.util.Pair;
 
-public class FlattenCFGVisitor implements AbstractCFGVisitor<List<IRStmt>>{
+public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
 
     private IdGenerator generator;
     // each element has its CFGNode and the node translated into a list of IRStmts

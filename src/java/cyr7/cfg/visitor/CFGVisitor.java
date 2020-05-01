@@ -7,7 +7,7 @@ import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
 
-public interface AbstractCFGVisitor<R> {
+public interface CFGVisitor<R> {
 
     R visit(CFGCallNode n);
 

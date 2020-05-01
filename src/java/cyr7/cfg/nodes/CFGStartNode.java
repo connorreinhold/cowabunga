@@ -4,7 +4,7 @@ import java.util.List;
 
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.cfg.visitor.CFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGStartNode extends CFGNode {
@@ -22,7 +22,7 @@ public class CFGStartNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(AbstractCFGVisitor<T> visitor) {
+    public <T> T accept(CFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

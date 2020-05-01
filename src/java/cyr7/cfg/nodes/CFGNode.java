@@ -5,7 +5,7 @@ import java.util.List;
 
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.cfg.visitor.CFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class CFGNode {
@@ -29,7 +29,7 @@ public abstract class CFGNode {
 
     public abstract List<CFGNode> out();
 
-    public abstract <T> T accept(AbstractCFGVisitor<T> visitor);
+    public abstract <T> T accept(CFGVisitor<T> visitor);
 
     /**
      * Invariant: the number of elements in the output of this list must
