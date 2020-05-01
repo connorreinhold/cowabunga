@@ -42,4 +42,9 @@ public class CFGVarAssignNode extends CFGNode {
 	public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
 		return transferFunction.transfer(this, input);
 	}
+	
+    @Override
+    public String toString() {
+        return String.format("%s=%s", variable, value.toString());
+    }
 }

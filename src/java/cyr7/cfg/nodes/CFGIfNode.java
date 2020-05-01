@@ -55,5 +55,10 @@ public class CFGIfNode extends CFGNode {
     public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
         return transferFunction.transfer(this, input);
     }
+    
+    @Override
+    public String toString() {
+        return String.format("if(%s)",cond.toString());
+    }
 
 }
