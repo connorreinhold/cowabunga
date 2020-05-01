@@ -79,6 +79,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
         ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
         for (int i = stmts.size() - 1; i >= 0; i--) {
             var stmt = stmts.get(i);
+            System.out.println(stmt);
             successor = stmt.accept(this).assertFirst();
         }
         return Result.cfg(successor);

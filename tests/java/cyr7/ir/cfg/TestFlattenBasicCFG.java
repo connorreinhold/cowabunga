@@ -1,12 +1,17 @@
 package cyr7.ir.cfg;
 
+import java.io.StringReader;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.flatten.CFGFlattener;
 import cyr7.cfg.nodes.CFGNode;
+import cyr7.ir.DefaultIdGenerator;
+import cyr7.ir.IRUtil;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -27,6 +32,7 @@ class TestFlattenBasicCFG {
         System.out.println(result);
     }
 
+    @Disabled
     @Test
     void testAssignmentsFunction() {
         Location loc = new Location(-1, -1);
@@ -46,6 +52,7 @@ class TestFlattenBasicCFG {
         // System.out.println(node);
     }
 
+    @Disabled
     @Test
     void testIFElseFunction() {
         Location loc = new Location(-1, -1);
@@ -62,6 +69,24 @@ class TestFlattenBasicCFG {
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
         this.testWithAlternateFlattener(result.get("if"));
+        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
+        // DefaultIdGenerator());
+        // System.out.println(node);
+    }
+
+    @Test
+    void testWhileFunction() throws Exception {
+
+        String prgmString = "main() { while(true) { while(false) { } } }";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "while.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        System.out.println(new LinkedList<>(comp.functions().values()).get(0).body());
+//        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+
+//        this.testWithAlternateFlattener(result.get("while.xi"));
         // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
         // DefaultIdGenerator());
         // System.out.println(node);
