@@ -130,4 +130,22 @@ class TestFlattenBasicCFG {
         // System.out.println(node);
     }
 
+
+    @Test
+    void testEmpty() throws Exception {
+
+        String prgmString = "main() { }";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "nestedControls.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
+        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
+        // DefaultIdGenerator());
+        // System.out.println(node);
+    }
+
+
 }
