@@ -6,9 +6,9 @@ import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.visitor.AbstractCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class StubCFGNode extends CFGNode {
+public class CFGStubNode extends CFGNode {
 
-    protected StubCFGNode() {
+    protected CFGStubNode() {
         super(new Location(-1, -1));
     }
 
@@ -23,7 +23,7 @@ public class StubCFGNode extends CFGNode {
     }
 
     @Override
-    public void convertFromStub(StubCFGNode stub, CFGNode n) {
+    public void convertFromStub(CFGStubNode stub, CFGNode n) {
         throw new UnsupportedOperationException("Cannot convert in stub node");
     }
 

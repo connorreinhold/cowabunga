@@ -38,7 +38,7 @@ import polyglot.util.Pair;
 public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
     private final Map<String, CFGNode> labelToCFG;
-    private final Queue<Pair<StubCFGNode, String>> jumpTargetFromCFG;
+    private final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG;
     private final CFGNode absoluteLastReturn = new CFGReturnNode(new Location(
             Integer.MAX_VALUE, Integer.MAX_VALUE));
     private CFGNode successor;
@@ -56,8 +56,8 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
         this.successor = absoluteLastReturn;
     }
 
-    private StubCFGNode createStubNode() {
-        return new StubCFGNode();
+    private CFGStubNode createStubNode() {
+        return new CFGStubNode();
     }
 
     @Override
@@ -78,7 +78,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
         while (!this.jumpTargetFromCFG.isEmpty()) {
             var nextPair = this.jumpTargetFromCFG.poll();
-            StubCFGNode stub = nextPair.part1();
+            CFGStubNode stub = nextPair.part1();
             String target = nextPair.part2();
 
             if (this.labelToCFG.containsKey(target)) {
@@ -119,7 +119,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
                     successor, n.cond());
         } else {
             // Create stub node, and connect target to the stub node.
-            StubCFGNode stub = this.createStubNode();
+            CFGStubNode stub = this.createStubNode();
             CFGIfNode ifNode = new CFGIfNode(n.location(),
                     stub, successor, n.cond());
             this.jumpTargetFromCFG.add(new Pair<>(stub, trueBranch));
@@ -137,7 +137,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
                 return this.labelToCFG.get(target);
             } else {
                 // Create a stub node for later computation
-                StubCFGNode stub = this.createStubNode();
+                CFGStubNode stub = this.createStubNode();
                 this.jumpTargetFromCFG.add(new Pair<>(stub, target));
                 return stub;
             }

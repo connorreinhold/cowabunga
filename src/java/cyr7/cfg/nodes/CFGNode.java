@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
-import cyr7.ir.cfg.StubCFGNode;
+import cyr7.ir.cfg.CFGStubNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class CFGNode {
@@ -36,6 +36,6 @@ public abstract class CFGNode {
         }
     }
 
-    public abstract void convertFromStub(StubCFGNode stub, CFGNode n);
+    public abstract void convertFromStub(CFGStubNode stub, CFGNode n);
 
 }

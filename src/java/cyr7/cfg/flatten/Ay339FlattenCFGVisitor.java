@@ -285,9 +285,9 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     public Optional<CFGNode> visit(CFGStartNode n) {
         if (!this.performProcessIfVisited(n)) {
             var make = this.createMake(n);
-            var startLbl = this.wrapStmt();
-            this.appendStmt(n, startLbl);
-            this.epilogueProcess(n, startLbl);
+            var startElement = this.wrapStmt();
+            this.appendStmt(n, startElement);
+            this.epilogueProcess(n, startElement);
 
             Optional<CFGNode> next = Optional.of(n.out().get(0));
             while (next.isPresent()) {

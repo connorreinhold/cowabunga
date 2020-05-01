@@ -3,7 +3,7 @@ package cyr7.cfg.nodes;
 import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
-import cyr7.ir.cfg.StubCFGNode;
+import cyr7.ir.cfg.CFGStubNode;
 import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -42,7 +42,7 @@ public class CFGIfNode extends CFGNode {
     }
 
     @Override
-    public void convertFromStub(StubCFGNode stub, CFGNode n) {
+    public void convertFromStub(CFGStubNode stub, CFGNode n) {
         if (trueBranch == stub) {
             this.trueBranch = n;
         } else if (falseBranch == stub) {
