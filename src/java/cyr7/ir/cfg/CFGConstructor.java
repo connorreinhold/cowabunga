@@ -18,7 +18,7 @@ public class CFGConstructor {
         Map<String, CFGNode> cfgCollection = new HashMap<>();
 
         c.functions().forEach((name, fn) -> {
-            CFGNode fBody = fn.body().accept(new CFGConstructorVisitor()).assertFirst();
+            CFGNode fBody = fn.body().accept(new CFGConstructorVisitor());
             cfgCollection.put(name, new CFGStartNode(new Location(-1, -1), fBody));
          });
         return cfgCollection;

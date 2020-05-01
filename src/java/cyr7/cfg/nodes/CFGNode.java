@@ -2,7 +2,9 @@ package cyr7.cfg.nodes;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.ir.cfg.StubCFGNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class CFGNode {
@@ -19,7 +21,7 @@ public abstract class CFGNode {
     public List<CFGNode> in() {
         return in;
     }
-    
+
     public Location location() {
         return location;
     }
@@ -33,5 +35,7 @@ public abstract class CFGNode {
             node.in().add(this);
         }
     }
+
+    public abstract void convertFromStub(StubCFGNode stub, CFGNode n);
 
 }

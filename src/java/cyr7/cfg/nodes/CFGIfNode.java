@@ -3,13 +3,14 @@ package cyr7.cfg.nodes;
 import java.util.List;
 
 import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.ir.cfg.StubCFGNode;
 import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGIfNode extends CFGNode {
 
-    private final CFGNode trueBranch;
-    private final CFGNode falseBranch;
+    private CFGNode trueBranch;
+    private CFGNode falseBranch;
     public final IRExpr cond;
 
     public CFGIfNode(Location location, CFGNode trueBranch,
@@ -30,16 +31,28 @@ public class CFGIfNode extends CFGNode {
     public CFGNode falseBranch() {
         return falseBranch;
     }
-    
+
     public CFGNode trueBranch() {
         return trueBranch;
     }
-    
+
     @Override
     public List<CFGNode> out() {
         return List.of(trueBranch, falseBranch);
     }
-    
+
+    @Override
+    public void convertFromStub(StubCFGNode stub, CFGNode n) {
+        if (trueBranch == stub) {
+            this.trueBranch = n;
+        } else if (falseBranch == stub) {
+            this.falseBranch = n;
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cannot change out node unless it was originally a stub node.");
+        }
+        this.updateIns();
+    }
 
 
 }
