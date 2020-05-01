@@ -107,11 +107,6 @@ public final class BlockGenerator {
 
             assert currentBlockStmts.size() == 1 : currentBlockStmts.toString();
             assert currentBlockStmts.get(0) instanceof IRLabel;
-
-            IRNodeFactory make = new IRNodeFactory_c(new Location(
-                    "IRReturn inserted by BlockGenerator", -1, -1
-            ));
-            currentBlockStmts.add(make.IRReturn());
             blocks.add(new BasicBlock(currentBlockStmts));
         }
 

@@ -231,6 +231,5 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
     public CFGNode visit(IRTemp n) {
         throw new UnsupportedOperationException(
                 "Cannot use IR expressions in this visitor.");
-    }
 
 }

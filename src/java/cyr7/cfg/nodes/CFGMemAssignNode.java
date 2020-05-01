@@ -2,8 +2,10 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 
-import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.cfg.CFGStubNode;
+import cyr7.cfg.dfa.BackwardTransferFunction;
+import cyr7.cfg.dfa.ForwardTransferFunction;
+import cyr7.cfg.visitor.CFGVisitor;
 import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -13,8 +15,12 @@ public class CFGMemAssignNode extends CFGNode {
     public final IRExpr value;
     private CFGNode out;
 
-    public CFGMemAssignNode(Location location, IRExpr target, IRExpr value,
-            CFGNode out) {
+    public CFGMemAssignNode(
+        Location location,
+        IRExpr target,
+        IRExpr value,
+        CFGNode out) {
+
         super(location);
         this.target = target;
         this.value = value;
@@ -29,7 +35,7 @@ public class CFGMemAssignNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(AbstractCFGVisitor<T> visitor) {
+    public <T> T accept(CFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
@@ -44,4 +50,17 @@ public class CFGMemAssignNode extends CFGNode {
         }
     }
 
+    public <T> List<T> acceptForward(ForwardTransferFunction<T> transferFunction, T in) {
+        return List.of(transferFunction.transfer(this, in));
+    }
+
+    @Override
+    public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
+        return transferFunction.transfer(this, input);
+    }
+
+    @Override
+    public String toString() {
+        return "([" + target.label() + "] = " + value.label() + ")";
+    }
 }

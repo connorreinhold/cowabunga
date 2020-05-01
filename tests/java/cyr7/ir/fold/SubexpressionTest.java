@@ -116,7 +116,7 @@ class SubexpressionTest {
                         make.IRCall(make.IRName("helper"),
                                 List.of(make.IRBinOp(OpType.ADD,
                                         make.IRConst(0), make.IRConst(1))))),
-                make.IRReturn());
+                make.IRReturn(0));
         List<IRStmt> stmtsOfHelper = List.of(
                 make.IRMove(
                         make.IRMem(make.IRBinOp(OpType.MUL, make.IRConst(2),
@@ -128,14 +128,14 @@ class SubexpressionTest {
                         make.IRCall(make.IRName("helper"),
                                 List.of(make.IRBinOp(OpType.ADD,
                                         make.IRConst(0), make.IRConst(1))))),
-                make.IRReturn());
+                make.IRReturn(0));
 
         List<IRStmt> stmtsOfMainFolded = List.of(
                 make.IRMove(make.IRTemp("t1"), make.IRConst(1)),
                 make.IRLabel("here"),
                 make.IRExp(make.IRCall(make.IRName("helper"),
                         List.of(make.IRConst(1)))),
-                make.IRReturn());
+                make.IRReturn(0));
 
         List<IRStmt> stmtsOfHelperFolded = List.of(
                 make.IRMove(
@@ -144,7 +144,7 @@ class SubexpressionTest {
                 make.IRExp(
                         make.IRCall(make.IRName("helper"),
                                 List.of(make.IRConst(1)))),
-                make.IRReturn());
+                make.IRReturn(0));
 
         Map<String, IRFuncDecl> funcs = new HashMap<>();
         funcs.put("main", make.IRFuncDecl("main", make.IRSeq(stmtsOfMain)));

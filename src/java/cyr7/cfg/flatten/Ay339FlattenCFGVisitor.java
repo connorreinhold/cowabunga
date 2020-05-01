@@ -16,7 +16,7 @@ import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
-import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.cfg.visitor.CFGVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRJump;
@@ -28,7 +28,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
 
 public class Ay339FlattenCFGVisitor
-        extends AbstractCFGVisitor<Optional<CFGNode>> {
+        implements CFGVisitor<Optional<CFGNode>> {
 
     /**
      * A wrapper class so that stmts can be compared via pointer addresses,
@@ -276,7 +276,7 @@ public class Ay339FlattenCFGVisitor
     public Optional<CFGNode> visit(CFGReturnNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
-            var stmt = this.wrapStmt(make.IRReturn());
+            var stmt = this.wrapStmt(make.IRReturn(n.numReturnValues));
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
         }
