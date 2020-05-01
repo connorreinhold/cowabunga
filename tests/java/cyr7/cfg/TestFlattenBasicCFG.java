@@ -1,13 +1,15 @@
-package cyr7.ir.cfg;
+package cyr7.cfg;
 
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
-import cyr7.cfg.CFGToIRGenerator;
+import cyr7.cfg.CFGUtil;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.ir.DefaultIdGenerator;
+import cyr7.ir.cfg.CFGConstructor;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -23,7 +25,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 class TestFlattenBasicCFG {
 
-    @Test
+    //@Test
     void testAssignmentsFunction() {
         Location loc = new Location(-1, -1);
         var func = new IRFuncDecl(loc, "assign", new IRSeq(loc,
@@ -35,11 +37,11 @@ class TestFlattenBasicCFG {
         map.put("assign", func);
         var comp = new IRCompUnit(loc, "base", map);
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new DefaultIdGenerator());
+        IRNode node = CFGUtil.generateIR(result.get("assign"), new DefaultIdGenerator());
         System.out.println(node);
     }
     
-    @Test
+    //@Test
     void testIFElseFunction() {
         Location loc = new Location(-1, -1);
         var func = new IRFuncDecl(loc, "if", new IRSeq(loc,
@@ -50,14 +52,32 @@ class TestFlattenBasicCFG {
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("if", func);
-
         var comp = new IRCompUnit(loc, "base", map);
-
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
-        IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new DefaultIdGenerator());
+        IRNode node = CFGUtil.generateIR(result.get("if"), new DefaultIdGenerator());
         System.out.println(node);
     }
+    
+    @Test
+    void tempDotGeneration() {
+        Location loc = new Location(-1, -1);
+        var func = new IRFuncDecl(loc, "if", new IRSeq(loc,
+                new IRCJump(loc, new IRConst(loc, 0), "Hello_World"),
+                new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
+                new IRLabel(loc, "Hello_World"),
+                new IRReturn(loc)));
+
+        var map = new HashMap<String, IRFuncDecl>();
+        map.put("if", func);
+        var comp = new IRCompUnit(loc, "base", map);
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        
+        CFGUtil.outputToDot(result.get("if"), new PrintWriter(System.out));
+
+        IRNode node = CFGUtil.generateIR(result.get("if"), new DefaultIdGenerator());
+    }
+    
 
 
 }

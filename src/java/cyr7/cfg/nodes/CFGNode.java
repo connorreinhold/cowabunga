@@ -44,5 +44,7 @@ public abstract class CFGNode {
             node.in().add(this);
         }
     }
+    
+    public abstract String CFGLabel();
 
 }

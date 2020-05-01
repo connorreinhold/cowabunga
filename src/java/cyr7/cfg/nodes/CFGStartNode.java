@@ -36,8 +36,7 @@ public class CFGStartNode extends CFGNode {
         return input;
     }
     
-    @Override
-    public String toString() {
+    public String CFGLabel() {
         return "start";
     }
 }

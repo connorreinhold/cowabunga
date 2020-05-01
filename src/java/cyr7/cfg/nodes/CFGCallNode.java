@@ -42,9 +42,8 @@ public class CFGCallNode extends CFGNode {
         return transferFunction.transfer(this, input);
     }
     
-    @Override
-    public String toString() {
-        return call.toString();
+    public String CFGLabel() {
+        return call.label();
     }
 
 }

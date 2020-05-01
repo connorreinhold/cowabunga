@@ -56,9 +56,8 @@ public class CFGIfNode extends CFGNode {
         return transferFunction.transfer(this, input);
     }
     
-    @Override
-    public String toString() {
-        return String.format("if(%s)",cond.toString());
+    public String CFGLabel() {
+        return String.format("if(%s)", cond.label());
     }
 
 }
