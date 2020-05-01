@@ -199,7 +199,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
     }
 
     @Override
-    public Void visit(CFGIfNode n) {
+    public Optional<CFGNode> visit(CFGIfNode n) {
         if (!this.performProcessIfVisited(n)) {
             final CFGNode trueBranch = n.trueBranch();
             final String trueLabel = generator.newLabel();
@@ -209,33 +209,33 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
             this.appendStmt(n, make.IRCJump(n.cond, trueLabel));
             this.trueBranches.add(trueBranch);
             this.epilogueProcess(n);
-            falseBranch.accept(this);
+            return Optional.of(falseBranch);
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(CFGVarAssignNode n) {
+    public Optional<CFGNode> visit(CFGVarAssignNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
             this.appendStmt(n, make.IRMove(make.IRTemp(n.variable), n.value));
             this.epilogueProcess(n);
             final CFGNode next = n.out().get(0);
-            next.accept(this);
+            return Optional.of(next);
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
-    public Void visit(CFGMemAssignNode n) {
+    public Optional<CFGNode> visit(CFGMemAssignNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
             this.appendStmt(n, make.IRMove(n.target, n.value));
             this.epilogueProcess(n);
             final CFGNode next = n.out().get(0);
-            next.accept(this);
+            return Optional.of(next);
         }
-        return null;
+        return Optional.empty();
     }
 
     /**
@@ -248,36 +248,41 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
      * </ol>
      */
     @Override
-    public Void visit(CFGReturnNode n) {
+    public Optional<CFGNode> visit(CFGReturnNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
             this.appendStmt(n, make.IRReturn());
         }
         this.epilogueProcess(n);
-        return null;
+        return Optional.empty();
     }
 
     /**
      * There are no labels or statements associated with the start node.
      */
     @Override
-    public Void visit(CFGStartNode n) {
+    public Optional<CFGNode> visit(CFGStartNode n) {
         if (hasEntered) {
             throw new UnsupportedOperationException(
                     "Cannot enter start node twice.");
         }
         this.epilogueProcess(n);
 
-        final CFGNode next = n.out().get(0);
-        next.accept(this);
+        Optional<CFGNode> next = Optional.of(n.out().get(0));
+        while (next.isPresent()) {
+            next = next.get().accept(this);
+        }
 
         while (!this.trueBranches.isEmpty()) {
-            final CFGNode nextTrueBranch = trueBranches.poll();
-            var make = this.createMake(nextTrueBranch);
-            final String trueLabel = this.cfgNodeToLabels.get(nextTrueBranch);
+            next = Optional.of(trueBranches.poll());
+            var make = this.createMake(next.get());
+            final String trueLabel = this.cfgNodeToLabels.get(next.get());
             this.stmts.add(this.wrapStmt(make.IRLabel(trueLabel)));
-            nextTrueBranch.accept(this);
+
+            while (next.isPresent()) {
+                next = next.get().accept(this);
+            }
         }
-        return null;
+        return Optional.empty();
     }
 }
