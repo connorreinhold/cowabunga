@@ -155,7 +155,19 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
 
     @Override
     public Void visit(CFGCallNode n) {
-        // TODO Auto-generated method stub
+        if (this.visitedNodes.contains(n)) {
+            if (this.cfgNodeToLabels.containsKey(n)) {
+                final String target = this.cfgNodeToLabels.get(n);
+                this.insertJumpForNode(this.predecessor, target);
+             } else {
+                 this.insertLabelForNode(n);
+             }
+        } else {
+            this.appendStmt(n, n.call);
+            this.epilogueProcess(n);
+            final CFGNode next = n.out().get(0);
+            next.accept(this);
+        }
         return null;
     }
 
@@ -184,13 +196,39 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
 
     @Override
     public Void visit(CFGVarAssignNode n) {
-        // TODO Auto-generated method stub
+        if (this.visitedNodes.contains(n)) {
+            if (this.cfgNodeToLabels.containsKey(n)) {
+                final String target = this.cfgNodeToLabels.get(n);
+                this.insertJumpForNode(this.predecessor, target);
+             } else {
+                 this.insertLabelForNode(n);
+             }
+        } else {
+            final var make = this.createMake(n);
+            this.appendStmt(n, make.IRMove(make.IRTemp(n.variable), n.value));
+            this.epilogueProcess(n);
+            final CFGNode next = n.out().get(0);
+            next.accept(this);
+        }
         return null;
     }
 
     @Override
     public Void visit(CFGMemAssignNode n) {
-        // TODO Auto-generated method stub
+        if (this.visitedNodes.contains(n)) {
+            if (this.cfgNodeToLabels.containsKey(n)) {
+                final String target = this.cfgNodeToLabels.get(n);
+                this.insertJumpForNode(this.predecessor, target);
+             } else {
+                 this.insertLabelForNode(n);
+             }
+        } else {
+            final var make = this.createMake(n);
+            this.appendStmt(n, make.IRMove(n.target, n.value));
+            this.epilogueProcess(n);
+            final CFGNode next = n.out().get(0);
+            next.accept(this);
+        }
         return null;
     }
 
@@ -233,6 +271,11 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
 
         final CFGNode next = n.out().get(0);
         next.accept(this);
+
+        while (!this.trueBranches.isEmpty()) {
+            CFGNode nextTrueBranch = trueBranches.poll();
+            nextTrueBranch.accept(this);
+        }
         return null;
     }
 }
