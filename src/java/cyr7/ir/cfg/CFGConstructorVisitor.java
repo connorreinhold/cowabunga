@@ -52,8 +52,9 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
     private final Map<String, CFGNode> labelToCFG;
     private CFGNode successor;
+    // TODO: Change -1 to number of return values?
     private final CFGNode absoluteLastReturn = new CFGReturnNode(new Location(
-            Integer.MAX_VALUE, Integer.MAX_VALUE));
+            Integer.MAX_VALUE, Integer.MAX_VALUE), -1);
 
     /**
      * This boolean is for testing purposes, enforcing that IRSeq is only found
@@ -183,7 +184,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<Result> {
 
     @Override
     public Result visit(IRReturn n) {
-        return Result.cfg(new CFGReturnNode(n.location()));
+        return Result.cfg(new CFGReturnNode(n.location(), n.numReturnValues));
     }
 
 }

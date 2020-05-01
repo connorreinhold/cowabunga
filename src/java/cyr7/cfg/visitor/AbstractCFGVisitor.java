@@ -7,18 +7,18 @@ import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
 
-public abstract class AbstractCFGVisitor<R> {
+public interface AbstractCFGVisitor<R> {
 
-    abstract public R visit(CFGCallNode n);
+    R visit(CFGCallNode n);
 
-    abstract public R visit(CFGIfNode n);
+    R visit(CFGIfNode n);
 
-    abstract public R visit(CFGVarAssignNode n);
+    R visit(CFGVarAssignNode n);
 
-    abstract public R visit(CFGMemAssignNode n);
+    R visit(CFGMemAssignNode n);
 
-    abstract public R visit(CFGReturnNode n);
+    R visit(CFGReturnNode n);
 
-    abstract public R visit(CFGStartNode n);
+    R visit(CFGStartNode n);
 
 }
