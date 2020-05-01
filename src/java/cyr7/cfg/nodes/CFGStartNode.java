@@ -35,4 +35,9 @@ public class CFGStartNode extends CFGNode {
     public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
         return input;
     }
+
+    @Override
+    public String toString() {
+        return "(start)";
+    }
 }

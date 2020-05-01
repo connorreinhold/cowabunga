@@ -53,4 +53,8 @@ public class CFGMemAssignNode extends CFGNode {
         return transferFunction.transfer(this, input);
     }
 
+    @Override
+    public String toString() {
+        return "([" + target.label() + "] = " + value.label() + ")";
+    }
 }

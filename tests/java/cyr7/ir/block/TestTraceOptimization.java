@@ -96,7 +96,7 @@ class TestTraceOptimization {
         LookaheadIdGenerator generate = new LookaheadIdGenerator();
         List<IRStmt> stmts = List.of(
             make.IRLabel("main"),
-            make.IRReturn(),
+            make.IRReturn(0),
 
             make.IRLabel("go"),
 
@@ -116,10 +116,10 @@ class TestTraceOptimization {
                 make.IRName("print")
             ),
 
-            make.IRReturn()
+            make.IRReturn(0)
         );
 
-        BasicBlock b1 = block(make.IRLabel("main"), make.IRReturn());
+        BasicBlock b1 = block(make.IRLabel("main"), make.IRReturn(0));
         BasicBlock b2 = block(make.IRLabel("go"));
         BasicBlock b3 = block(
             make.IRLabel("truth"),
@@ -133,7 +133,7 @@ class TestTraceOptimization {
                 make.IRTemp(generate.argTemp(0)),
                 make.IRConst(0)),
             make.IRCallStmt(make.IRName("print")),
-            make.IRReturn());
+            make.IRReturn(0));
 
         List<List<BasicBlock>> expected =
             List.of(
@@ -152,12 +152,12 @@ class TestTraceOptimization {
         List<IRStmt> stmts = List.of(
             make.IRCJump(make.IRConst(0), lt, lf),
             make.IRLabel(lt),
-            make.IRReturn(),
+            make.IRReturn(0),
             make.IRJump(make.IRName("end")),
             make.IRLabel(lf),
             make.IRMove(make.IRTemp("_few"), make.IRConst(1)),
             make.IRLabel("end"),
-            make.IRReturn()
+            make.IRReturn(0)
         );
 
         BasicBlock b1 = block(
@@ -166,7 +166,7 @@ class TestTraceOptimization {
         );
         BasicBlock b2 = block(
             make.IRLabel(lt),
-            make.IRReturn()
+            make.IRReturn(0)
         );
         BasicBlock b3 = block(
             make.IRLabel(generate.peekLabel(1)),
@@ -178,7 +178,7 @@ class TestTraceOptimization {
         );
         BasicBlock b5 = block(
             make.IRLabel("end"),
-            make.IRReturn()
+            make.IRReturn(0)
         );
 
         List<List<BasicBlock>> expected =
@@ -202,13 +202,13 @@ class TestTraceOptimization {
             make.IRLabel(lf),
             make.IRJump(make.IRName("end")),
             make.IRLabel("end"),
-            make.IRReturn()
+            make.IRReturn(0)
         );
 
         BasicBlock b1 = block(make.IRLabel(generate.peekLabel(0)));
         BasicBlock b2 = block(make.IRLabel(lt));
         BasicBlock b3 = block(make.IRLabel(lf));
-        BasicBlock b4 = block(make.IRLabel("end"), make.IRReturn());
+        BasicBlock b4 = block(make.IRLabel("end"), make.IRReturn(0));
 
         List<List<BasicBlock>> expected =
             List.of(new ArrayList<>(List.of(b1, b2, b3, b4)));

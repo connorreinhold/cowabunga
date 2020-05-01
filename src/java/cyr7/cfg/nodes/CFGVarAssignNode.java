@@ -1,6 +1,7 @@
 package cyr7.cfg.nodes;
 
 import java.util.List;
+import java.util.Objects;
 
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
@@ -41,5 +42,10 @@ public class CFGVarAssignNode extends CFGNode {
 	@Override
 	public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
 		return transferFunction.transfer(this, input);
+	}
+
+	@Override
+	public String toString() {
+		return "(" + variable + " = " + value.label() + ")";
 	}
 }

@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public enum LiveVariablesAnalysis implements BackwardDataflowAnalysis<Set<String>> {
+public enum LiveVariableAnalysis implements BackwardDataflowAnalysis<Set<String>> {
 
     INSTANCE;
 
@@ -35,7 +35,7 @@ public enum LiveVariablesAnalysis implements BackwardDataflowAnalysis<Set<String
         return Stream.concat(lhs.stream(), rhs.stream()).collect(Collectors.toSet());
     }
 
-    static class TransferFunction implements BackwardTransferFunction<Set<String>> {
+    private static class TransferFunction implements BackwardTransferFunction<Set<String>> {
 
         private static Set<String> f(CFGNode n, Set<String> in) {
             return Sets.union(
