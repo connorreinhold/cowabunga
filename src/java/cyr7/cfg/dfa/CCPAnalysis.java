@@ -35,8 +35,7 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
     @Override
     public LatticeElement topValue() {
-        // all code is reachable and all variables are initially set to top
-        return new LatticeElement(false);
+        return LatticeElement.top;
     }
 
     @Override
@@ -103,6 +102,9 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
     public static final class LatticeElement {
 
+        public static final LatticeElement top = new LatticeElement(false);
+        public static final LatticeElement deadCode = new LatticeElement(true);
+
         public final boolean unreachable;
         private final Map<String, VLatticeElement> values;
 
@@ -131,32 +133,86 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public LatticeElement transfer(CFGCallNode n, LatticeElement in) {
-            return null;
+            if (in.unreachable) {
+                return LatticeElement.deadCode;
+            }
+
+            HashMap<String, VLatticeElement> values = new HashMap<>(in.values);
+            for (String variable : n.call.collectors()) {
+                values.put(variable, VLatticeElement.bot);
+            }
+
+            return new LatticeElement(false, values);
         }
 
         @Override
         public LatticeElement transferTrue(CFGIfNode n, LatticeElement in) {
-            return null;
+            if (in.unreachable) {
+                return LatticeElement.deadCode;
+            }
+
+            VLatticeElement result = n.cond.accept(new AbstractInterpreter(in.values));
+            if (result.isTop()) {
+                // William: We can do whatever, so I guess we take the true branch?
+                return in;
+            } else if (result.isBot()) {
+                return in;
+            } else {
+                long value = result.value();
+                if (value != 0) {
+                    return in;
+                } else {
+                    return LatticeElement.deadCode;
+                }
+            }
         }
 
         @Override
         public LatticeElement transferFalse(CFGIfNode n, LatticeElement in) {
-            return null;
+            VLatticeElement result = n.cond.accept(new AbstractInterpreter(in.values));
+            if (result.isTop()) {
+                // William: We can do whatever, so I guess we take the true branch?
+                return LatticeElement.deadCode;
+            } else if (result.isBot()) {
+                return in;
+            } else {
+                long value = result.value();
+                if (value != 0) {
+                    return LatticeElement.deadCode;
+                } else {
+                    return in;
+                }
+            }
         }
 
         @Override
         public LatticeElement transfer(CFGMemAssignNode n, LatticeElement in) {
-            return null;
+            if (in.unreachable) {
+                return LatticeElement.deadCode;
+            }
+
+            return in;
         }
 
         @Override
         public LatticeElement transfer(CFGStartNode n, LatticeElement in) {
-            return null;
+            if (in.unreachable) {
+                return LatticeElement.deadCode;
+            }
+
+            return LatticeElement.top;
         }
 
         @Override
         public LatticeElement transfer(CFGVarAssignNode n, LatticeElement in) {
-            return null;
+            if (in.unreachable) {
+                return LatticeElement.deadCode;
+            }
+
+            HashMap<String, VLatticeElement> values = new HashMap<>(in.values);
+            VLatticeElement result = n.value.accept(new AbstractInterpreter(in.values));
+            values.put(n.variable, result);
+            return new LatticeElement(false, values);
         }
 
     }
