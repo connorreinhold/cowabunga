@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.Queue;
 
 import cyr7.cfg.nodes.CFGCallNode;
@@ -15,12 +16,14 @@ import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
+import cyr7.ir.nodes.IRJump;
+import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import cyr7.ir.nodes.IRStmt;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
+public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>> {
 
     /**
      * A wrapper class so that stmts can be compared via pointer addresses.
@@ -28,12 +31,35 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
      *
      */
     class IRStmtWrapper {
+
+        private Optional<IRLabel> label;
+        private Optional<IRJump> jump;
+
         protected final IRStmt stmt;
         public IRStmtWrapper(IRStmt stmt) {
             this.stmt = stmt;
+            this.label = Optional.empty();
+            this.jump = Optional.empty();
         }
+
         public Location location() {
             return this.stmt.location();
+        }
+
+        public void setLabel(String label) {
+            if (this.label.isPresent()) {
+                throw new UnsupportedOperationException("Error: Cannot set label twice.");
+            }
+            var make = new IRNodeFactory_c(stmt.location());
+            this.label = Optional.of(make.IRLabel(label));
+        }
+
+        public void setJump(String target) {
+            if (this.jump.isPresent()) {
+                throw new UnsupportedOperationException("Error: Cannot set jump twice.");
+            }
+            var make = new IRNodeFactory_c(stmt.location());
+            this.jump = Optional.of(make.IRJump(make.IRName(target)));
         }
     }
 
@@ -109,19 +135,13 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
         return new IRNodeFactory_c(n.location());
     }
 
-    private IRNodeFactory createMake(IRStmtWrapper s) {
-        return new IRNodeFactory_c(s.location());
-    }
-
     private IRStmtWrapper wrapStmt(IRStmt s) {
         return new IRStmtWrapper(s);
     }
 
     private void insertJumpForNode(CFGNode from, String target) {
-        final var make = this.createMake(from);
         final var fromStmt = this.cfgNodeToIRStmt.get(from);
-        final int i = this.stmts.indexOf(fromStmt);
-        this.stmts.add(i + 1, this.wrapStmt(make.IRJump(make.IRName(target))));
+        fromStmt.setJump(target);
     }
 
     /**
@@ -132,11 +152,25 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
     private void insertLabelForNode(CFGNode n) {
         IRStmtWrapper stmt = this.cfgNodeToIRStmt.get(n);
         final String label = generator.newLabel();
-        final var make = this.createMake(stmt);
-        final int i = this.stmts.indexOf(stmt);
-        this.stmts.add(i, this.wrapStmt(make.IRLabel(label)));
+        stmt.setLabel(label);
         this.cfgNodeToLabels.put(n, label);
     }
+
+
+    private boolean performProcessIfVisited(CFGNode n) {
+        if (this.visitedNodes.contains(n)) {
+            if (this.cfgNodeToLabels.containsKey(n)) {
+                final String target = this.cfgNodeToLabels.get(n);
+                this.insertJumpForNode(this.predecessor, target);
+            } else {
+                this.insertLabelForNode(n);
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 
     /**
      * Adds the statement {@code stmt} to the end of the list of statements.
@@ -154,33 +188,19 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
     }
 
     @Override
-    public Void visit(CFGCallNode n) {
-        if (this.visitedNodes.contains(n)) {
-            if (this.cfgNodeToLabels.containsKey(n)) {
-                final String target = this.cfgNodeToLabels.get(n);
-                this.insertJumpForNode(this.predecessor, target);
-             } else {
-                 this.insertLabelForNode(n);
-             }
-        } else {
+    public Optional<CFGNode> visit(CFGCallNode n) {
+        if (!this.performProcessIfVisited(n)) {
             this.appendStmt(n, n.call);
             this.epilogueProcess(n);
             final CFGNode next = n.out().get(0);
-            next.accept(this);
+            return Optional.of(next);
         }
-        return null;
+        return Optional.empty();
     }
 
     @Override
     public Void visit(CFGIfNode n) {
-        if (this.visitedNodes.contains(n)) {
-            if (this.cfgNodeToLabels.containsKey(n)) {
-                final String target = this.cfgNodeToLabels.get(n);
-                this.insertJumpForNode(this.predecessor, target);
-             } else {
-                 this.insertLabelForNode(n);
-             }
-        } else {
+        if (!this.performProcessIfVisited(n)) {
             final CFGNode trueBranch = n.trueBranch();
             final String trueLabel = generator.newLabel();
             this.cfgNodeToLabels.put(trueBranch, trueLabel);
@@ -196,14 +216,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
 
     @Override
     public Void visit(CFGVarAssignNode n) {
-        if (this.visitedNodes.contains(n)) {
-            if (this.cfgNodeToLabels.containsKey(n)) {
-                final String target = this.cfgNodeToLabels.get(n);
-                this.insertJumpForNode(this.predecessor, target);
-             } else {
-                 this.insertLabelForNode(n);
-             }
-        } else {
+        if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
             this.appendStmt(n, make.IRMove(make.IRTemp(n.variable), n.value));
             this.epilogueProcess(n);
@@ -215,14 +228,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
 
     @Override
     public Void visit(CFGMemAssignNode n) {
-        if (this.visitedNodes.contains(n)) {
-            if (this.cfgNodeToLabels.containsKey(n)) {
-                final String target = this.cfgNodeToLabels.get(n);
-                this.insertJumpForNode(this.predecessor, target);
-             } else {
-                 this.insertLabelForNode(n);
-             }
-        } else {
+        if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
             this.appendStmt(n, make.IRMove(n.target, n.value));
             this.epilogueProcess(n);
@@ -243,15 +249,8 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
      */
     @Override
     public Void visit(CFGReturnNode n) {
-        final var make = this.createMake(n);
-        if (this.visitedNodes.contains(n)) {
-            if (this.cfgNodeToLabels.containsKey(n)) {
-               final String target = this.cfgNodeToLabels.get(n);
-               this.insertJumpForNode(this.predecessor, target);
-            } else {
-                this.insertLabelForNode(n);
-            }
-        } else {
+        if (!this.performProcessIfVisited(n)) {
+            final var make = this.createMake(n);
             this.appendStmt(n, make.IRReturn());
         }
         this.epilogueProcess(n);
@@ -273,7 +272,10 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
         next.accept(this);
 
         while (!this.trueBranches.isEmpty()) {
-            CFGNode nextTrueBranch = trueBranches.poll();
+            final CFGNode nextTrueBranch = trueBranches.poll();
+            var make = this.createMake(nextTrueBranch);
+            final String trueLabel = this.cfgNodeToLabels.get(nextTrueBranch);
+            this.stmts.add(this.wrapStmt(make.IRLabel(trueLabel)));
             nextTrueBranch.accept(this);
         }
         return null;
