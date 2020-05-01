@@ -33,13 +33,31 @@ class TestFlattenBasicCFG {
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("assign", func);
+        var comp = new IRCompUnit(loc, "base", map);
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new DefaultIdGenerator());
+        System.out.println(node);
+    }
+    
+    @Test
+    void testIFElseFunction() {
+        Location loc = new Location(-1, -1);
+        var func = new IRFuncDecl(loc, "if", new IRSeq(loc,
+                new IRCJump(loc, new IRConst(loc, 0), "Hello_World"),
+                new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
+                new IRLabel(loc, "Hello_World"),
+                new IRReturn(loc)));
+
+        var map = new HashMap<String, IRFuncDecl>();
+        map.put("if", func);
 
         var comp = new IRCompUnit(loc, "base", map);
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
-        IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new DefaultIdGenerator());
+        IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new DefaultIdGenerator());
         System.out.println(node);
     }
+
 
 }

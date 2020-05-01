@@ -104,7 +104,9 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
         stmts.add(make.IRLabel(lt));
         stmts.addAll(n.trueBranch().accept(this));
         stmts.add(make.IRLabel(end));
-        stmts.addAll(joinTranslations.get(joinNode));
+        if (joinNode != null) {
+            stmts.addAll(joinTranslations.get(joinNode));
+        }
         
         return stmtsOrAddTranslation(n,stmts);
     }
@@ -140,7 +142,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
 
     // This method ensures that if there are multiple entry points to a node, we save
     // the translation to put it in the correct spot when translating to IR. Currently,
-    // joinNodeTranslations will only contain the nodes after an if/else block.
+    // joinNodes are for where the branches of an if/else statement come back together.
     private List<IRStmt> stmtsOrAddTranslation(CFGNode n, List<IRStmt> stmts) {
         if (!joinNodes.isEmpty() && joinNodes.peek() == n ) {
             joinTranslations.put(n, stmts);
