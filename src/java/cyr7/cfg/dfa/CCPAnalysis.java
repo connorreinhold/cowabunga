@@ -6,6 +6,7 @@ import cyr7.cfg.nodes.CFGIfNode;
 import cyr7.cfg.nodes.CFGMemAssignNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
+import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -170,12 +171,27 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public VLatticeElement visit(IRBinOp n) {
-            return null;
+            VLatticeElement
+                left = n.left().accept(this),
+                right = n.right().accept(this);
+
+            if (left.isTop() || right.isTop()) {
+                return VLatticeElement.top;
+            } else if (left.isBot() || right.isBot()) {
+                return VLatticeElement.bot;
+            } else {
+                // they're both values
+                long value = BinOpInterpreter.interpret(
+                    n.opType(),
+                    left.value(),
+                    right.value());
+                return VLatticeElement.value(value);
+            }
         }
 
         @Override
         public VLatticeElement visit(IRCall n) {
-            return null;
+            throw new AssertionError();
         }
 
         @Override

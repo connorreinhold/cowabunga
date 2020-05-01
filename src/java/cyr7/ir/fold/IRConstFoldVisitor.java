@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -65,69 +66,7 @@ public class IRConstFoldVisitor
         }
         final long l = n.left().constant();
         final long r = n.right().constant();
-        long value;
-
-        // Copied from staff-given interpreter code.
-        switch (n.opType()) {
-        case ADD:
-            value = l + r;
-            break;
-        case SUB:
-            value = l - r;
-            break;
-        case MUL:
-            value = l * r;
-            break;
-        case HMUL:
-            value = BigInteger.valueOf(l).multiply(BigInteger.valueOf(r))
-                    .shiftRight(64).longValue();
-            break;
-        case DIV:
-            value = l / r;
-            break;
-        case MOD:
-            value = l % r;
-            break;
-        case AND:
-            value = l & r;
-            break;
-        case OR:
-            value = l | r;
-            break;
-        case XOR:
-            value = l ^ r;
-            break;
-        case LSHIFT:
-            value = l << r;
-            break;
-        case RSHIFT:
-            value = l >>> r;
-            break;
-        case ARSHIFT:
-            value = l >> r;
-            break;
-        case EQ:
-            value = l == r ? 1 : 0;
-            break;
-        case NEQ:
-            value = l != r ? 1 : 0;
-            break;
-        case LT:
-            value = l < r ? 1 : 0;
-            break;
-        case GT:
-            value = l > r ? 1 : 0;
-            break;
-        case LEQ:
-            value = l <= r ? 1 : 0;
-            break;
-        case GEQ:
-            value = l >= r ? 1 : 0;
-            break;
-        default:
-            throw new InternalCompilerError("Invalid binary operation");
-        }
-
+        long value = BinOpInterpreter.interpret(n.opType(), l, r);
         return make.IRConst(value);
     }
 
