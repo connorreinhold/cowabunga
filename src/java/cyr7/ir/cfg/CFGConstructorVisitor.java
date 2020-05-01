@@ -69,9 +69,9 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
         }
 
         ArrayList<IRStmt> stmts = new ArrayList<>(n.stmts());
+        System.out.println(stmts);
         for (int i = stmts.size() - 1; i >= 0; i--) {
             var stmt = stmts.get(i);
-            System.out.println(stmt);
             successor = stmt.accept(this);
         }
 
@@ -79,11 +79,19 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
             var nextPair = this.jumpTargetFromCFG.poll();
             StubCFGNode stub = nextPair.part1();
             String target = nextPair.part2();
+
             if (this.labelToCFG.containsKey(target)) {
                 CFGNode targetNode = this.labelToCFG.get(target);
                 for (CFGNode incoming: stub.in()) {
-                    incoming.convertFromStub(stub, targetNode);
+                    // Target node may be itself, which
+                    // indicates an empty loop coming from the parent node.
+                    if (targetNode == stub) {
+                        incoming.convertFromStub(stub, incoming);
+                    } else {
+                        incoming.convertFromStub(stub, targetNode);
+                    }
                 }
+
             } else {
                 throw new UnsupportedOperationException(
                         "Target label was never found in the program.");

@@ -22,4 +22,9 @@ public class StubCFGNode extends CFGNode {
         throw new UnsupportedOperationException("Cannot visit stub node");
     }
 
+    @Override
+    public void convertFromStub(StubCFGNode stub, CFGNode n) {
+        throw new UnsupportedOperationException("Cannot convert in stub node");
+    }
+
 }

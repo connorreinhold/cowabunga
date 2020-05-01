@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.flatten.CFGFlattener;
@@ -32,7 +31,6 @@ class TestFlattenBasicCFG {
         System.out.println(result);
     }
 
-    @Disabled
     @Test
     void testAssignmentsFunction() {
         Location loc = new Location(-1, -1);
@@ -47,12 +45,8 @@ class TestFlattenBasicCFG {
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
         this.testWithAlternateFlattener(result.get("assign"));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
-    @Disabled
     @Test
     void testIFElseFunction() {
         Location loc = new Location(-1, -1);
@@ -69,27 +63,20 @@ class TestFlattenBasicCFG {
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
         this.testWithAlternateFlattener(result.get("if"));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
     @Test
     void testWhileFunction() throws Exception {
 
-        String prgmString = "main() { while(true) { while(false) { } } }";
+        String prgmString = "main() { x: int = 32 while(x < 0) { while(true) { } } }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
                 "while.xi", null, new IRUtil.LowerConfiguration(true, true),
                 new DefaultIdGenerator());
-
-        System.out.println(new LinkedList<>(comp.functions().values()).get(0).body());
-//        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-
-//        this.testWithAlternateFlattener(result.get("while.xi"));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        var stuff = new LinkedList<>(result.values()).get(0);
+        System.out.println(stuff);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 
 }
