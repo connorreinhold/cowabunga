@@ -1,11 +1,13 @@
-package cyr7.cfg.visitor;
+package cyr7.cfg.flatten;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
+import java.util.stream.Collectors;
 
 import cyr7.cfg.nodes.CFGCallNode;
 import cyr7.cfg.nodes.CFGIfNode;
@@ -14,6 +16,7 @@ import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
+import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRJump;
@@ -26,9 +29,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>> {
 
     /**
-     * A wrapper class so that stmts can be compared via pointer addresses.
-     * @author ayang
-     *
+     * A wrapper class so that stmts can be compared via pointer addresses,
+     * instead of their overwritten equals() methods.
      */
     class IRStmtWrapper {
 
@@ -104,13 +106,12 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
 
     private final IdGenerator generator;
 
-
     /**
      * Testing variable to ensure start node is only entered once.
      */
     private boolean hasEntered;
 
-    public Ay339FlattenCFGVisitor() {
+    protected Ay339FlattenCFGVisitor() {
         this.visitedNodes = new HashSet<>();
         this.cfgNodeToLabels = new IdentityHashMap<>();
         this.cfgNodeToIRStmt = new IdentityHashMap<>();
@@ -119,7 +120,6 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         this.generator = new DefaultIdGenerator();
         this.hasEntered = false;
     }
-
 
     /**
      * Sets node {@code n} to be visited and the predecessor node for the next
@@ -156,6 +156,15 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         this.cfgNodeToLabels.put(n, label);
     }
 
+    protected List<IRStmt> getFunctionBody() {
+        return this.stmts.stream().flatMap(wrapper -> {
+            final List<IRStmt> content = new ArrayList<>();
+            wrapper.label.ifPresent(lbl -> content.add(lbl));
+            content.add(wrapper.stmt);
+            wrapper.jump.ifPresent(jump -> content.add(jump));
+            return content.stream();
+        }).collect(Collectors.toList());
+    }
 
     private boolean performProcessIfVisited(CFGNode n) {
         if (this.visitedNodes.contains(n)) {
@@ -204,8 +213,9 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
             final CFGNode trueBranch = n.trueBranch();
             final String trueLabel = generator.newLabel();
             this.cfgNodeToLabels.put(trueBranch, trueLabel);
-            final CFGNode falseBranch = n.falseBranch();
+
             final var make = this.createMake(n);
+            final CFGNode falseBranch = n.falseBranch();
             this.appendStmt(n, make.IRCJump(n.cond, trueLabel));
             this.trueBranches.add(trueBranch);
             this.epilogueProcess(n);
@@ -252,8 +262,8 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
             this.appendStmt(n, make.IRReturn());
+            this.epilogueProcess(n);
         }
-        this.epilogueProcess(n);
         return Optional.empty();
     }
 
