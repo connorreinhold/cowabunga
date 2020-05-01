@@ -161,7 +161,24 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Void> {
 
     @Override
     public Void visit(CFGIfNode n) {
-        // TODO Auto-generated method stub
+        if (this.visitedNodes.contains(n)) {
+            if (this.cfgNodeToLabels.containsKey(n)) {
+                final String target = this.cfgNodeToLabels.get(n);
+                this.insertJumpForNode(this.predecessor, target);
+             } else {
+                 this.insertLabelForNode(n);
+             }
+        } else {
+            final CFGNode trueBranch = n.trueBranch();
+            final String trueLabel = generator.newLabel();
+            this.cfgNodeToLabels.put(trueBranch, trueLabel);
+            final CFGNode falseBranch = n.falseBranch();
+            final var make = this.createMake(n);
+            this.appendStmt(n, make.IRCJump(n.cond, trueLabel));
+            this.trueBranches.add(trueBranch);
+            this.epilogueProcess(n);
+            falseBranch.accept(this);
+        }
         return null;
     }
 
