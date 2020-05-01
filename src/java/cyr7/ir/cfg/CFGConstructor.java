@@ -4,9 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCompUnit;
-import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGConstructor {
 
@@ -19,7 +17,7 @@ public class CFGConstructor {
 
         c.functions().forEach((name, fn) -> {
             CFGNode fBody = fn.body().accept(new CFGConstructorVisitor());
-            cfgCollection.put(name, new CFGStartNode(new Location(-1, -1), fBody));
+            cfgCollection.put(name, fBody);
          });
         return cfgCollection;
     }

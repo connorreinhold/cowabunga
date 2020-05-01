@@ -11,6 +11,7 @@ import cyr7.cfg.nodes.CFGIfNode;
 import cyr7.cfg.nodes.CFGMemAssignNode;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGReturnNode;
+import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -74,6 +75,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
             var stmt = stmts.get(i);
             successor = stmt.accept(this);
         }
+        successor = new CFGStartNode(n.location(), successor);
 
         while (!this.jumpTargetFromCFG.isEmpty()) {
             var nextPair = this.jumpTargetFromCFG.poll();

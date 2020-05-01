@@ -38,22 +38,29 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         private Optional<IRLabel> label;
         private Optional<IRJump> jump;
 
-        protected final IRStmt stmt;
+        protected final Optional<IRStmt> stmt;
+
         public IRStmtWrapper(IRStmt stmt) {
-            this.stmt = stmt;
+            this.stmt = Optional.of(stmt);
+            this.label = Optional.empty();
+            this.jump = Optional.empty();
+        }
+
+        public IRStmtWrapper() {
+            this.stmt = Optional.empty();
             this.label = Optional.empty();
             this.jump = Optional.empty();
         }
 
         public Location location() {
-            return this.stmt.location();
+            return stmt.map(s -> s.location()).orElse(new Location(-1, -1));
         }
 
         public void setLabel(String label) {
             if (this.label.isPresent()) {
                 throw new UnsupportedOperationException("Error: Cannot set label twice.");
             }
-            var make = new IRNodeFactory_c(stmt.location());
+            var make = new IRNodeFactory_c(this.location());
             this.label = Optional.of(make.IRLabel(label));
         }
 
@@ -61,7 +68,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
             if (this.jump.isPresent()) {
                 throw new UnsupportedOperationException("Error: Cannot set jump twice.");
             }
-            var make = new IRNodeFactory_c(stmt.location());
+            var make = new IRNodeFactory_c(this.location());
             this.jump = Optional.of(make.IRJump(make.IRName(target)));
         }
     }
@@ -107,11 +114,6 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
 
     private final IdGenerator generator;
 
-    /**
-     * Testing variable to ensure start node is only entered once.
-     */
-    private boolean hasEntered;
-
     protected Ay339FlattenCFGVisitor() {
         this.visitedNodes = new HashSet<>();
         this.cfgNodeToLabels = new IdentityHashMap<>();
@@ -119,7 +121,6 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         this.trueBranches = new LinkedList<>();
         this.stmts = new LinkedList<>();
         this.generator = new DefaultIdGenerator();
-        this.hasEntered = false;
     }
 
     /**
@@ -138,6 +139,10 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
 
     private IRStmtWrapper wrapStmt(IRStmt s) {
         return new IRStmtWrapper(s);
+    }
+
+    private IRStmtWrapper wrapStmt() {
+        return new IRStmtWrapper();
     }
 
     private void insertJumpForNode(IRStmtWrapper from, String target) {
@@ -161,7 +166,7 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
         return this.stmts.stream().flatMap(wrapper -> {
             final List<IRStmt> content = new ArrayList<>();
             wrapper.label.ifPresent(lbl -> content.add(lbl));
-            content.add(wrapper.stmt);
+            wrapper.stmt.ifPresent(s -> content.add(s));
             wrapper.jump.ifPresent(jump -> content.add(jump));
             return content.stream();
         }).collect(Collectors.toList());
@@ -278,29 +283,31 @@ public class Ay339FlattenCFGVisitor extends AbstractCFGVisitor<Optional<CFGNode>
      */
     @Override
     public Optional<CFGNode> visit(CFGStartNode n) {
-        if (hasEntered) {
-            throw new UnsupportedOperationException(
-                    "Cannot enter start node twice.");
-        }
-        this.epilogueProcess(n, null);
+        if (!this.performProcessIfVisited(n)) {
+            var make = this.createMake(n);
+            var startLbl = this.wrapStmt();
+            this.appendStmt(n, startLbl);
+            this.epilogueProcess(n, startLbl);
 
-        Optional<CFGNode> next = Optional.of(n.out().get(0));
-        while (next.isPresent()) {
-            next = next.get().accept(this);
-        }
-
-        while (!this.trueBranches.isEmpty()) {
-            final Pair<CFGNode, String> nextTrueBranch = trueBranches.poll();
-            next = Optional.of(nextTrueBranch.part1());
-            var make = this.createMake(next.get());
-            final String trueLabel = nextTrueBranch.part2();
-
-            var stmt = this.wrapStmt(make.IRLabel(trueLabel));
-            this.predecessor = stmt;
-            this.stmts.add(stmt);
+            Optional<CFGNode> next = Optional.of(n.out().get(0));
             while (next.isPresent()) {
                 next = next.get().accept(this);
             }
+
+            while (!this.trueBranches.isEmpty()) {
+                final Pair<CFGNode, String> nextTrueBranch = trueBranches.poll();
+                next = Optional.of(nextTrueBranch.part1());
+                make = this.createMake(next.get());
+                final String trueLabel = nextTrueBranch.part2();
+
+                var stmt = this.wrapStmt(make.IRLabel(trueLabel));
+                this.predecessor = stmt;
+                this.stmts.add(stmt);
+                while (next.isPresent()) {
+                    next = next.get().accept(this);
+                }
+            }
+            return Optional.empty();
         }
         return Optional.empty();
     }
