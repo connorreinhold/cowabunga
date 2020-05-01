@@ -113,6 +113,10 @@ public class Ay339FlattenCFGVisitor
      */
     private final Queue<Pair<CFGNode, String>> trueBranches;
 
+    /**
+     * The previous IRStmt added to the list of statements when traversing 
+     * through CFG sub-graph.
+     */
     private IRStmtWrapper predecessor;
 
     private final IdGenerator generator;
