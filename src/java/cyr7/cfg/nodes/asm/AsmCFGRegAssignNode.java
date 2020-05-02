@@ -6,19 +6,17 @@ import cyr7.cfg.visitor.AsmCFGVisitor;
 import cyr7.x86.asm.ASMReg;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class AsmCFGVarAssignNode extends AsmCFGNode {
-    public final String variable;
+public class AsmCFGRegAssignNode extends AsmCFGNode {
+    public final ASMReg register;
     public final AsmCFGOperationExpr value;
-    public final ASMReg.Size size;
     private AsmCFGNode outNode;
 
-    public AsmCFGVarAssignNode(Location location, String variable,
-            AsmCFGOperationExpr value, ASMReg.Size size, AsmCFGNode outNode) {
+    public AsmCFGRegAssignNode(Location location, ASMReg register,
+            AsmCFGOperationExpr value, AsmCFGNode outNode) {
         super(location);
-        this.variable = variable;
+        this.register = register;
         this.value = value;
         this.outNode = outNode;
-        this.size = size;
 
         this.updateIns();
 	}
@@ -46,6 +44,6 @@ public class AsmCFGVarAssignNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "(" + variable + " = " + value.getIntelArg() + ")";
+        return "(" + register + " = " + value.getIntelArg() + ")";
     }
 }

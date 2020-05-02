@@ -3,18 +3,17 @@ package cyr7.cfg.nodes.asm;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
-import cyr7.ir.nodes.IRCallStmt;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AsmCFGCallNode extends AsmCFGNode {
 
     // This includes both procedures and function calls
-    public final IRCallStmt call;
+    public final String target;
     private AsmCFGNode out;
 
-    public AsmCFGCallNode(Location location, IRCallStmt call, AsmCFGNode out) {
+    public AsmCFGCallNode(Location location, String target, AsmCFGNode out) {
         super(location);
-        this.call = call;
+        this.target = target;
         this.out = out;
 
         this.updateIns();
@@ -43,8 +42,7 @@ public class AsmCFGCallNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "(call " + call.target()
-                              .label() + ")";
+        return "(call " + this.target + ")";
     }
 
 }

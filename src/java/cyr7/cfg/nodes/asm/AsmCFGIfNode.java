@@ -3,22 +3,30 @@ package cyr7.cfg.nodes.asm;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
-import cyr7.ir.nodes.IRExpr;
+import cyr7.x86.asm.ASMArg;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AsmCFGIfNode extends AsmCFGNode {
 
+    public enum ASMCompareType {
+        LT, LTE, GT, GTE, EQ, NEQ
+    }
+
+    private final ASMCompareType type;
     private AsmCFGNode trueBranch;
     private AsmCFGNode falseBranch;
-    public final IRExpr cond;
+    public final ASMArg leftOperand;
+    public final ASMArg rightOperand;
 
     public AsmCFGIfNode(Location location, AsmCFGNode trueBranch,
-            AsmCFGNode falseBranch, IRExpr cond) {
+            AsmCFGNode falseBranch, ASMCompareType type,
+            ASMArg leftOperand, ASMArg rightOperand) {
         super(location);
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
-        this.cond = cond;
-
+        this.type = type;
+        this.leftOperand = leftOperand;
+        this.rightOperand = rightOperand;
         this.updateIns();
     }
 
@@ -55,6 +63,7 @@ public class AsmCFGIfNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "(if " + cond.label() + ")";
+        return "(if " + this.leftOperand.getIntelArg()
+        + type.toString() + this.rightOperand.getIntelArg() + ")";
     }
 }

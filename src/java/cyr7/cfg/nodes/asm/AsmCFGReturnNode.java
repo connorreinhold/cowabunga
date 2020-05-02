@@ -2,17 +2,13 @@ package cyr7.cfg.nodes.asm;
 
 import java.util.List;
 
-import cyr7.cfg.dfa.ForwardTransferFunction;
 import cyr7.cfg.visitor.AsmCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AsmCFGReturnNode extends AsmCFGNode {
 
-    public final int numReturnValues;
-
-    public AsmCFGReturnNode(Location location, int numReturnValues) {
+    public AsmCFGReturnNode(Location location) {
         super(location);
-        this.numReturnValues = numReturnValues;
         this.updateIns();
     }
 
@@ -31,12 +27,8 @@ public class AsmCFGReturnNode extends AsmCFGNode {
         return;
     }
 
-    public <T> List<T> acceptForward(ForwardTransferFunction<T> transferFunction, T in) {
-        return List.of();
-    }
-
     @Override
     public String toString() {
-        return "(return " + numReturnValues + ")";
+        return "(return)";
     }
 }

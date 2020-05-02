@@ -1,7 +1,8 @@
 package cyr7.cfg.nodes.asm;
 
-import cyr7.ir.nodes.IRCallStmt;
-import cyr7.ir.nodes.IRExpr;
+import cyr7.cfg.nodes.asm.AsmCFGIfNode.ASMCompareType;
+import cyr7.x86.asm.ASMAddrExpr;
+import cyr7.x86.asm.ASMArg;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public final class AsmCFGNodeFactory {
@@ -12,27 +13,29 @@ public final class AsmCFGNodeFactory {
         this.location = location;
     }
 
-    public AsmCFGCallNode Call(IRCallStmt callStmt, AsmCFGNode out) {
-        return new AsmCFGCallNode(location, callStmt, out);
+    public AsmCFGCallNode Call(String target, AsmCFGNode out) {
+        return new AsmCFGCallNode(location, target, out);
     }
 
-    public AsmCFGIfNode If(AsmCFGNode trueBranch, AsmCFGNode falseBranch, IRExpr cond) {
-        return new AsmCFGIfNode(location, trueBranch, falseBranch, cond);
+    public AsmCFGIfNode If(AsmCFGNode trueBranch,
+            AsmCFGNode falseBranch, ASMCompareType type,
+            ASMArg leftOperand, ASMArg rightOperand) {
+        return new AsmCFGIfNode(location, trueBranch, falseBranch, type, leftOperand, rightOperand);
     }
 
-    public AsmCFGMemAssignNode MemAssign(IRExpr target, IRExpr value, AsmCFGNode out) {
-        return new AsmCFGMemAssignNode(location, target, value, out);
+    public AsmCFGMemAssignNode MemAssign(ASMAddrExpr address, ASMArg value, AsmCFGNode out) {
+        return new AsmCFGMemAssignNode(location, address, value, out);
     }
 
-    public AsmCFGReturnNode Return(int numReturnValue) {
-        return new AsmCFGReturnNode(location, numReturnValue);
+    public AsmCFGReturnNode Return() {
+        return new AsmCFGReturnNode(location);
     }
 
     public AsmCFGStartNode Start(AsmCFGNode out) {
         return new AsmCFGStartNode(location, out);
     }
 
-    public AsmCFGVarAssignNode VarAssign(String variable, IRExpr value, AsmCFGNode out) {
+    public AsmCFGVarAssignNode VarAssign(String variable, ASMArg value, AsmCFGNode out) {
         return new AsmCFGVarAssignNode(location, variable, value, out);
     }
 

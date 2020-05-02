@@ -2,15 +2,14 @@ package cyr7.x86.asm;
 
 import java.util.Objects;
 
-import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 public final class ASMTempArg implements ASMTempRegArg {
 
     public final String name;
-    public final Size size;
+    public final ASMReg.Size size;
 
-    public ASMTempArg(String name, Size size) {
+    public ASMTempArg(String name, ASMReg.Size size) {
         this.name = name;
         this.size = size;
     }

@@ -3,23 +3,23 @@ package cyr7.cfg.nodes.asm;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
-import cyr7.ir.nodes.IRExpr;
+import cyr7.x86.asm.ASMAddrExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AsmCFGMemAssignNode extends AsmCFGNode {
 
-    public final IRExpr target;
-    public final IRExpr value;
+    public final ASMAddrExpr address;
+    public final AsmCFGOperationExpr value;
     private AsmCFGNode out;
 
     public AsmCFGMemAssignNode(
         Location location,
-        IRExpr target,
-        IRExpr value,
+        ASMAddrExpr address,
+        AsmCFGOperationExpr value,
         AsmCFGNode out) {
 
         super(location);
-        this.target = target;
+        this.address = address;
         this.value = value;
         this.out = out;
 
@@ -49,6 +49,6 @@ public class AsmCFGMemAssignNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "([" + target.label() + "] = " + value.label() + ")";
+        return "([" + address.getIntelExpr() + "] = " + value.getIntelArg() + ")";
     }
 }

@@ -3,6 +3,7 @@ package cyr7.cfg.visitor;
 import cyr7.cfg.nodes.asm.AsmCFGCallNode;
 import cyr7.cfg.nodes.asm.AsmCFGIfNode;
 import cyr7.cfg.nodes.asm.AsmCFGMemAssignNode;
+import cyr7.cfg.nodes.asm.AsmCFGRegAssignNode;
 import cyr7.cfg.nodes.asm.AsmCFGReturnNode;
 import cyr7.cfg.nodes.asm.AsmCFGStartNode;
 import cyr7.cfg.nodes.asm.AsmCFGVarAssignNode;
@@ -20,5 +21,7 @@ public interface AsmCFGVisitor<R> {
     R visit(AsmCFGReturnNode n);
 
     R visit(AsmCFGStartNode n);
+
+    R visit(AsmCFGRegAssignNode n);
 
 }
