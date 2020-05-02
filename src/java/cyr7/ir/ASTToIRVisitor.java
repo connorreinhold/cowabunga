@@ -140,7 +140,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             at the end.
         */
         if (n.getResultType() == ResultType.UNIT) {
-            seq.add(make.IRReturn());
+            seq.add(make.IRReturn(0));
         }
         return OneOfTwo.ofSecond(make.IRSeq(seq));
     }
@@ -419,8 +419,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public OneOfTwo<IRExpr, IRStmt> visit(ReturnStmtNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
-        List<IRStmt> stmts = new ArrayList<IRStmt>();
-        List<IRTemp> returnValTemps = new ArrayList<IRTemp>();
+        List<IRStmt> stmts = new ArrayList<>();
+        List<IRTemp> returnValTemps = new ArrayList<>();
 
         // Move each return arg into a temp representing its value
         for (ExprNode expr : n.exprs) {
@@ -438,7 +438,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             stmts.add(make.IRMove(make.IRTemp(generator.retTemp(i)),
                     returnValTemps.get(i)));
         }
-        stmts.add(make.IRReturn());
+        stmts.add(make.IRReturn(n.exprs.size()));
         return OneOfTwo.ofSecond(make.IRSeq(stmts));
     }
 

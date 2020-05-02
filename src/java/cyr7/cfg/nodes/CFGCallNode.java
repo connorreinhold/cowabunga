@@ -2,9 +2,10 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 
+import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.ir.cfg.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.AbstractCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
@@ -12,7 +13,7 @@ public class CFGCallNode extends CFGNode {
 
     // This includes both procedures and function calls
     public final IRCallStmt call;
-    private final CFGNode out;
+    private CFGNode out;
 
     public CFGCallNode(Location location, IRCallStmt call, CFGNode out) {
         super(location);
@@ -28,17 +29,29 @@ public class CFGCallNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(AbstractCFGVisitor<T> visitor) {
+    public <T> T accept(CFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
     @Override
-    public <T> List<T> acceptForward(ForwardTransferFunction<T> transferFunction, T in) {
+    public void convertFromStub(CFGStubNode stub, CFGNode n) {
+        if (out == stub) {
+            this.out = n;
+            this.updateIns();
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cannot change out node unless it was originally a stub node.");
+        }
+    }
+
+    public <T> List<T> acceptForward(
+            ForwardTransferFunction<T> transferFunction, T in) {
         return List.of(transferFunction.transfer(this, in));
     }
 
     @Override
-    public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
+    public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction,
+            T input) {
         return transferFunction.transfer(this, input);
     }
     
@@ -46,4 +59,9 @@ public class CFGCallNode extends CFGNode {
         return call.label();
     }
 
+    @Override
+    public String toString() {
+        return "(call " + call.target()
+                              .label() + ")";
+    }
 }

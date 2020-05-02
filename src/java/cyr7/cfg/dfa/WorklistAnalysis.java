@@ -95,7 +95,7 @@ public final class WorklistAnalysis {
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
             if (!nodes.contains(node)) {
-                nodes.addAll(node.out());
+                nodes.add(node);
                 worklist.addAll(node.out());
             }
         }

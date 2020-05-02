@@ -2,16 +2,17 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 
+import cyr7.ir.cfg.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.AbstractCFGVisitor;
+import cyr7.cfg.visitor.CFGVisitor;
 import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGIfNode extends CFGNode {
 
-    private final CFGNode trueBranch;
-    private final CFGNode falseBranch;
+    private CFGNode trueBranch;
+    private CFGNode falseBranch;
     public final IRExpr cond;
 
     public CFGIfNode(Location location, CFGNode trueBranch,
@@ -25,23 +26,35 @@ public class CFGIfNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(AbstractCFGVisitor<T> visitor) {
+    public <T> T accept(CFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
     public CFGNode falseBranch() {
         return falseBranch;
     }
-    
+
     public CFGNode trueBranch() {
         return trueBranch;
     }
-    
+
     @Override
     public List<CFGNode> out() {
         return List.of(trueBranch, falseBranch);
     }
-    
+
+    @Override
+    public void convertFromStub(CFGStubNode stub, CFGNode n) {
+        if (trueBranch == stub) {
+            this.trueBranch = n;
+        } else if (falseBranch == stub) {
+            this.falseBranch = n;
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cannot change out node unless it was originally a stub node.");
+        }
+        this.updateIns();
+    }
 
 
     @Override
@@ -60,4 +73,8 @@ public class CFGIfNode extends CFGNode {
         return String.format("if(%s)", cond.label());
     }
 
+    @Override
+    public String toString() {
+        return "(if " + cond.label() + ")";
+    }
 }

@@ -16,7 +16,7 @@ import cyr7.cfg.nodes.CFGVarAssignNode;
 
 import polyglot.util.Pair;
 
-public class DotVisitor extends AbstractCFGVisitor<Optional<Void>>{
+public class DotVisitor implements CFGVisitor<Optional<Void>>{
 
     private final Map<CFGNode, String> nodeToLabel;
     private int id = 0;

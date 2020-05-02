@@ -25,7 +25,7 @@ import cyr7.ir.nodes.IRStmt;
 
 import polyglot.util.Pair;
 
-public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
+public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
 
     private IdGenerator generator;
     // each element has its CFGNode and the node translated into a list of IRStmts
@@ -132,7 +132,7 @@ public class FlattenCFGVisitor extends AbstractCFGVisitor<List<IRStmt>>{
     @Override
     public List<IRStmt> visit(CFGReturnNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        return stmtsOrAddTranslation(n, List.of(make.IRReturn()));
+        return stmtsOrAddTranslation(n, List.of(make.IRReturn(n.numReturnValues)));
     }
 
     @Override
