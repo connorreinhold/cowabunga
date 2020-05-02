@@ -135,7 +135,6 @@ public class IRConstFoldVisitor
             throw new InternalCompilerError("Invalid binary operation");
         }
 
->>>>>>> master
         return make.IRConst(value);
     }
 
