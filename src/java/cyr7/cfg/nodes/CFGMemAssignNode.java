@@ -25,7 +25,6 @@ public class CFGMemAssignNode extends CFGNode {
         this.target = target;
         this.value = value;
         this.out = out;
-
         this.updateIns();
     }
 
@@ -60,6 +59,8 @@ public class CFGMemAssignNode extends CFGNode {
     }
 
     public String CFGLabel() {
-        return target.label() + "=" + value.label();
+        String targetString = target.toString().replaceAll("\n", "");
+        String valueString = target.toString().replaceAll("\n", "");
+        return targetString + "=" + valueString;
     }
 }

@@ -57,6 +57,7 @@ public class CFGVarAssignNode extends CFGNode {
 	}
 	
     public String CFGLabel() {
-        return String.format("%s=%s", variable, value.label());
+        String valueString = value.toString().replaceAll("\n", "");
+        return String.format("%s=%s", variable, valueString);
     }
 }

@@ -70,11 +70,7 @@ public class CFGIfNode extends CFGNode {
     }
     
     public String CFGLabel() {
-        return String.format("if(%s)", cond.label());
-    }
-
-    @Override
-    public String toString() {
-        return "(if " + cond.label() + ")";
+        String condString = cond.toString().replaceAll("\n", "");
+        return String.format("if(%s)", condString);
     }
 }

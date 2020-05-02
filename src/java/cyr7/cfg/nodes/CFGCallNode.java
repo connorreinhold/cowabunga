@@ -56,12 +56,7 @@ public class CFGCallNode extends CFGNode {
     }
     
     public String CFGLabel() {
-        return call.label();
-    }
-
-    @Override
-    public String toString() {
-        return "(call " + call.target()
-                              .label() + ")";
+        String callString = call.toString().replaceAll("\n", "");
+        return callString;
     }
 }

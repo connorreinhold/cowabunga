@@ -137,6 +137,9 @@ public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
 
     @Override
     public List<IRStmt> visit(CFGStartNode n) {
+        if (n.out().size() > 1) {
+            return List.of();
+        }
         return n.out().get(0).accept(this);
     }
 
