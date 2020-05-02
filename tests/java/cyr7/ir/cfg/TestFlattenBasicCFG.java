@@ -45,9 +45,7 @@ class TestFlattenBasicCFG {
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
         this.testWithAlternateFlattener(result.get("assign"));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("assign"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
+
     }
 
     @Test
@@ -67,9 +65,6 @@ class TestFlattenBasicCFG {
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
         this.testWithAlternateFlattener(result.get("if"));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
     @Test
@@ -83,9 +78,6 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
 
@@ -101,9 +93,6 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
 
@@ -126,9 +115,6 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
 
@@ -143,9 +129,6 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
 
