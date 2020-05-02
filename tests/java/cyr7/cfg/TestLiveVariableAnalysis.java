@@ -53,7 +53,7 @@ public class TestLiveVariableAnalysis {
 
         var result = WorklistAnalysis.analyze(line0, LiveVariableAnalysis.INSTANCE);
         assertEquals(Map.of(
-            line0, Set.of(),
+            line0, Set.of("a"),
             line1, Set.of("a"),
             line2, Set.of("b"),
             line3, Set.of("c", "e"),
