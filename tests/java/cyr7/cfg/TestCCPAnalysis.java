@@ -1,23 +1,23 @@
 package cyr7.cfg;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import java.util.List;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
+
 import cyr7.C;
 import cyr7.cfg.dfa.CCPAnalysis;
 import cyr7.cfg.dfa.CCPAnalysis.LatticeElement;
 import cyr7.cfg.dfa.CCPAnalysis.VLatticeElement;
 import cyr7.cfg.dfa.WorklistAnalysis;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGNodeFactory;
-import cyr7.cfg.nodes.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGNodeFactory;
+import cyr7.cfg.nodes.ir.CFGStartNode;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.ir.nodes.IRName;
 import cyr7.ir.nodes.IRNodeFactory;
 import cyr7.ir.nodes.IRNodeFactory_c;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCCPAnalysis {
 

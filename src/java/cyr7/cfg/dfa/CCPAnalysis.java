@@ -1,11 +1,17 @@
 package cyr7.cfg.dfa;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.function.Consumer;
+
 import cyr7.cfg.dfa.CCPAnalysis.LatticeElement;
-import cyr7.cfg.nodes.CFGCallNode;
-import cyr7.cfg.nodes.CFGIfNode;
-import cyr7.cfg.nodes.CFGMemAssignNode;
-import cyr7.cfg.nodes.CFGStartNode;
-import cyr7.cfg.nodes.CFGVarAssignNode;
+import cyr7.cfg.nodes.ir.CFGCallNode;
+import cyr7.cfg.nodes.ir.CFGIfNode;
+import cyr7.cfg.nodes.ir.CFGMemAssignNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGVarAssignNode;
 import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -26,12 +32,6 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.util.Sets;
 import cyr7.visitor.MyIRVisitor;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.function.Consumer;
 
 public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
