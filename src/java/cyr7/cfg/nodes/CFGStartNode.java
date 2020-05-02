@@ -2,7 +2,7 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 
-import cyr7.ir.cfg.CFGStubNode;
+import cyr7.cfg.constructor.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
 import cyr7.cfg.visitor.CFGVisitor;

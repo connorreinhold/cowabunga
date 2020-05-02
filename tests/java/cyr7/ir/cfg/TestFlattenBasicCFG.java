@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.cfg.constructor.CFGConstructor;
 import cyr7.cfg.flatten.CFGFlattener;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.ir.DefaultIdGenerator;

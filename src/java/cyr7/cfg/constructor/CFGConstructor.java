@@ -1,9 +1,10 @@
-package cyr7.ir.cfg;
+package cyr7.cfg.constructor;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import cyr7.cfg.nodes.CFGNode;
+import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCompUnit;
 
 public class CFGConstructor {
@@ -17,6 +18,8 @@ public class CFGConstructor {
 
         c.functions().forEach((name, fn) -> {
             CFGNode fBody = fn.body().accept(new CFGConstructorVisitor());
+            var cleaner = new CFGUnreachableNodeCleaner();
+            fBody = cleaner.removeUnreachableNodes((CFGStartNode) fBody);
             cfgCollection.put(name, fBody);
          });
         return cfgCollection;

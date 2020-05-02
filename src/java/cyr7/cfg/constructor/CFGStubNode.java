@@ -1,4 +1,4 @@
-package cyr7.ir.cfg;
+package cyr7.cfg.constructor;
 
 import java.util.List;
 
