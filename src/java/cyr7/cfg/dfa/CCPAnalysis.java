@@ -29,9 +29,13 @@ import cyr7.visitor.MyIRVisitor;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.function.Consumer;
 
-public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
+public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
+
+    INSTANCE;
 
     @Override
     public LatticeElement topValue() {
@@ -45,17 +49,23 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
     @Override
     public LatticeElement meet(LatticeElement lhs, LatticeElement rhs) {
-        Set<String> variables = Sets.union(lhs.values.keySet(), rhs.values.keySet());
+        if (lhs.unreachable() && rhs.unreachable()) {
+            return LatticeElement.unreachable;
+        }
+
+        Set<String> variables = Sets.union(lhs.variables(), rhs.variables());
 
         Map<String, VLatticeElement> values = new HashMap<>(variables.size());
         for (String variable : variables) {
-            values.put(variable, meet(lhs.getValue(variable), rhs.getValue(variable)));
+            values.put(variable, meet(lhs.getValue(variable),
+                rhs.getValue(variable)));
         }
 
-        return new LatticeElement(lhs.unreachable && rhs.unreachable, values);
+        return LatticeElement.reachable(values);
     }
 
-    private static VLatticeElement meet(VLatticeElement lhs, VLatticeElement rhs) {
+    private static VLatticeElement meet(VLatticeElement lhs,
+                                        VLatticeElement rhs) {
         if (lhs.isTop() || rhs.isBot()) {
             return rhs;
         } else if (lhs.isBot() || rhs.isTop()) {
@@ -72,57 +82,201 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
         }
     }
 
-    private interface VLatticeElement {
+    public interface VLatticeElement {
 
         boolean isTop();
+
         boolean isBot();
+
         long value();
 
         VLatticeElement top = new VLatticeElement() {
-            @Override public boolean isTop() { return true; }
-            @Override public boolean isBot() { return false; }
-            @Override public long value() { return 0; }
+            @Override
+            public boolean isTop() {
+                return true;
+            }
+
+            @Override
+            public boolean isBot() {
+                return false;
+            }
+
+            @Override
+            public long value() {
+                return 0;
+            }
+
+            @Override
+            public String toString() {
+                return "⊤";
+            }
         };
 
         VLatticeElement bot = new VLatticeElement() {
-            @Override public boolean isTop() { return false; }
-            @Override public boolean isBot() { return true; }
-            @Override public long value() { return 0; }
+            @Override
+            public boolean isTop() {
+                return false;
+            }
+
+            @Override
+            public boolean isBot() {
+                return true;
+            }
+
+            @Override
+            public long value() {
+                return 0;
+            }
+
+            @Override
+            public String toString() {
+                return "⊥";
+            }
         };
 
         static VLatticeElement value(long val) {
-            return new VLatticeElement() {
-                @Override public boolean isTop() { return false; }
-                @Override public boolean isBot() { return false; }
-                @Override public long value() { return val; }
-            };
+            return new ValueVLatticeElement(val);
         }
 
     }
 
-    public static final class LatticeElement {
+    private final static class ValueVLatticeElement implements VLatticeElement {
 
-        public static final LatticeElement top = new LatticeElement(false);
-        public static final LatticeElement deadCode = new LatticeElement(true);
+        private final long val;
 
-        public final boolean unreachable;
-        private final Map<String, VLatticeElement> values;
-
-        public LatticeElement(boolean unreachable) {
-            this.unreachable = unreachable;
-            this.values = new HashMap<>(4);
+        public ValueVLatticeElement(long val) {
+            this.val = val;
         }
 
-        public LatticeElement(
-            boolean unreachable,
-            Map<String, VLatticeElement> values) {
-
-            this.unreachable = unreachable;
-            this.values = Map.copyOf(values);
+        @Override
+        public boolean isTop() {
+            return false;
         }
 
+        @Override
+        public boolean isBot() {
+            return false;
+        }
+
+        @Override
+        public long value() {
+            return val;
+        }
+
+        @Override
+        public String toString() {
+            return Long.toString(val);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ValueVLatticeElement that = (ValueVLatticeElement) o;
+            return val == that.val;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(val);
+        }
+    }
+
+    public interface LatticeElement {
+
+        static LatticeElement reachable(Map<String, VLatticeElement> values) {
+            return new ReachableLatticeElement(values);
+        }
+
+        LatticeElement top = reachable(new HashMap<>(0));
+
+        LatticeElement unreachable = new LatticeElement() {
+            @Override
+            public boolean unreachable() {
+                return true;
+            }
+
+            @Override
+            public Set<String> variables() {
+                return Set.of();
+            }
+
+            @Override
+            public VLatticeElement getValue(String variable) {
+                return VLatticeElement.top;
+            }
+
+            @Override
+            public LatticeElement modified(
+                Consumer<Map<String, VLatticeElement>> modify) {
+                throw new UnsupportedOperationException();
+            }
+
+            @Override
+            public String toString() {
+                return "unreachable";
+            }
+        };
+
+        boolean unreachable();
+
+        Set<String> variables();
+
+        VLatticeElement getValue(String variable);
+
+        LatticeElement modified(Consumer<Map<String, VLatticeElement>> modify);
+
+    }
+
+    private final static class ReachableLatticeElement implements LatticeElement {
+
+        private final Map<String, VLatticeElement> immutableValues;
+
+        public ReachableLatticeElement(Map<String, VLatticeElement> values) {
+            this.immutableValues = Map.copyOf(values);
+        }
+
+        @Override
+        public boolean unreachable() {
+            return false;
+        }
+
+        @Override
+        public Set<String> variables() {
+            return immutableValues.keySet();
+        }
+
+        @Override
         public VLatticeElement getValue(String variable) {
-            return values.getOrDefault(variable, VLatticeElement.top);
+            return immutableValues.getOrDefault(variable,
+                VLatticeElement.top);
+        }
+
+        @Override
+        public LatticeElement modified(Consumer<Map<String,
+            VLatticeElement>> modify) {
+            Map<String, VLatticeElement> copy =
+                new HashMap<>(immutableValues);
+            modify.accept(copy);
+            return LatticeElement.reachable(copy);
+        }
+
+        @Override
+        public String toString() {
+            return immutableValues.toString();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            ReachableLatticeElement that = (ReachableLatticeElement) o;
+            return Objects.equals(immutableValues, that.immutableValues);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(immutableValues);
         }
 
     }
@@ -133,27 +287,28 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public LatticeElement transfer(CFGCallNode n, LatticeElement in) {
-            if (in.unreachable) {
-                return LatticeElement.deadCode;
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
             }
 
-            HashMap<String, VLatticeElement> values = new HashMap<>(in.values);
-            for (String variable : n.call.collectors()) {
-                values.put(variable, VLatticeElement.bot);
-            }
-
-            return new LatticeElement(false, values);
+            return in.modified(values -> {
+                for (String variable : n.call.collectors()) {
+                    values.put(variable, VLatticeElement.bot);
+                }
+            });
         }
 
         @Override
         public LatticeElement transferTrue(CFGIfNode n, LatticeElement in) {
-            if (in.unreachable) {
-                return LatticeElement.deadCode;
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
             }
 
-            VLatticeElement result = n.cond.accept(new AbstractInterpreter(in.values));
+            VLatticeElement result =
+                n.cond.accept(new AbstractInterpreter(in));
             if (result.isTop()) {
-                // William: We can do whatever, so I guess we take the true branch?
+                // William: We can do whatever, so I guess we take the true
+                // branch?
                 return in;
             } else if (result.isBot()) {
                 return in;
@@ -162,23 +317,29 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 if (value != 0) {
                     return in;
                 } else {
-                    return LatticeElement.deadCode;
+                    return LatticeElement.unreachable;
                 }
             }
         }
 
         @Override
         public LatticeElement transferFalse(CFGIfNode n, LatticeElement in) {
-            VLatticeElement result = n.cond.accept(new AbstractInterpreter(in.values));
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
+            }
+
+            VLatticeElement result =
+                n.cond.accept(new AbstractInterpreter(in));
             if (result.isTop()) {
-                // William: We can do whatever, so I guess we take the true branch?
-                return LatticeElement.deadCode;
+                // William: We can do whatever, so I guess we take the true
+                // branch?
+                return LatticeElement.unreachable;
             } else if (result.isBot()) {
                 return in;
             } else {
                 long value = result.value();
                 if (value != 0) {
-                    return LatticeElement.deadCode;
+                    return LatticeElement.unreachable;
                 } else {
                     return in;
                 }
@@ -187,8 +348,8 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public LatticeElement transfer(CFGMemAssignNode n, LatticeElement in) {
-            if (in.unreachable) {
-                return LatticeElement.deadCode;
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
             }
 
             return in;
@@ -196,8 +357,8 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public LatticeElement transfer(CFGStartNode n, LatticeElement in) {
-            if (in.unreachable) {
-                return LatticeElement.deadCode;
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
             }
 
             return LatticeElement.top;
@@ -205,23 +366,24 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public LatticeElement transfer(CFGVarAssignNode n, LatticeElement in) {
-            if (in.unreachable) {
-                return LatticeElement.deadCode;
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
             }
 
-            HashMap<String, VLatticeElement> values = new HashMap<>(in.values);
-            VLatticeElement result = n.value.accept(new AbstractInterpreter(in.values));
-            values.put(n.variable, result);
-            return new LatticeElement(false, values);
+            return in.modified(values -> {
+                VLatticeElement result =
+                    n.value.accept(new AbstractInterpreter(in));
+                values.put(n.variable, result);
+            });
         }
 
     }
 
     private static final class AbstractInterpreter implements MyIRVisitor<VLatticeElement> {
 
-        private final Map<String, VLatticeElement> env;
+        private final LatticeElement env;
 
-        private AbstractInterpreter(Map<String, VLatticeElement> env) {
+        private AbstractInterpreter(LatticeElement env) {
             this.env = env;
         }
 
@@ -272,7 +434,7 @@ public class CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public VLatticeElement visit(IRTemp n) {
-            return env.getOrDefault(n.name(), VLatticeElement.top);
+            return env.getValue(n.name());
         }
 
         @Override
