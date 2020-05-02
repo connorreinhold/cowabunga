@@ -10,16 +10,24 @@ import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.visitor.DotVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IdGenerator;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.cfg.CFGConstructor;
 import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRNode;
+import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
 import polyglot.util.Pair;
 
 public class CFGUtil {
-    public static IRNode generateIR(CFGNode start, IdGenerator generator) {
+
+    /**
+     * Transforms a control-flow graph into an Lowered-IR function body.
+     * @param start Must be an instance of CFGStartNode. The CFG must either
+     * terminate or lead to an infinite loop in all possible paths from the
+     * {@code start} node.
+     *
+     * @return
+     */
+    public static IRSeq generateIR(CFGNode start) {
         return CFGFlattener.flatten(start);
     }
 
