@@ -9,7 +9,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGStubNode extends CFGNode {
 
-    protected CFGStubNode() {
+    public CFGStubNode() {
         super(new Location(-1, -1));
     }
 
