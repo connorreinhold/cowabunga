@@ -3,7 +3,7 @@ package cyr7.ir.cfg;
 import java.util.HashMap;
 import java.util.Map;
 
-import cyr7.cfg.nodes.CFGNode;
+import cyr7.cfg.nodes.ir.CFGNode;
 import cyr7.ir.nodes.IRCompUnit;
 
 public class CFGConstructor {

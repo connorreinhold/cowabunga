@@ -1,4 +1,4 @@
-package cyr7.cfg.nodes;
+package cyr7.cfg.nodes.ir;
 
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.ir.nodes.IRExpr;

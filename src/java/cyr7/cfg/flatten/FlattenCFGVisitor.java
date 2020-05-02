@@ -9,14 +9,14 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
-import cyr7.cfg.nodes.CFGCallNode;
-import cyr7.cfg.nodes.CFGIfNode;
-import cyr7.cfg.nodes.CFGMemAssignNode;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGReturnNode;
-import cyr7.cfg.nodes.CFGStartNode;
-import cyr7.cfg.nodes.CFGVarAssignNode;
-import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.cfg.nodes.ir.CFGCallNode;
+import cyr7.cfg.nodes.ir.CFGIfNode;
+import cyr7.cfg.nodes.ir.CFGMemAssignNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGReturnNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGVarAssignNode;
+import cyr7.cfg.visitor.IrCFGVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRJump;
@@ -28,7 +28,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
 
 public class FlattenCFGVisitor
-        implements CFGVisitor<Optional<CFGNode>> {
+        implements IrCFGVisitor<Optional<CFGNode>> {
 
     /**
      * A wrapper class so that stmts can be compared via pointer addresses,
