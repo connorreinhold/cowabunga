@@ -3,6 +3,7 @@ package cyr7.cfg.nodes;
 import java.util.ArrayList;
 import java.util.List;
 
+import cyr7.ir.cfg.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
 import cyr7.cfg.visitor.CFGVisitor;
@@ -44,5 +45,7 @@ public abstract class CFGNode {
             node.in().add(this);
         }
     }
+
+    public abstract void convertFromStub(CFGStubNode stub, CFGNode n);
 
 }
