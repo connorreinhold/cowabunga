@@ -80,6 +80,21 @@ class TestFlattenBasicCFG {
 
 
     @Test
+    void testBasicInfiniteLoop() throws Exception {
+
+        String prgmString = "main() { while (true) { } }";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "while.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
+    }
+
+
+
+    @Test
     void testJustReturnFunction() throws Exception {
 
         String prgmString = "main(): int { return 13 }";
@@ -87,10 +102,10 @@ class TestFlattenBasicCFG {
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
                 "return.xi", null, new IRUtil.LowerConfiguration(true, true),
                 new DefaultIdGenerator());
-
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
+
 
     @Test
     void testNestedControls() throws Exception {

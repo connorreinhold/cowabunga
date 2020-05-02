@@ -3,11 +3,13 @@ package cyr7.cfg;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.ir.IRUtil;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
 
@@ -55,6 +57,7 @@ class TestDotGeneration {
         FileWriter w = new FileWriter("output.dot");
         LowerConfiguration config = new LowerConfiguration(true, true);
         try {
+            IRUtil.irGen(r, new PrintWriter(System.out), "main", new Opener(), config);
             CFGUtil.generateDot(r, w, "main", new Opener(), config, "_Imain_p");
         } catch (Exception e) {
             e.printStackTrace();

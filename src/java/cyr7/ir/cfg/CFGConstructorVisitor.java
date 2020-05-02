@@ -87,7 +87,15 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
                     // Target node may be itself, which
                     // indicates an empty loop coming from the parent node.
                     if (targetNode == stub) {
-                        incoming.convertFromStub(stub, incoming);
+                        // Infinite loop...
+                        var stubNodeTrue = this.createStubNode();
+                        var stubNodeFalse = this.createStubNode();
+                        var loopNode = new CFGIfNode(targetNode.location(),
+                                stubNodeTrue, stubNodeFalse,
+                                new IRConst(targetNode.location(), 0));
+                        loopNode.convertFromStub(stubNodeTrue, loopNode);
+                        loopNode.convertFromStub(stubNodeFalse, loopNode);
+                        incoming.convertFromStub(stub, loopNode);
                     } else {
                         incoming.convertFromStub(stub, targetNode);
                     }
