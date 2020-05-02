@@ -83,9 +83,15 @@ public class IRConstFoldVisitor
                     .shiftRight(64).longValue();
             break;
         case DIV:
+            if (r == 0) {
+                return n;
+            }
             value = l / r;
             break;
         case MOD:
+            if (r == 0) {
+                return n;
+            }
             value = l % r;
             break;
         case AND:
