@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
