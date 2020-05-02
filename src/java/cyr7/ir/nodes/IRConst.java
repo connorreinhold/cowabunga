@@ -66,4 +66,9 @@ public class IRConst extends IRExpr_c {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        return String.valueOf(this.value);
+    }
 }

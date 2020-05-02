@@ -52,4 +52,6 @@ public interface IRNode {
 
     Location location();
 
+    String userFriendlyString();
+
 }

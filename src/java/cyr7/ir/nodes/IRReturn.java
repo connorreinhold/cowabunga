@@ -56,4 +56,9 @@ public class IRReturn extends IRStmt {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        return "RETURN";
+    }
 }

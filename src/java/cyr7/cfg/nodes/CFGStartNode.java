@@ -2,10 +2,10 @@ package cyr7.cfg.nodes;
 
 import java.util.List;
 
-import cyr7.ir.cfg.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
 import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.ir.cfg.CFGStubNode;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGStartNode extends CFGNode {
@@ -38,6 +38,7 @@ public class CFGStartNode extends CFGNode {
         }
     }
 
+    @Override
     public <T> List<T> acceptForward(ForwardTransferFunction<T> transferFunction, T in) {
         return List.of(transferFunction.transfer(this, in));
     }
@@ -46,7 +47,8 @@ public class CFGStartNode extends CFGNode {
     public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
         return input;
     }
-    
+
+    @Override
     public String CFGLabel() {
         return "start";
     }

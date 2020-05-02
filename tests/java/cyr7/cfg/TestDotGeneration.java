@@ -41,7 +41,7 @@ class TestDotGeneration {
     @Test
     void test() throws IOException {
         final String prgmString = "main() { i: int = 232 "
-                + "while (i < 32) {"
+                + "while (false) {"
                 + "    if (i%2 == 0) { i = 32 } else {"
                 + "        k: int = 0"
                 + "        while (k < 12) k = k + 1"

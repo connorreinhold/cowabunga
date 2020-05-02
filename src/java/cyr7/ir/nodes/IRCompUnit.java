@@ -102,4 +102,11 @@ public class IRCompUnit extends IRStmt {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        StringBuffer result = new StringBuffer("Functions: ");
+        result.append(String.join(", ", this.functions.keySet()));
+        return result.toString();
+    }
 }

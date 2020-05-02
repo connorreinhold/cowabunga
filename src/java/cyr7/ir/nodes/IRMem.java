@@ -102,4 +102,9 @@ public class IRMem extends IRExpr_c {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        return "[ " + this.memType + " ]";
+    }
 }
