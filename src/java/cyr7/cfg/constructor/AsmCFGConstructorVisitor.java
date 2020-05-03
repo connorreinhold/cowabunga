@@ -12,8 +12,6 @@ import cyr7.cfg.nodes.asm.AsmCFGIfNode.ASMCompareType;
 import cyr7.cfg.nodes.asm.AsmCFGMemAssignNode;
 import cyr7.cfg.nodes.asm.AsmCFGNode;
 import cyr7.cfg.nodes.asm.AsmCFGNodeFactory;
-import cyr7.cfg.nodes.asm.AsmCFGOperationExpr;
-import cyr7.cfg.nodes.asm.AsmCFGOperationExpr.ASMOperation;
 import cyr7.cfg.nodes.asm.AsmCFGRegAssignNode;
 import cyr7.cfg.nodes.asm.AsmCFGStartNode;
 import cyr7.cfg.nodes.asm.AsmCFGStubNode;

@@ -24,8 +24,8 @@ public final class CFGNodeFactory {
         return new CFGMemAssignNode(location, target, value, out);
     }
 
-    public CFGReturnNode Return(int numReturnValue) {
-        return new CFGReturnNode(location, numReturnValue);
+    public CFGReturnNode Return() {
+        return new CFGReturnNode(location);
     }
 
     public CFGStartNode Start(CFGNode out) {

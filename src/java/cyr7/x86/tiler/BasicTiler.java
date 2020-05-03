@@ -1,10 +1,5 @@
 package cyr7.x86.tiler;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
@@ -34,9 +29,14 @@ import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
 import cyr7.x86.asm.ASMTempRegArg;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Tiles IRStatement trees using the most rudimentary of patterns, i.e. the
@@ -101,7 +101,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         ASMArg rightArg = right.result.get();
         if (leftArg instanceof ASMMemArg && rightArg instanceof ASMMemArg) {
             // Move LHS to a temp if there are two memory args
-            ASMArg leftTemp = arg.temp(generator.newTemp(), Size.QWORD);
+            ASMArg leftTemp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
             insns.add(make.Mov(leftTemp, leftArg));
             leftArg = leftTemp;
         }
@@ -124,7 +124,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
+        ASMArg ret = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
         List<ASMLine> insns = List.of(
             make.Mov(ret, new ASMConstArg(n.constant())));
         TilerData result = new TilerData(1, insns, Optional.of(ret));
@@ -179,7 +179,7 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
         if (n.hasOptimalTiling()) {
             return n.getOptimalTiling();
         }
-        ASMArg ret = new ASMTempArg(n.name(), Size.QWORD);
+        ASMArg ret = new ASMTempArg(n.name(), ASMRegSize.QWORD);
         TilerData result = new TilerData(1,
             new ArrayList<>(),
             Optional.of(ret));

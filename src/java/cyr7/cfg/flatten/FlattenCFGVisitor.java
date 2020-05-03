@@ -280,7 +280,7 @@ public class FlattenCFGVisitor
     public Optional<CFGNode> visit(CFGReturnNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
-            var stmt = this.wrapStmt(make.IRReturn(n.numReturnValues));
+            var stmt = this.wrapStmt(make.IRReturn());
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
         }

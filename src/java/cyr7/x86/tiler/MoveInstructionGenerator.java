@@ -19,7 +19,7 @@ import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 
 public class MoveInstructionGenerator {
 
@@ -179,7 +179,7 @@ public class MoveInstructionGenerator {
                 Optional.empty());
         } else if (target instanceof ASMMemArg
             && source instanceof ASMMemArg) {
-            ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
+            ASMTempArg sourceTemp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
             instrs.add(make.Mov(sourceTemp, source));
             instrs.add(make.Mov(target, sourceTemp));
             result = new TilerData(
@@ -190,7 +190,7 @@ public class MoveInstructionGenerator {
             ASMConstArg constArg = (ASMConstArg) source;
             if (constArg.constant < Integer.MIN_VALUE
                 || Integer.MAX_VALUE < constArg.constant) {
-                ASMTempArg sourceTemp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg sourceTemp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 instrs.add(make.MovAbs(sourceTemp, source));
                 instrs.add(make.Mov(target, sourceTemp));
                 result = new TilerData(

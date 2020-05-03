@@ -7,9 +7,9 @@ import cyr7.x86.visitor.AbstractASMVisitor;
 public final class ASMTempArg implements ASMTempRegArg {
 
     public final String name;
-    public final ASMReg.Size size;
+    public final ASMRegSize size;
 
-    public ASMTempArg(String name, ASMReg.Size size) {
+    public ASMTempArg(String name, ASMRegSize size) {
         this.name = name;
         this.size = size;
     }

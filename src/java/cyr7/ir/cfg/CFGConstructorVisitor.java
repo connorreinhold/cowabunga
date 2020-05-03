@@ -41,7 +41,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
     private final Map<String, CFGNode> labelToCFG;
     private final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG;
     private final CFGNode absoluteLastReturn = new CFGReturnNode(
-        new Location(Integer.MAX_VALUE, Integer.MAX_VALUE), 0);
+        new Location(Integer.MAX_VALUE, Integer.MAX_VALUE));
     private CFGNode successor;
 
     /**
@@ -171,7 +171,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(IRReturn n) {
-        return new CFGReturnNode(n.location(), n.numReturnValues);
+        return new CFGReturnNode(n.location());
     }
 
 

@@ -4,23 +4,24 @@ import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
 import cyr7.x86.asm.ASMAddrExpr;
+import cyr7.x86.asm.ASMArg;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class AsmCFGMemAssignNode extends AsmCFGNode {
 
     public final ASMAddrExpr address;
-    public final AsmCFGOperationExpr value;
+    public final ASMArg expr;
     private AsmCFGNode out;
 
     public AsmCFGMemAssignNode(
         Location location,
         ASMAddrExpr address,
-        AsmCFGOperationExpr value,
+        ASMArg expr,
         AsmCFGNode out) {
 
         super(location);
         this.address = address;
-        this.value = value;
+        this.expr = expr;
         this.out = out;
 
         this.updateIns();
@@ -49,6 +50,6 @@ public class AsmCFGMemAssignNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "([" + address.getIntelExpr() + "] = " + value.getIntelArg() + ")";
+        return "([" + address.getIntelExpr() + "] = " + expr.getIntelArg() + ")";
     }
 }

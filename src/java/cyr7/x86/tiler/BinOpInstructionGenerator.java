@@ -10,7 +10,7 @@ import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.asm.ASMTempArg;
 
 public class BinOpInstructionGenerator {
@@ -26,7 +26,7 @@ public class BinOpInstructionGenerator {
             IdGenerator generator) {
 
         ASMLineFactory make = new ASMLineFactory(n);
-        ASMArg ret = arg.temp(generator.newTemp(), Size.QWORD);
+        ASMArg ret = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
 
         switch (n.opType()) {
         case ADD:
@@ -41,27 +41,27 @@ public class BinOpInstructionGenerator {
             String raxTemp = generator.newTemp();
             String rdxTemp = generator.newTemp();
 
-            insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
-            insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
+            insns.add(make.Mov(arg.temp(raxTemp, ASMRegSize.QWORD), ASMReg.RAX));
+            insns.add(make.Mov(arg.temp(rdxTemp, ASMRegSize.QWORD), ASMReg.RDX));
 
             insns.add(make.Mov(ASMReg.RAX, leftArg));
             insns.add(make.CQO());
             if (!(rightArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, rightArg));
                 rightArg = temp;
             }
             insns.add(make.Div(rightArg));
             insns.add(make.Mov(ret, ASMReg.RAX));
 
-            insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
-            insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
+            insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, ASMRegSize.QWORD)));
+            insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, ASMRegSize.QWORD)));
             break;
         }
         case EQ: {
-            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), ASMRegSize.BYTE);
             if (!(leftArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, leftArg));
                 leftArg = temp;
             }
@@ -71,9 +71,9 @@ public class BinOpInstructionGenerator {
             break;
         }
         case GEQ: {
-            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), ASMRegSize.BYTE);
             if (!(leftArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, leftArg));
                 leftArg = temp;
             }
@@ -83,9 +83,9 @@ public class BinOpInstructionGenerator {
             break;
         }
         case GT: {
-            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), ASMRegSize.BYTE);
             if (!(leftArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, leftArg));
                 leftArg = temp;
             }
@@ -98,26 +98,26 @@ public class BinOpInstructionGenerator {
             String raxTemp = generator.newTemp();
             String rdxTemp = generator.newTemp();
 
-            insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
-            insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
+            insns.add(make.Mov(arg.temp(raxTemp, ASMRegSize.QWORD), ASMReg.RAX));
+            insns.add(make.Mov(arg.temp(rdxTemp, ASMRegSize.QWORD), ASMReg.RDX));
 
             insns.add(make.Mov(ASMReg.RAX, leftArg));
             if (!(rightArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, rightArg));
                 rightArg = temp;
             }
             insns.add(make.Mul(rightArg));
             insns.add(make.Mov(ret, ASMReg.RDX));
 
-            insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
-            insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
+            insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, ASMRegSize.QWORD)));
+            insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, ASMRegSize.QWORD)));
             break;
         }
         case LEQ: {
-            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), ASMRegSize.BYTE);
             if (!(leftArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, leftArg));
                 leftArg = temp;
             }
@@ -151,9 +151,9 @@ public class BinOpInstructionGenerator {
             break;
         }
         case LT: {
-            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), ASMRegSize.BYTE);
             if (!(leftArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, leftArg));
                 leftArg = temp;
             }
@@ -166,30 +166,30 @@ public class BinOpInstructionGenerator {
             String raxTemp = generator.newTemp();
             String rdxTemp = generator.newTemp();
 
-            insns.add(make.Mov(arg.temp(raxTemp, Size.QWORD), ASMReg.RAX));
-            insns.add(make.Mov(arg.temp(rdxTemp, Size.QWORD), ASMReg.RDX));
+            insns.add(make.Mov(arg.temp(raxTemp, ASMRegSize.QWORD), ASMReg.RAX));
+            insns.add(make.Mov(arg.temp(rdxTemp, ASMRegSize.QWORD), ASMReg.RDX));
 
             insns.add(make.Mov(ASMReg.RAX, leftArg));
             insns.add(make.CQO());
             if (!(rightArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, rightArg));
                 rightArg = temp;
             }
             insns.add(make.Div(rightArg));
             insns.add(make.Mov(ret, ASMReg.RDX));
 
-            insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, Size.QWORD)));
-            insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, Size.QWORD)));
+            insns.add(make.Mov(ASMReg.RAX, arg.temp(raxTemp, ASMRegSize.QWORD)));
+            insns.add(make.Mov(ASMReg.RDX, arg.temp(rdxTemp, ASMRegSize.QWORD)));
             break;
         case MUL:
             insns.add(make.Mov(ret, leftArg));
             insns.add(make.Mul(ret, rightArg));
             break;
         case NEQ: {
-            ASMArg byteReg = new ASMTempArg(generator.newTemp(), Size.BYTE);
+            ASMArg byteReg = new ASMTempArg(generator.newTemp(), ASMRegSize.BYTE);
             if (!(leftArg instanceof ASMTempArg)) {
-                ASMTempArg temp = arg.temp(generator.newTemp(), Size.QWORD);
+                ASMTempArg temp = arg.temp(generator.newTemp(), ASMRegSize.QWORD);
                 insns.add(make.Mov(temp, leftArg));
                 leftArg = temp;
             }

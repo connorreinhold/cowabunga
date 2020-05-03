@@ -3,6 +3,7 @@ package cyr7.cfg.nodes.asm;
 import cyr7.cfg.nodes.asm.AsmCFGIfNode.ASMCompareType;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMRegSize;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public final class AsmCFGNodeFactory {
@@ -35,8 +36,13 @@ public final class AsmCFGNodeFactory {
         return new AsmCFGStartNode(location, out);
     }
 
-    public AsmCFGVarAssignNode VarAssign(String variable, ASMArg value, AsmCFGNode out) {
-        return new AsmCFGVarAssignNode(location, variable, value, out);
+    public AsmCFGVarAssignNode VarAssign(
+        String variable,
+        ASMArg value,
+        ASMRegSize size,
+        AsmCFGNode outNode) {
+
+        return new AsmCFGVarAssignNode(location, variable, value, size, outNode);
     }
 
 }

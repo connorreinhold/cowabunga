@@ -14,7 +14,7 @@ import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 
@@ -56,7 +56,7 @@ public class ConstTimesTemp extends MemoryAddrPattern {
             ASMAddrExpr addrExpr = arg.addr(
                     Optional.empty(),
                     ScaleValues.fromConst(constArg.constant()).get(),
-                    Optional.of(arg.temp(tempArg.name, Size.QWORD)),
+                    Optional.of(arg.temp(tempArg.name, ASMRegSize.QWORD)),
                     0
                 );
             return Optional.of(addrExpr);

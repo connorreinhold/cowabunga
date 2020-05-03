@@ -13,14 +13,20 @@ public class AsmCFGIfNode extends AsmCFGNode {
     }
 
     private final ASMCompareType type;
-    private AsmCFGNode trueBranch;
-    private AsmCFGNode falseBranch;
     public final ASMArg leftOperand;
     public final ASMArg rightOperand;
 
-    public AsmCFGIfNode(Location location, AsmCFGNode trueBranch,
-            AsmCFGNode falseBranch, ASMCompareType type,
-            ASMArg leftOperand, ASMArg rightOperand) {
+    private AsmCFGNode trueBranch;
+    private AsmCFGNode falseBranch;
+
+    public AsmCFGIfNode(
+        Location location,
+        AsmCFGNode trueBranch,
+        AsmCFGNode falseBranch,
+        ASMCompareType type,
+        ASMArg leftOperand,
+        ASMArg rightOperand) {
+
         super(location);
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
