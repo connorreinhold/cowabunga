@@ -32,7 +32,9 @@ public class AsmCFGOpNode extends AsmCFGSourceNode {
     public void convertFromStub(AsmCFGStubNode stub, AsmCFGNode n) {
         if (out == stub) {
             out = n;
+            updateIns();
+        } else {
+            throw new AssertionError();
         }
-        updateIns();
     }
 }

@@ -77,11 +77,11 @@ public class AsmCFGConstructor {
         return new AsmCFGStartNode(successor);
     }
 
-    public void accept(ASMLabel label) {
+    private void accept(ASMLabel label) {
         this.labelToCFG.put(label.label, successor);
     }
 
-    public AsmCFGSourceNode accept(ASMInstr instr, int index) {
+    private AsmCFGSourceNode accept(ASMInstr instr, int index) {
         switch (instr.type) {
             // operations
             case ADDQ:
@@ -124,7 +124,7 @@ public class AsmCFGConstructor {
                     return new AsmCFGIfNode(index, instr, trueBranch, successor);
                 } else {
                     // Create stub node, and connect target to the stub node.
-                    AsmCFGStubNode stub = new AsmCFGStubNode();
+                    AsmCFGStubNode stub = new AsmCFGStubNode(index, instr);
                     AsmCFGIfNode ifNode = new AsmCFGIfNode(index, instr, stub, successor);
                     this.jumpTargetFromCFG.add(new Pair<>(stub, trueLabel));
                     return ifNode;

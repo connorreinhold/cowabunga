@@ -24,6 +24,7 @@ public class AsmCFGReturnNode extends AsmCFGSourceNode {
 
     @Override
     public void convertFromStub(AsmCFGStubNode stub, AsmCFGNode n) {
+        // do nothing since this node has no out nodes
     }
 
     @Override
