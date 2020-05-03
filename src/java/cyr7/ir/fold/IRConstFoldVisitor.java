@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -83,9 +84,15 @@ public class IRConstFoldVisitor
                     .shiftRight(64).longValue();
             break;
         case DIV:
+            if (r == 0) {
+                return n;
+            }
             value = l / r;
             break;
         case MOD:
+            if (r == 0) {
+                return n;
+            }
             value = l % r;
             break;
         case AND:

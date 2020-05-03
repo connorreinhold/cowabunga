@@ -132,7 +132,7 @@ public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
     @Override
     public List<IRStmt> visit(CFGReturnNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.location());
-        return stmtsOrAddTranslation(n, List.of(make.IRReturn(n.numReturnValues)));
+        return stmtsOrAddTranslation(n, List.of(make.IRReturn()));
     }
 
     @Override

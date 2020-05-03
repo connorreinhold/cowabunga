@@ -42,8 +42,7 @@ public class CFGStubNode extends CFGNode {
     }
 
     @Override
-    public String CFGLabel() {
-        
+    public String toString() {
         return "Stub";
     }
 

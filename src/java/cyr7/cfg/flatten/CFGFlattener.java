@@ -11,7 +11,7 @@ public class CFGFlattener {
     public static IRStmt flatten(CFGNode root) {
         assert root instanceof CFGStartNode;
 
-        var flattener = new Ay339FlattenCFGVisitor();
+        var flattener = new FlattenCFGVisitor();
         root.accept(flattener);
         return new IRSeq(new Location(-1, -1), flattener.getFunctionBody());
     }

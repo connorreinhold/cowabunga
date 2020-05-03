@@ -53,6 +53,7 @@ public class CLI {
     private static boolean wantsIrRun = false;
     private static boolean wantsAssembly = true;
     private static boolean wantsTaggedASMFile = false;
+    public static boolean wantsCommentedAssembly = false;
 
     /**
      * Enable assertions at the assembly level. This specifically enables
@@ -268,6 +269,11 @@ public class CLI {
             .required(false)
             .build();
 
+        Option assemblyComments = Option
+            .builder("asmComments")
+            .desc("Enable comments about IR code in assembly.")
+            .build();
+
         return options.addOption(help)
                 .addOption(lex)
                 .addOption(parse)
@@ -288,7 +294,8 @@ public class CLI {
                 .addOption(noAssembly)
                 .addOption(tiler)
                 .addOption(taggedAssembly)
-                .addOption(enableAssemblyLevelAssertions);
+                .addOption(enableAssemblyLevelAssertions)
+                .addOption(assemblyComments);
     }
 
     /**
@@ -465,6 +472,10 @@ public class CLI {
 
                 case "enableAssemblyLevelAssertions":
                     assemblyLevelAssertionsEnabled = true;
+                    break;
+
+                case "asmComments":
+                    wantsCommentedAssembly = true;
                     break;
 
                 default:

@@ -27,7 +27,7 @@ import cyr7.ir.nodes.IRStmt;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
 
-public class Ay339FlattenCFGVisitor
+public class FlattenCFGVisitor
         implements CFGVisitor<Optional<CFGNode>> {
 
     /**
@@ -121,7 +121,7 @@ public class Ay339FlattenCFGVisitor
 
     private final IdGenerator generator;
 
-    protected Ay339FlattenCFGVisitor() {
+    protected FlattenCFGVisitor() {
         this.visitedNodes = new HashSet<>();
         this.cfgNodeToLabels = new IdentityHashMap<>();
         this.cfgNodeToIRStmt = new IdentityHashMap<>();
@@ -280,7 +280,7 @@ public class Ay339FlattenCFGVisitor
     public Optional<CFGNode> visit(CFGReturnNode n) {
         if (!this.performProcessIfVisited(n)) {
             final var make = this.createMake(n);
-            var stmt = this.wrapStmt(make.IRReturn(n.numReturnValues));
+            var stmt = this.wrapStmt(make.IRReturn());
             this.appendStmt(n, stmt);
             this.epilogueProcess(n, stmt);
         }

@@ -46,7 +46,7 @@ public class DotVisitor implements CFGVisitor<Optional<Void>>{
     
     public void addDotInfo(CFGNode n) {
         id++;
-        String label = n.CFGLabel() + "[id=" + id+"]";
+        String label = n.toString() + "[id=" + id+"]";
         nodeToLabel.put(n, label);
         nodes.add(n);
         for(CFGNode inc: n.in()) {

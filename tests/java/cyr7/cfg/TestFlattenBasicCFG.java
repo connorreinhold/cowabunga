@@ -45,34 +45,30 @@ class TestFlattenBasicCFG {
         var func = new IRFuncDecl(loc, "assign", new IRSeq(loc,
                 new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
                 new IRMove(loc, new IRMem(loc, new IRConst(loc, 0)), new IRConst(loc, 0)),
-                new IRReturn(loc, 0)));
+                new IRReturn(loc)));
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("assign", func);
         var comp = new IRCompUnit(loc, "base", map);
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        IRNode node = CFGUtil.generateIR(result.get("assign"), new DefaultIdGenerator());
-        System.out.println(node);
-        //this.testWithAlternateFlattener(result.get("assign"));
+
+        this.testWithAlternateFlattener(result.get("assign"));
     }
 
-    //@Test
+    @Test
     void testIFElseFunction() {
         Location loc = new Location(-1, -1);
         var func = new IRFuncDecl(loc, "if", new IRSeq(loc,
                 new IRCJump(loc, new IRConst(loc, 0), "Hello_World"),
                 new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
                 new IRLabel(loc, "Hello_World"),
-                new IRReturn(loc, 0)));
+                new IRReturn(loc)));
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("if", func);
         var comp = new IRCompUnit(loc, "base", map);
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-
-        IRNode node = CFGUtil.generateIR(new LinkedList<>(result.values()).get(0), new DefaultIdGenerator());
-        System.out.println(node);
-        // this.testWithAlternateFlattener(result.get("if"));
+        this.testWithAlternateFlattener(result.get("if"));
     }
 
     @Test
@@ -85,9 +81,7 @@ class TestFlattenBasicCFG {
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        //this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        IRNode node = CFGUtil.generateIR(new LinkedList<>(result.values()).get(0), new DefaultIdGenerator());
-        System.out.println(node);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 
 
@@ -103,9 +97,6 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
     @Disabled
@@ -128,14 +119,8 @@ class TestFlattenBasicCFG {
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        
-        //CFGUtil.generateIR(new LinkedList<>(result.values()).get(0), new DefaultIdGenerator());
-        // IRNode node = CFGToIRGenerator.generateIR(result.get("if"), new
-        // DefaultIdGenerator());
-        // System.out.println(node);
     }
 
-    @Disabled
     @Test
     void testEmpty() throws Exception {
 
@@ -146,9 +131,7 @@ class TestFlattenBasicCFG {
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        //this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
-        IRNode node = CFGUtil.generateIR(new LinkedList<>(result.values()).get(0), new DefaultIdGenerator());
 
-        System.out.println(node);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 }

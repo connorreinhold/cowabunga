@@ -47,8 +47,6 @@ public abstract class CFGNode {
             }
         }
     }
-    
-    public abstract String CFGLabel();
 
     public abstract void convertFromStub(CFGStubNode stub, CFGNode n);
 

@@ -116,7 +116,7 @@ public interface IRNodeFactory {
      */
     IRName IRName(String name);
 
-    IRReturn IRReturn(int numReturnValues);
+    IRReturn IRReturn();
 
     /**
      * @param stmts the statements

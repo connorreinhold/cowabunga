@@ -48,15 +48,12 @@ public class ASMTrivialArgTranslator {
         for (int i = 0; i < instr.args.size(); i++) {
             ASMArg arg = instr.args.get(i);
 
-            boolean uses = instr.type.uses().contains(i);
-            boolean defs = instr.type.defs().contains(i);
-
             if (arg instanceof ASMMemArg) {
                 ASMMemArg memArg = (ASMMemArg) arg;
-                allocateRegisterForMemory(memArg, uses, defs);
+                allocateRegisterForMemory(memArg);
             } else if (arg instanceof ASMTempArg) {
                 ASMTempArg tempArg = (ASMTempArg) arg;
-                allocateMemoryForNormalTemporary(tempArg, uses, defs);
+                allocateMemoryForNormalTemporary(tempArg);
             } else {
                 newArgs.add(arg);
             }
@@ -70,17 +67,17 @@ public class ASMTrivialArgTranslator {
     }
 
     // allocate registers for temporaries inside a mem arg
-    protected void allocateRegisterForMemory(ASMMemArg arg, boolean uses, boolean defs) {
+    protected void allocateRegisterForMemory(ASMMemArg arg) {
         Optional<ASMTempRegArg> base = Optional.empty();
         Optional<ASMTempRegArg> index = Optional.empty();
 
         if (arg.address.base.isPresent()) {
             ASMTempRegArg b = arg.address.base.get();
-            base = Optional.of(allocateRegisterForMemoryOperand(b, uses, defs));
+            base = Optional.of(allocateRegisterForMemoryOperand(b));
         }
         if (arg.address.index.isPresent()) {
             ASMTempRegArg i = arg.address.index.get();
-            index = Optional.of(allocateRegisterForMemoryOperand(i, uses, defs));
+            index = Optional.of(allocateRegisterForMemoryOperand(i));
         }
 
         ASMAddrExpr address = new ASMAddrExpr(
@@ -93,11 +90,7 @@ public class ASMTrivialArgTranslator {
 
     // allocate registers for temporaries that are regular arguments to an
     // asm instruction (i.e. not inside memory access)
-    protected void allocateMemoryForNormalTemporary(
-        ASMTempArg arg,
-        boolean uses,
-        boolean defs) {
-
+    protected void allocateMemoryForNormalTemporary(ASMTempArg arg) {
         switch (arg.size) {
             case BYTE: {
                 ASMReg reg = BYTE_REGS[nextByteReg++];
@@ -118,15 +111,11 @@ public class ASMTrivialArgTranslator {
             case QWORD: {
                 ASMReg reg = QWORD_REGS[nextQwordReg++];
 
-                if (uses) {
-                    prelude.add(make.Mov(reg,
-                        new ASMMemArg(addressOfTemporary(arg))));
-                }
+                prelude.add(make.Mov(reg,
+                    new ASMMemArg(addressOfTemporary(arg))));
 
-                if (defs) {
-                    postlude.add(0,
-                        make.Mov(new ASMMemArg(addressOfTemporary(arg)), reg));
-                }
+                postlude.add(0,
+                    make.Mov(new ASMMemArg(addressOfTemporary(arg)), reg));
 
                 newArgs.add(reg);
 
@@ -135,7 +124,7 @@ public class ASMTrivialArgTranslator {
         }
     }
 
-    protected ASMTempRegArg allocateRegisterForMemoryOperand(ASMTempRegArg arg, boolean uses, boolean defs) {
+    protected ASMTempRegArg allocateRegisterForMemoryOperand(ASMTempRegArg arg) {
         if (arg instanceof ASMReg) {
             return arg;
         } else if (arg instanceof ASMTempArg) {
@@ -144,12 +133,8 @@ public class ASMTrivialArgTranslator {
 
             ASMAddrExpr address = addressOfTemporary(tempArg);
 
-            if (uses) {
-                prelude.add(make.Mov(reg, new ASMMemArg(address)));
-            }
-            if (defs) {
-                postlude.add(0, make.Mov(new ASMMemArg(address), reg));
-            }
+            prelude.add(make.Mov(reg, new ASMMemArg(address)));
+            postlude.add(0, make.Mov(new ASMMemArg(address), reg));
 
             return reg;
         } else {

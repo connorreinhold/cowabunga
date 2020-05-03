@@ -55,7 +55,8 @@ public class CFGCallNode extends CFGNode {
         return transferFunction.transfer(this, input);
     }
     
-    public String CFGLabel() {
+    @Override
+    public String toString() {
         String callString = call.toString().replaceAll("\n", "");
         return callString;
     }

@@ -23,7 +23,7 @@ class TestGenerateBasicCFG {
     @Test
     void testEmptyFunction() {
         Location loc = new Location(-1, -1);
-        var func = new IRFuncDecl(loc, "empty", new IRSeq(loc, new IRReturn(loc, 0)));
+        var func = new IRFuncDecl(loc, "empty", new IRSeq(loc, new IRReturn(loc)));
         var map = new HashMap<String, IRFuncDecl>();
         map.put("empty", func);
 
@@ -41,7 +41,7 @@ class TestGenerateBasicCFG {
         var func = new IRFuncDecl(loc, "assign", new IRSeq(loc,
                 new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
                 new IRMove(loc, new IRMem(loc, new IRConst(loc, 0)), new IRConst(loc, 0)),
-                new IRReturn(loc, 0)));
+                new IRReturn(loc)));
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("assign", func);
@@ -61,7 +61,7 @@ class TestGenerateBasicCFG {
                 new IRCJump(loc, new IRConst(loc, 0), "Hello_World"),
                 new IRMove(loc, new IRTemp(loc, "target"), new IRConst(loc, 0)),
                 new IRLabel(loc, "Hello_World"),
-                new IRReturn(loc, 0)));
+                new IRReturn(loc)));
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("if", func);
