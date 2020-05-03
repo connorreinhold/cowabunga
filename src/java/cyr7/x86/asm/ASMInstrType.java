@@ -1,7 +1,5 @@
 package cyr7.x86.asm;
 
-import java.util.List;
-
 public enum ASMInstrType {
 
     // Arithmetic

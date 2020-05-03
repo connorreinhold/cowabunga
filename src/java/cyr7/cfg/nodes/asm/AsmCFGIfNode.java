@@ -1,38 +1,24 @@
 package cyr7.cfg.nodes.asm;
 
+import cyr7.cfg.visitor.AsmCFGVisitor;
+import cyr7.x86.asm.ASMInstr;
+
 import java.util.List;
 
-import cyr7.cfg.visitor.AsmCFGVisitor;
-import cyr7.x86.asm.ASMArg;
-import java_cup.runtime.ComplexSymbolFactory.Location;
-
-public class AsmCFGIfNode extends AsmCFGNode {
-
-    public enum ASMCompareType {
-        LT, LTE, GT, GTE, EQ, NEQ
-    }
-
-    private final ASMCompareType type;
-    public final ASMArg leftOperand;
-    public final ASMArg rightOperand;
+public class AsmCFGIfNode extends AsmCFGSourceNode {
 
     private AsmCFGNode trueBranch;
     private AsmCFGNode falseBranch;
 
     public AsmCFGIfNode(
-        Location location,
+        int sourceIndex,
+        ASMInstr sourceInstr,
         AsmCFGNode trueBranch,
-        AsmCFGNode falseBranch,
-        ASMCompareType type,
-        ASMArg leftOperand,
-        ASMArg rightOperand) {
+        AsmCFGNode falseBranch) {
 
-        super(location);
+        super(sourceIndex, sourceInstr);
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
-        this.type = type;
-        this.leftOperand = leftOperand;
-        this.rightOperand = rightOperand;
         this.updateIns();
     }
 
@@ -50,7 +36,7 @@ public class AsmCFGIfNode extends AsmCFGNode {
     }
 
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of(trueBranch, falseBranch);
     }
 
@@ -69,7 +55,6 @@ public class AsmCFGIfNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "(if " + this.leftOperand.getIntelArg()
-        + type.toString() + this.rightOperand.getIntelArg() + ")";
+        return "(if)";
     }
 }

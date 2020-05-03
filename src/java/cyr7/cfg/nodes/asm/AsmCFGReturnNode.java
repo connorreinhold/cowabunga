@@ -3,17 +3,17 @@ package cyr7.cfg.nodes.asm;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
+import cyr7.x86.asm.ASMInstr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class AsmCFGReturnNode extends AsmCFGNode {
+public class AsmCFGReturnNode extends AsmCFGSourceNode {
 
-    public AsmCFGReturnNode(Location location) {
-        super(location);
-        this.updateIns();
+    public AsmCFGReturnNode(int sourceIndex, ASMInstr sourceInstr) {
+        super(sourceIndex, sourceInstr);
     }
 
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of();
     }
 
@@ -24,7 +24,7 @@ public class AsmCFGReturnNode extends AsmCFGNode {
 
     @Override
     public void convertFromStub(AsmCFGStubNode stub, AsmCFGNode n) {
-        return;
+        // do nothing since this node has no out nodes
     }
 
     @Override
