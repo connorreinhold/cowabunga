@@ -73,4 +73,9 @@ public class IRJump extends IRStmt {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        return "GOTO " + this.target.userFriendlyString();
+    }
 }

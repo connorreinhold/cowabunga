@@ -82,4 +82,9 @@ public class IRExp extends IRStmt {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        return "ignore(" + this.expr.userFriendlyString() + ")";
+    }
 }

@@ -65,9 +65,9 @@ public class IRBinOp extends IRExpr_c {
             }
             throw new InternalCompilerError("Unknown op type");
         }
-        
+
         public boolean isCmpOp() {
-            return this == EQ || this == NEQ || this == LT || 
+            return this == EQ || this == NEQ || this == LT ||
                     this == GT || this == LEQ || this == GEQ;
         }
     };
@@ -164,6 +164,72 @@ public class IRBinOp extends IRExpr_c {
     @Override
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
+    }
+
+    @Override
+    public String userFriendlyString() {
+        String lhs = this.left.userFriendlyString();
+        String rhs = this.right.userFriendlyString();
+        String operation;
+        switch (this.type) {
+        case ADD:
+            operation = " + ";
+            break;
+        case AND:
+            operation = " & ";
+            break;
+        case ARSHIFT:
+            operation = " >> ";
+            break;
+        case DIV:
+            operation = " / ";
+            break;
+        case EQ:
+            operation = " == ";
+            break;
+        case GEQ:
+            operation = " >= ";
+            break;
+        case GT:
+            operation = " > ";
+            break;
+        case HMUL:
+            operation = " *>> ";
+            break;
+        case LEQ:
+            operation = " <= ";
+            break;
+        case LSHIFT:
+            operation = " << ";
+            break;
+        case LT:
+            operation = " < ";
+            break;
+        case MOD:
+            operation = " % ";
+            break;
+        case MUL:
+            operation = " * ";
+            break;
+        case NEQ:
+            operation = " != ";
+            break;
+        case OR:
+            operation = " | ";
+            break;
+        case RSHIFT:
+            operation = " >>> ";
+            break;
+        case SUB:
+            operation = " - ";
+            break;
+        case XOR:
+            operation = " ^ ";
+            break;
+        default:
+            throw new UnsupportedOperationException("Unsupported operation");
+        }
+        return lhs + operation + rhs;
     }
 
 }

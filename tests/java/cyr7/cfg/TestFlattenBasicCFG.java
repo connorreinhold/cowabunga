@@ -1,23 +1,17 @@
 package cyr7.cfg;
 
-import java.io.PrintWriter;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import cyr7.cfg.CFGUtil;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.ir.DefaultIdGenerator;
-import cyr7.ir.cfg.CFGConstructor;
 import cyr7.cfg.flatten.CFGFlattener;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-
+import cyr7.ir.cfg.CFGConstructor;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -25,7 +19,6 @@ import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRMem;
 import cyr7.ir.nodes.IRMove;
-import cyr7.ir.nodes.IRNode;
 import cyr7.ir.nodes.IRReturn;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
@@ -39,7 +32,7 @@ class TestFlattenBasicCFG {
         System.out.println(result);
     }
 
-    //@Test
+    @Test
     void testAssignmentsFunction() {
         Location loc = new Location(-1, -1);
         var func = new IRFuncDecl(loc, "assign", new IRSeq(loc,
@@ -68,7 +61,8 @@ class TestFlattenBasicCFG {
         map.put("if", func);
         var comp = new IRCompUnit(loc, "base", map);
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
-        this.testWithAlternateFlattener(result.get("if"));
+
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 
     @Test
@@ -85,7 +79,21 @@ class TestFlattenBasicCFG {
     }
 
 
-    @Disabled
+    @Test
+    void testBasicInfiniteLoop() throws Exception {
+
+        String prgmString = "main() { while (true) { } }";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "while.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
+    }
+
+
+
     @Test
     void testJustReturnFunction() throws Exception {
 
@@ -94,12 +102,11 @@ class TestFlattenBasicCFG {
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
                 "return.xi", null, new IRUtil.LowerConfiguration(true, true),
                 new DefaultIdGenerator());
-
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 
-    @Disabled
+
     @Test
     void testNestedControls() throws Exception {
 

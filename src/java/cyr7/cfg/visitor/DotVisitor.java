@@ -1,7 +1,6 @@
 package cyr7.cfg.visitor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,35 +14,37 @@ import cyr7.cfg.nodes.CFGNode;
 import cyr7.cfg.nodes.CFGReturnNode;
 import cyr7.cfg.nodes.CFGStartNode;
 import cyr7.cfg.nodes.CFGVarAssignNode;
-
 import polyglot.util.Pair;
 
 public class DotVisitor implements CFGVisitor<Optional<Void>>{
 
     private final Map<CFGNode, String> nodeToLabel;
     private int id = 0;
-    
+
     private List<CFGNode> nodes;
     private List<Pair<CFGNode, CFGNode>> edges;
-    
+
     public DotVisitor() {
         nodeToLabel = new HashMap<CFGNode, String>();
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
     }
-    
+
     public List<String> getDotNodes() {
         return this.nodes.stream().map(
                 node -> nodeToLabel.get(node)).collect(Collectors.toList());
     }
-    
+
     public List<Pair<String,String>> getDotEdges() {
         return this.edges.stream().map(
-                nodePair -> new Pair<String, String>(
-                        nodeToLabel.get(nodePair.part1()), nodeToLabel.get(nodePair.part2())))
-                .collect(Collectors.toList());
+                nodePair -> {
+                    System.out.println(nodePair.part1());
+                    return new Pair<String, String>(
+                            nodeToLabel.get(nodePair.part1()),
+                            nodeToLabel.get(nodePair.part2()));
+                }).collect(Collectors.toList());
     }
-    
+
     public void addDotInfo(CFGNode n) {
         id++;
         String label = n.toString() + "[id=" + id+"]";
@@ -53,7 +54,7 @@ public class DotVisitor implements CFGVisitor<Optional<Void>>{
             edges.add(new Pair<CFGNode, CFGNode>(inc, n));
         }
     }
-    
+
     @Override
     public Optional<Void> visit(CFGCallNode n) {
         if (nodeToLabel.containsKey(n)) {
