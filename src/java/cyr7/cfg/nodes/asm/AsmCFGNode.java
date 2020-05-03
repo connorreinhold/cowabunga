@@ -13,16 +13,17 @@ public abstract class AsmCFGNode {
     private List<AsmCFGNode> in;
 
     protected AsmCFGNode() {
-        this.in = Collections.emptyList();
+        this.in = new ArrayList<>(1);
     }
 
     /**
      * Call this whenever the out nodes are changed
      */
     protected final void updateIns() {
-        this.in = new ArrayList<>(outNodes().size());
         for (AsmCFGNode node : outNodes()) {
-            node.inNodes().add(this);
+            if (!node.inNodes().contains(this)) {
+                node.inNodes().add(this);
+            }
         }
     }
 
