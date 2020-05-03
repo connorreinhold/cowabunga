@@ -4,25 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
+import cyr7.x86.asm.ASMInstr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class AsmCFGNode {
 
     protected final List<AsmCFGNode> in;
 
-    private final Location location;
+    public final ASMInstr sourceInstr;
 
-    protected AsmCFGNode(Location location) {
+    protected AsmCFGNode(ASMInstr sourceInstr) {
         this.in = new ArrayList<>(1);
-        this.location = location;
+        this.sourceInstr = sourceInstr;
     }
 
     public List<AsmCFGNode> in() {
         return in;
-    }
-
-    public Location location() {
-        return location;
     }
 
     public abstract List<AsmCFGNode> out();

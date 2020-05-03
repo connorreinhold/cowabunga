@@ -8,7 +8,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class AsmCFGStubNode extends AsmCFGNode {
 
     public AsmCFGStubNode() {
-        super(new Location(-1, -1));
+        super(null);
     }
 
     @Override

@@ -4,41 +4,32 @@ import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
 import cyr7.x86.asm.ASMArg;
+import cyr7.x86.asm.ASMInstr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
+/**
+ * A comparison between the FLAGS register and the value 0
+ */
 public class AsmCFGIfNode extends AsmCFGNode {
-
-    public enum ASMCompareType {
-        LT, LTE, GT, GTE, EQ, NEQ
-    }
-
-    private final ASMCompareType type;
-    public final ASMArg leftOperand;
-    public final ASMArg rightOperand;
 
     private AsmCFGNode trueBranch;
     private AsmCFGNode falseBranch;
 
     public AsmCFGIfNode(
-        Location location,
+        ASMInstr sourceInstr,
         AsmCFGNode trueBranch,
-        AsmCFGNode falseBranch,
-        ASMCompareType type,
-        ASMArg leftOperand,
-        ASMArg rightOperand) {
+        AsmCFGNode falseBranch) {
 
-        super(location);
+        super(sourceInstr);
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
-        this.type = type;
-        this.leftOperand = leftOperand;
-        this.rightOperand = rightOperand;
         this.updateIns();
     }
 
     @Override
     public <T> T accept(AsmCFGVisitor<T> visitor) {
-        return visitor.visit(this);
+//        return visitor.visit(this);
+        return null;
     }
 
     public AsmCFGNode falseBranch() {
@@ -69,7 +60,6 @@ public class AsmCFGIfNode extends AsmCFGNode {
 
     @Override
     public String toString() {
-        return "(if " + this.leftOperand.getIntelArg()
-        + type.toString() + this.rightOperand.getIntelArg() + ")";
+        return "(if)";
     }
 }
