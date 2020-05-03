@@ -10,14 +10,17 @@ public class AsmCFGStartNode extends AsmCFGNode {
 
     private AsmCFGNode out;
 
-    public AsmCFGStartNode(ASMInstr sourceInstr, AsmCFGNode out) {
-        super(sourceInstr);
+    public AsmCFGStartNode(AsmCFGNode out) {
         this.out = out;
         this.updateIns();
     }
 
+    public AsmCFGNode out() {
+        return out;
+    }
+
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of(this.out);
     }
 

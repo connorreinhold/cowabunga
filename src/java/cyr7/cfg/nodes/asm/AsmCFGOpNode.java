@@ -5,17 +5,21 @@ import cyr7.x86.asm.ASMInstr;
 
 import java.util.List;
 
-public class AsmCFGOpNode extends AsmCFGNode {
+public class AsmCFGOpNode extends AsmCFGSourceNode {
 
-    public final AsmCFGNode out;
+    private AsmCFGNode out;
 
-    public AsmCFGOpNode(ASMInstr sourceInstr, AsmCFGNode out) {
-        super(sourceInstr);
+    public AsmCFGOpNode(int sourceIndex, ASMInstr sourceInstr, AsmCFGNode out) {
+        super(sourceIndex, sourceInstr);
         this.out = out;
     }
 
+    public AsmCFGNode out() {
+        return out;
+    }
+
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of(out);
     }
 
@@ -26,6 +30,9 @@ public class AsmCFGOpNode extends AsmCFGNode {
 
     @Override
     public void convertFromStub(AsmCFGStubNode stub, AsmCFGNode n) {
-
+        if (out == stub) {
+            out = n;
+        }
+        updateIns();
     }
 }

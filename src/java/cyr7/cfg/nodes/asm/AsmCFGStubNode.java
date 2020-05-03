@@ -3,16 +3,17 @@ package cyr7.cfg.nodes.asm;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
+import cyr7.x86.asm.ASMInstr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class AsmCFGStubNode extends AsmCFGNode {
+public class AsmCFGStubNode extends AsmCFGSourceNode {
 
-    public AsmCFGStubNode() {
-        super(null);
+    public AsmCFGStubNode(int sourceIndex, ASMInstr sourceInstr) {
+        super(sourceIndex, sourceInstr);
     }
 
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of();
     }
 

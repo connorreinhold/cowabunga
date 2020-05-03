@@ -1,26 +1,22 @@
 package cyr7.cfg.nodes.asm;
 
+import cyr7.cfg.visitor.AsmCFGVisitor;
+import cyr7.x86.asm.ASMInstr;
+
 import java.util.List;
 
-import cyr7.cfg.visitor.AsmCFGVisitor;
-import cyr7.x86.asm.ASMArg;
-import cyr7.x86.asm.ASMInstr;
-import java_cup.runtime.ComplexSymbolFactory.Location;
-
-/**
- * A comparison between the FLAGS register and the value 0
- */
-public class AsmCFGIfNode extends AsmCFGNode {
+public class AsmCFGIfNode extends AsmCFGSourceNode {
 
     private AsmCFGNode trueBranch;
     private AsmCFGNode falseBranch;
 
     public AsmCFGIfNode(
+        int sourceIndex,
         ASMInstr sourceInstr,
         AsmCFGNode trueBranch,
         AsmCFGNode falseBranch) {
 
-        super(sourceInstr);
+        super(sourceIndex, sourceInstr);
         this.trueBranch = trueBranch;
         this.falseBranch = falseBranch;
         this.updateIns();
@@ -28,7 +24,6 @@ public class AsmCFGIfNode extends AsmCFGNode {
 
     @Override
     public <T> T accept(AsmCFGVisitor<T> visitor) {
-//        return visitor.visit(this);
         return null;
     }
 
@@ -41,7 +36,7 @@ public class AsmCFGIfNode extends AsmCFGNode {
     }
 
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of(trueBranch, falseBranch);
     }
 

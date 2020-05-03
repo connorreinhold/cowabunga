@@ -6,26 +6,24 @@ import cyr7.cfg.visitor.AsmCFGVisitor;
 import cyr7.x86.asm.ASMInstr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class AsmCFGReturnNode extends AsmCFGNode {
+public class AsmCFGReturnNode extends AsmCFGSourceNode {
 
-    protected AsmCFGReturnNode(ASMInstr sourceInstr) {
-        super(sourceInstr);
+    public AsmCFGReturnNode(int sourceIndex, ASMInstr sourceInstr) {
+        super(sourceIndex, sourceInstr);
     }
 
     @Override
-    public List<AsmCFGNode> out() {
+    public List<AsmCFGNode> outNodes() {
         return List.of();
     }
 
     @Override
     public <T> T accept(AsmCFGVisitor<T> visitor) {
-//        return visitor.visit(this);
         return null;
     }
 
     @Override
     public void convertFromStub(AsmCFGStubNode stub, AsmCFGNode n) {
-        return;
     }
 
     @Override

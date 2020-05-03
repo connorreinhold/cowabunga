@@ -1,6 +1,7 @@
 package cyr7.cfg.nodes.asm;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cyr7.cfg.visitor.AsmCFGVisitor;
@@ -9,28 +10,29 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class AsmCFGNode {
 
-    protected final List<AsmCFGNode> in;
+    private List<AsmCFGNode> in;
 
-    public final ASMInstr sourceInstr;
-
-    protected AsmCFGNode(ASMInstr sourceInstr) {
-        this.in = new ArrayList<>(1);
-        this.sourceInstr = sourceInstr;
+    protected AsmCFGNode() {
+        this.in = Collections.emptyList();
     }
 
-    public List<AsmCFGNode> in() {
+    /**
+     * Call this whenever the out nodes are changed
+     */
+    protected final void updateIns() {
+        this.in = new ArrayList<>(outNodes().size());
+        for (AsmCFGNode node : outNodes()) {
+            node.inNodes().add(this);
+        }
+    }
+
+    public List<AsmCFGNode> inNodes() {
         return in;
     }
 
-    public abstract List<AsmCFGNode> out();
+    public abstract List<AsmCFGNode> outNodes();
 
     public abstract <T> T accept(AsmCFGVisitor<T> visitor);
-
-    protected final void updateIns() {
-        for (AsmCFGNode node : out()) {
-            node.in().add(this);
-        }
-    }
 
     public abstract void convertFromStub(AsmCFGStubNode stub, AsmCFGNode n);
 
