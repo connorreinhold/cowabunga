@@ -17,14 +17,13 @@ public enum ASMReg implements ASMTempRegArg {
     // Newer Registers
     R8, R9, R10, R11, R12, R13, R14, R15,
 
+    // https://en.wikipedia.org/wiki/FLAGS_register
+    FLAGS,
+
     AL, CL, DL, BL, // 8 bit registers
 
     // Newer 8 bit registers
     R8B, R9B, R10B, R11B, R12B, R13B, R14B, R15B;
-
-    public enum Size {
-        QWORD, BYTE
-    }
 
     @Override
     public String getIntelArg() {
@@ -56,7 +55,7 @@ public enum ASMReg implements ASMTempRegArg {
         return visitor.visit(this);
     }
 
-    Size size() {
+    public ASMRegSize size() {
         switch (this) {
             case RAX:
             case RCX:
@@ -74,7 +73,8 @@ public enum ASMReg implements ASMTempRegArg {
             case R13:
             case R14:
             case R15:
-                return Size.QWORD;
+            case FLAGS:
+                return ASMRegSize.QWORD;
             case AL:
             case CL:
             case DL:
@@ -87,9 +87,9 @@ public enum ASMReg implements ASMTempRegArg {
             case R13B:
             case R14B:
             case R15B:
-                return Size.BYTE;
+                return ASMRegSize.BYTE;
             default:
-                return Size.QWORD;
+                return ASMRegSize.QWORD;
         }
     }
 

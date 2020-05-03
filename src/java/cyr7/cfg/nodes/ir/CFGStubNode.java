@@ -1,16 +1,15 @@
-package cyr7.ir.cfg;
+package cyr7.cfg.nodes.ir;
 
 import java.util.List;
 
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.cfg.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGStubNode extends CFGNode {
 
-    protected CFGStubNode() {
+    public CFGStubNode() {
         super(new Location(-1, -1));
     }
 
@@ -20,7 +19,7 @@ public class CFGStubNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(CFGVisitor<T> visitor) {
+    public <T> T accept(IrCFGVisitor<T> visitor) {
         throw new UnsupportedOperationException("Cannot visit stub node");
     }
 

@@ -16,7 +16,7 @@ import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
@@ -58,7 +58,7 @@ public class Temp_LShiftConst extends PatternMapper<IRBinOp> {
             int cost = 1 + tempLShiftConst.preMapLeft()
                                           .getOptimalTiling().tileCost;
 
-            var t_result = arg.temp(gen.newTemp(), Size.QWORD);
+            var t_result = arg.temp(gen.newTemp(), ASMRegSize.QWORD);
             insns.add(make.Mov(t_result, lhs));
             insns.add(make.LShift(t_result, new ASMConstArg(rhs.constant())));
 

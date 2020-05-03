@@ -1,5 +1,14 @@
 package cyr7.cfg.visitor;
 
+import cyr7.cfg.nodes.ir.CFGCallNode;
+import cyr7.cfg.nodes.ir.CFGIfNode;
+import cyr7.cfg.nodes.ir.CFGMemAssignNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGReturnNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGVarAssignNode;
+import polyglot.util.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -7,16 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import cyr7.cfg.nodes.CFGCallNode;
-import cyr7.cfg.nodes.CFGIfNode;
-import cyr7.cfg.nodes.CFGMemAssignNode;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGReturnNode;
-import cyr7.cfg.nodes.CFGStartNode;
-import cyr7.cfg.nodes.CFGVarAssignNode;
-import polyglot.util.Pair;
-
-public class DotVisitor implements CFGVisitor<Optional<Void>>{
+public class DotVisitor implements IrCFGVisitor<Optional<Void>>{
 
     private final Map<CFGNode, String> nodeToLabel;
     private int id = 0;
@@ -25,7 +25,7 @@ public class DotVisitor implements CFGVisitor<Optional<Void>>{
     private List<Pair<CFGNode, CFGNode>> edges;
 
     public DotVisitor() {
-        nodeToLabel = new HashMap<CFGNode, String>();
+        nodeToLabel = new HashMap<>();
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
     }
@@ -39,9 +39,9 @@ public class DotVisitor implements CFGVisitor<Optional<Void>>{
         return this.edges.stream().map(
                 nodePair -> {
                     System.out.println(nodePair.part1());
-                    return new Pair<String, String>(
-                            nodeToLabel.get(nodePair.part1()),
-                            nodeToLabel.get(nodePair.part2()));
+                    return new Pair<>(
+                        nodeToLabel.get(nodePair.part1()),
+                        nodeToLabel.get(nodePair.part2()));
                 }).collect(Collectors.toList());
     }
 
@@ -51,7 +51,7 @@ public class DotVisitor implements CFGVisitor<Optional<Void>>{
         nodeToLabel.put(n, label);
         nodes.add(n);
         for(CFGNode inc: n.in()) {
-            edges.add(new Pair<CFGNode, CFGNode>(inc, n));
+            edges.add(new Pair<>(inc, n));
         }
     }
 

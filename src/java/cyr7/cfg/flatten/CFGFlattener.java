@@ -1,7 +1,7 @@
 package cyr7.cfg.flatten;
 
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
 import cyr7.ir.nodes.IRSeq;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 

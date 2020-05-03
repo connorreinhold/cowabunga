@@ -1,11 +1,10 @@
 package cyr7.x86.asm;
 
-import java.util.List;
-import java.util.Optional;
-
 import cyr7.cli.CLI;
 import cyr7.ir.nodes.IRNode;
-import cyr7.x86.asm.ASMReg.Size;
+
+import java.util.List;
+import java.util.Optional;
 
 public class ASMLineFactory {
 
@@ -91,9 +90,9 @@ public class ASMLineFactory {
     }
 
     public ASMInstr Mov(ASMArg dest, ASMArg source) {
-        if (dest instanceof ASMReg && ((ASMReg) dest).size() == Size.BYTE) {
+        if (dest instanceof ASMReg && ((ASMReg) dest).size() == ASMRegSize.BYTE) {
             return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
-        } else if (source instanceof ASMReg && ((ASMReg) source).size() == Size.BYTE) {
+        } else if (source instanceof ASMReg && ((ASMReg) source).size() == ASMRegSize.BYTE) {
             return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
         } else {
             return new ASMInstr(ASMInstrType.MOVQ, List.of(dest, source), node);

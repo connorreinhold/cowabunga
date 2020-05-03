@@ -11,7 +11,7 @@ import cyr7.x86.asm.ASMArgFactory;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 
 public class CallInstructionGenerator {
 
@@ -113,16 +113,16 @@ public class CallInstructionGenerator {
         }
 
         if (CLI.assemblyLevelAssertionsEnabled) {
-            insn.add(make.Mov(arg.temp("__rax_temp1", Size.QWORD), ASMReg.RAX));
-            insn.add(make.Mov(arg.temp("__rdx_temp1", Size.QWORD), ASMReg.RDX));
+            insn.add(make.Mov(arg.temp("__rax_temp1", ASMRegSize.QWORD), ASMReg.RAX));
+            insn.add(make.Mov(arg.temp("__rdx_temp1", ASMRegSize.QWORD), ASMReg.RDX));
             insn.add(make.Mov(ASMReg.RAX, ASMReg.RSP));
             insn.add(make.CQO());
             insn.add(make.Mov(ASMReg.R15, arg.constant(16)));
             insn.add(make.Div(ASMReg.R15));
             insn.add(make.Cmp(ASMReg.RDX, arg.constant(0))); // remainder cmp 0
             insn.add(make.JumpNE(arg.label("_xi_out_of_bounds")));
-            insn.add(make.Mov(ASMReg.RAX, arg.temp("__rax_temp1", Size.QWORD)));
-            insn.add(make.Mov(ASMReg.RDX, arg.temp("__rdx_temp1", Size.QWORD)));
+            insn.add(make.Mov(ASMReg.RAX, arg.temp("__rax_temp1", ASMRegSize.QWORD)));
+            insn.add(make.Mov(ASMReg.RDX, arg.temp("__rdx_temp1", ASMRegSize.QWORD)));
         }
 
         // Perform the call
@@ -148,7 +148,7 @@ public class CallInstructionGenerator {
                 continue;
             }
 
-            ASMArg target = arg.temp(tempName, Size.QWORD);
+            ASMArg target = arg.temp(tempName, ASMRegSize.QWORD);
             switch (i) {
             case 0:
                 insn.add(make.Mov(target, ASMReg.RAX));

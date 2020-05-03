@@ -1,12 +1,7 @@
 package cyr7.cfg;
 
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Map;
-
 import cyr7.cfg.flatten.CFGFlattener;
-import cyr7.cfg.nodes.CFGNode;
+import cyr7.cfg.nodes.ir.CFGNode;
 import cyr7.cfg.visitor.DotVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
@@ -16,6 +11,11 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
 import polyglot.util.Pair;
+
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
 
 public class CFGUtil {
 

@@ -1,12 +1,11 @@
-package cyr7.cfg.nodes;
-
-import java.util.List;
+package cyr7.cfg.nodes.ir;
 
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.CFGVisitor;
-import cyr7.ir.cfg.CFGStubNode;
+import cyr7.cfg.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.List;
 
 public class CFGReturnNode extends CFGNode {
 
@@ -21,7 +20,7 @@ public class CFGReturnNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(CFGVisitor<T> visitor) {
+    public <T> T accept(IrCFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 

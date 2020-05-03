@@ -9,7 +9,7 @@ import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
 
@@ -51,7 +51,7 @@ public abstract class MemoryAddrPattern extends PatternMapper<IRBinOp> {
                     Optional.of(arg.mem(addrExpr))
                 ));
         } else {
-            ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
+            ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), ASMRegSize.QWORD);
             ASMLine line = make.Lea(resultTemp, arg.mem(addrExpr));
             insns.add(line);
             return Optional.of(

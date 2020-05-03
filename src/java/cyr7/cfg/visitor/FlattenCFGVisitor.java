@@ -1,5 +1,18 @@
 package cyr7.cfg.visitor;
 
+import cyr7.cfg.nodes.ir.CFGCallNode;
+import cyr7.cfg.nodes.ir.CFGIfNode;
+import cyr7.cfg.nodes.ir.CFGMemAssignNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGReturnNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGVarAssignNode;
+import cyr7.ir.IdGenerator;
+import cyr7.ir.nodes.IRNodeFactory;
+import cyr7.ir.nodes.IRNodeFactory_c;
+import cyr7.ir.nodes.IRStmt;
+import polyglot.util.Pair;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -11,21 +24,7 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.stream.Collectors;
 
-import cyr7.cfg.nodes.CFGCallNode;
-import cyr7.cfg.nodes.CFGIfNode;
-import cyr7.cfg.nodes.CFGMemAssignNode;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGReturnNode;
-import cyr7.cfg.nodes.CFGStartNode;
-import cyr7.cfg.nodes.CFGVarAssignNode;
-import cyr7.ir.IdGenerator;
-import cyr7.ir.nodes.IRNodeFactory;
-import cyr7.ir.nodes.IRNodeFactory_c;
-import cyr7.ir.nodes.IRStmt;
-
-import polyglot.util.Pair;
-
-public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
+public class FlattenCFGVisitor implements IrCFGVisitor<List<IRStmt>> {
 
     private IdGenerator generator;
     // each element has its CFGNode and the node translated into a list of IRStmts
@@ -55,13 +54,13 @@ public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
         String lt = generator.newLabel();
         String lf = generator.newLabel();
         String end = generator.newLabel();
-        List<IRStmt> stmts = new ArrayList<IRStmt>();
+        List<IRStmt> stmts = new ArrayList<>();
     
-        Set<CFGNode> seenFromTrueBranch = new HashSet<CFGNode>();
-        Set<CFGNode> seenFromFalseBranch = new HashSet<CFGNode>();
-        Queue<Pair<CFGNode, BranchOrigin>> frontier = new LinkedList<Pair<CFGNode, BranchOrigin>>();
-        frontier.add(new Pair<CFGNode, BranchOrigin>(n.falseBranch(), BranchOrigin.FALSE));
-        frontier.add(new Pair<CFGNode, BranchOrigin>(n.trueBranch(), BranchOrigin.TRUE));
+        Set<CFGNode> seenFromTrueBranch = new HashSet<>();
+        Set<CFGNode> seenFromFalseBranch = new HashSet<>();
+        Queue<Pair<CFGNode, BranchOrigin>> frontier = new LinkedList<>();
+        frontier.add(new Pair<>(n.falseBranch(), BranchOrigin.FALSE));
+        frontier.add(new Pair<>(n.trueBranch(), BranchOrigin.TRUE));
         CFGNode joinNode = null;
         
         // run bfs to find node where the false and true branches come back together
@@ -73,7 +72,7 @@ public class FlattenCFGVisitor implements CFGVisitor<List<IRStmt>> {
             List<Pair<CFGNode, BranchOrigin>> outPairs = current
                     .part1().out().stream()
                     .filter(outNode -> outNode != n)
-                    .map(outNode -> new Pair<CFGNode, BranchOrigin>(outNode, current.part2()))
+                    .map(outNode -> new Pair<>(outNode, current.part2()))
                     .collect(Collectors.toList());
             
             if (current.part2() == BranchOrigin.FALSE) {
