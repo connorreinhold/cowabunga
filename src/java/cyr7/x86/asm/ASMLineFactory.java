@@ -3,6 +3,7 @@ package cyr7.x86.asm;
 import java.util.List;
 import java.util.Optional;
 
+import cyr7.cli.CLI;
 import cyr7.ir.nodes.IRNode;
 import cyr7.x86.asm.ASMReg.Size;
 
@@ -17,7 +18,11 @@ public class ASMLineFactory {
     }
 
     public ASMLineFactory(IRNode node) {
-        this.node = Optional.of(node);
+        if (CLI.wantsCommentedAssembly) {
+            this.node = Optional.of(node);
+        } else {
+            this.node = Optional.empty();
+        }
     }
 
     public ASMInstr Add(ASMArg dest, ASMArg source) {

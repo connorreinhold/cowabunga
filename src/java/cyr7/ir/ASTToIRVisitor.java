@@ -140,7 +140,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             at the end.
         */
         if (n.getResultType() == ResultType.UNIT) {
-            seq.add(make.IRReturn(0));
+            seq.add(make.IRReturn());
         }
         return OneOfTwo.ofSecond(make.IRSeq(seq));
     }
@@ -438,7 +438,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
             stmts.add(make.IRMove(make.IRTemp(generator.retTemp(i)),
                     returnValTemps.get(i)));
         }
-        stmts.add(make.IRReturn(n.exprs.size()));
+        stmts.add(make.IRReturn());
         return OneOfTwo.ofSecond(make.IRSeq(stmts));
     }
 

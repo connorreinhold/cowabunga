@@ -39,7 +39,7 @@ public class TestCCPAnalysis {
      */
     @Test
     void testLectureExample() {
-        CFGNode line7 = make.Return(0);
+        CFGNode line7 = make.Return();
         CFGNode line6 = make.VarAssign(
             "z",
             makeIR.IRBinOp(OpType.MUL,
@@ -119,7 +119,7 @@ public class TestCCPAnalysis {
      */
     @Test
     void testSameValueDifferentPaths() {
-        CFGNode line6 = make.Return(0);
+        CFGNode line6 = make.Return();
         CFGNode line5 = make.VarAssign("y",
             makeIR.IRBinOp(OpType.ADD,
                 makeIR.IRTemp("y"),

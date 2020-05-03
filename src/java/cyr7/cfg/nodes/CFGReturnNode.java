@@ -10,11 +10,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGReturnNode extends CFGNode {
 
-    public final int numReturnValues;
-
-    public CFGReturnNode(Location location, int numReturnValues) {
+    public CFGReturnNode(Location location) {
         super(location);
-        this.numReturnValues = numReturnValues;
         this.updateIns();
     }
 
@@ -44,6 +41,6 @@ public class CFGReturnNode extends CFGNode {
 
     @Override
     public String toString() {
-        return "(return " + numReturnValues + ")";
+        return "(return)";
     }
 }
