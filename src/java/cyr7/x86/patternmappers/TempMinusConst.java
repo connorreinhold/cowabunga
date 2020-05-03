@@ -13,7 +13,7 @@ import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 
@@ -51,7 +51,7 @@ public class TempMinusConst extends MemoryAddrPattern {
                     + tempMinusConst.preMapLeft().getOptimalTiling().tileCost);
 
             ASMAddrExpr addrExpr = arg.addr(Optional.of(arg.temp(lhs.name,
-                    Size.QWORD)),
+                    ASMRegSize.QWORD)),
                     ScaleValues.ONE,
                     Optional.empty(),
                     -rhs.constant());

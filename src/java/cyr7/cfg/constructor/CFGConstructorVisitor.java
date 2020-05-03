@@ -6,13 +6,14 @@ import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 
-import cyr7.cfg.nodes.CFGCallNode;
-import cyr7.cfg.nodes.CFGIfNode;
-import cyr7.cfg.nodes.CFGMemAssignNode;
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGReturnNode;
-import cyr7.cfg.nodes.CFGStartNode;
-import cyr7.cfg.nodes.CFGVarAssignNode;
+import cyr7.cfg.nodes.ir.CFGCallNode;
+import cyr7.cfg.nodes.ir.CFGIfNode;
+import cyr7.cfg.nodes.ir.CFGMemAssignNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGReturnNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGStubNode;
+import cyr7.cfg.nodes.ir.CFGVarAssignNode;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -40,7 +41,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
     private final Map<String, CFGNode> labelToCFG;
     private final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG;
     private final CFGNode absoluteLastReturn = new CFGReturnNode(
-        new Location(Integer.MAX_VALUE, Integer.MAX_VALUE), 0);
+        new Location(Integer.MAX_VALUE, Integer.MAX_VALUE));
     private CFGNode successor;
 
     /**
@@ -87,7 +88,15 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
                     // Target node may be itself, which
                     // indicates an empty loop coming from the parent node.
                     if (targetNode == stub) {
-                        incoming.convertFromStub(stub, incoming);
+                        // Infinite loop...
+                        var stubNodeTrue = this.createStubNode();
+                        var stubNodeFalse = this.createStubNode();
+                        var loopNode = new CFGIfNode(targetNode.location(),
+                                stubNodeTrue, stubNodeFalse,
+                                new IRConst(targetNode.location(), 0));
+                        loopNode.convertFromStub(stubNodeTrue, loopNode);
+                        loopNode.convertFromStub(stubNodeFalse, loopNode);
+                        incoming.convertFromStub(stub, loopNode);
                     } else {
                         incoming.convertFromStub(stub, targetNode);
                     }
@@ -170,7 +179,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(IRReturn n) {
-        return new CFGReturnNode(n.location(), n.numReturnValues);
+        return new CFGReturnNode(n.location());
     }
 
 

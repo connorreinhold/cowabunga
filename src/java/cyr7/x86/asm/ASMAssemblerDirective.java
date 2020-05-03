@@ -1,9 +1,8 @@
 package cyr7.x86.asm;
 
-import cyr7.x86.visitor.AbstractASMVisitor;
-
 import java.util.List;
-import java.util.stream.Collectors;
+
+import cyr7.x86.visitor.AbstractASMVisitor;
 
 // https://ftp.gnu.org/old-gnu/Manuals/gas-2.9.1/html_chapter/as_7.html
 public class ASMAssemblerDirective implements ASMLine {

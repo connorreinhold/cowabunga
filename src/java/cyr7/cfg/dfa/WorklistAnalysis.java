@@ -1,8 +1,5 @@
 package cyr7.cfg.dfa;
 
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGStartNode;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -10,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
 
 public final class WorklistAnalysis {
 

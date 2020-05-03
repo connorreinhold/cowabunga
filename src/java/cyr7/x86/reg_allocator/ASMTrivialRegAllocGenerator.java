@@ -1,16 +1,5 @@
 package cyr7.x86.reg_allocator;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -22,12 +11,23 @@ import cyr7.x86.asm.ASMLabel;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.tiler.TilerData;
 import cyr7.x86.tiler.TilerFactory;
 import cyr7.x86.visitor.TempVisitor;
 import polyglot.util.Pair;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
@@ -68,7 +68,7 @@ public class ASMTrivialRegAllocGenerator implements ASMGenerator {
 
         Optional<ASMTempArg> addrOfOverspillRetValues;
         if (numRetValues > 2) {
-            addrOfOverspillRetValues = Optional.of(arg.temp(generator.newTemp(), Size.QWORD));
+            addrOfOverspillRetValues = Optional.of(arg.temp(generator.newTemp(), ASMRegSize.QWORD));
         } else {
             addrOfOverspillRetValues = Optional.empty();
         }

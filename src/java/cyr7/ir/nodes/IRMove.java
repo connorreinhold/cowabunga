@@ -86,4 +86,10 @@ public class IRMove extends IRStmt {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        return this.target.userFriendlyString()
+                + " = " + this.src.userFriendlyString();
+    }
 }

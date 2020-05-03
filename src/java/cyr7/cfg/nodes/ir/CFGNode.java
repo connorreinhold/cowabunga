@@ -1,12 +1,11 @@
-package cyr7.cfg.nodes;
+package cyr7.cfg.nodes.ir;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import cyr7.cfg.constructor.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.cfg.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public abstract class CFGNode {
@@ -30,7 +29,7 @@ public abstract class CFGNode {
 
     public abstract List<CFGNode> out();
 
-    public abstract <T> T accept(CFGVisitor<T> visitor);
+    public abstract <T> T accept(IrCFGVisitor<T> visitor);
 
     /**
      * Invariant: the number of elements in the output of this list must
@@ -42,7 +41,9 @@ public abstract class CFGNode {
 
     protected final void updateIns() {
         for (CFGNode node : out()) {
-            node.in().add(this);
+            if (!node.in().contains(this)) {
+                node.in().add(this);
+            }
         }
     }
 

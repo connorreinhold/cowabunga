@@ -13,7 +13,7 @@ import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMTempArg;
-import cyr7.x86.asm.ASMReg.Size;
+import cyr7.x86.asm.ASMRegSize;
 import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.x86.tiler.ComplexTiler;
 import cyr7.x86.tiler.TilerData;
@@ -49,7 +49,7 @@ public class ConstPlusTemp extends MemoryAddrPattern {
 
             this.setCost(1 + pattern.preMapRight().getOptimalTiling().tileCost);
             return Optional.of(arg.addr(
-                Optional.of(arg.temp(tempArg.name(), Size.QWORD)),
+                Optional.of(arg.temp(tempArg.name(), ASMRegSize.QWORD)),
                 ScaleValues.ONE,
                 Optional.empty(),
                 constArg.constant()
@@ -75,7 +75,7 @@ public class ConstPlusTemp extends MemoryAddrPattern {
                     Optional.of(arg.mem(addrExpr))
                 ));
         } else {
-            ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), Size.QWORD);
+            ASMTempArg resultTemp = arg.temp(tiler.generator().newTemp(), ASMRegSize.QWORD);
             ASMLine line = make.Lea(
                 resultTemp, arg.mem(addrExpr));
             insns.add(line);

@@ -124,8 +124,8 @@ public class IRNodeFactory_c implements IRNodeFactory {
     }
 
     @Override
-    public IRReturn IRReturn(int numReturnValues) {
-        return new IRReturn(location, numReturnValues);
+    public IRReturn IRReturn() {
+        return new IRReturn(location);
     }
 
     @Override

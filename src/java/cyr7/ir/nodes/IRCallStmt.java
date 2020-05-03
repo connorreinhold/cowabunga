@@ -1,9 +1,9 @@
 package cyr7.ir.nodes;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
@@ -116,5 +116,14 @@ public class IRCallStmt extends IRStmt {
     @Override
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
+    }
+
+    @Override
+    public String userFriendlyString() {
+        String targetValues = String.join(", ", this.collectors);
+        String functionName = this.target.userFriendlyString();
+        String arguments = String.join(", ", this.args.stream()
+                .map(a -> a.userFriendlyString()).collect(Collectors.toList()));
+        return targetValues + " = " + functionName + "(" + arguments + ")";
     }
 }

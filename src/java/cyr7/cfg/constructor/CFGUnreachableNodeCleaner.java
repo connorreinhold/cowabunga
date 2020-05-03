@@ -5,8 +5,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import cyr7.cfg.nodes.CFGNode;
-import cyr7.cfg.nodes.CFGStartNode;
+import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.nodes.ir.CFGStartNode;
+
 
 public class CFGUnreachableNodeCleaner {
 

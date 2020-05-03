@@ -7,11 +7,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 /** RETURN statement */
 public class IRReturn extends IRStmt {
 
-    public final int numReturnValues;
-
-    public IRReturn(Location location, int numReturnValues) {
+    public IRReturn(Location location) {
         super(location);
-        this.numReturnValues = numReturnValues;
     }
 
     @Override
@@ -55,5 +52,10 @@ public class IRReturn extends IRStmt {
     @Override
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
+    }
+
+    @Override
+    public String userFriendlyString() {
+        return "RETURN";
     }
 }

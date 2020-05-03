@@ -1,13 +1,12 @@
-package cyr7.cfg.nodes;
+package cyr7.cfg.nodes.ir;
 
-import java.util.List;
-
-import cyr7.cfg.constructor.CFGStubNode;
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.cfg.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+
+import java.util.List;
 
 public class CFGIfNode extends CFGNode {
 
@@ -26,7 +25,7 @@ public class CFGIfNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(CFGVisitor<T> visitor) {
+    public <T> T accept(IrCFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
@@ -71,6 +70,7 @@ public class CFGIfNode extends CFGNode {
 
     @Override
     public String toString() {
-        return "(if " + cond.label() + ")";
+        String condString = cond.toString().replaceAll("\n", "");
+        return String.format("if(%s)", condString);
     }
 }

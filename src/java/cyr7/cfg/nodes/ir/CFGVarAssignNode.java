@@ -1,12 +1,12 @@
-package cyr7.cfg.nodes;
+package cyr7.cfg.nodes.ir;
 
 import java.util.List;
 
 import cyr7.ir.nodes.IRExpr;
-import cyr7.cfg.constructor.CFGStubNode;
+
 import cyr7.cfg.dfa.BackwardTransferFunction;
 import cyr7.cfg.dfa.ForwardTransferFunction;
-import cyr7.cfg.visitor.CFGVisitor;
+import cyr7.cfg.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGVarAssignNode extends CFGNode {
@@ -22,7 +22,7 @@ public class CFGVarAssignNode extends CFGNode {
         this.outNode = outNode;
 
         this.updateIns();
-	}
+    }
 
     @Override
     public List<CFGNode> out() {
@@ -30,7 +30,7 @@ public class CFGVarAssignNode extends CFGNode {
     }
 
     @Override
-    public <T> T accept(CFGVisitor<T> visitor) {
+    public <T> T accept(IrCFGVisitor<T> visitor) {
         return visitor.visit(this);
     }
 
@@ -45,18 +45,22 @@ public class CFGVarAssignNode extends CFGNode {
         }
     }
 
-	@Override
-	public <T> List<T> acceptForward(ForwardTransferFunction<T> transferFunction, T in) {
-		return List.of(transferFunction.transfer(this, in));
-	}
+    @Override
+    public <T> List<T> acceptForward(
+            ForwardTransferFunction<T> transferFunction, T in) {
+        return List.of(transferFunction.transfer(this, in));
+    }
 
-	@Override
-	public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction, T input) {
-		return transferFunction.transfer(this, input);
-	}
+    @Override
+    public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction,
+            T input) {
+        return transferFunction.transfer(this, input);
+    }
 
-	@Override
-	public String toString() {
-		return "(" + variable + " = " + value.label() + ")";
-	}
+    @Override
+    public String toString() {
+        String valueString = value.toString()
+                                  .replaceAll("\n", "");
+        return String.format("%s=%s", variable, valueString);
+    }
 }
