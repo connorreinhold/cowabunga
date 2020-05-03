@@ -206,3 +206,6 @@ bin/
 
 # vscode-related project files
 .vscode/
+
+# Generated .dot files
+**/*.dot

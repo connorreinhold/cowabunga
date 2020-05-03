@@ -119,4 +119,15 @@ public class IRCJump extends IRStmt {
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
     }
+
+    @Override
+    public String userFriendlyString() {
+        String condition = this.cond.userFriendlyString();
+        StringBuffer result = new StringBuffer();
+        result.append("if (" +  condition + ") then GOTO " + this.trueLabel);
+        this.falseLabel.ifPresent(f -> {
+            result.append(" ELSE GOTO " + f);
+        });
+        return result.toString();
+    }
 }

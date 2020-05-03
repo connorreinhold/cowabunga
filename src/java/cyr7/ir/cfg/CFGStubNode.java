@@ -41,4 +41,9 @@ public class CFGStubNode extends CFGNode {
         throw new UnsupportedOperationException("Cannot accept backward in stub node");
     }
 
+    @Override
+    public String toString() {
+        return "Stub";
+    }
+
 }

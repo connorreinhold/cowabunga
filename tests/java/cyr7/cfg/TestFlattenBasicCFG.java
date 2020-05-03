@@ -1,4 +1,4 @@
-package cyr7.ir.cfg;
+package cyr7.cfg;
 
 import java.io.StringReader;
 import java.util.HashMap;
@@ -11,6 +11,7 @@ import cyr7.cfg.flatten.CFGFlattener;
 import cyr7.cfg.nodes.CFGNode;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
+import cyr7.ir.cfg.CFGConstructor;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -45,7 +46,6 @@ class TestFlattenBasicCFG {
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
         this.testWithAlternateFlattener(result.get("assign"));
-
     }
 
     @Test
@@ -59,18 +59,30 @@ class TestFlattenBasicCFG {
 
         var map = new HashMap<String, IRFuncDecl>();
         map.put("if", func);
-
         var comp = new IRCompUnit(loc, "base", map);
-
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
 
-        this.testWithAlternateFlattener(result.get("if"));
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 
     @Test
     void testWhileFunction() throws Exception {
 
-        String prgmString = "main(): int { while (false) { while(true) { } } if (133 > 0) { return 43 } return 12 }";
+        String prgmString = "main(): int { a:int = 3; while (true) { while(true) { } } if (133 > 0) { return 43 } return 12 }";
+
+        IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
+                "while.xi", null, new IRUtil.LowerConfiguration(true, true),
+                new DefaultIdGenerator());
+
+        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
+    }
+
+
+    @Test
+    void testBasicInfiniteLoop() throws Exception {
+
+        String prgmString = "main() { while (true) { } }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
                 "while.xi", null, new IRUtil.LowerConfiguration(true, true),
@@ -90,7 +102,6 @@ class TestFlattenBasicCFG {
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
                 "return.xi", null, new IRUtil.LowerConfiguration(true, true),
                 new DefaultIdGenerator());
-
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
@@ -117,7 +128,6 @@ class TestFlattenBasicCFG {
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
 
-
     @Test
     void testEmpty() throws Exception {
 
@@ -128,8 +138,7 @@ class TestFlattenBasicCFG {
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
     }
-
-
 }

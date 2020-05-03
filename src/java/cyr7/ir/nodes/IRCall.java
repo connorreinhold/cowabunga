@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import cyr7.ir.visit.AggregateVisitor;
 import cyr7.ir.visit.CheckCanonicalIRVisitor;
@@ -17,6 +18,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
  * CALL(e_target, e_1, ..., e_n)
  */
 public class IRCall extends IRExpr_c {
+
     protected final IRExpr target;
     protected final List<IRExpr> args;
     public final int numOfReturnValues;
@@ -118,5 +120,13 @@ public class IRCall extends IRExpr_c {
     @Override
     public <T> T accept(MyIRVisitor<T> v) {
         return v.visit(this);
+    }
+
+    @Override
+    public String userFriendlyString() {
+        String functionName = this.target.userFriendlyString();
+        String arguments = String.join(", ", this.args.stream()
+                .map(a -> a.userFriendlyString()).collect(Collectors.toList()));
+        return functionName + "(" + arguments + ")";
     }
 }

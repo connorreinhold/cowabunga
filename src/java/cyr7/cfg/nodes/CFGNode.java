@@ -42,7 +42,9 @@ public abstract class CFGNode {
 
     protected final void updateIns() {
         for (CFGNode node : out()) {
-            node.in().add(this);
+            if (!node.in().contains(this)) {
+                node.in().add(this);
+            }
         }
     }
 
