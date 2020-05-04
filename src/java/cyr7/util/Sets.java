@@ -7,12 +7,12 @@ import java.util.stream.Stream;
 
 public final class Sets {
 
-    public static Set<String> union(Set<String> lhs, Set<String> rhs) {
+    public static <T> Set<T> union(Set<T> lhs, Set<T> rhs) {
         return Stream.concat(lhs.stream(), rhs.stream()).collect(Collectors.toSet());
     }
 
-    public static Set<String> difference(Set<String> lhs, Set<String> rhs) {
-        Set<String> elements = new HashSet<>(lhs);
+    public static <T> Set<T> difference(Set<T> lhs, Set<T> rhs) {
+        Set<T> elements = new HashSet<>(lhs);
         elements.removeAll(rhs);
         return elements;
     }

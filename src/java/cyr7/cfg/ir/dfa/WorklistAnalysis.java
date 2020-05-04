@@ -56,39 +56,7 @@ public final class WorklistAnalysis {
         return out;
     }
 
-    public static <L> Map<CFGNode, L> analyze(
-        CFGStartNode cfg,
-        BackwardDataflowAnalysis<L> analysis) {
-
-        Set<CFGNode> allNodes = getAllNodes(cfg);
-        Queue<CFGNode> worklist = new LinkedList<>(allNodes);
-
-        Map<CFGNode, L> in = new HashMap<>();
-        Map<CFGNode, L> out = new HashMap<>();
-        for (CFGNode node : allNodes) {
-            in.put(node, analysis.topValue());
-        }
-
-        while (!worklist.isEmpty()) {
-            CFGNode node = worklist.remove();
-            L outValue = node.out()
-                .stream()
-                .map(in::get)
-                .reduce(analysis::meet)
-                .orElse(analysis.topValue());
-            out.put(node, outValue);
-
-            L oldInValue = in.get(node);
-            L inValue = node.acceptBackward(analysis.transfer(), outValue);
-            if (!oldInValue.equals(inValue)) {
-                in.put(node, inValue);
-            }
-        }
-
-        return in;
-    }
-
-    static Set<CFGNode> getAllNodes(CFGStartNode cfg) {
+    private static Set<CFGNode> getAllNodes(CFGStartNode cfg) {
         Set<CFGNode> nodes = new HashSet<>();
         Queue<CFGNode> worklist = new LinkedList<>();
         worklist.add(cfg);
