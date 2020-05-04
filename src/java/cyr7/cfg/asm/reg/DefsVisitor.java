@@ -31,27 +31,6 @@ public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case SHLQ:
             case SHRQ:
             case SARQ:
-                if (instr.args.get(0) instanceof ASMTempRegArg) {
-                    return Set.of(
-                        (ASMTempRegArg) instr.args.get(0),
-                        ASMReg.FLAGS);
-                } else {
-                    return Set.of();
-                }
-
-            case IMULQ:
-                if (instr.args.size() == 2
-                    && instr.args.get(0) instanceof ASMTempRegArg) {
-                    return Set.of(
-                        (ASMTempRegArg) instr.args.get(0),
-                        ASMReg.FLAGS);
-                }
-                // fallthrough intentionally
-            case IDIVQ:
-            case CQO: // https://www.felixcloutier.com/x86/cwd:cdq:cqo
-                return Set.of(ASMReg.RDX, ASMReg.RAX);
-
-            // movs and sets
             case MOVQ:
             case MOV:
             case MOVABSQ:
@@ -68,22 +47,33 @@ public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
                     return Set.of();
                 }
 
-                // push and pop
+            case IMULQ:
+                if (instr.args.size() == 2
+                    && instr.args.get(0) instanceof ASMTempRegArg) {
+                    return Set.of((ASMTempRegArg) instr.args.get(0));
+                }
+                // fallthrough intentionally
+            case IDIVQ:
+            case CQO: // https://www.felixcloutier.com/x86/cwd:cdq:cqo
+                return Set.of(ASMReg.RDX, ASMReg.RAX);
+
+            // push and pop
             case PUSHQ:
             case POPQ:
                 return Set.of(ASMReg.RSP);
 
             // compare
             case CMPQ:
-                return Set.of(ASMReg.FLAGS);
+                return Set.of();
 
             case CALLQ:
                 String mangledName = ((ASMLabelArg) instr.args.get(0)).label;
                 // A call defs its return registers.
                 return Collections.unmodifiableSet(
-                    MangledNameParser.returnRegisters(mangledName));
+                    MangledNameParser.argumentRegisters(mangledName));
 
             // control flow
+            // these are represented as an inherent part of the CFG
             case RETQ:
             case JMP:
             case JE:
@@ -92,9 +82,10 @@ public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case JGE:
             case JL:
             case JG:
-            default:
-                return Set.of();
+                throw new IllegalArgumentException();
         }
+
+        throw new AssertionError();
     }
 
     @Override
