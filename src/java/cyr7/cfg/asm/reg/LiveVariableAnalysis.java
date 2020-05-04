@@ -14,8 +14,8 @@ public final class LiveVariableAnalysis
     private final UsesVisitor uses;
     private final DefsVisitor defs;
 
-    public LiveVariableAnalysis() {
-        this.uses = new UsesVisitor();
+    public LiveVariableAnalysis(String mangledName) {
+        this.uses = new UsesVisitor(MangledNameParser.returnRegisters(mangledName));
         this.defs = new DefsVisitor();
     }
 

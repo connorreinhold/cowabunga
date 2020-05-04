@@ -7,7 +7,7 @@ import java.util.stream.Stream;
 
 public final class Sets {
 
-    public static <T> Set<T> union(Set<T> lhs, Set<T> rhs) {
+    public static <T> Set<T> union(Set<? extends T> lhs, Set<? extends T> rhs) {
         return Stream.concat(lhs.stream(), rhs.stream()).collect(Collectors.toSet());
     }
 

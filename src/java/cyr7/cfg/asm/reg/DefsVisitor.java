@@ -6,6 +6,7 @@ import cyr7.cfg.asm.nodes.AsmCFGReturnNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
 import cyr7.cfg.asm.visitor.AsmCFGVisitor;
 import cyr7.x86.asm.ASMInstr;
+import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempRegArg;
 
@@ -72,12 +73,15 @@ public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case POPQ:
                 return Set.of(ASMReg.RSP);
 
-                // compare
+            // compare
             case CMPQ:
                 return Set.of(ASMReg.FLAGS);
 
             case CALLQ:
-                break;
+                String mangledName = ((ASMLabelArg) instr.args.get(0)).label;
+                // A call defs its return registers.
+                return Collections.unmodifiableSet(
+                    MangledNameParser.returnRegisters(mangledName));
 
             // control flow
             case RETQ:

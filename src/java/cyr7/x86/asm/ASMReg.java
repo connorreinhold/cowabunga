@@ -1,5 +1,6 @@
 package cyr7.x86.asm;
 
+import cyr7.x86.visitor.ASMArgVisitor;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 public enum ASMReg implements ASMTempRegArg {
@@ -53,6 +54,11 @@ public enum ASMReg implements ASMTempRegArg {
     @Override
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public <R> R accept(ASMArgVisitor<R> visitor) {
+        return visitor.accept(this);
     }
 
     public ASMRegSize size() {
