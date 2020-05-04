@@ -84,14 +84,14 @@ public class CFGUtil {
         printer.println("digraph nfa {");
         printer.println("    node [shape=circle]");
         for(String label: dv.getDotNodes()) {
-            printer.println("    \""+label+"\"");
+            //printer.println("    \""+label+"\"");
         }
-        printer.println();
+        //printer.println();
         for(Pair<String, String> edge:dv.getDotEdges()) {
             String edgeName = "    \""+edge.part1()+"\" -> \""+edge.part2()+"\"";
-            printer.println(edgeName);
+            //printer.println(edgeName);
         }
-        printer.println("}");
+        // printer.println("}");
         printer.flush();
     }
     

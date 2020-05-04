@@ -24,7 +24,7 @@ public class AsmCFGIfNode extends AsmCFGSourceNode {
 
     @Override
     public <T> T accept(AsmCFGVisitor<T> visitor) {
-        return null;
+        return visitor.visit(this);
     }
 
     public AsmCFGNode falseBranch() {

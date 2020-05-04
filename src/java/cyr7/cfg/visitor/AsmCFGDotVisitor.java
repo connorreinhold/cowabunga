@@ -36,7 +36,6 @@ public class AsmCFGDotVisitor implements AsmCFGVisitor<Optional<Void>>{
     public List<Pair<String,String>> getDotEdges() {
         return this.edges.stream().map(
                 nodePair -> {
-                    System.out.println(nodePair.part1());
                     return new Pair<>(
                         nodeToLabel.get(nodePair.part1()),
                         nodeToLabel.get(nodePair.part2()));
@@ -48,6 +47,7 @@ public class AsmCFGDotVisitor implements AsmCFGVisitor<Optional<Void>>{
         String label = n.toString() + "[id=" + id+"]";
         nodeToLabel.put(n, label);
         nodes.add(n);
+        System.out.println(n.inNodes().size());
         for(AsmCFGNode inc: n.inNodes()) {
             edges.add(new Pair<>(inc, n));
         }

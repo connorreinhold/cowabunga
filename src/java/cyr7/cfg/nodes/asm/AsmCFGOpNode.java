@@ -25,7 +25,7 @@ public class AsmCFGOpNode extends AsmCFGSourceNode {
 
     @Override
     public <T> T accept(AsmCFGVisitor<T> visitor) {
-        return null;
+        return visitor.visit(this);
     }
 
     @Override
@@ -36,5 +36,10 @@ public class AsmCFGOpNode extends AsmCFGSourceNode {
         } else {
             throw new AssertionError();
         }
+    }
+    
+    @Override
+    public String toString() {
+        return this.sourceInstr().getIntelAssembly().trim();
     }
 }

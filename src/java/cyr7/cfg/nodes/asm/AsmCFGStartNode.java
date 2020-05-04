@@ -26,8 +26,7 @@ public class AsmCFGStartNode extends AsmCFGNode {
 
     @Override
     public <T> T accept(AsmCFGVisitor<T> visitor) {
-//        return visitor.visit(this);
-        return null;
+        return visitor.visit(this);
     }
 
     @Override

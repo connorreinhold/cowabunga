@@ -12,7 +12,7 @@ public class ASMLineFactory {
 
     private final Optional<IRNode> node;
 
-    private ASMLineFactory() {
+    public ASMLineFactory() {
         this.node = Optional.empty();
     }
 
