@@ -189,7 +189,13 @@ public class CLI {
         Option optimizations = Option
                 .builder("O")
                 .longOpt(null)
-                .desc("Disable optimizations")
+                .desc("Use O<opt> to enable optimization <opt>.\n" +
+                        "If one of these options is used, other optimizations are off by default unless otherwise\n" +
+                        "enabled.\nThe following optimizations are supported:\n" +
+                        "-Constant Folding\n" +
+                        "Use O-no-<opt> to disable only optimization <opt>.\n" +
+                        "Use only O to disable all optimizations. This option is redundant if one of the -O<opt> " +
+                        "options is used.")
                 .hasArg(false)
                 .argName(null)
                 .numberOfArgs(0)
@@ -340,7 +346,6 @@ public class CLI {
                 switch(opt) {
                     case CF:
                         cFoldEnabled = true && noModifier;
-                        System.out.println(opt + " is " + (cFoldEnabled? "enabled":"disabled"));
                         args[i] = "";
                     default:
                         break;
