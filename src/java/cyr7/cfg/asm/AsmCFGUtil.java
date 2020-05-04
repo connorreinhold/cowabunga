@@ -25,6 +25,7 @@ public final class AsmCFGUtil {
         node.accept(dv);
         printer.println("digraph nfa {");
         printer.println("    node [shape=circle]");
+        for(String label: dv.getDotNodes()) {
             printer.println("    \""+label+"\"");
         }
         printer.println();
