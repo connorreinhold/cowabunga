@@ -4,6 +4,7 @@ import java.util.Objects;
 import java.util.Optional;
 
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
+import cyr7.x86.visitor.ASMArgVisitor;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 public final class ASMMemArg implements ASMArg {
@@ -31,6 +32,11 @@ public final class ASMMemArg implements ASMArg {
     @Override
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public <R> R accept(ASMArgVisitor<R> visitor) {
+        return visitor.accept(this);
     }
 
     @Override
