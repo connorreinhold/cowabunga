@@ -12,6 +12,7 @@ public class AsmCFGOpNode extends AsmCFGSourceNode {
     public AsmCFGOpNode(int sourceIndex, ASMInstr sourceInstr, AsmCFGNode out) {
         super(sourceIndex, sourceInstr);
         this.out = out;
+        this.updateIns();
     }
 
     public AsmCFGNode out() {
