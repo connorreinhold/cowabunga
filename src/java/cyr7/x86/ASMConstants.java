@@ -1,5 +1,7 @@
 package cyr7.x86;
 
+import cyr7.x86.asm.ASMReg;
+
 public class ASMConstants {
 
     /**
@@ -8,5 +10,41 @@ public class ASMConstants {
      * function.
      */
     public static int WORD_OFFSET_TO_ARGS = 2;
+
+    public static final ASMReg[] RETURN_REGISTERS = {
+        ASMReg.RAX,
+        ASMReg.RDX
+    };
+
+    public static final ASMReg[] ARGUMENT_REGISTERS = {
+        ASMReg.RDI,
+        ASMReg.RSI,
+        ASMReg.RDX,
+        ASMReg.RCX,
+        ASMReg.R8,
+        ASMReg.R9
+    };
+
+    public static final ASMReg[] CALLEE_SAVED_REGISTERS = {
+        ASMReg.RBP,
+        ASMReg.RSP,
+        ASMReg.RBX,
+        ASMReg.R12,
+        ASMReg.R13,
+        ASMReg.R14,
+        ASMReg.R15
+    };
+
+    public static final ASMReg[] CALLER_SAVED_REGISTERS = {
+        ASMReg.RAX,
+        ASMReg.RCX,
+        ASMReg.RDX,
+        ASMReg.RSI,
+        ASMReg.RDI,
+        ASMReg.R8,
+        ASMReg.R9,
+        ASMReg.R10,
+        ASMReg.R11
+    };
 
 }

@@ -6,6 +6,7 @@ import cyr7.cfg.asm.nodes.AsmCFGReturnNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
 import cyr7.cfg.asm.visitor.AsmCFGVisitor;
 import cyr7.util.Sets;
+import cyr7.x86.ASMConstants;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLabelArg;
 import cyr7.x86.asm.ASMReg;
@@ -17,16 +18,6 @@ import java.util.Set;
 public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
 
     private final Set<ASMReg> returnRegisters;
-    private static final Set<ASMReg> calleeSavedRegisters = Set.of(
-        ASMReg.RBX,
-        ASMReg.RBP,
-        ASMReg.RDI,
-        ASMReg.RSI,
-        ASMReg.RSP,
-        ASMReg.R12,
-        ASMReg.R13,
-        ASMReg.R14,
-        ASMReg.R15);
 
     public UsesVisitor(Set<ASMReg> returnRegisters) {
         this.returnRegisters = returnRegisters;
@@ -79,9 +70,9 @@ public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
 
             case CALLQ:
                 String mangledName = ((ASMLabelArg) instr.args.get(0)).label;
-                // A call defs its return registers.
+                // A call uses its argument registers
                 return Collections.unmodifiableSet(
-                    MangledNameParser.returnRegisters(mangledName));
+                    MangledNameParser.argRegisters(mangledName));
 
             case SETZ:
             case SETNE:
@@ -117,7 +108,8 @@ public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
     @Override
     public Set<ASMTempRegArg> visit(AsmCFGReturnNode n) {
         // why do this? Appel p. 228
-        return Sets.union(returnRegisters, calleeSavedRegisters);
+        return Sets.union(returnRegisters,
+            Set.of(ASMConstants.CALLEE_SAVED_REGISTERS));
     }
 
     @Override
