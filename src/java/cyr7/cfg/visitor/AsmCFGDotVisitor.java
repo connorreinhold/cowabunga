@@ -1,12 +1,10 @@
 package cyr7.cfg.visitor;
 
-import cyr7.cfg.nodes.ir.CFGCallNode;
-import cyr7.cfg.nodes.ir.CFGIfNode;
-import cyr7.cfg.nodes.ir.CFGMemAssignNode;
-import cyr7.cfg.nodes.ir.CFGNode;
-import cyr7.cfg.nodes.ir.CFGReturnNode;
-import cyr7.cfg.nodes.ir.CFGStartNode;
-import cyr7.cfg.nodes.ir.CFGVarAssignNode;
+import cyr7.cfg.nodes.asm.AsmCFGIfNode;
+import cyr7.cfg.nodes.asm.AsmCFGNode;
+import cyr7.cfg.nodes.asm.AsmCFGOpNode;
+import cyr7.cfg.nodes.asm.AsmCFGReturnNode;
+import cyr7.cfg.nodes.asm.AsmCFGStartNode;
 import polyglot.util.Pair;
 
 import java.util.ArrayList;
@@ -16,15 +14,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DotVisitor implements IrCFGVisitor<Optional<Void>>{
+public class AsmCFGDotVisitor implements AsmCFGVisitor<Optional<Void>>{
 
-    private final Map<CFGNode, String> nodeToLabel;
+    private final Map<AsmCFGNode, String> nodeToLabel;
     private int id = 0;
 
-    private List<CFGNode> nodes;
-    private List<Pair<CFGNode, CFGNode>> edges;
+    private List<AsmCFGNode> nodes;
+    private List<Pair<AsmCFGNode, AsmCFGNode>> edges;
 
-    public DotVisitor() {
+    public AsmCFGDotVisitor() {
         nodeToLabel = new HashMap<>();
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
@@ -45,59 +43,39 @@ public class DotVisitor implements IrCFGVisitor<Optional<Void>>{
                 }).collect(Collectors.toList());
     }
 
-    public void addDotInfo(CFGNode n) {
+    public void addDotInfo(AsmCFGNode n) {
         id++;
         String label = n.toString() + "[id=" + id+"]";
         nodeToLabel.put(n, label);
         nodes.add(n);
-        for(CFGNode inc: n.in()) {
+        for(AsmCFGNode inc: n.inNodes()) {
             edges.add(new Pair<>(inc, n));
         }
     }
 
     @Override
-    public Optional<Void> visit(CFGCallNode n) {
+    public Optional<Void> visit(AsmCFGOpNode n) {
         if (nodeToLabel.containsKey(n)) {
             return Optional.empty();
         }
         addDotInfo(n);
-        n.out().get(0).accept(this);
+        n.outNodes().get(0).accept(this);
         return Optional.empty();
     }
 
     @Override
-    public Optional<Void> visit(CFGIfNode n) {
+    public Optional<Void> visit(AsmCFGIfNode n) {
         if (nodeToLabel.containsKey(n)) {
             return Optional.empty();
         }
         addDotInfo(n);
-        n.out().get(0).accept(this);
-        n.out().get(1).accept(this);
+        n.outNodes().get(0).accept(this);
+        n.outNodes().get(1).accept(this);
         return Optional.empty();
     }
-
+    
     @Override
-    public Optional<Void> visit(CFGVarAssignNode n) {
-        if (nodeToLabel.containsKey(n)) {
-            return Optional.empty();
-        }
-        addDotInfo(n);
-        n.out().get(0).accept(this);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(CFGMemAssignNode n) {
-        if (nodeToLabel.containsKey(n)) {
-            return Optional.empty();
-        }
-        addDotInfo(n);
-        n.out().get(0).accept(this);
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<Void> visit(CFGReturnNode n) {
+    public Optional<Void> visit(AsmCFGReturnNode n) {
         if (nodeToLabel.containsKey(n)) {
             return Optional.empty();
         }
@@ -106,12 +84,12 @@ public class DotVisitor implements IrCFGVisitor<Optional<Void>>{
     }
 
     @Override
-    public Optional<Void> visit(CFGStartNode n) {
+    public Optional<Void> visit(AsmCFGStartNode n) {
         if (nodeToLabel.containsKey(n)) {
             return Optional.empty();
         }
         addDotInfo(n);
-        n.out().get(0).accept(this);
+        n.outNodes().get(0).accept(this);
         return Optional.empty();
     }
 }

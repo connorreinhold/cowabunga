@@ -22,6 +22,8 @@ public abstract class AsmCFGNode {
     protected final void updateIns() {
         this.in = new ArrayList<>(outNodes().size());
         for (AsmCFGNode node : outNodes()) {
+            System.out.println(node.inNodes());
+            System.out.println(this);
             node.inNodes().add(this);
         }
     }
