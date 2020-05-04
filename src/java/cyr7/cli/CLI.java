@@ -9,8 +9,12 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Function;
 
 import cyr7.x86.ASMUtil.TilerConf;
@@ -41,7 +45,6 @@ public class CLI {
     final static private CommandLineParser parser = new DefaultParser();
 
     private static boolean debugPrintingEnabled = false;
-    private static boolean optimizationsEnabled = true;
     private static ASMUtil.TilerConf tiler = TilerConf.COMPLEX;
 
     private static boolean cFoldEnabled = true;
@@ -204,16 +207,6 @@ public class CLI {
                 .build();
 
         // For internal testing
-        Option cFoldOpt = Option
-                .builder("cfolddisabled")
-                .longOpt(null)
-                .desc("Disable constant folding optimizations")
-                .hasArg(false)
-                .argName(null)
-                .numberOfArgs(0)
-                .required(false)
-                .build();
-
         Option version = Option
                 .builder("v")
                 .longOpt("version")
@@ -282,7 +275,6 @@ public class CLI {
                 .addOption(irRun)
                 .addOption(mirRun)
                 .addOption(optimizations)
-                .addOption(cFoldOpt)
                 .addOption(source)
                 .addOption(libpath)
                 .addOption(destination)
@@ -329,9 +321,35 @@ public class CLI {
      */
     static CommandLine parseCommand(String[] args)
             throws ParseException {
+        boolean hasBeenDisabled = false;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("-O")) {
+                String optShort = args[i].substring(args[i].indexOf('O') + 1);
+                boolean noModifier = true;
+
+                if (optShort.startsWith("-no-")) {
+                    optShort = optShort.substring(optShort.indexOf("-no-") + 4);
+                    noModifier = false;
+                } else if (!hasBeenDisabled) {
+                    cFoldEnabled = false;
+                    hasBeenDisabled = true;
+                }
+
+                Optimizations opt = Optimizations.parse(optShort);
+
+                switch(opt) {
+                    case CF:
+                        cFoldEnabled = true && noModifier;
+                        System.out.println(opt + " is " + (cFoldEnabled? "enabled":"disabled"));
+                        args[i] = "";
+                    default:
+                        break;
+                }
+            }
+        }
+
         return parser.parse(options, args);
     }
-
 
     /**
      * Returns the filename without its extension if an extension exists.
@@ -430,15 +448,11 @@ public class CLI {
                     break;
                 }
                 case "O":
-                    optimizationsEnabled = false;
                     break;
                 case "tos": {
                     target= OperatingSystem.parse(cmd.getOptionValue("tos"));
                     break;
                 }
-                case "cfolddisabled":
-                    cFoldEnabled = false;
-                    break;
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
@@ -548,11 +562,7 @@ public class CLI {
             }
 
             LowerConfiguration lowerConfiguration;
-            if (!optimizationsEnabled) {
-                lowerConfiguration = new LowerConfiguration(false, true);
-            } else {
-                lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
-            }
+            lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
 
             if (wantsIrGen) {
                 debugPrint("Generate intermediate code for: " + filename);
