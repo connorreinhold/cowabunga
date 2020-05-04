@@ -55,6 +55,6 @@ public class AsmCFGIfNode extends AsmCFGSourceNode {
 
     @Override
     public String toString() {
-        return "(if)";
+        return sourceInstr().getIntelAssembly();
     }
 }

@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class DotVisitor implements IrCFGVisitor<Optional<Void>>{
+public class IrCFGDotVisitor implements IrCFGVisitor<Optional<Void>>{
 
     private final Map<CFGNode, String> nodeToLabel;
     private int id = 0;
@@ -24,7 +24,7 @@ public class DotVisitor implements IrCFGVisitor<Optional<Void>>{
     private List<CFGNode> nodes;
     private List<Pair<CFGNode, CFGNode>> edges;
 
-    public DotVisitor() {
+    public IrCFGDotVisitor() {
         nodeToLabel = new HashMap<>();
         nodes = new ArrayList<>();
         edges = new ArrayList<>();

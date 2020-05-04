@@ -38,4 +38,9 @@ public class AsmCFGOpNode extends AsmCFGSourceNode {
             throw new AssertionError();
         }
     }
+    
+    @Override
+    public String toString() {
+        return this.sourceInstr().getIntelAssembly().trim();
+    }
 }
