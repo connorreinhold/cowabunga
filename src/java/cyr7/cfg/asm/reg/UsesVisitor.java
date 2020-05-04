@@ -75,6 +75,8 @@ public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case IDIVQ:
                 if (instr.args.get(0) instanceof ASMTempRegArg) {
                     return Set.of((ASMTempRegArg) instr.args.get(0), ASMReg.RAX);
+                } else {
+                    throw new AssertionError();
                 }
 
             case CALLQ:

@@ -1,18 +1,10 @@
-package cyr7.cfg;
-
-import java.io.StringReader;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-
-import org.junit.jupiter.api.Test;
+package cyr7.cfg.ir;
 
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.cfg.CFGConstructor;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -25,6 +17,12 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import java_cup.runtime.ComplexSymbolFactory.Location;
+import org.junit.jupiter.api.Test;
+
+import java.io.StringReader;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
 
 class TestFlattenBasicCFG {
 

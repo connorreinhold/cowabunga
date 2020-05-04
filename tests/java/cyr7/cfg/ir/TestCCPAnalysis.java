@@ -1,4 +1,4 @@
-package cyr7.cfg;
+package cyr7.cfg.ir;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
