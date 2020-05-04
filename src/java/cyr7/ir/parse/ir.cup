@@ -104,7 +104,7 @@ bare_stmt ::=
         RESULT = parser.nf.IRLabel(n);
     :}
     | RETURN LPAREN RPAREN {:
-        RESULT = parser.nf.IRReturn(0);
+        RESULT = parser.nf.IRReturn();
     :}
 ;
 
