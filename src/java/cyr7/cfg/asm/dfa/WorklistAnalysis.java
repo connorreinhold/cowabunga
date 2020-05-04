@@ -21,6 +21,7 @@ public enum WorklistAnalysis {
         Queue<AsmCFGNode> worklist = new LinkedList<>(allNodes);
 
         Map<AsmCFGNode, L> in = new HashMap<>();
+        Map<AsmCFGNode, L> out = new HashMap<>();
         for (AsmCFGNode node : allNodes) {
             in.put(node, analysis.topValue());
         }
@@ -32,11 +33,13 @@ public enum WorklistAnalysis {
                 .map(in::get)
                 .reduce(analysis::meet)
                 .orElse(analysis.topValue());
+            out.put(node, outValue);
 
             L oldInValue = in.get(node);
             L inValue = analysis.transfer(node, outValue);
             if (!oldInValue.equals(inValue)) {
                 in.put(node, inValue);
+                worklist.addAll(node.inNodes());
             }
         }
 

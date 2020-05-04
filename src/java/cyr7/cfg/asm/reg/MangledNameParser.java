@@ -48,11 +48,9 @@ public enum MangledNameParser {
                         cursor++;
                     }
                     numReturnValues =
-                        Integer.parseInt(encodedType.substring(1, cursor + 1));
-                    cursor++;
+                        Integer.parseInt(encodedType.substring(1, cursor));
                     break;
                 default:
-                    cursor++;
                     numReturnValues = 1;
             }
 
