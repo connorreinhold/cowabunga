@@ -7,6 +7,7 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringReader;
 
+import cyr7.cfg.ir.CFGUtil;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ir.IRUtil;

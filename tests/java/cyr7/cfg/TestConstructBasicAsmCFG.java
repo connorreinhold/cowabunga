@@ -1,10 +1,10 @@
 package cyr7.cfg;
 
-import cyr7.cfg.constructor.AsmCFGConstructor;
-import cyr7.cfg.nodes.asm.AsmCFGIfNode;
-import cyr7.cfg.nodes.asm.AsmCFGOpNode;
-import cyr7.cfg.nodes.asm.AsmCFGReturnNode;
-import cyr7.cfg.nodes.asm.AsmCFGStartNode;
+import cyr7.cfg.asm.constructor.AsmCFGConstructor;
+import cyr7.cfg.asm.nodes.AsmCFGIfNode;
+import cyr7.cfg.asm.nodes.AsmCFGOpNode;
+import cyr7.cfg.asm.nodes.AsmCFGReturnNode;
+import cyr7.cfg.asm.nodes.AsmCFGStartNode;
 import cyr7.x86.asm.ASMConstArg;
 import cyr7.x86.asm.ASMLabel;
 import cyr7.x86.asm.ASMLabelArg;

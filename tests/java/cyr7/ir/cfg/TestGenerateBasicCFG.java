@@ -3,10 +3,10 @@ package cyr7.ir.cfg;
 import java.util.HashMap;
 import java.util.Map;
 
+import cyr7.cfg.ir.nodes.CFGNode;
 import org.junit.jupiter.api.Test;
 
-import cyr7.cfg.constructor.CFGConstructor;
-import cyr7.cfg.nodes.ir.CFGNode;
+import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
