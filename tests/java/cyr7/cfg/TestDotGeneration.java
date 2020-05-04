@@ -1,4 +1,4 @@
-package cyr7.cfg.ir;
+package cyr7.cfg;
 
 import java.io.FileNotFoundException;
 import java.io.FileWriter;

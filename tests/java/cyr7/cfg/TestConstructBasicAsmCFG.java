@@ -1,4 +1,4 @@
-package cyr7.cfg.ir;
+package cyr7.cfg;
 
 import cyr7.cfg.asm.constructor.AsmCFGConstructor;
 import cyr7.cfg.asm.nodes.AsmCFGIfNode;
