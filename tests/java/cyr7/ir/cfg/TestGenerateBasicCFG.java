@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.cfg.constructor.CFGConstructor;
 import cyr7.cfg.nodes.ir.CFGNode;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;

@@ -2,7 +2,6 @@ package cyr7.cfg.constructor;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,6 @@ import cyr7.cfg.nodes.asm.AsmCFGReturnNode;
 import cyr7.cfg.nodes.asm.AsmCFGSourceNode;
 import cyr7.cfg.nodes.asm.AsmCFGStartNode;
 import cyr7.cfg.nodes.asm.AsmCFGStubNode;
-import cyr7.cfg.nodes.ir.CFGNode;
 import cyr7.util.Pair;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLabel;
