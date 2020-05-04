@@ -47,7 +47,6 @@ public class AsmCFGDotVisitor implements AsmCFGVisitor<Optional<Void>>{
         String label = n.toString() + "[id=" + id+"]";
         nodeToLabel.put(n, label);
         nodes.add(n);
-        System.out.println(n.inNodes().size());
         for(AsmCFGNode inc: n.inNodes()) {
             edges.add(new Pair<>(inc, n));
         }

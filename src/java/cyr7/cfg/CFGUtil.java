@@ -84,19 +84,19 @@ public class CFGUtil {
         printer.println("digraph nfa {");
         printer.println("    node [shape=circle]");
         for(String label: dv.getDotNodes()) {
-            //printer.println("    \""+label+"\"");
+            printer.println("    \""+label+"\"");
         }
-        //printer.println();
+        printer.println();
         for(Pair<String, String> edge:dv.getDotEdges()) {
             String edgeName = "    \""+edge.part1()+"\" -> \""+edge.part2()+"\"";
-            //printer.println(edgeName);
+            printer.println(edgeName);
         }
-        // printer.println("}");
+         printer.println("}");
         printer.flush();
     }
     
     
-    public static void generateDotAsm() throws Exception {
+    public static void testGenerateDotAsm() throws Exception {
         File f = new File("tests/resources/testJunk.xi");
         FileReader fr = new FileReader(f);
         BufferedReader br  = new BufferedReader(fr);
@@ -110,9 +110,5 @@ public class CFGUtil {
         AsmCFGStartNode startNode = cfgConstructor.constructAsmCFG();
         Writer writer = new PrintWriter(System.out);
         outputDotForFunctionAsm(startNode, writer);
-    }
-    
-    public static void main(String[] args) throws Exception {
-        generateDotAsm();
     }
 }
