@@ -22,7 +22,6 @@ implements BackwardDataflowAnalysis<IrLiveVarLattice> {
         return new IrLiveVarLattice();
     }
 
-
     @Override
     public BackwardTransferFunction<IrLiveVarLattice> transfer() {
         return LiveVarTransferFunction.INSTANCE;
@@ -32,7 +31,6 @@ implements BackwardDataflowAnalysis<IrLiveVarLattice> {
     public IrLiveVarLattice meet(IrLiveVarLattice lhs, IrLiveVarLattice rhs) {
         return IrLiveVarLattice.meet(lhs, rhs);
     }
-
 
     /**
      * Transfer function is defined as: in[n] = use[n] ∪ (out[n] — def [n])
@@ -98,12 +96,15 @@ implements BackwardDataflowAnalysis<IrLiveVarLattice> {
         }
 
         /**
-         * No variables are used. No variables are defined;
+         * All variables in rhs expression are used.
+         * <p>
+         * LHS variable is defined;
          */
         @Override
         public IrLiveVarLattice transfer(CFGVarAssignNode n, IrLiveVarLattice out) {
-            return transfer(Collections.emptySet(),
-                    out.liveVars, Collections.emptySet());
+            Set<String> used = n.value.accept(tempVisitor);
+            Set <String> defined = Set.of(n.variable);
+            return transfer(used, out.liveVars, defined);
         }
     }
 
