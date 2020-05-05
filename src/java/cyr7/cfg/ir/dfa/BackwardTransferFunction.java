@@ -8,14 +8,14 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 
 public interface BackwardTransferFunction<L> {
 
-    L transfer(CFGCallNode n, L in);
+    L transfer(CFGCallNode n, L out);
 
-    L transfer(CFGIfNode n, L in);
+    L transfer(CFGIfNode n, L out);
 
-    L transfer(CFGMemAssignNode n, L in);
+    L transfer(CFGMemAssignNode n, L out);
 
-    L transfer(CFGReturnNode n, L in);
+    L transfer(CFGReturnNode n, L out);
 
-    L transfer(CFGVarAssignNode n, L in);
+    L transfer(CFGVarAssignNode n, L out);
 
 }
