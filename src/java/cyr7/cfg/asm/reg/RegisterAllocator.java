@@ -4,18 +4,14 @@ import cyr7.cfg.asm.constructor.AsmCFGConstructor;
 import cyr7.cfg.asm.dfa.WorklistAnalysis;
 import cyr7.cfg.asm.nodes.AsmCFGNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
-import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.util.Pair;
 import cyr7.util.Sets;
 import cyr7.x86.asm.ASMInstr;
-import cyr7.x86.asm.ASMInstrType;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMReg;
-import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempRegArg;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,7 +19,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public final class RegisterAllocator {
 
@@ -43,9 +40,9 @@ public final class RegisterAllocator {
         ASMReg.R15
     };
 
-    private final int K = availableRegisters.length;
-
     private final Set<ASMTempRegArg> precolored = Set.of(availableRegisters);
+
+    private final int K = availableRegisters.length;
 
     private final List<ASMLine> functionBody;
 
@@ -56,104 +53,37 @@ public final class RegisterAllocator {
         this.mangledName = mangledName;
     }
 
-    // node sets
+    private final Worklists worklists = new Worklists();
 
-    // temporaries, not precolored and not yet processed
-    private Deque<ASMTempArg> initial;
+    private final HashSet<ASMTempRegArg> spilledNodes = new HashSet<>();
+    private final HashSet<ASMTempRegArg> coalescedNodes = new HashSet<>();
+    private final HashSet<ASMTempRegArg> coloredNodes = new HashSet<>();
+    private final Deque<ASMTempRegArg> selectStack = new LinkedList<>();
 
-    // list of low-degree non-move-related nodes
-    private Deque<ASMTempRegArg> simplifyWorklist;
+    private final Moves moves = new Moves(worklists.moves);
 
-    // low-degree move-related nodes
-    private Deque<ASMTempRegArg> freezeWorklist;
+    private InterferenceGraph graph;
+    private Map<ASMTempRegArg, Integer> coloring;
+    private CoalescingHeuristic coalescingHeuristic;
 
-    // high-degree nodes
-    private Deque<ASMTempRegArg> spillWorklist;
-
-    // nodes marked for spilling during this round
-    private List<ASMTempArg> spilledNodes;
-
-    // variables that have been coalesced; when u <- v is coalesced, v is added
-    // to this set and u put back on some worklist (or vice versa)
-    private List<ASMTempArg> coalescedNodes;
-
-    // nodes successfully colored
-    private Set<ASMTempArg> coloredNodes;
-
-    // stack containing temporaries removed from the graph
-    private Deque<ASMTempRegArg> selectStack;
-
-    // move sets
-
-    // (index of) moves that have been coalesced
-    private Set<Integer> coalescedMoves;
-
-    // (index of) moves whose source and target interfere
-    private Set<Integer> constrainedMoves;
-
-    // (index of) moves that will no longer be considered for coalescing
-    private Set<Integer> frozenMoves;
-
-    // (index of) moves enabled for possible coalescing
-    private Set<Integer> worklistMoves;
-
-    // (index of) moves not yet ready for coalescing
-    private Set<Integer> activeMoves;
-
-    // other data structures
-
-    private Set<Pair<ASMTempRegArg, ASMTempRegArg>> adjSet;
-
-    private HashMap<ASMTempArg, Set<ASMTempRegArg>> adjList;
-
-    private Map<ASMTempRegArg, Integer> degree;
-
-    // a mapping from a node to the list of moves it is associated with
-    private Map<ASMTempRegArg, Set<Integer>> moveList;
-
-    // when a move (u, v) has been coalesced, and v put in coalescedNodes, then
-    // alias(v) = u
-    private Map<Integer, Integer> alias;
-
-    private Map<ASMTempRegArg, ASMReg> coloring;
-
-    private void run() {
-        initial = new LinkedList<>();
-        simplifyWorklist = new LinkedList<>();
-        freezeWorklist = new LinkedList<>();
-        spillWorklist = new LinkedList<>();
-        spilledNodes = new ArrayList<>();
-        coalescedNodes = new ArrayList<>();
-        coloredNodes = new HashSet<>();
-        selectStack = new LinkedList<>();
-        coalescedMoves = new HashSet<>();
-        constrainedMoves = new HashSet<>();
-        frozenMoves = new HashSet<>();
-        worklistMoves = new HashSet<>();
-        activeMoves = new HashSet<>();
-        adjSet = new HashSet<>();
-        adjList = new HashMap<>();
-        degree = new HashMap<>();
-        moveList = new HashMap<>();
-        alias = new HashMap<>();
-        coloring = new HashMap<>();
-
+    public void run() {
+        initColoring();
         build();
         makeWorklist();
         do {
-            if (!simplifyWorklist.isEmpty()) {
+            if (!worklists.simplify.isEmpty()) {
                 simplify();
-            } else if (!worklistMoves.isEmpty()) {
+            } else if (!worklists.moves.isEmpty()) {
                 coalesce();
-            } else if (!freezeWorklist.isEmpty()) {
+            } else if (!worklists.freeze.isEmpty()) {
                 freeze();
-            } else if (!spillWorklist.isEmpty()) {
+            } else if (!worklists.spill.isEmpty()) {
                 selectSpill();
             }
-        } while (!spillWorklist.isEmpty()
-            || !worklistMoves.isEmpty()
-            || !freezeWorklist.isEmpty()
-            || !spillWorklist.isEmpty());
+        } while (!worklists.simplify.isEmpty()
+            || !worklists.moves.isEmpty()
+            || !worklists.freeze.isEmpty()
+            || !worklists.spill.isEmpty());
 
         assignColors();
 
@@ -163,202 +93,266 @@ public final class RegisterAllocator {
         }
     }
 
+    private void initColoring() {
+        coloring = new HashMap<>(K);
+        for (int i = 0; i < availableRegisters.length; i++) {
+            coloring.put(availableRegisters[i], i);
+        }
+    }
+
     // build
 
     private void build() {
         AsmCFGConstructor constructor = new AsmCFGConstructor(functionBody);
         AsmCFGStartNode cfg = constructor.constructAsmCFG();
         Map<AsmCFGNode, Set<ASMTempRegArg>> liveVariables
-            = WorklistAnalysis.analyze(cfg, new LiveVariableAnalysis(mangledName));
+            = WorklistAnalysis.analyze(
+            cfg,
+            new LiveVariableAnalysis(mangledName));
 
-        for (Map.Entry<AsmCFGNode, Set<ASMTempRegArg>> keyValue : liveVariables.entrySet()) {
+        graph = new InterferenceGraph(precolored, selectStack, coalescedNodes);
+        for (var keyValue : liveVariables.entrySet()) {
             List<ASMTempRegArg> args = new ArrayList<>(keyValue.getValue());
 
             // Add every distinct pair of conflicting registers
             for (int i = 0; i < args.size(); i++) {
                 for (int j = 0; j < i; j++) {
-                    addEdge(args.get(i), args.get(j));
+                    graph.addEdge(args.get(i), args.get(j));
                 }
             }
         }
 
-        for (int i = functionBody.size() - 1; i >= 0; i++) {
-            ASMLine line = functionBody.get(i);
-            if (line instanceof ASMInstr) {
-                ASMInstr instr = (ASMInstr) line;
-                if (isMoveInstruction(instr)) {
-                    for (ASMTempRegArg n : getAllArgs(instr)) {
-                        getOrDefault(moveList, n, () -> new HashSet<>(1)).add(i);
-                    }
-                    worklistMoves.add(i);
+        for (int move = functionBody.size() - 1; move >= 0; move++) {
+            if (functionBody.get(move) instanceof ASMInstr
+                && Util.isMoveInstruction((ASMInstr) functionBody.get(move))) {
+
+                ASMInstr moveInstr = (ASMInstr) functionBody.get(move);
+                if (moveInstr.args.get(0) instanceof ASMTempRegArg &&
+                    moveInstr.args.get(1) instanceof ASMTempRegArg) {
+
+                    moves.assoc((ASMTempRegArg) moveInstr.args.get(0), move);
+                    moves.assoc((ASMTempRegArg) moveInstr.args.get(1), move);
+                    worklists.moves.add(move);
                 }
             }
         }
-    }
 
-    private void addEdge(ASMTempRegArg lhs, ASMTempRegArg rhs) {
-        if (adjSet.contains(new Pair<>(lhs, rhs))) {
-            return;
-        }
-
-        adjSet.add(new Pair<>(lhs, rhs));
-        adjSet.add(new Pair<>(rhs, lhs));
-
-        if (lhs instanceof ASMTempArg && precolored.contains(lhs)) {
-            ASMTempArg u = (ASMTempArg) lhs;
-            // lhs not precolored
-            getOrDefault(adjList, u, () -> new HashSet<>(1)).add(rhs);
-            if (degree.containsKey(u)) {
-                degree.put(u, degree.get(u) + 1);
-            } else {
-                degree.put(u, 1);
-            }
-        }
-
-        if (rhs instanceof ASMTempArg && precolored.contains(rhs)) {
-            ASMTempArg v = (ASMTempArg) rhs;
-            // lhs not precolored
-            getOrDefault(adjList, v, () -> new HashSet<>(1)).add(rhs);
-            if (degree.containsKey(v)) {
-                degree.put(v, degree.get(v) + 1);
-            } else {
-                degree.put(v, 1);
-            }
-        }
-    }
-
-    private boolean isMoveInstruction(ASMInstr instr) {
-        return instr.type == ASMInstrType.MOV || instr.type == ASMInstrType.MOVQ;
+        this.coalescingHeuristic =
+            new CoalescingHeuristic(K, precolored, graph);
     }
 
     // make worklist
 
     private void makeWorklist() {
-        while (!initial.isEmpty()) {
-            ASMTempArg n = initial.removeFirst();
+        while (!worklists.initial.isEmpty()) {
+            ASMTempRegArg n = worklists.initial.removeFirst();
 
-            if (degree.getOrDefault(n, 0) >= K) {
-                spillWorklist.add(n);
-            } else if (moveRelated(n)) {
-                freezeWorklist.add(n);
+            if (graph.degree(n) >= K) {
+                worklists.spill.add(n);
+            } else if (moves.nodeIsMoveRelated(n)) {
+                worklists.freeze.add(n);
             } else {
-                simplifyWorklist.add(n);
+                worklists.simplify.add(n);
             }
         }
     }
 
     // simplify
 
-    private Set<ASMTempRegArg> adjacentNodes(ASMTempRegArg arg) {
-        return Sets.difference(
-            adjList.get(arg),
-            Sets.union(new HashSet<>(selectStack), new HashSet<>()));
-    }
-
-    private Set<Integer> nodeMoves(ASMTempRegArg arg) {
-        return Sets.intersection(
-            moveList.get(arg),
-            Sets.union(
-                activeMoves,
-                worklistMoves));
-    }
-
-    private boolean moveRelated(ASMTempRegArg n) {
-        return !nodeMoves(n).isEmpty();
-    }
-
     private void simplify() {
-        ASMTempRegArg n = simplifyWorklist.removeFirst();
+        ASMTempRegArg n = worklists.simplify.removeFirst();
         selectStack.push(n);
-        for (ASMTempRegArg m : adjacentNodes(n)) {
-            decrementDegree(m);
+        // this automatically decrements the degree in the graph
+
+        for (ASMTempRegArg m : graph.adjacent(n)) {
+            degreeDecremented(m);
         }
     }
 
-    private void decrementDegree(ASMTempRegArg m) {
-        int d = degree.getOrDefault(m, 0);
-        degree.put(m, d - 1);
-        if (d == K) {
-            enableMoves(Sets.union(Set.of(m), adjacentNodes(m)));
-            spillWorklist.remove(m);
-            if (moveRelated(m)) {
-                freezeWorklist.add(m);
+    private void degreeDecremented(ASMTempRegArg m) {
+        if (graph.degree(m) == K - 1) {
+            enableMoves(Sets.union(Set.of(m), graph.adjacent(m)));
+
+            boolean removed = worklists.spill.remove(m);
+            assert removed;
+
+            if (moves.nodeIsMoveRelated(m)) {
+                worklists.freeze.add(m);
             } else {
-                simplifyWorklist.add(m);
+                worklists.simplify.add(m);
             }
         }
     }
 
     private void enableMoves(Set<ASMTempRegArg> nodes) {
         for (ASMTempRegArg n : nodes) {
-            for (int m : nodeMoves(n)) {
-                if (activeMoves.contains(m)) {
-                    activeMoves.remove(m);
-                    worklistMoves.add(m);
+            for (int m : moves.getMoves(n)) {
+                if (moves.active.contains(m)) {
+                    boolean removed = moves.active.remove(m);
+                    assert removed;
+
+                    worklists.moves.add(m);
                 }
             }
         }
     }
 
-    private void addWorklist(ASMTempRegArg u) {
-        if (u instanceof ASMTempArg && !moveRelated(u) && degree.getOrDefault(u, 0) < K) {
-            freezeWorklist.remove(u);
-            simplifyWorklist.add(u);
-        }
-    }
-
-    private boolean precoloredCoalescingHeuristic(ASMTempRegArg t, ASMTempRegArg r) {
-        return degree.get(t) < K || precolored.contains(t) || adjSet.contains(new Pair<>(t, r));
-    }
-
-    private boolean conservativeCoalescingHeuristic(Set<ASMTempRegArg> nodes) {
-        int k = 0;
-        for (ASMTempRegArg n : nodes) {
-            if (degree.getOrDefault(n, 0) >= 0)
-        }
-    }
-
     // coalesce
 
-    private void coalesce() { }
+    private void addWorklist(ASMTempRegArg u) {
+        if (!precolored.contains(u)
+            && !moves.nodeIsMoveRelated(u)
+            && graph.degree(u) < K) {
+
+            boolean removed = worklists.freeze.remove(u);
+            assert removed;
+
+            worklists.simplify.add(u);
+        }
+    }
+
+    private void coalesce() {
+        int move = worklists.moves.removeFirst();
+        Pair<ASMTempRegArg, ASMTempRegArg> xy = getCopyRegs(move);
+        ASMTempRegArg x = xy.left, y = xy.right;
+
+        ASMTempRegArg u, v;
+        if (precolored.contains(y)) {
+            u = y;
+            v = x;
+        } else {
+            u = x;
+            v = y;
+        }
+
+        if (u.equals(v)) {
+            moves.coalesced.add(move);
+            addWorklist(u);
+        } else if (precolored.contains(v) && graph.adjacentSet(u, v)) {
+            moves.constrained.add(move);
+            addWorklist(u);
+            addWorklist(v);
+        } else if (precolored.contains(u)
+            && graph.adjacent(v).stream().allMatch(t -> coalescingHeuristic.ok(t, u))
+            || !precolored.contains(u)
+            && coalescingHeuristic.conservative(Sets.union(
+            graph.adjacent(u),
+            graph.adjacent(v)))) {
+
+            moves.coalesced.add(move);
+            combine(u, v);
+            addWorklist(u);
+        } else {
+            moves.active.add(move);
+        }
+    }
+
+    private void combine(ASMTempRegArg x, ASMTempRegArg y) {
+        if (worklists.freeze.contains(y)) {
+            worklists.freeze.remove(y);
+        } else {
+            worklists.spill.remove(y);
+        }
+
+        coalescedNodes.add(y);
+        graph.alias.put(y, x);
+        moves.merge(x, y);
+        enableMoves(Set.of(y));
+
+        for (ASMTempRegArg t : graph.adjacent(y)) {
+            graph.addEdge(t, x);
+            degreeDecremented(t);
+        }
+
+        if (graph.degree(x) >= K && worklists.freeze.contains(x)) {
+            boolean removed = worklists.freeze.remove(x);
+            assert removed;
+
+            worklists.spill.add(x);
+        }
+    }
 
     // freeze
 
-    private void freeze() { }
+    private void freeze() {
+        ASMTempRegArg x = worklists.freeze.removeFirst();
+        worklists.simplify.add(x);
+        freezeMoves(x);
+    }
+
+    private void freezeMoves(ASMTempRegArg u) {
+        for (int move : moves.getMoves(u)) {
+            Pair<ASMTempRegArg, ASMTempRegArg> xy = getCopyRegs(move);
+            ASMTempRegArg x = xy.left, y = xy.right;
+
+            ASMTempRegArg v;
+            if (graph.getAlias(y).equals(graph.getAlias(u))) {
+                v = graph.getAlias(x);
+            } else {
+                v = graph.getAlias(y);
+            }
+
+            boolean removed = moves.active.remove(move);
+            assert removed;
+
+            moves.frozen.add(move);
+            if (worklists.freeze.contains(v) && moves.getMoves(v).isEmpty()) {
+                removed = worklists.freeze.remove(v);
+                assert removed;
+
+                worklists.simplify.add(v);
+            }
+        }
+    }
 
     // spill
 
-    private void selectSpill() { }
+    private void selectSpill() {
+        ASMTempRegArg m = worklists.spill.removeFirst();
+        worklists.simplify.add(m);
+        freezeMoves(m);
+    }
 
     // assign colors
 
-    private void assignColors() { }
+    private void assignColors() {
+        while (!selectStack.isEmpty()) {
+            ASMTempRegArg n = selectStack.removeFirst();
+            Set<Integer> okColors = IntStream.rangeClosed(0, K - 1)
+                .boxed().collect(Collectors.toSet());
+
+            for (ASMTempRegArg w : graph.adjacent(n)) {
+                w = graph.getAlias(w);
+                if (coloredNodes.contains(w) || precolored.contains(w)) {
+                    okColors.remove(coloring.get(w));
+                }
+            }
+
+            if (okColors.isEmpty()) {
+                spilledNodes.add(n);
+            } else {
+                coloredNodes.add(n);
+                coloring.put(n, okColors.stream().findAny().get());
+            }
+        }
+
+        for (ASMTempRegArg n : coalescedNodes) {
+            coloring.put(n, coloring.get(graph.getAlias(n)));
+        }
+    }
 
     // rewriteProgram
 
-    private void rewriteProgram() { }
+    private void rewriteProgram() {
+    }
 
     // utils
 
-    private int getDegree(ASMTempRegArg n) {
-        return degree.get(n);
-    }
-
-    private static Set<ASMTempRegArg> getAllArgs(ASMInstr instr) {
-        return instr.args.stream()
-            .map(arg -> arg.accept(ArgUsesVisitor.INSTANCE))
-            .reduce(Sets::union)
-            .orElse(Collections.emptySet());
-    }
-
-    private static <K, V> V getOrDefault(Map<K, V> map, K key, Supplier<V> supplier) {
-        if (map.containsKey(key)) {
-            return map.get(key);
-        } else {
-            V value = supplier.get();
-            map.put(key, value);
-            return value;
-        }
+    private Pair<ASMTempRegArg, ASMTempRegArg> getCopyRegs(int move) {
+        ASMInstr moveInstr = (ASMInstr) functionBody.get(move);
+        ASMTempRegArg x = graph.getAlias((ASMTempRegArg) moveInstr.args.get(0));
+        ASMTempRegArg y = graph.getAlias((ASMTempRegArg) moveInstr.args.get(1));
+        return new Pair<>(x, y);
     }
 
 }
