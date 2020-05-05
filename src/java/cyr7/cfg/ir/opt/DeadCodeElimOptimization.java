@@ -18,6 +18,7 @@ import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
+import cyr7.ir.interpret.Configuration;
 
 public class DeadCodeElimOptimization {
 
@@ -67,26 +68,45 @@ public class DeadCodeElimOptimization {
 
         private Map<CFGNode, IrLiveVarLattice> result;
 
+        private boolean isAReturn(String n) {
+            return n.startsWith(Configuration.ABSTRACT_RET_PREFIX);
+        }
+
         protected ReplaceDeadCodeVisitor(Map<CFGNode, IrLiveVarLattice> result) {
             this.result = Collections.unmodifiableMap(result);
         }
 
         @Override
         public CFGNode visit(CFGCallNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGIfNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGVarAssignNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            // If variable is not defined, then remove from graph. Unless
+            // it is being assigned to a return value temp.
+            Set<String> defined = this.result.get(n).liveVars;
+            if (!this.isAReturn(n.variable)
+                    && defined.contains(n.variable)) {
+                // Remove n from the graph.
+                for (CFGNode incoming: n.in()) {
+                    for (CFGNode out: n.out()) {
+                        if (!incoming.out().contains(out)
+                            && !out.in().contains(incoming)) {
+                            incoming.out().add(out);
+                            out.in().add(incoming);
+                        }
+                    }
+                }
+                return n;
+            } else {
+                return n;
+            }
         }
 
         @Override
