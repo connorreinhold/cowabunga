@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.opt;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
@@ -25,13 +26,20 @@ import cyr7.ir.nodes.IRExpr;
 
 public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
-    private final Map<CFGNode, Map<CFGNode, CopyPropLattice>> result;
+    private Map<CFGNode, Map<CFGNode, CopyPropLattice>> result;
 
-    private final Set<CFGNode> visited;
-    private final Queue<CFGNode> nextNodes;
+    private Set<CFGNode> visited;
+    private Queue<CFGNode> nextNodes;
 
-    public CopyPropagationOptimization(CFGNode start) {
+    public CopyPropagationOptimization() {
+        this.result = Collections.emptyMap();
+        this.visited = Collections.emptySet();
+        this.nextNodes = new LinkedList<>();
+    }
+
+    public CFGStartNode optimize(CFGNode start) {
         // Mapping from CFGNode to the out lattices.
+        CFGStartNode startNode = (CFGStartNode)start;
         this.result = WorklistAnalysis.analyze((CFGStartNode)start,
                 CopyPropagationAnalysis.INSTANCE);
         this.visited = new HashSet<>();
@@ -58,6 +66,7 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
             }
 
         }
+        return startNode;
     }
 
     private CFGNode replaceEdges(CFGNode original, CFGNode current, CFGStubNode ... stubs) {

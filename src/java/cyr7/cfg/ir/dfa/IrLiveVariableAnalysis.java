@@ -13,9 +13,8 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.visit.IRExprVarsVisitor;
 import cyr7.util.Sets;
 
-public final class IrLiveVariableAnalysis
-
-implements BackwardDataflowAnalysis<IrLiveVarLattice> {
+public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVarLattice> {
+    INSTANCE;
 
     @Override
     public IrLiveVarLattice topValue() {

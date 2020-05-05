@@ -23,6 +23,7 @@ import cyr7.ir.nodes.IRTemp;
 import cyr7.visitor.MyIRVisitor;
 
 public class ReplaceTempIRVisitor implements MyIRVisitor<IRExpr> {
+
     private ReplaceTempIRVisitor() {}
 
     public final static ReplaceTempIRVisitor instance = new ReplaceTempIRVisitor();
