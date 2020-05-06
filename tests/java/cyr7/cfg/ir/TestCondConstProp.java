@@ -33,8 +33,8 @@ class TestCondConstProp {
      * Should simplify to the following:
      * start
      * x = 30
-     * z = x
-     * println(x)
+     * z = 30
+     * println(30)
      * return
      */
     @Test
