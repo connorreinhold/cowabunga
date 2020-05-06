@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.dfa;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -29,7 +30,7 @@ public final class WorklistAnalysis {
             }
             out.put(node, outEdges);
         }
-
+        
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
             L inValue = node.in()
@@ -41,9 +42,6 @@ public final class WorklistAnalysis {
                 // return node for a backward analysis
                 .orElse(analysis.topValue());
             in.put(node, inValue);
-            for(CFGNode n: node.in()) {
-                //System.out.println(out.get(n).get(node)+" ****");
-            }
 
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
             for (int i = 0; i < node.out().size(); i++) {
