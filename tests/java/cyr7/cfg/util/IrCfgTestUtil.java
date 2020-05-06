@@ -1,8 +1,10 @@
 package cyr7.cfg.util;
 
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.nodes.CFGCallNode;
@@ -50,8 +52,8 @@ public class IrCfgTestUtil {
      * @param expectedEdges
      */
     public static boolean assertEqualGraphs(CFGNode start,
-            List<CFGNode> expectedNodes, List<Pair<CFGNode, CFGNode>> expectedEdges) {
-        List<CFGNode> actualNodes = getAllNodes(start);
+            Set<CFGNode> expectedNodes, List<Pair<CFGNode, CFGNode>> expectedEdges) {
+        Set<CFGNode> actualNodes = getAllNodes(start);
         List<CFGPair> actualEdges = getAllEdges(start);
 
         var expectedEdgesMod = expectedEdges.stream().map(pair ->
@@ -145,8 +147,8 @@ public class IrCfgTestUtil {
     /**
      * Returns a list of all nodes in a CFG graph.
      */
-    private static List<CFGNode> getAllNodes(CFGNode start) {
-        List<CFGNode> nodes = new LinkedList<>();
+    private static Set<CFGNode> getAllNodes(CFGNode start) {
+        Set<CFGNode> nodes = new HashSet<>();
         Queue<CFGNode> list = new LinkedList<>();
         list.add(start);
         while (!list.isEmpty()) {
@@ -164,20 +166,15 @@ public class IrCfgTestUtil {
      * Returns a list of all edges in a CFG graph.
      */
     private static List<CFGPair> getAllEdges(CFGNode start) {
-        List<CFGNode> visited = new LinkedList<>();
         List<CFGPair> edges = new LinkedList<>();
-        Queue<CFGNode> list = new LinkedList<>();
-        list.add(start);
+        Queue<CFGNode> list = new LinkedList<>(getAllNodes(start));
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
             for (CFGNode outNode: node.out()) {
                 edges.add(new CFGPair(node, outNode));
             }
-            visited.add(node);
             for (CFGNode out: node.out()) {
-                if (!visited.contains(out)) {
-                    list.add(out);
-                }
+                list.add(out);
             }
         }
         return edges;
