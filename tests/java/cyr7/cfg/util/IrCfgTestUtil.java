@@ -1,10 +1,9 @@
 package cyr7.cfg.util;
 
-import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.nodes.CFGCallNode;
@@ -19,30 +18,22 @@ import polyglot.util.Pair;
 
 public class IrCfgTestUtil {
 
+    private IrCfgTestUtil() {}
 
     /**
      * A commutative version of Pair, i.e. ordering of the values does
      * not matter.
      */
-    private static class CommutativePair extends Pair<CFGNode, CFGNode> {
+    private static class CFGPair extends Pair<CFGNode, CFGNode> {
 
-        private Class<?> classType;
-
-        public CommutativePair(CFGNode p1, CFGNode p2) {
+        public CFGPair(CFGNode p1, CFGNode p2) {
             super(p1, p2);
-            this.classType = p1.getClass();
-        }
-
-        @Override
-        public int hashCode() {
-            return new Pair<>(this.part1, this.part2).hashCode()
-                    ^ (new Pair<>(this.part2, this.part1).hashCode() + 23457);
         }
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof CommutativePair) {
-                CommutativePair pair = (CommutativePair)o;
+            if (o instanceof CFGPair) {
+                CFGPair pair = (CFGPair)o;
                 CFGNodeEqualVisitor equalsPart1 = new CFGNodeEqualVisitor(this.part1);
                 CFGNodeEqualVisitor equalsPart2 = new CFGNodeEqualVisitor(this.part2);
                 return (pair.part1.accept(equalsPart1) && pair.part2.accept(equalsPart2))
@@ -63,12 +54,12 @@ public class IrCfgTestUtil {
      *                      not matter;
      */
     public static boolean assertEqualGraphs(CFGNode start,
-            Set<CFGNode> expectedNodes, Set<Pair<CFGNode, CFGNode>> expectedEdges) {
-        Set<CFGNode> actualNodes = getAllNodes(start);
-        Set<CommutativePair> actualEdges = getAllEdges(start);
+            List<CFGNode> expectedNodes, List<Pair<CFGNode, CFGNode>> expectedEdges) {
+        List<CFGNode> actualNodes = getAllNodes(start);
+        List<CFGPair> actualEdges = getAllEdges(start);
 
         boolean sameEdges = expectedEdges.stream().map(pair ->
-            new CommutativePair(pair.part1(), pair.part2()))
+            new CFGPair(pair.part1(), pair.part2()))
         .collect(Collectors.toSet()).equals(actualEdges);
 
         for (CFGNode node: expectedNodes) {
@@ -95,7 +86,7 @@ public class IrCfgTestUtil {
      * containing that node from {@code set} is returned. Otherwise,
      * {@code Optional.empty()} is returned.
      */
-    private static Optional<CFGNode> containsCFG(CFGNode node, Set<CFGNode> set) {
+    private static Optional<CFGNode> containsCFG(CFGNode node, List<CFGNode> set) {
         var equalVisitor = new CFGNodeEqualVisitor(node);
         for (CFGNode nodeOfSet: set) {
             if (nodeOfSet.accept(equalVisitor)) {
@@ -176,8 +167,8 @@ public class IrCfgTestUtil {
     /**
      * Returns a set of all nodes in a CFG graph.
      */
-    private static Set<CFGNode> getAllNodes(CFGNode start) {
-        Set<CFGNode> nodes = new HashSet<>();
+    private static List<CFGNode> getAllNodes(CFGNode start) {
+        List<CFGNode> nodes = new LinkedList<>();
         Queue<CFGNode> list = new LinkedList<>();
         list.add(start);
         while (!list.isEmpty()) {
@@ -194,15 +185,15 @@ public class IrCfgTestUtil {
     /**
      * Returns a set of all edges in a CFG graph.
      */
-    private static Set<CommutativePair> getAllEdges(CFGNode start) {
-        Set<CFGNode> visited = new HashSet<>();
-        Set<CommutativePair> edges = new HashSet<>();
+    private static List<CFGPair> getAllEdges(CFGNode start) {
+        List<CFGNode> visited = new LinkedList<>();
+        List<CFGPair> edges = new LinkedList<>();
         Queue<CFGNode> list = new LinkedList<>();
         list.add(start);
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
             for (CFGNode outNode: node.out()) {
-                edges.add(new CommutativePair(node, outNode));
+                edges.add(new CFGPair(node, outNode));
             }
             if (!visited.contains(node)) {
                 visited.add(node);
