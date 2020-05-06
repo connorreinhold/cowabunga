@@ -37,6 +37,7 @@ public class CopyPropagationAnalysis implements
                 n.call.collectors().forEach(def -> {
                     updated.remove(def);
                 });
+                updated.values().removeAll(n.call.collectors());
                 return new CopyPropLattice(updated);
             }
 
@@ -70,10 +71,12 @@ public class CopyPropagationAnalysis implements
                 // Kill all previous copies that map to the newly defined
                 // variable.
                 updated.remove(n.variable);
+                updated.values().removeAll(Collections.singleton(n.variable));
                 if (n.value instanceof IRTemp) {
                     String source = ((IRTemp)n.value).name();
                     updated.put(n.variable, source);
                 }
+
                 return new CopyPropLattice(updated);
             }
         };

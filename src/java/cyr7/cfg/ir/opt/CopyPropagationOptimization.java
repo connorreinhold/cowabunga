@@ -25,7 +25,7 @@ import cyr7.ir.nodes.IRExpr;
 
 public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
-    private Map<CFGNode, Map<CFGNode, CopyPropLattice>> result;
+    private Map<CFGNode, CopyPropLattice> result;
 
     private Set<CFGNode> visited;
     private Queue<CFGNode> nextNodes;
@@ -66,8 +66,7 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(CFGCallNode n) {
-        final var outEdge = n.out().get(0);
-        final var lattice = this.result.get(n).get(outEdge);
+        final var lattice = this.result.get(n);
 
         final List<IRExpr> args = n.call.args().stream().map(arg -> {
             return ReplaceTempIRVisitor.instance.replace(arg, lattice.copies);
@@ -81,8 +80,8 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(CFGIfNode n) {
-        final var outEdge = n.out().get(0);  // For copy propagation, true and false are the same.
-        final var lattice = this.result.get(n).get(outEdge);
+        // For copy propagation, true and false are the same.
+        final var lattice = this.result.get(n);
 
         final var condition = ReplaceTempIRVisitor.instance.replace(n.cond, lattice.copies);
         n.cond = condition;
@@ -91,8 +90,7 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(CFGVarAssignNode n) {
-        final var outEdge = n.out().get(0);
-        final var lattice = this.result.get(n).get(outEdge);
+        final var lattice = this.result.get(n);
 
         final var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
         n.value = value;
@@ -101,8 +99,7 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(CFGMemAssignNode n) {
-        final var outEdge = n.out().get(0);
-        final var lattice = this.result.get(n).get(outEdge);
+        final var lattice = this.result.get(n);
 
         final var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
         final var mem = ReplaceTempIRVisitor.instance.replace(n.target, lattice.copies);

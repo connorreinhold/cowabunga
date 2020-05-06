@@ -13,7 +13,7 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 
 public final class WorklistAnalysis {
 
-    public static <L> Map<CFGNode, Map<CFGNode, L>> analyze(
+    public static <L> Map<CFGNode, L> analyze(
         CFGStartNode cfg,
         ForwardDataflowAnalysis<L> analysis) {
 
@@ -53,7 +53,7 @@ public final class WorklistAnalysis {
             }
         }
 
-        return out;
+        return in;
     }
 
     public static <L> Map<CFGNode, L> analyze(

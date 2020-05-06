@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGNodeFactory;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
@@ -19,6 +20,7 @@ import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRNodeFactory_c;
+import cyr7.ir.nodes.IRStmt;
 import cyr7.ir.nodes.IRTemp;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
@@ -49,20 +51,20 @@ class TestCopyPropagation {
                                     new IRConst(loc, 15), deadAssign);
         CFGNode root = new CFGStartNode(loc, firstAssign);
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
-
         CFGNode zIsDoubleY = cfg.VarAssign("z",
                 ir.IRBinOp(OpType.ADD, ir.IRTemp("y"), ir.IRTemp("y")),
-                returnNode);
+                new CFGStubNode());
 
-        Set<CFGNode> expectedNodes = Set.of(root, firstAssign,
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, firstAssign,
                 deadAssign, zIsDoubleY, returnNode);
 
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, firstAssign),
                 new Pair<>(firstAssign, deadAssign),
                 new Pair<>(deadAssign, zIsDoubleY),
                 new Pair<>(zIsDoubleY, returnNode));
+
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -77,7 +79,7 @@ class TestCopyPropagation {
      * } else {
      *    y = x
      * }
-     * println(y)
+     * println(x) // Should change here.
      * return
      */
     @Test
@@ -99,26 +101,30 @@ class TestCopyPropagation {
         CFGNode xAssign = cfg.VarAssign("x", ir.IRConst(30), ifNode);
         CFGNode root = cfg.Start(xAssign);
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
-
         CFGNode printNodeOpt = cfg.Call(
                 ir.IRCallStmt(List.of(), ir.IRName("println"),
-                        List.of(ir.IRTemp("x"))), returnNode);
+                        List.of(ir.IRTemp("x"))), new CFGStubNode());
 
-        Set<CFGNode> expectedNodes = Set.of(root, xAssign, ifNode,
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, xAssign, ifNode,
                                             yIsX1, yIsX2,
                                             printNodeOpt, returnNode);
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, xAssign),
                 new Pair<>(xAssign, ifNode),
                 new Pair<>(ifNode, yIsX1),
                 new Pair<>(ifNode, yIsX2),
-                new Pair<>(yIsX1, printNode),
-                new Pair<>(yIsX2, printNode),
-                new Pair<>(printNode, returnNode));
+                new Pair<>(yIsX1, printNodeOpt),
+                new Pair<>(yIsX2, printNodeOpt),
+                new Pair<>(printNodeOpt, returnNode));
+
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+
+        IrCfgTestUtil.printIR(start);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
+
     }
 
 
@@ -137,12 +143,12 @@ class TestCopyPropagation {
 
         CFGNode root = cfg.Start(setRV);
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
-
-        Set<CFGNode> expectedNodes = Set.of(root, setRV, returnNode);
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, setRV, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, setRV),
                 new Pair<>(setRV, returnNode));
+
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -189,15 +195,14 @@ class TestCopyPropagation {
 
         CFGNode root = cfg.Start(setX);
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
-
         CFGNode altXIncrement = cfg.VarAssign("x",
-                ir.IRBinOp(OpType.ADD, ir.IRTemp("x"), ir.IRConst(1)), whileIfNode);
+                ir.IRBinOp(OpType.ADD, ir.IRTemp("x"), ir.IRConst(1)),
+                new CFGStubNode());
 
-        Set<CFGNode> expectedNodes = Set.of(root, setX, setY,
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, setX, setY,
                 whileIfNode, yIsX, altXIncrement, setRV, returnNode);
 
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, setX),
                 new Pair<>(setX, setY),
                 new Pair<>(setY, whileIfNode),
@@ -208,9 +213,104 @@ class TestCopyPropagation {
                 new Pair<>(setRV, returnNode)
                 );
 
+
+
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
     }
 
 
+    /**
+     * x = 0;
+     * y = 0;
+     * a = x;
+     * b = y;
+     * f(x, y)
+     * println(a)  // becomes println(x)
+     * println(b)  // becomes println(y)
+     * x = foo()
+     * y = foo()
+     * c = a + b   // no change
+     * println(c)  // no change
+     * return
+     */
+    @Test
+    void testFunctionCallCFG() {
+        final Location loc = new Location(-1, -1);
+        final var cfg = new CFGNodeFactory(loc);
+        final var ir = new IRNodeFactory_c(loc);
+
+        CFGNode returnNode = cfg.Return();
+
+        CFGNode printlnC = cfg.Call(ir.IRCallStmt(List.of(),
+                                              ir.IRName("println"),
+                                              List.of(ir.IRTemp("c"))),
+                                    returnNode);
+
+        CFGNode cIsAPlusB = cfg.VarAssign("c",
+                ir.IRBinOp(OpType.ADD, ir.IRTemp("a"), ir.IRTemp("b")), printlnC);
+
+        CFGNode yIsFoo = cfg.Call(ir.IRCallStmt(List.of("y"),
+                ir.IRName("foo"), List.of()), cIsAPlusB);
+
+        CFGNode xIsFoo = cfg.Call(ir.IRCallStmt(List.of("x"),
+                ir.IRName("foo"), List.of()), yIsFoo);
+
+        CFGNode printlnB = cfg.Call(ir.IRCallStmt(List.of(),
+                ir.IRName("println"),
+                List.of(ir.IRTemp("b"))), xIsFoo);
+
+        CFGNode printlnA = cfg.Call(ir.IRCallStmt(List.of(),
+                ir.IRName("println"),
+                List.of(ir.IRTemp("a"))), printlnB);
+
+        CFGNode fOfXAndY = cfg.Call(ir.IRCallStmt(List.of(), ir.IRName("f"),
+                            List.of(ir.IRTemp("x"), ir.IRTemp("y"))), printlnA);
+
+        CFGNode bIsY = cfg.VarAssign("b", ir.IRTemp("y"), fOfXAndY);
+
+        CFGNode aIsX = cfg.VarAssign("a", ir.IRTemp("x"), bIsY);
+
+        CFGNode setY = cfg.VarAssign("y", ir.IRConst(0), aIsX);
+
+        CFGNode setX = cfg.VarAssign("x", ir.IRConst(0), setY);
+
+        CFGNode root = cfg.Start(setX);
+
+        CFGNode printlnX = cfg.Call(ir.IRCallStmt(List.of(),
+                ir.IRName("println"),
+                List.of(ir.IRTemp("x"))), new CFGStubNode());
+
+        CFGNode printlnY = cfg.Call(ir.IRCallStmt(List.of(),
+                ir.IRName("println"),
+                List.of(ir.IRTemp("y"))), new CFGStubNode());
+
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, setX, setY,
+                aIsX, bIsY, fOfXAndY, printlnX, printlnY,
+                xIsFoo, yIsFoo, cIsAPlusB, printlnC, returnNode);
+
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
+                new Pair<>(root, setX),
+                new Pair<>(setX, setY),
+                new Pair<>(setY, aIsX),
+                new Pair<>(aIsX, bIsY),
+                new Pair<>(bIsY, fOfXAndY),
+                new Pair<>(fOfXAndY, printlnX),
+                new Pair<>(printlnX, printlnY),
+                new Pair<>(printlnY, xIsFoo),
+                new Pair<>(xIsFoo, yIsFoo),
+                new Pair<>(yIsFoo, cIsAPlusB),
+                new Pair<>(cIsAPlusB, printlnC),
+                new Pair<>(printlnC, returnNode));
+
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+
+        assertTrue(IrCfgTestUtil.assertEqualGraphs(
+                            start, expectedNodes, expectedEdges));
+
+        IRStmt result = CFGFlattener.flatten(start);
+        System.out.println(result);
+    }
 }

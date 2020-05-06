@@ -41,21 +41,24 @@ class TestDeadCodeRemover {
                                     new IRConst(loc, 15), deadAssign);
         CFGNode root = new CFGStartNode(loc, firstAssign);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        Set<CFGNode> expectedNodes = Set.of(root, firstAssign, returnNode);
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(
+                                        root, firstAssign, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, firstAssign),
                 new Pair<>(firstAssign, returnNode));
+
+        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
 
-
         // Running it again should remove y = 15
+        expectedNodes = IrCfgTestUtil.nodeSet(root, returnNode);
+        expectedEdges = IrCfgTestUtil.edgeList(new Pair<>(root, returnNode));
+
         start = new DeadCodeElimOptimization().optimize(root);
-        expectedNodes = Set.of(root, returnNode);
-        expectedEdges = List.of(new Pair<>(root, returnNode));
+
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                 start, expectedNodes, expectedEdges));
     }
@@ -90,16 +93,16 @@ class TestDeadCodeRemover {
         CFGNode xAssign = cfg.VarAssign("x", ir.IRConst(30), ifNode);
         CFGNode root = cfg.Start(xAssign);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
-
-        Set<CFGNode> expectedNodes = Set.of(root, xAssign, ifNode,
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, xAssign, ifNode,
                                             printNode, returnNode);
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, xAssign),
                 new Pair<>(xAssign, ifNode),
                 new Pair<>(ifNode, printNode),
                 new Pair<>(ifNode, printNode),
                 new Pair<>(printNode, returnNode));
+
+        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -121,12 +124,12 @@ class TestDeadCodeRemover {
 
         CFGNode root = cfg.Start(setRV);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
-
-        Set<CFGNode> expectedNodes = Set.of(root, setRV, returnNode);
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, setRV, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, setRV),
                 new Pair<>(setRV, returnNode));
+
+        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -167,16 +170,16 @@ class TestDeadCodeRemover {
 
         CFGNode root = cfg.Start(setX);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
-
-        Set<CFGNode> expectedNodes = Set.of(root, setX, whileIfNode, xIncrement, returnNode);
-        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, setX, whileIfNode, xIncrement, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
                 new Pair<>(root, setX),
                 new Pair<>(setX, whileIfNode),
                 new Pair<>(whileIfNode, xIncrement),
                 new Pair<>(xIncrement, whileIfNode),
                 new Pair<>(whileIfNode, returnNode)
                 );
+
+        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
