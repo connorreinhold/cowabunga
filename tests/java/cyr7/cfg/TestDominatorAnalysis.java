@@ -182,6 +182,7 @@ public class TestDominatorAnalysis {
         CFGNode line3 = make.VarAssign("x", makeIR.IRConst(5), 
                 line4);
         line2.convertFromStub(line3Stub, line3);
+        //System.out.println(line3.out());
         CFGNode line1 = make.VarAssign("x", makeIR.IRConst(12), 
                 line2);
         CFGStartNode line0 = make.Start(line1);
