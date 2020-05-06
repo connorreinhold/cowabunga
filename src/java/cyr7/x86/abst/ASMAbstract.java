@@ -126,7 +126,7 @@ public enum ASMAbstract {
         return (1           // for when call saves pc onto the stack
             + 1             // we save rbp onto the stack
             + numberOfTemps // number of temps we push
-        ) % 2 == 0;
+        ) % 2 != 0;
     }
 
 }

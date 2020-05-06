@@ -52,7 +52,7 @@ public class ComplexTiler extends BasicTiler {
 
 
     private final Comparator<TilerData> byCost = (lhs, rhs) ->
-            lhs.tileCost == rhs.tileCost
+        lhs.tileCost == rhs.tileCost
             ? lhs.optimalInstructions.size() - rhs.optimalInstructions.size()
             : lhs.tileCost - rhs.tileCost;
 
@@ -69,10 +69,11 @@ public class ComplexTiler extends BasicTiler {
     }
 
     public ComplexTiler(IdGenerator generator, int numRetValues,
-            String returnLbl, Optional<ASMTempArg> additionalRetValAddress,
-            boolean stack16ByteAligned) {
+                        String returnLbl,
+                        Optional<ASMTempArg> additionalRetValAddress,
+                        boolean stack16ByteAligned) {
         super(generator, numRetValues, returnLbl, additionalRetValAddress,
-                stack16ByteAligned);
+            stack16ByteAligned);
 
         disableBasicTilerMemoizeResults();
     }
@@ -98,9 +99,12 @@ public class ComplexTiler extends BasicTiler {
                 new ConstTimesTemp_PlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new TempPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
                 new ConstPlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
-                new Temp_PlusConstTimesTemp_PlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
-                new ConstTimesTemp_PlusTemp_PlusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
-                new Const_PlusConstTimesTemp_PlusTemp(false).match(n, this, make).ifPresent(possibleTilings::add);
+                new Temp_PlusConstTimesTemp_PlusOffset(false).match(n, this,
+                    make).ifPresent(possibleTilings::add);
+                new ConstTimesTemp_PlusTemp_PlusOffset(false).match(n, this,
+                    make).ifPresent(possibleTilings::add);
+                new Const_PlusConstTimesTemp_PlusTemp(false).match(n, this,
+                    make).ifPresent(possibleTilings::add);
                 break;
             case SUB:
                 new ConstTimesTemp_MinusOffset(false).match(n, this, make).ifPresent(possibleTilings::add);
@@ -108,7 +112,7 @@ public class ComplexTiler extends BasicTiler {
                 break;
             case LSHIFT:
                 new Temp_LShiftConst(generator, false).match(n, this, make)
-                        .ifPresent(possibleTilings::add);
+                    .ifPresent(possibleTilings::add);
                 break;
             default: {
                 break;
@@ -125,7 +129,7 @@ public class ComplexTiler extends BasicTiler {
     @Override
     public TilerData visit(IRCall n) {
         throw new UnsupportedOperationException(
-                "Call is not a valid node at this stage.");
+            "Call is not a valid node at this stage.");
     }
 
     @Override
@@ -139,7 +143,7 @@ public class ComplexTiler extends BasicTiler {
     @Override
     public TilerData visit(IRESeq n) {
         throw new UnsupportedOperationException(
-                "ESeq is not a valid node at this stage.");
+            "ESeq is not a valid node at this stage.");
     }
 
     @Override
@@ -156,10 +160,12 @@ public class ComplexTiler extends BasicTiler {
                     new ConstTimesTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
                     new ConstTimes_TempPlusOffset(true).match(exprBinOp, this,
                         make).ifPresent(possibleTilings::add);
-                    new ConstTimes_TempMinusOffset(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    new ConstTimes_TempMinusOffset(true).match(exprBinOp,
+                        this, make).ifPresent(possibleTilings::add);
                     break;
                 case ADD:
-                    new ConstTimesTemp_PlusTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
+                    new ConstTimesTemp_PlusTemp(true).match(exprBinOp, this,
+                        make).ifPresent(possibleTilings::add);
                     new ConstTimesTemp_PlusOffset(true).match(exprBinOp, this,
                         make).ifPresent(possibleTilings::add);
                     new TempPlusTemp(true).match(exprBinOp, this, make).ifPresent(possibleTilings::add);
@@ -175,7 +181,7 @@ public class ComplexTiler extends BasicTiler {
                     break;
                 case LSHIFT:
                     new Temp_LShiftConst(generator, true).match(exprBinOp, this,
-                            make).ifPresent(possibleTilings::add);
+                        make).ifPresent(possibleTilings::add);
                     break;
                 default:
                     break;
@@ -214,7 +220,7 @@ public class ComplexTiler extends BasicTiler {
         List<ASMArg> arguments = new ArrayList<>();
         List<ASMLine> instructions = new ArrayList<>();
         int cost = 1;
-        for (IRExpr a: n.args()) {
+        for (IRExpr a : n.args()) {
             TilerData argTile = a.accept(this);
             cost += argTile.tileCost;
             if (a instanceof IRConst) {
@@ -227,9 +233,14 @@ public class ComplexTiler extends BasicTiler {
         TilerData targetTile = n.target().accept(this);
         cost += targetTile.tileCost;
         instructions.addAll(targetTile.optimalInstructions);
-        possibleTilings.add(CallInstructionGenerator.generate(n, cost,
-                targetTile.result.get(), n.collectors(),
-                arguments, instructions, this.stack16ByteAligned));
+        possibleTilings.add(new CallInstructionGenerator(
+            n,
+            cost,
+            targetTile.result.get(),
+            n.collectors(),
+            arguments,
+            instructions,
+            stack16ByteAligned).generate());
 
 
         possibleTilings.add(super.visit(n));
@@ -248,19 +259,19 @@ public class ComplexTiler extends BasicTiler {
     @Override
     public TilerData visit(IRCompUnit n) {
         throw new UnsupportedOperationException(
-                "CompUnit cannot be tilied by the ComplexTiler.");
+            "CompUnit cannot be tilied by the ComplexTiler.");
     }
 
     @Override
     public TilerData visit(IRExp n) {
         throw new UnsupportedOperationException(
-                "Exp is not a valid node at the tiling stage.");
+            "Exp is not a valid node at the tiling stage.");
     }
 
     @Override
     public TilerData visit(IRFuncDecl n) {
         throw new UnsupportedOperationException(
-                "FuncDecl cannot be tiled by the ComplexTiler.");
+            "FuncDecl cannot be tiled by the ComplexTiler.");
     }
 
     @Override
@@ -302,8 +313,8 @@ public class ComplexTiler extends BasicTiler {
         instructions.addAll(target.optimalInstructions);
         final int cost = 1 + target.tileCost + source.tileCost;
         possibleTilings.add(MoveInstructionGenerator.generate(n, cost,
-                targetArg, sourceArg,
-                numRetValues, generator, additionalRetValAddress, instructions));
+            targetArg, sourceArg,
+            numRetValues, generator, additionalRetValAddress, instructions));
 
         possibleTilings.add(super.visit(n));
 
