@@ -52,7 +52,22 @@ class TestCopyPropagation {
 
         CFGStartNode start = new CopyPropagationOptimization().optimize(root);
 
-        System.out.println(start);
+        CFGNode zIsDoubleY = cfg.VarAssign("z",
+                ir.IRBinOp(OpType.ADD, ir.IRTemp("y"), ir.IRTemp("y")),
+                returnNode);
+
+        Set<CFGNode> expectedNodes = Set.of(root, firstAssign,
+                deadAssign, zIsDoubleY, returnNode);
+
+        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
+                new Pair<>(root, firstAssign),
+                new Pair<>(firstAssign, deadAssign),
+                new Pair<>(deadAssign, zIsDoubleY),
+                new Pair<>(zIsDoubleY, returnNode));
+
+        assertTrue(IrCfgTestUtil.assertEqualGraphs(
+                            start, expectedNodes, expectedEdges));
+
     }
 
 
