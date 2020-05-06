@@ -16,6 +16,10 @@ public class ASMArgFactory {
         return new ASMTempArg(t, size);
     }
 
+    public ASMTempArg temp(String t) {
+        return temp(t, ASMRegSize.QWORD);
+    }
+
     public ASMConstArg constant(long n) {
         return new ASMConstArg(n);
     }
@@ -31,6 +35,18 @@ public class ASMArgFactory {
 
     public ASMMemArg mem(ASMAddrExpr addr) {
         return new ASMMemArg(addr);
+    }
+
+    public ASMMemArg mem(ASMTempRegArg base) {
+        return mem(addr(Optional.of(base), ScaleValues.ONE, Optional.empty(), 0));
+    }
+
+    public ASMMemArg mem(ASMTempRegArg base, ASMTempRegArg index) {
+        return mem(addr(Optional.of(base), ScaleValues.ONE, Optional.of(index), 0));
+    }
+
+    public ASMMemArg mem(ASMTempRegArg base, long displacement) {
+        return mem(addr(Optional.of(base), ScaleValues.ONE, Optional.empty(), displacement));
     }
 
 }

@@ -1,5 +1,6 @@
 package cyr7.x86.asm;
 
+import cyr7.x86.visitor.ASMArgVisitor;
 import cyr7.x86.visitor.AbstractASMVisitor;
 
 import java.util.Objects;
@@ -24,6 +25,11 @@ public final class ASMLabelArg implements ASMArg {
     @Override
     public <R> R accept(AbstractASMVisitor<R> visitor) {
         return visitor.visit(this);
+    }
+
+    @Override
+    public <R> R accept(ASMArgVisitor<R> visitor) {
+        return visitor.accept(this);
     }
 
     @Override
