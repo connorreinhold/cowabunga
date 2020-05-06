@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.dfa.CCPAnalysis;
 import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
+import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
@@ -56,10 +57,12 @@ public class CCPOptimization {
     private static class CcpCfgTransformationVisitor implements IrCFGVisitor<CFGNode> {
 
         private final Map<CFGNode, LatticeElement> incomingLattice;
+        private final Map<CFGNode, Map<CFGNode, LatticeElement>> outgoingLattice;
 
-        public CcpCfgTransformationVisitor(Map<CFGNode, LatticeElement> ccpResult) {
+        public CcpCfgTransformationVisitor(DfaResult<LatticeElement> ccpResult) {
             // May be it is more helpful to know both the outs and ins of nodes.
-            this.incomingLattice = ccpResult;
+            this.incomingLattice = ccpResult.in();
+            this.outgoingLattice = ccpResult.out();
         }
 
         @Override
