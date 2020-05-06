@@ -1,6 +1,6 @@
 package cyr7.cli;
 
-public enum Optimizations {
+public enum Optimization {
     CF,
     REG,
     MC,
@@ -53,9 +53,9 @@ public enum Optimizations {
         }
     }
 
-    public static Optimizations parse(String s) {
+    public static Optimization parse(String s) {
         try {
-            return Optimizations.valueOf(s.toUpperCase());
+            return Optimization.valueOf(s.toUpperCase());
         } catch (IllegalArgumentException e) {
             return UNSUPPORTED;
         }

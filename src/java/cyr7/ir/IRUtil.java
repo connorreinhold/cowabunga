@@ -111,6 +111,24 @@ public class IRUtil {
         printer.flush();
     }
 
+    public static void initialIRGen(
+            Reader reader,
+            Writer writer,
+            String filename,
+            IxiFileOpener fileOpener) throws Exception {
+
+        IRCompUnit lowered = generateInitialIR(
+                reader,
+                filename,
+                fileOpener,
+                new DefaultIdGenerator());
+
+        SExpPrinter printer
+                = new CodeWriterSExpPrinter(new PrintWriter(writer));
+        lowered.printSExp(printer);
+        printer.flush();
+    }
+
     public static void irRun(
         Reader reader,
         Writer writer,
@@ -137,6 +155,21 @@ public class IRUtil {
         node.printSExp(printer);
         printer.flush();
         return writer.toString();
+    }
+
+    public static IRCompUnit generateInitialIR(
+            Reader reader,
+            String filename,
+            IxiFileOpener fileOpener,
+            IdGenerator generator) throws Exception {
+
+        Node result = ParserUtil.parseNode(reader, filename, false);
+        TypeCheckUtil.typeCheck(result, fileOpener);
+
+        IRCompUnit compUnit = (IRCompUnit)
+                result.accept(new ASTToIRVisitor(generator)).assertSecond();
+
+        return compUnit;
     }
 
     public static IRCompUnit generateIR(
