@@ -121,7 +121,7 @@ public class CCPOptimization {
             final var lattice = incomingLattices.get(n);
             if (lattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                n.out().get(0).in().remove(n);
+                n.outNode().in().remove(n);
                 return n;
             }
             n.value = IRTempToConstant.replace(n.value, lattice);
@@ -133,7 +133,7 @@ public class CCPOptimization {
             final var lattice = incomingLattices.get(n);
             if (lattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                n.out().get(0).in().remove(n);
+                n.outNode().in().remove(n);
                 return n;
             }
             n.value = IRTempToConstant.replace(n.value, lattice);
@@ -151,7 +151,7 @@ public class CCPOptimization {
             final var lattice = incomingLattices.get(n);
             if (lattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                n.out().get(0).in().remove(n);
+                n.outNode().in().remove(n);
                 return n;
             }
             return n;

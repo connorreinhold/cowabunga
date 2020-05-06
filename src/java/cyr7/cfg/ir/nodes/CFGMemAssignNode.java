@@ -27,6 +27,10 @@ public class CFGMemAssignNode extends CFGNode {
         this.updateIns();
     }
 
+    public CFGNode outNode() {
+        return out;
+    }
+
     @Override
     public List<CFGNode> out() {
         return List.of(this.out);

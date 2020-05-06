@@ -105,11 +105,7 @@ public class DeadCodeElimOptimization {
                         incoming.replaceOutEdge(n, out);
                     }
                 }
-
-                for (CFGNode out: n.out()) {
-                    out.in().remove(n);
-                }
-
+                n.outNode().in().remove(n);
                 return n;
             } else {
                 return n;

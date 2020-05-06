@@ -8,6 +8,7 @@ import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGStartNode extends CFGNode {
+
     private CFGNode out;
 
     public CFGStartNode(Location location, CFGNode out) {
@@ -19,6 +20,10 @@ public class CFGStartNode extends CFGNode {
     @Override
     public List<CFGNode> out() {
         return List.of(this.out);
+    }
+
+    public CFGNode outNode() {
+        return out;
     }
 
     @Override
