@@ -2,9 +2,11 @@ package cyr7.cfg.ir.opt;
 
 import java.util.ArrayDeque;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.dfa.CCPAnalysis;
 import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
@@ -18,6 +20,8 @@ import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
+import cyr7.ir.nodes.IRCallStmt;
+import cyr7.ir.nodes.IRExpr;
 
 public class CCPOptimization {
 
@@ -51,16 +55,23 @@ public class CCPOptimization {
 
     private static class CcpCfgTransformationVisitor implements IrCFGVisitor<CFGNode> {
 
-        private final Map<CFGNode, LatticeElement> result;
+        private final Map<CFGNode, LatticeElement> incomingLattice;
 
         public CcpCfgTransformationVisitor(Map<CFGNode, LatticeElement> ccpResult) {
-            this.result = ccpResult;
+            // May be it is more helpful to know both the outs and ins of nodes.
+            this.incomingLattice = ccpResult;
         }
 
         @Override
         public CFGNode visit(CFGCallNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            final var lattice = incomingLattice.get(n);
+            final IRCallStmt call = n.call;
+            List<IRExpr> updatedArgs = call.args().stream().map(arg -> {
+                return IRTempToConstant.replace(arg, lattice);
+            }).collect(Collectors.toList());
+
+            n.call = new IRCallStmt(n.location(), call.collectors(), call.target(), updatedArgs);
+            return n;
         }
 
         @Override
@@ -71,32 +82,32 @@ public class CCPOptimization {
 
         @Override
         public CFGNode visit(CFGVarAssignNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            final var lattice = incomingLattice.get(n);
+            n.value = IRTempToConstant.replace(n.value, lattice);
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGMemAssignNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            final var lattice = incomingLattice.get(n);
+            n.value = IRTempToConstant.replace(n.value, lattice);
+            n.target = IRTempToConstant.replace(n.target, lattice);
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGReturnNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGStartNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGSelfLoopNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
     }
