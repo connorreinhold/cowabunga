@@ -173,9 +173,11 @@ public class IrCfgTestUtil {
             for (CFGNode outNode: node.out()) {
                 edges.add(new CFGPair(node, outNode));
             }
-            if (!visited.contains(node)) {
-                visited.add(node);
-                list.addAll(node.out());
+            visited.add(node);
+            for (CFGNode out: node.out()) {
+                if (!visited.contains(out)) {
+                    list.add(out);
+                }
             }
         }
         return edges;
