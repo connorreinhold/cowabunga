@@ -4,6 +4,7 @@ import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 
 public interface BackwardTransferFunction<L> {
@@ -17,5 +18,7 @@ public interface BackwardTransferFunction<L> {
     L transfer(CFGReturnNode n, L out);
 
     L transfer(CFGVarAssignNode n, L out);
+
+    L transfer(CFGSelfLoopNode n, L out);
 
 }

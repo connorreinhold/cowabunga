@@ -14,6 +14,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
@@ -114,7 +115,7 @@ public class FlattenCFGVisitor
     private final Queue<Pair<CFGNode, String>> trueBranches;
 
     /**
-     * The previous IRStmt added to the list of statements when traversing 
+     * The previous IRStmt added to the list of statements when traversing
      * through CFG sub-graph.
      */
     private IRStmtWrapper predecessor;
@@ -208,6 +209,7 @@ public class FlattenCFGVisitor
     private void appendStmt(CFGNode n, IRStmtWrapper stmt) {
         final var wrappedStmt = stmt;
         this.stmts.add(wrappedStmt);
+        this.wrapStmt().label.ifPresent(lbl -> this.cfgNodeToLabels.put(n, lbl.name()));
         this.cfgNodeToIRStmt.put(n, wrappedStmt);
     }
 
@@ -318,6 +320,19 @@ public class FlattenCFGVisitor
                 }
             }
             return Optional.empty();
+        }
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<CFGNode> visit(CFGSelfLoopNode n) {
+        if (!this.performProcessIfVisited(n)) {
+            final var make = this.createMake(n);
+            final var labelString = generator.newLabel();
+            final var stmt = this.wrapStmt(make.IRJump(make.IRName(labelString)));
+            stmt.setLabel(labelString);
+            this.appendStmt(n, stmt);
+            this.epilogueProcess(n, stmt);
         }
         return Optional.empty();
     }

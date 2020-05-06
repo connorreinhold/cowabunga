@@ -17,6 +17,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
@@ -115,6 +116,11 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(CFGStartNode n) {
+        return n;
+    }
+
+    @Override
+    public CFGNode visit(CFGSelfLoopNode n) {
         return n;
     }
 

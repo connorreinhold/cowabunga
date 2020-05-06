@@ -10,15 +10,14 @@ import cyr7.cfg.ir.dfa.CopyPropagationAnalysis.CopyPropLattice;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.nodes.IRTemp;
 
-public class CopyPropagationAnalysis implements
+public enum CopyPropagationAnalysis implements
         ForwardDataflowAnalysis<CopyPropLattice> {
-
-    public final static CopyPropagationAnalysis INSTANCE
-            = new CopyPropagationAnalysis();
+    INSTANCE;
 
     @Override
     public CopyPropLattice topValue() {
@@ -78,6 +77,12 @@ public class CopyPropagationAnalysis implements
                 }
 
                 return new CopyPropLattice(updated);
+            }
+
+            @Override
+            public CopyPropLattice transfer(CFGSelfLoopNode n,
+                    CopyPropLattice in) {
+                return in.clone();
             }
         };
     }

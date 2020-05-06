@@ -11,6 +11,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
@@ -89,14 +90,8 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
                     // indicates an empty loop coming from the parent node.
                     if (targetNode == stub) {
                         // Infinite loop...
-                        var stubNodeTrue = this.createStubNode();
-                        var stubNodeFalse = this.createStubNode();
-                        var loopNode = new CFGIfNode(targetNode.location(),
-                                stubNodeTrue, stubNodeFalse,
-                                new IRConst(targetNode.location(), 0));
-                        loopNode.replaceOutEdge(stubNodeTrue, loopNode);
-                        loopNode.replaceOutEdge(stubNodeFalse, loopNode);
-                        incoming.replaceOutEdge(stub, loopNode);
+                        var selfLoop = new CFGSelfLoopNode();
+                        incoming.replaceOutEdge(stub, selfLoop);
                     } else {
                         incoming.replaceOutEdge(stub, targetNode);
                     }

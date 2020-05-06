@@ -10,6 +10,7 @@ import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.visit.IRExprVarsVisitor;
 import cyr7.util.Sets;
@@ -105,6 +106,13 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
             Set<String> used = n.value.accept(tempVisitor);
             Set <String> defined = Set.of(n.variable);
             return transfer(used, out.liveVars, defined);
+        }
+
+        @Override
+        public IrLiveVarLattice transfer(CFGSelfLoopNode n,
+                IrLiveVarLattice out) {
+            return transfer(Collections.emptySet(),
+                    out.liveVars, Collections.emptySet());
         }
     }
 

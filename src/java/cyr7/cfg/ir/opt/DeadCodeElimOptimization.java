@@ -15,6 +15,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
@@ -109,20 +110,22 @@ public class DeadCodeElimOptimization {
 
         @Override
         public CFGNode visit(CFGMemAssignNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGReturnNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGStartNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            return n;
+        }
+
+        @Override
+        public CFGNode visit(CFGSelfLoopNode n) {
+            return n;
         }
     }
 
