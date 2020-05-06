@@ -24,36 +24,29 @@ public class IrCfgTestUtil {
      * A commutative version of Pair, i.e. ordering of the values does
      * not matter.
      */
-    private static class CommutativePair<V> extends Pair<V, V> {
+    private static class CommutativePair extends Pair<CFGNode, CFGNode> {
 
         private Class<?> classType;
 
-        public CommutativePair(V p1, V p2) {
+        public CommutativePair(CFGNode p1, CFGNode p2) {
             super(p1, p2);
             this.classType = p1.getClass();
         }
 
         @Override
         public int hashCode() {
-            return new Pair<V, V>(this.part1, this.part2).hashCode()
-                    ^ (new Pair<V, V>(this.part2, this.part1).hashCode() + 23457);
+            return new Pair<>(this.part1, this.part2).hashCode()
+                    ^ (new Pair<>(this.part2, this.part1).hashCode() + 23457);
         }
 
         @Override
         public boolean equals(Object o) {
-            if (this.isInstanceOf(o)) {
-                CommutativePair<?> pair = (CommutativePair<?>)o;
-                return (pair.part1.equals(this.part1) && pair.part2.equals(this.part2))
-                    || (pair.part1.equals(this.part2) && pair.part2.equals(this.part1));
-            }
-            return false;
-        }
-
-        private boolean isInstanceOf(Object o) {
             if (o instanceof CommutativePair) {
-                CommutativePair<?> pair = (CommutativePair<?>)o;
-                return pair.part1.getClass().equals(classType)
-                    && pair.part2.getClass().equals(classType);
+                CommutativePair pair = (CommutativePair)o;
+                CFGNodeEqualVisitor equalsPart1 = new CFGNodeEqualVisitor(this.part1);
+                CFGNodeEqualVisitor equalsPart2 = new CFGNodeEqualVisitor(this.part2);
+                return (pair.part1.accept(equalsPart1) && pair.part2.accept(equalsPart2))
+                    || (pair.part1.accept(equalsPart2) && pair.part2.accept(equalsPart1));
             }
             return false;
         }
@@ -72,10 +65,10 @@ public class IrCfgTestUtil {
     public static boolean assertEqualGraphs(CFGNode start,
             Set<CFGNode> expectedNodes, Set<Pair<CFGNode, CFGNode>> expectedEdges) {
         Set<CFGNode> actualNodes = getAllNodes(start);
-        Set<CommutativePair<CFGNode>> actualEdges = getAllEdges(start);
+        Set<CommutativePair> actualEdges = getAllEdges(start);
 
         boolean sameEdges = expectedEdges.stream().map(pair ->
-            new CommutativePair<>(pair.part1(), pair.part2()))
+            new CommutativePair(pair.part1(), pair.part2()))
         .collect(Collectors.toSet()).equals(actualEdges);
 
         for (CFGNode node: expectedNodes) {
@@ -201,15 +194,15 @@ public class IrCfgTestUtil {
     /**
      * Returns a set of all edges in a CFG graph.
      */
-    private static Set<CommutativePair<CFGNode>> getAllEdges(CFGNode start) {
+    private static Set<CommutativePair> getAllEdges(CFGNode start) {
         Set<CFGNode> visited = new HashSet<>();
-        Set<CommutativePair<CFGNode>> edges = new HashSet<>();
+        Set<CommutativePair> edges = new HashSet<>();
         Queue<CFGNode> list = new LinkedList<>();
         list.add(start);
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
             for (CFGNode outNode: node.out()) {
-                edges.add(new CommutativePair<>(node, outNode));
+                edges.add(new CommutativePair(node, outNode));
             }
             if (!visited.contains(node)) {
                 visited.add(node);
