@@ -79,7 +79,7 @@ class TestCopyPropagation {
      * } else {
      *    y = x
      * }
-     * println(x) // Should change here.
+     * println(y) // Should change here.
      * return
      */
     @Test

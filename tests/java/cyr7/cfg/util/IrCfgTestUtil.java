@@ -156,6 +156,7 @@ public class IrCfgTestUtil {
             if (!expectedNodes.stream().anyMatch(node -> node.accept(equalsVisitor)))
                 sameNodes = false;
         }
+
         return sameEdges && sameNodes;
     }
 
