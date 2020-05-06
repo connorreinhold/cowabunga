@@ -92,15 +92,11 @@ public class DeadCodeElimOptimization {
             // it is being assigned to a return value temp.
             Set<String> defined = this.result.get(n).liveVars;
             if (!this.isAReturn(n.variable)
-                    && defined.contains(n.variable)) {
+                    && !defined.contains(n.variable)) {
                 // Remove n from the graph.
                 for (CFGNode incoming: n.in()) {
                     for (CFGNode out: n.out()) {
-                        if (!incoming.out().contains(out)
-                            && !out.in().contains(incoming)) {
-                            incoming.out().add(out);
-                            out.in().add(incoming);
-                        }
+                        incoming.replaceOutEdge(n, out);
                     }
                 }
                 return n;

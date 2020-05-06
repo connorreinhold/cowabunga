@@ -1,5 +1,7 @@
 package cyr7.cfg.ir;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -7,19 +9,15 @@ import org.junit.jupiter.api.Test;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
+import cyr7.cfg.util.IrCfgTestUtil;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRTemp;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 import polyglot.util.Pair;
 
 class TestDeadCodeRemover {
-
-    private CFGStubNode makeStub() {
-        return new CFGStubNode();
-    }
 
     @Test
     void test() {
@@ -33,10 +31,14 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        Set<CFGNode> expected = Set.of(root, firstAssign, returnNode);
-        Set<Pair<CFGNode, CFGNode>> edges = Set.of(
+        Set<CFGNode> expectedNodes = Set.of(root, firstAssign, returnNode);
+        Set<Pair<CFGNode, CFGNode>> expectedEdges = Set.of(
                 new Pair<>(root, firstAssign),
                 new Pair<>(firstAssign, returnNode));
+
+        assertTrue(IrCfgTestUtil.assertEqualGraphs(
+                            start, expectedNodes, expectedEdges));
+
     }
 
 }

@@ -94,11 +94,11 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
                         var loopNode = new CFGIfNode(targetNode.location(),
                                 stubNodeTrue, stubNodeFalse,
                                 new IRConst(targetNode.location(), 0));
-                        loopNode.convertFromStub(stubNodeTrue, loopNode);
-                        loopNode.convertFromStub(stubNodeFalse, loopNode);
-                        incoming.convertFromStub(stub, loopNode);
+                        loopNode.replaceOutEdge(stubNodeTrue, loopNode);
+                        loopNode.replaceOutEdge(stubNodeFalse, loopNode);
+                        incoming.replaceOutEdge(stub, loopNode);
                     } else {
-                        incoming.convertFromStub(stub, targetNode);
+                        incoming.replaceOutEdge(stub, targetNode);
                     }
                 }
 

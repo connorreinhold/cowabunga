@@ -2,11 +2,10 @@ package cyr7.cfg.ir.nodes;
 
 import java.util.List;
 
-import cyr7.ir.nodes.IRExpr;
-
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
+import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGVarAssignNode extends CFGNode {
@@ -35,13 +34,13 @@ public class CFGVarAssignNode extends CFGNode {
     }
 
     @Override
-    public void convertFromStub(CFGStubNode stub, CFGNode n) {
-        if (outNode == stub) {
+    public void replaceOutEdge(CFGNode previous, CFGNode n) {
+        if (outNode == previous) {
             this.outNode = n;
             this.updateIns();
         } else {
             throw new UnsupportedOperationException(
-                    "Cannot change out node unless it was originally a stub node.");
+                    "Cannot replace node arbitrarily.");
         }
     }
 

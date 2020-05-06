@@ -24,7 +24,7 @@ public class CFGStubNode extends CFGNode {
     }
 
     @Override
-    public void convertFromStub(CFGStubNode stub, CFGNode n) {
+    public void replaceOutEdge(CFGNode stub, CFGNode n) {
         throw new UnsupportedOperationException("Cannot convert in stub node");
     }
 
