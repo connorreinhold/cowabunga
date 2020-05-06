@@ -20,7 +20,7 @@ import java.util.Set;
 /**
  * Utility class for parsing mangled names
  */
-public enum MangledNameParser {
+enum MangledNameParser {
     ;
 
     public static Optional<FunctionType> parseFunctionType(String mangledName) {

@@ -30,7 +30,7 @@ public enum ASMAbstract {
         IdGenerator generator,
         TilerFactory tilerFactory) {
 
-        String returnLbl = "end_" + funcDecl.name();
+        String returnLabel = ASMConstants.returnLabel(funcDecl.name());
 
         List<ASMLine> body = new ArrayList<>();
 
@@ -62,14 +62,14 @@ public enum ASMAbstract {
         MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
             generator,
             funcDecl.numOfReturnValues(),
-            returnLbl,
+            returnLabel,
             addrOfOverspillRetValues,
             true);
         body.addAll(funcDecl.body().accept(tiler).optimalInstructions);
 
         // add return label
 
-        body.add(new ASMLabel(returnLbl));
+        body.add(new ASMLabel(returnLabel));
 
         // move callee saved registers out of temps
 

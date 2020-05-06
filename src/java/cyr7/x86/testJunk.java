@@ -4,17 +4,26 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
+import com.sun.tools.attach.AgentInitializationException;
+import cyr7.cfg.asm.reg.ASMRegAllocGenerator;
+import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
 import cyr7.ir.IRUtil.LowerConfiguration;
+import cyr7.ir.IdGenerator;
+import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.typecheck.IxiFileOpener;
+import cyr7.x86.abst.ASMAbstract;
 import cyr7.x86.asm.ASMLine;
+import cyr7.x86.asm.ASMReg;
+import cyr7.x86.tiler.ComplexTiler;
 
 public class testJunk {
+
     public static void main(String[] args) throws Exception {
         String fileName = "testJunk.xi";
         LowerConfiguration lowerConfiguration = new LowerConfiguration(true, true);
@@ -31,18 +40,10 @@ public class testJunk {
             boolean isIXI, 
             IxiFileOpener fileOpener,
             LowerConfiguration lowerConfiguration) throws Exception {
-        
-        boolean pDebug = false;
-        
-        //StringWriter hoo = new StringWriter();
-        //IRUtil.irGen(reader, hoo, filename, fileOpener, lowerConfiguration);
-        
-        if (pDebug) {
-            ASMUtil.printDebugASM(
-                    reader, filename, fileOpener, lowerConfiguration);
-        } else {
-            List<ASMLine> lines = ASMUtil.generateAbstractASM(
-                    reader, filename, fileOpener, lowerConfiguration);
-        }
+        IdGenerator idGenerator = new DefaultIdGenerator();
+        IRCompUnit compUnit = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
+        ASMRegAllocGenerator asmGenerator = new ASMRegAllocGenerator(ComplexTiler::new, idGenerator);
+        System.out.println(asmGenerator.generate(compUnit));
     }
+
 }

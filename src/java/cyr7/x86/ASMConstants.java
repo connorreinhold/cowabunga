@@ -47,4 +47,8 @@ public class ASMConstants {
         ASMReg.R11
     };
 
+    public static String returnLabel(String mangledName) {
+        return "end_" + mangledName;
+    }
+
 }

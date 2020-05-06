@@ -12,6 +12,7 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
 import polyglot.util.Pair;
 
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -47,6 +48,10 @@ public final class CFGUtil {
                 new DefaultIdGenerator());
         Map<String, CFGNode> result = CFGConstructor.constructCFG(lowered);
         outputDotForFunctionIR(result.get(functionName), writer);
+    }
+
+    public static void printDotForFunctionIR(CFGNode node) {
+        outputDotForFunctionIR(node, new OutputStreamWriter(System.out));
     }
 
     public static void outputDotForFunctionIR(CFGNode node, Writer writer) {

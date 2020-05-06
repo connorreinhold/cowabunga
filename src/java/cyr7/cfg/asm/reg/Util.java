@@ -8,7 +8,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 import java.util.Collections;
 import java.util.Set;
 
-public final class Util {
+final class Util {
 
     public static Set<ASMTempRegArg> getAllArgs(ASMInstr instr) {
         return instr.args.stream()

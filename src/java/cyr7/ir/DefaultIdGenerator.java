@@ -23,6 +23,11 @@ public final class DefaultIdGenerator implements IdGenerator {
     }
 
     @Override
+    public String newTemp(String description) {
+        return String.format("_t_" + description + "_%d", (tempCounter++));
+    }
+
+    @Override
     public String retTemp(int number) {
         return Configuration.ABSTRACT_RET_PREFIX + number;
     }

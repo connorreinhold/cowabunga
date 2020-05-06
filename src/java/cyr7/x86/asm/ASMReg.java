@@ -21,7 +21,7 @@ public enum ASMReg implements ASMTempRegArg {
     // https://en.wikipedia.org/wiki/FLAGS_register
     FLAGS,
 
-    AL, CL, DL, BL, // 8 bit registers
+    AL, CL, DL, BL, SPL, BPL, SIL, DIL, // 8 bit registers
 
     // Newer 8 bit registers
     R8B, R9B, R10B, R11B, R12B, R13B, R14B, R15B;
@@ -48,6 +48,28 @@ public enum ASMReg implements ASMTempRegArg {
                 return RBX;
             default:
                 return this;
+        }
+    }
+
+    public ASMReg correspondingByteReg() {
+        switch (this) {
+            case RAX: return AL;
+            case RCX: return CL;
+            case RDX: return DL;
+            case RBX: return BL;
+            case RSI: return SIL;
+            case RDI: return DIL;
+            case RSP: return SPL;
+            case RBP: return BPL;
+            case R8: return R8B;
+            case R9: return R9B;
+            case R10: return R10B;
+            case R11: return R11B;
+            case R12: return R12B;
+            case R13: return R13B;
+            case R14: return R14B;
+            case R15: return R15B;
+            default: throw new IllegalArgumentException();
         }
     }
 

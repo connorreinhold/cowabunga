@@ -1,15 +1,20 @@
 package cyr7.cfg.asm.reg;
 
+import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.asm.constructor.AsmCFGConstructor;
 import cyr7.cfg.asm.dfa.WorklistAnalysis;
 import cyr7.cfg.asm.nodes.AsmCFGNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
+import cyr7.ir.IdGenerator;
 import cyr7.util.Pair;
 import cyr7.util.Sets;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLine;
+import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
+import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.asm.ASMTempRegArg;
+import cyr7.x86.visitor.TempVisitor;
 
 import java.util.ArrayList;
 import java.util.Deque;
@@ -22,9 +27,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public final class RegisterAllocator {
+final class RegisterAllocator {
 
-    private final ASMReg[] availableRegisters = {
+    public static final ASMReg[] DEFAULT_AVAILABLE_REGISTERS = {
         ASMReg.RAX,
         ASMReg.RCX,
         ASMReg.RDX,
@@ -40,17 +45,37 @@ public final class RegisterAllocator {
         ASMReg.R15
     };
 
-    private final Set<ASMTempRegArg> precolored = Set.of(availableRegisters);
+    private final ASMReg[] availableRegisters;
+    private final Set<ASMTempRegArg> precolored;
+    private final int K;
+    private final IdGenerator generator;
 
-    private final int K = availableRegisters.length;
-
-    private final List<ASMLine> functionBody;
-
+    private ArrayList<ASMLine> functionBody;
     private final String mangledName;
 
-    public RegisterAllocator(List<ASMLine> functionBody, String mangledName) {
-        this.functionBody = new ArrayList<>(functionBody);
+    private SpillMemAllocator spillAllocator = new SpillMemAllocator();
+
+    public RegisterAllocator(
+        List<ASMLine> functionBody,
+        String mangledName,
+        ASMReg[] availableRegisters,
+        IdGenerator generator) {
+
+        ArrayList<ASMLine> augmentedFunctionBody = new ArrayList<>(functionBody);
+        augmentedFunctionBody.add(ASMLineFactory.instance.Ret());
+
+        this.availableRegisters = availableRegisters;
+        this.precolored = Set.of(availableRegisters);
+        this.K = availableRegisters.length;
+        this.generator = generator;
+        this.functionBody = augmentedFunctionBody;
         this.mangledName = mangledName;
+
+        init();
+    }
+
+    public RegisterAllocator(List<ASMLine> functionBody, String mangledName, IdGenerator generator) {
+        this(functionBody, mangledName, DEFAULT_AVAILABLE_REGISTERS, generator);
     }
 
     private final Worklists worklists = new Worklists();
@@ -62,12 +87,41 @@ public final class RegisterAllocator {
 
     private final Moves moves = new Moves(worklists.moves);
 
+    private final Alias alias = new Alias(coalescedNodes);
+
     private InterferenceGraph graph;
-    private Map<ASMTempRegArg, Integer> coloring;
+    private HashMap<ASMTempRegArg, Integer> coloring;
     private CoalescingHeuristic coalescingHeuristic;
 
+    // getters
+
+    public HashMap<ASMTempRegArg, Integer> coloring() {
+        return coloring;
+    }
+
+    public ASMReg[] registers() {
+        return availableRegisters;
+    }
+
+    public ArrayList<ASMLine> program() {
+        return functionBody;
+    }
+
+    public int allocatedTemps() {
+        return spillAllocator.allocatedTemps();
+    }
+
+    public HashSet<Integer> coalescedMoves() {
+        return moves.coalesced;
+    }
+
+    public Alias alias() {
+        return alias;
+    }
+
+    // run
+
     public void run() {
-        initColoring();
         build();
         makeWorklist();
         do {
@@ -93,11 +147,20 @@ public final class RegisterAllocator {
         }
     }
 
-    private void initColoring() {
+    private void init() {
         coloring = new HashMap<>(K);
         for (int i = 0; i < availableRegisters.length; i++) {
             coloring.put(availableRegisters[i], i);
         }
+
+        worklists.initial.addAll(uniqueTemps(functionBody));
+    }
+
+    private List<ASMTempArg> uniqueTemps(List<ASMLine> lines) {
+        Set<ASMTempArg> temps = new HashSet<>();
+        var tempVisitor = new TempVisitor();
+        lines.forEach(l -> temps.addAll(l.accept(tempVisitor)));
+        return new ArrayList<>(temps);
     }
 
     // build
@@ -105,6 +168,7 @@ public final class RegisterAllocator {
     private void build() {
         AsmCFGConstructor constructor = new AsmCFGConstructor(functionBody);
         AsmCFGStartNode cfg = constructor.constructAsmCFG();
+        AsmCFGUtil.printDotForFunctionAsm(cfg);
         Map<AsmCFGNode, Set<ASMTempRegArg>> liveVariables
             = WorklistAnalysis.analyze(
             cfg,
@@ -122,7 +186,7 @@ public final class RegisterAllocator {
             }
         }
 
-        for (int move = functionBody.size() - 1; move >= 0; move++) {
+        for (int move = functionBody.size() - 1; move >= 0; move--) {
             if (functionBody.get(move) instanceof ASMInstr
                 && Util.isMoveInstruction((ASMInstr) functionBody.get(move))) {
 
@@ -255,7 +319,7 @@ public final class RegisterAllocator {
         }
 
         coalescedNodes.add(y);
-        graph.alias.put(y, x);
+        alias.make(y, x);
         moves.merge(x, y);
         enableMoves(Set.of(y));
 
@@ -286,10 +350,10 @@ public final class RegisterAllocator {
             ASMTempRegArg x = xy.left, y = xy.right;
 
             ASMTempRegArg v;
-            if (graph.getAlias(y).equals(graph.getAlias(u))) {
-                v = graph.getAlias(x);
+            if (alias.get(y).equals(alias.get(u))) {
+                v = alias.get(x);
             } else {
-                v = graph.getAlias(y);
+                v = alias.get(y);
             }
 
             boolean removed = moves.active.remove(move);
@@ -322,7 +386,7 @@ public final class RegisterAllocator {
                 .boxed().collect(Collectors.toSet());
 
             for (ASMTempRegArg w : graph.adjacent(n)) {
-                w = graph.getAlias(w);
+                w = alias.get(w);
                 if (coloredNodes.contains(w) || precolored.contains(w)) {
                     okColors.remove(coloring.get(w));
                 }
@@ -337,21 +401,36 @@ public final class RegisterAllocator {
         }
 
         for (ASMTempRegArg n : coalescedNodes) {
-            coloring.put(n, coloring.get(graph.getAlias(n)));
+            coloring.put(n, coloring.get(alias.get(n)));
         }
     }
 
-    // rewriteProgram
+    // rewrite program
 
     private void rewriteProgram() {
+        SpillProgramRewriter rewriter = new SpillProgramRewriter(
+            generator,
+            functionBody,
+            spilledNodes,
+            spillAllocator);
+        rewriter.run();
+        functionBody = rewriter.rewritten();
+
+        worklists.initial.clear();
+        worklists.initial.addAll(coloredNodes);
+        worklists.initial.addAll(coalescedNodes);
+        worklists.initial.addAll(spillAllocator.newTemps());
+
+        coloredNodes.clear();
+        coalescedNodes.clear();
     }
 
     // utils
 
     private Pair<ASMTempRegArg, ASMTempRegArg> getCopyRegs(int move) {
         ASMInstr moveInstr = (ASMInstr) functionBody.get(move);
-        ASMTempRegArg x = graph.getAlias((ASMTempRegArg) moveInstr.args.get(0));
-        ASMTempRegArg y = graph.getAlias((ASMTempRegArg) moveInstr.args.get(1));
+        ASMTempRegArg x = alias.get((ASMTempRegArg) moveInstr.args.get(0));
+        ASMTempRegArg y = alias.get((ASMTempRegArg) moveInstr.args.get(1));
         return new Pair<>(x, y);
     }
 

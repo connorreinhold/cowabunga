@@ -4,7 +4,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 
 import java.util.Set;
 
-public final class CoalescingHeuristic {
+final class CoalescingHeuristic {
 
     private final int K;
     private final Set<ASMTempRegArg> precolored;

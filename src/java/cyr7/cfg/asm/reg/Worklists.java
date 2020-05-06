@@ -4,7 +4,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 
 import java.util.LinkedList;
 
-public final class Worklists {
+final class Worklists {
 
     public final LinkedList<ASMTempRegArg> initial = new LinkedList<>();
     public final LinkedList<ASMTempRegArg> simplify = new LinkedList<>();

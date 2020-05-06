@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public final class Moves {
+final class Moves {
 
     private final Collection<Integer> worklistMoves;
 
@@ -18,10 +18,10 @@ public final class Moves {
         this.worklistMoves = worklistMoves;
     }
 
-    public final Set<Integer> active = new HashSet<>();
-    public final Set<Integer> frozen = new HashSet<>();
-    public final Set<Integer> constrained = new HashSet<>();
-    public final Set<Integer> coalesced = new HashSet<>();
+    public final HashSet<Integer> active = new HashSet<>();
+    public final HashSet<Integer> frozen = new HashSet<>();
+    public final HashSet<Integer> constrained = new HashSet<>();
+    public final HashSet<Integer> coalesced = new HashSet<>();
 
     private final Map<ASMTempRegArg, Set<Integer>> nodeToMoves = new HashMap<>();
 

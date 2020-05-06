@@ -10,10 +10,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-public final class InterferenceGraph {
+final class InterferenceGraph {
 
     private final Map<ASMTempRegArg, Set<ASMTempRegArg>> edges;
-    public final Map<ASMTempRegArg, ASMTempRegArg> alias;
 
     private final Set<ASMTempRegArg> precolored;
     private final Deque<ASMTempRegArg> selectStack;
@@ -25,7 +24,6 @@ public final class InterferenceGraph {
         Set<ASMTempRegArg> coalescedNodes) {
 
         this.edges = new HashMap<>();
-        this.alias = new HashMap<>();
 
         this.precolored = precolored;
         this.selectStack = selectStack;
@@ -65,14 +63,6 @@ public final class InterferenceGraph {
         boolean fromLeft = edges.getOrDefault(lhs, Collections.emptySet()).contains(rhs);
         assert fromLeft == edges.getOrDefault(rhs, Collections.emptySet()).contains(lhs);
         return fromLeft;
-    }
-
-    public ASMTempRegArg getAlias(ASMTempRegArg n) {
-        if (coalescedNodes.contains(n)) {
-            return getAlias(alias.get(n));
-        } else {
-            return n;
-        }
     }
 
 }

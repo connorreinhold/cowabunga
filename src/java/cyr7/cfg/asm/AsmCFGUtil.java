@@ -12,6 +12,7 @@ import polyglot.util.Pair;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -19,12 +20,16 @@ import java.util.List;
 
 public final class AsmCFGUtil {
 
+    public static void printDotForFunctionAsm(AsmCFGStartNode node) {
+        outputDotForFunctionAsm(node, new OutputStreamWriter(System.out));
+    }
+
     public static void outputDotForFunctionAsm(AsmCFGNode node, Writer writer) {
         PrintWriter printer = new PrintWriter(writer);
         AsmCFGDotVisitor dv = new AsmCFGDotVisitor();
         node.accept(dv);
         printer.println("digraph nfa {");
-        printer.println("    node [shape=circle]");
+        printer.println("    node [shape=oval]");
         for(String label: dv.getDotNodes()) {
             printer.println("    \""+label+"\"");
         }
