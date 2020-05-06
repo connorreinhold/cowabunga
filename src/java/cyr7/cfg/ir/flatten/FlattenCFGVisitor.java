@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.flatten;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -126,8 +127,8 @@ public class FlattenCFGVisitor
         this.visitedNodes = new HashSet<>();
         this.cfgNodeToLabels = new IdentityHashMap<>();
         this.cfgNodeToIRStmt = new IdentityHashMap<>();
-        this.trueBranches = new LinkedList<>();
-        this.stmts = new LinkedList<>();
+        this.trueBranches = new ArrayDeque<>();
+        this.stmts = new ArrayList<>();
         this.generator = new DefaultIdGenerator();
     }
 

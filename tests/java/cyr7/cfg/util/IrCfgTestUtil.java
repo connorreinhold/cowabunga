@@ -1,7 +1,8 @@
 package cyr7.cfg.util;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
@@ -41,7 +42,7 @@ public class IrCfgTestUtil {
     public static List<Pair<CFGNode, CFGNode>>
                 edgeList(Pair<CFGNode, CFGNode> ... edges) {
         var cloner = new CfgNodeClonerVisitor();
-        List<Pair<CFGNode, CFGNode>> edgeList = new LinkedList<>();
+        List<Pair<CFGNode, CFGNode>> edgeList = new ArrayList<>();
         for (Pair<CFGNode, CFGNode> e: edges) {
             edgeList.add(new Pair<>(e.part1().accept(cloner),
                                    e.part2().accept(cloner)));
@@ -232,7 +233,7 @@ public class IrCfgTestUtil {
      */
     private static Set<CFGNode> getAllNodes(CFGNode start) {
         Set<CFGNode> nodes = new HashSet<>();
-        Queue<CFGNode> list = new LinkedList<>();
+        Queue<CFGNode> list = new ArrayDeque<>();
         list.add(start);
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
@@ -249,8 +250,8 @@ public class IrCfgTestUtil {
      * Returns a list of all edges in a CFG graph.
      */
     private static List<CFGPair> getAllEdges(CFGNode start) {
-        List<CFGPair> edges = new LinkedList<>();
-        Queue<CFGNode> list = new LinkedList<>(getAllNodes(start));
+        List<CFGPair> edges = new ArrayList<>();
+        Queue<CFGNode> list = new ArrayDeque<>(getAllNodes(start));
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
             for (CFGNode outNode: node.out()) {

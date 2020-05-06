@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.constructor;
 
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -33,7 +34,7 @@ public class CFGUnreachableNodeCleaner {
     public CFGUnreachableNodeCleaner() {
         this.visitedNodes = new HashSet<>();
         this.reachableNodes = new HashSet<>();
-        this.nextNodesToCheck = new LinkedList<>();
+        this.nextNodesToCheck = new ArrayDeque<>();
     }
 
     /**

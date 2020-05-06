@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.dfa;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -18,7 +19,7 @@ public final class WorklistAnalysis {
         ForwardDataflowAnalysis<L> analysis) {
 
         Set<CFGNode> allNodes = getAllNodes(cfg);
-        Queue<CFGNode> worklist = new LinkedList<>(allNodes);
+        Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
 
         Map<CFGNode, L> in = new HashMap<>();
         Map<CFGNode, Map<CFGNode, L>> out = new HashMap<>();
@@ -61,7 +62,7 @@ public final class WorklistAnalysis {
             BackwardDataflowAnalysis<L> analysis) {
 
             Set<CFGNode> allNodes = getAllNodes(cfg);
-            Queue<CFGNode> worklist = new LinkedList<>(allNodes);
+            Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
 
             Map<CFGNode, L> in = new HashMap<>();
             Map<CFGNode, L> out = new HashMap<>();
@@ -100,7 +101,7 @@ public final class WorklistAnalysis {
 
     private static Set<CFGNode> getAllNodes(CFGStartNode cfg) {
         Set<CFGNode> nodes = new HashSet<>();
-        Queue<CFGNode> worklist = new LinkedList<>();
+        Queue<CFGNode> worklist = new ArrayDeque<>();
         worklist.add(cfg);
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();

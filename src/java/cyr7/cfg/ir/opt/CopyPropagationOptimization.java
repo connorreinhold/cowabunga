@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.opt;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -46,7 +47,7 @@ public class CopyPropagationOptimization {
                 WorklistAnalysis.analyze((CFGStartNode)start,
                 CopyPropagationAnalysis.INSTANCE));
         Set<CFGNode> visited = new HashSet<>();
-        Queue<CFGNode> nextNodes = new LinkedList<>();
+        Queue<CFGNode> nextNodes = new ArrayDeque<>();
         nextNodes.add(start);
 
         while (!nextNodes.isEmpty()) {

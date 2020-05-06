@@ -70,7 +70,7 @@ public final class HashMapStackContext implements Context {
      * Instantiate an empty context
      */
     public HashMapStackContext() {
-        stack = new LinkedList<>();
+        stack = new ArrayDeque<>();
         stack.add(new HashMap<>());
     }
 
