@@ -3,7 +3,6 @@ package cyr7.cfg.ir;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
@@ -43,8 +42,8 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        Set<CFGNode> expectedNodes = Set.of(root, firstAssign, returnNode);
-        Set<Pair<CFGNode, CFGNode>> expectedEdges = Set.of(
+        List<CFGNode> expectedNodes = List.of(root, firstAssign, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, firstAssign),
                 new Pair<>(firstAssign, returnNode));
 
@@ -54,8 +53,8 @@ class TestDeadCodeRemover {
 
         // Running it again should remove y = 15
         start = new DeadCodeElimOptimization().optimize(root);
-        expectedNodes = Set.of(root, returnNode);
-        expectedEdges = Set.of(new Pair<>(root, returnNode));
+        expectedNodes = List.of(root, returnNode);
+        expectedEdges = List.of(new Pair<>(root, returnNode));
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                 start, expectedNodes, expectedEdges));
     }
@@ -92,9 +91,9 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        Set<CFGNode> expectedNodes = Set.of(root, xAssign, ifNode,
+        List<CFGNode> expectedNodes = List.of(root, xAssign, ifNode,
                                             printNode, returnNode);
-        Set<Pair<CFGNode, CFGNode>> expectedEdges = Set.of(
+        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, xAssign),
                 new Pair<>(xAssign, ifNode),
                 new Pair<>(ifNode, printNode),
@@ -122,8 +121,8 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        Set<CFGNode> expectedNodes = Set.of(root, setRV, returnNode);
-        Set<Pair<CFGNode, CFGNode>> expectedEdges = Set.of(
+        List<CFGNode> expectedNodes = List.of(root, setRV, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, setRV),
                 new Pair<>(setRV, returnNode));
 
@@ -169,8 +168,8 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        Set<CFGNode> expectedNodes = Set.of(root, setX, whileIfNode, xIncrement, returnNode);
-        Set<Pair<CFGNode, CFGNode>> expectedEdges = Set.of(
+        List<CFGNode> expectedNodes = List.of(root, setX, whileIfNode, xIncrement, returnNode);
+        List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, setX),
                 new Pair<>(setX, whileIfNode),
                 new Pair<>(whileIfNode, xIncrement),
