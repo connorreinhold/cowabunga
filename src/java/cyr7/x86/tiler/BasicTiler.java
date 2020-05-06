@@ -205,17 +205,19 @@ public class BasicTiler implements MyIRVisitor<TilerData> {
             insn.addAll(tile.optimalInstructions);
         }
 
-        TilerData targetTile = n
-                .target()
-                .accept(this);
+        TilerData targetTile = n.target().accept(this);
 
         cost += targetTile.tileCost;
         insn.addAll(targetTile.optimalInstructions);
 
-        TilerData result = CallInstructionGenerator.generate(n, cost,
-                targetTile.result.get(),
-                n.collectors(), arguments,
-                insn, stack16ByteAligned);
+        TilerData result = new CallInstructionGenerator(
+            n,
+            cost,
+            targetTile.result.get(),
+            n.collectors(),
+            arguments,
+            insn,
+            stack16ByteAligned).generate();
         return this.setResult(n, result);
     }
 

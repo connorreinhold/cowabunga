@@ -173,11 +173,7 @@ public class IrCfgTestUtil {
             for (CFGNode outNode: node.out()) {
                 edges.add(new CFGPair(node, outNode));
             }
-            for (CFGNode out: node.out()) {
-                list.add(out);
-            }
         }
         return edges;
     }
-
 }

@@ -40,11 +40,17 @@ public class ASMTrivialArgTranslator {
 
     private final Map<String, Integer> tempToIndexMap;
 
-    public ASMTrivialArgTranslator(Map<String, Integer> tempToIndexMap) {
+    private final ASMInstr instr;
+
+    public ASMTrivialArgTranslator(
+        Map<String, Integer> tempToIndexMap,
+        ASMInstr instr) {
+
         this.tempToIndexMap = tempToIndexMap;
+        this.instr = instr;
     }
 
-    public List<ASMLine> translate(ASMInstr instr) {
+    public List<ASMLine> translate() {
         for (int i = 0; i < instr.args.size(); i++) {
             ASMArg arg = instr.args.get(i);
 
