@@ -9,8 +9,8 @@ import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGVarAssignNode extends CFGNode {
-    public final String variable;
-    public final IRExpr value;
+    public String variable;
+    public IRExpr value;
     private CFGNode outNode;
 
     public CFGVarAssignNode(Location location, String variable, IRExpr value,

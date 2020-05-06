@@ -12,7 +12,7 @@ public class CFGIfNode extends CFGNode {
 
     private CFGNode trueBranch;
     private CFGNode falseBranch;
-    public final IRExpr cond;
+    public IRExpr cond;
 
     public CFGIfNode(Location location, CFGNode trueBranch,
             CFGNode falseBranch, IRExpr cond) {

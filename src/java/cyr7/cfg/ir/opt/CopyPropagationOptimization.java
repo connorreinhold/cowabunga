@@ -18,7 +18,6 @@ import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
@@ -54,11 +53,6 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
 
             this.visited.add(next);
 
-            for (CFGNode in: next.in()) {
-                if (!this.visited.contains(in)) {
-                    this.nextNodes.add(in);
-                }
-            }
             for (CFGNode out: next.out()) {
                 if (!this.visited.contains(out)) {
                     this.nextNodes.add(out);
@@ -69,70 +63,51 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
         return startNode;
     }
 
-    private CFGNode replaceEdges(CFGNode original, CFGNode current, CFGStubNode ... stubs) {
-        for (CFGNode incoming: original.in()) {
-            incoming.out().remove(original);
-            incoming.out().add(current);
-        }
-        for (CFGStubNode stub: stubs) {
-            current.out().remove(stub);
-        }
-        for (CFGNode outgoing: original.out()) {
-            outgoing.in().remove(original);
-            outgoing.in().add(current);
-        }
-        return current;
-    }
-
     @Override
     public CFGNode visit(CFGCallNode n) {
-        var outEdge = n.out().get(0);
-        var lattice = this.result.get(n).get(outEdge);
+        final var outEdge = n.out().get(0);
+        final var lattice = this.result.get(n).get(outEdge);
 
-        List<IRExpr> args = n.call.args().stream().map(arg -> {
+        final List<IRExpr> args = n.call.args().stream().map(arg -> {
             return ReplaceTempIRVisitor.instance.replace(arg, lattice.copies);
         }).collect(Collectors.toList());
-        var call = new IRCallStmt(n.location(), n.call.collectors(),
+        final var call = new IRCallStmt(n.location(), n.call.collectors(),
                                                 n.call.target(), args);
-        var stub = new CFGStubNode();
-        var replacedCFGNode = new CFGCallNode(n.location(), call, stub);
-        return this.replaceEdges(n, replacedCFGNode, stub);
+        n.call = call;
+        return n;
     }
 
 
     @Override
     public CFGNode visit(CFGIfNode n) {
-        var outEdge = n.out().get(0);  // For copy propagation, true and false are the same.
-        var lattice = this.result.get(n).get(outEdge);
+        final var outEdge = n.out().get(0);  // For copy propagation, true and false are the same.
+        final var lattice = this.result.get(n).get(outEdge);
 
-        var condition = ReplaceTempIRVisitor.instance.replace(n.cond, lattice.copies);
-        var trueStub = new CFGStubNode();
-        var falseStub = new CFGStubNode();
-        var replacedCFGNode = new CFGIfNode(n.location(), trueStub, falseStub, condition);
-        return this.replaceEdges(n, replacedCFGNode, trueStub, falseStub);
+        final var condition = ReplaceTempIRVisitor.instance.replace(n.cond, lattice.copies);
+        n.cond = condition;
+        return n;
     }
 
     @Override
     public CFGNode visit(CFGVarAssignNode n) {
-        var outEdge = n.out().get(0);
-        var lattice = this.result.get(n).get(outEdge);
+        final var outEdge = n.out().get(0);
+        final var lattice = this.result.get(n).get(outEdge);
 
-        var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
-        var stub = new CFGStubNode();
-        var replacedCFGNode = new CFGVarAssignNode(n.location(), n.variable, value, stub);
-        return this.replaceEdges(n, replacedCFGNode, stub);
+        final var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
+        n.value = value;
+        return n;
     }
 
     @Override
     public CFGNode visit(CFGMemAssignNode n) {
-        var outEdge = n.out().get(0);
-        var lattice = this.result.get(n).get(outEdge);
+        final var outEdge = n.out().get(0);
+        final var lattice = this.result.get(n).get(outEdge);
 
-        var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
-        var mem = ReplaceTempIRVisitor.instance.replace(n.target, lattice.copies);
-        var stub = new CFGStubNode();
-        var replacedCFGNode = new CFGMemAssignNode(n.location(), mem, value, stub);
-        return this.replaceEdges(n, replacedCFGNode, stub);
+        final var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
+        final var mem = ReplaceTempIRVisitor.instance.replace(n.target, lattice.copies);
+        n.value = value;
+        n.target = mem;
+        return n;
     }
 
     @Override

@@ -3,6 +3,7 @@ package cyr7.cfg.ir.dfa;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis.CopyPropLattice;
 import cyr7.cfg.ir.nodes.CFGCallNode;
@@ -71,7 +72,7 @@ public class CopyPropagationAnalysis implements
                 updated.values().removeAll(Collections.singleton(n.variable));
                 if (n.value instanceof IRTemp) {
                     String source = ((IRTemp)n.value).name();
-                    updated.put(source, n.variable);
+                    updated.put(n.variable, source);
                 }
                 return new CopyPropLattice(updated);
             }
@@ -79,7 +80,7 @@ public class CopyPropagationAnalysis implements
     }
 
     /**
-     * Removes conflicting mappings, e.g. {@code lhs} has { x --> y}
+     * Removes conflicting mappings, e.g. {@code lhs} has {x --> y}
      * and {@code rhs} has {x --> z}. Conflicting copies, so they are removed.
      */
     @Override
@@ -97,6 +98,23 @@ public class CopyPropagationAnalysis implements
 
     public static class CopyPropLattice {
 
+        @Override
+        public int hashCode() {
+            return Objects.hash(copies);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof CopyPropLattice)) {
+                return false;
+            }
+            CopyPropLattice other = (CopyPropLattice) obj;
+            return Objects.equals(copies, other.copies);
+        }
+
         /**
          * Maps the value to the definition.
          * <p>
@@ -109,7 +127,7 @@ public class CopyPropagationAnalysis implements
         }
 
         protected CopyPropLattice(Map<String, String> copies) {
-            this.copies = Collections.unmodifiableMap(new HashMap<>());
+            this.copies = Collections.unmodifiableMap(copies);
         }
 
         @Override

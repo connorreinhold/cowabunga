@@ -10,8 +10,8 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGMemAssignNode extends CFGNode {
 
-    public final IRExpr target;
-    public final IRExpr value;
+    public IRExpr target;
+    public IRExpr value;
     private CFGNode out;
 
     public CFGMemAssignNode(

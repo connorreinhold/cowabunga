@@ -11,7 +11,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public class CFGCallNode extends CFGNode {
 
     // This includes both procedures and function calls
-    public final IRCallStmt call;
+    public IRCallStmt call;
     private CFGNode out;
 
     public CFGCallNode(Location location, IRCallStmt call, CFGNode out) {
