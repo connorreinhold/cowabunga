@@ -69,7 +69,7 @@ public class IrCfgTestUtil {
      * @param expectedEdges The order of the CFGNodes in the edge pair does
      *                      not matter;
      */
-    public boolean assertEqualGraphs(CFGNode start,
+    public static boolean assertEqualGraphs(CFGNode start,
             Set<CFGNode> expectedNodes, Set<Pair<CFGNode, CFGNode>> expectedEdges) {
         Set<CFGNode> actualNodes = this.getAllNodes(start);
         Set<CommutativePair<CFGNode>> actualEdges = this.getAllEdges(start);
