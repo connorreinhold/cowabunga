@@ -323,77 +323,19 @@ class TestCopyPropagation {
     void testSurivesInfiniteLoopCFG() {
         final Location loc = new Location(-1, -1);
         final var cfg = new CFGNodeFactory(loc);
-        final var ir = new IRNodeFactory_c(loc);
 
-        CFGNode returnNode = cfg.Return();
+        final CFGNode loopNode = cfg.SelfLoop();
+        final CFGNode root = cfg.Start(loopNode);
 
-        CFGNode printlnC = cfg.Call(ir.IRCallStmt(List.of(),
-                                              ir.IRName("println"),
-                                              List.of(ir.IRTemp("c"))),
-                                    returnNode);
+        final Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, loopNode);
 
-        CFGNode cIsAPlusB = cfg.VarAssign("c",
-                ir.IRBinOp(OpType.ADD, ir.IRTemp("a"), ir.IRTemp("b")), printlnC);
-
-        CFGNode yIsFoo = cfg.Call(ir.IRCallStmt(List.of("y"),
-                ir.IRName("foo"), List.of()), cIsAPlusB);
-
-        CFGNode xIsFoo = cfg.Call(ir.IRCallStmt(List.of("x"),
-                ir.IRName("foo"), List.of()), yIsFoo);
-
-        CFGNode printlnB = cfg.Call(ir.IRCallStmt(List.of(),
-                ir.IRName("println"),
-                List.of(ir.IRTemp("b"))), xIsFoo);
-
-        CFGNode printlnA = cfg.Call(ir.IRCallStmt(List.of(),
-                ir.IRName("println"),
-                List.of(ir.IRTemp("a"))), printlnB);
-
-        CFGNode fOfXAndY = cfg.Call(ir.IRCallStmt(List.of(), ir.IRName("f"),
-                            List.of(ir.IRTemp("x"), ir.IRTemp("y"))), printlnA);
-
-        CFGNode bIsY = cfg.VarAssign("b", ir.IRTemp("y"), fOfXAndY);
-
-        CFGNode aIsX = cfg.VarAssign("a", ir.IRTemp("x"), bIsY);
-
-        CFGNode setY = cfg.VarAssign("y", ir.IRConst(0), aIsX);
-
-        CFGNode setX = cfg.VarAssign("x", ir.IRConst(0), setY);
-
-        CFGNode root = cfg.Start(setX);
-
-        CFGNode printlnX = cfg.Call(ir.IRCallStmt(List.of(),
-                ir.IRName("println"),
-                List.of(ir.IRTemp("x"))), new CFGStubNode());
-
-        CFGNode printlnY = cfg.Call(ir.IRCallStmt(List.of(),
-                ir.IRName("println"),
-                List.of(ir.IRTemp("y"))), new CFGStubNode());
-
-        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, setX, setY,
-                aIsX, bIsY, fOfXAndY, printlnX, printlnY,
-                xIsFoo, yIsFoo, cIsAPlusB, printlnC, returnNode);
-
-        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
-                new Pair<>(root, setX),
-                new Pair<>(setX, setY),
-                new Pair<>(setY, aIsX),
-                new Pair<>(aIsX, bIsY),
-                new Pair<>(bIsY, fOfXAndY),
-                new Pair<>(fOfXAndY, printlnX),
-                new Pair<>(printlnX, printlnY),
-                new Pair<>(printlnY, xIsFoo),
-                new Pair<>(xIsFoo, yIsFoo),
-                new Pair<>(yIsFoo, cIsAPlusB),
-                new Pair<>(cIsAPlusB, printlnC),
-                new Pair<>(printlnC, returnNode));
+        final List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
+                new Pair<>(root, loopNode),
+                new Pair<>(loopNode, loopNode));
 
         CFGStartNode start = new CopyPropagationOptimization().optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
-
-        IRStmt result = CFGFlattener.flatten(start);
-        System.out.println(result);
     }
 }

@@ -13,6 +13,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
@@ -84,6 +85,11 @@ public class IrCfgTestUtil {
         @Override
         public CFGNode visit(CFGStartNode n) {
             return new CFGStartNode(n.location(), stubReference);
+        }
+
+        @Override
+        public CFGNode visit(CFGSelfLoopNode n) {
+            return new CFGSelfLoopNode();
         }
 
     }
@@ -211,6 +217,11 @@ public class IrCfgTestUtil {
         @Override
         public Boolean visit(CFGStartNode n) {
             return nodeToCompare instanceof CFGStartNode;
+        }
+
+        @Override
+        public Boolean visit(CFGSelfLoopNode n) {
+            return nodeToCompare instanceof CFGSelfLoopNode;
         }
 
     }

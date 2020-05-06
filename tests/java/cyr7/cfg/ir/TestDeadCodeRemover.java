@@ -186,4 +186,29 @@ class TestDeadCodeRemover {
     }
 
 
+    /**
+     * while(true) {
+     * }
+     */
+    @Test
+    void testSurivesInfiniteLoopCFG() {
+        final Location loc = new Location(-1, -1);
+        final var cfg = new CFGNodeFactory(loc);
+
+        final CFGNode loopNode = cfg.SelfLoop();
+        final CFGNode root = cfg.Start(loopNode);
+
+        final Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(root, loopNode);
+
+        final List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
+                new Pair<>(root, loopNode),
+                new Pair<>(loopNode, loopNode));
+
+        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+
+        assertTrue(IrCfgTestUtil.assertEqualGraphs(
+                            start, expectedNodes, expectedEdges));
+    }
+
+
 }
