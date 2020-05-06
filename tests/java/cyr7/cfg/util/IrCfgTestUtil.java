@@ -24,7 +24,7 @@ public class IrCfgTestUtil {
      * A commutative version of Pair, i.e. ordering of the values does
      * not matter.
      */
-    private class CommutativePair<V> extends Pair<V, V> {
+    private static class CommutativePair<V> extends Pair<V, V> {
 
         private Class<?> classType;
 
@@ -71,15 +71,15 @@ public class IrCfgTestUtil {
      */
     public static boolean assertEqualGraphs(CFGNode start,
             Set<CFGNode> expectedNodes, Set<Pair<CFGNode, CFGNode>> expectedEdges) {
-        Set<CFGNode> actualNodes = this.getAllNodes(start);
-        Set<CommutativePair<CFGNode>> actualEdges = this.getAllEdges(start);
+        Set<CFGNode> actualNodes = getAllNodes(start);
+        Set<CommutativePair<CFGNode>> actualEdges = getAllEdges(start);
 
         boolean sameEdges = expectedEdges.stream().map(pair ->
             new CommutativePair<>(pair.part1(), pair.part2()))
         .collect(Collectors.toSet()).equals(actualEdges);
 
         for (CFGNode node: expectedNodes) {
-            Optional<CFGNode> check = this.containsCFG(node, actualNodes);
+            Optional<CFGNode> check = containsCFG(node, actualNodes);
             if (check.isPresent()) {
                 actualNodes.remove(check.get());
             } else {
@@ -102,7 +102,7 @@ public class IrCfgTestUtil {
      * containing that node from {@code set} is returned. Otherwise,
      * {@code Optional.empty()} is returned.
      */
-    public Optional<CFGNode> containsCFG(CFGNode node, Set<CFGNode> set) {
+    private static Optional<CFGNode> containsCFG(CFGNode node, Set<CFGNode> set) {
         var equalVisitor = new CFGNodeEqualVisitor(node);
         for (CFGNode nodeOfSet: set) {
             if (nodeOfSet.accept(equalVisitor)) {
@@ -121,7 +121,7 @@ public class IrCfgTestUtil {
      * edges do not matter.
      *
      */
-    private class CFGNodeEqualVisitor implements IrCFGVisitor<Boolean> {
+    private static class CFGNodeEqualVisitor implements IrCFGVisitor<Boolean> {
 
         private final CFGNode nodeToCompare;
 
@@ -183,7 +183,7 @@ public class IrCfgTestUtil {
     /**
      * Returns a set of all nodes in a CFG graph.
      */
-    private Set<CFGNode> getAllNodes(CFGNode start) {
+    private static Set<CFGNode> getAllNodes(CFGNode start) {
         Set<CFGNode> nodes = new HashSet<>();
         Queue<CFGNode> list = new LinkedList<>();
         list.add(start);
@@ -201,7 +201,7 @@ public class IrCfgTestUtil {
     /**
      * Returns a set of all edges in a CFG graph.
      */
-    private Set<CommutativePair<CFGNode>> getAllEdges(CFGNode start) {
+    private static Set<CommutativePair<CFGNode>> getAllEdges(CFGNode start) {
         Set<CFGNode> visited = new HashSet<>();
         Set<CommutativePair<CFGNode>> edges = new HashSet<>();
         Queue<CFGNode> list = new LinkedList<>();
