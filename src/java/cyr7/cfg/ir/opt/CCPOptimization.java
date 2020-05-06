@@ -26,6 +26,8 @@ import cyr7.ir.nodes.IRExpr;
 
 public class CCPOptimization {
 
+    private CCPOptimization() {}
+
     public static CFGStartNode optimize(CFGNode start) {
         CFGStartNode startNode = (CFGStartNode)start;
         final var ccpResult = WorklistAnalysis.analyze(startNode,
@@ -54,45 +56,86 @@ public class CCPOptimization {
         return startNode;
     }
 
+    // TODO: Removing nodes if they are unreachable
     private static class CcpCfgTransformationVisitor implements IrCFGVisitor<CFGNode> {
 
-        private final Map<CFGNode, LatticeElement> incomingLattice;
-        private final Map<CFGNode, Map<CFGNode, LatticeElement>> outgoingLattice;
+        private final Map<CFGNode, LatticeElement> incomingLattices;
+        private final Map<CFGNode, Map<CFGNode, LatticeElement>> outgoingLattices;
 
         public CcpCfgTransformationVisitor(DfaResult<LatticeElement> ccpResult) {
             // May be it is more helpful to know both the outs and ins of nodes.
-            this.incomingLattice = ccpResult.in();
-            this.outgoingLattice = ccpResult.out();
+            this.incomingLattices = ccpResult.in();
+            this.outgoingLattices = ccpResult.out();
         }
 
         @Override
         public CFGNode visit(CFGCallNode n) {
-            final var lattice = incomingLattice.get(n);
+            final var lattice = incomingLattices.get(n);
             final IRCallStmt call = n.call;
             List<IRExpr> updatedArgs = call.args().stream().map(arg -> {
                 return IRTempToConstant.replace(arg, lattice);
             }).collect(Collectors.toList());
 
-            n.call = new IRCallStmt(n.location(), call.collectors(), call.target(), updatedArgs);
+            n.call = new IRCallStmt(n.location(),
+                                    call.collectors(),
+                                    call.target(),
+                                    updatedArgs);
             return n;
         }
 
         @Override
         public CFGNode visit(CFGIfNode n) {
-            // TODO Auto-generated method stub
-            return null;
+            final var incomingLattice = incomingLattices.get(n);
+            final var outgoingLattice = outgoingLattices.get(n);
+
+            final var trueBranch = n.trueBranch();
+            final var falseBranch = n.falseBranch();
+            if (incomingLattice.unreachable()) {
+                // Remove this node as the incoming node of the next.
+                trueBranch.in().remove(n);
+                falseBranch.in().remove(n);
+                return n;
+            }
+
+            n.cond = IRTempToConstant.replace(n.cond, incomingLattice);
+            if (outgoingLattice.get(trueBranch).unreachable()) {
+                // Remove this node and link the previous nodes to the
+                // false branch
+                falseBranch.in().remove(n);
+                for (CFGNode incoming: n.in()) {
+                    incoming.replaceOutEdge(n, falseBranch);
+                }
+            } else if (outgoingLattice.get(falseBranch).unreachable()) {
+                // Remove this node and link the previous nodes to the
+                // true branch
+                trueBranch.in().remove(n);
+                for (CFGNode incoming: n.in()) {
+                    incoming.replaceOutEdge(n, trueBranch);
+                }
+            }
+            return n;
         }
 
         @Override
         public CFGNode visit(CFGVarAssignNode n) {
-            final var lattice = incomingLattice.get(n);
+            final var lattice = incomingLattices.get(n);
+            if (lattice.unreachable()) {
+                // Remove this node as the incoming node of the next.
+                n.out().get(0).in().remove(n);
+                return n;
+            }
             n.value = IRTempToConstant.replace(n.value, lattice);
             return n;
         }
 
         @Override
         public CFGNode visit(CFGMemAssignNode n) {
-            final var lattice = incomingLattice.get(n);
+            final var lattice = incomingLattices.get(n);
+            if (lattice.unreachable()) {
+                // Remove this node as the incoming node of the next.
+                n.out().get(0).in().remove(n);
+                return n;
+            }
             n.value = IRTempToConstant.replace(n.value, lattice);
             n.target = IRTempToConstant.replace(n.target, lattice);
             return n;
@@ -105,6 +148,12 @@ public class CCPOptimization {
 
         @Override
         public CFGNode visit(CFGStartNode n) {
+            final var lattice = incomingLattices.get(n);
+            if (lattice.unreachable()) {
+                // Remove this node as the incoming node of the next.
+                n.out().get(0).in().remove(n);
+                return n;
+            }
             return n;
         }
 
