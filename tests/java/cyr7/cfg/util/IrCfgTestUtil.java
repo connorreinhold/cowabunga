@@ -2,7 +2,6 @@ package cyr7.cfg.util;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
@@ -36,8 +35,7 @@ public class IrCfgTestUtil {
                 CFGPair pair = (CFGPair)o;
                 CFGNodeEqualVisitor equalsPart1 = new CFGNodeEqualVisitor(this.part1);
                 CFGNodeEqualVisitor equalsPart2 = new CFGNodeEqualVisitor(this.part2);
-                return (pair.part1.accept(equalsPart1) && pair.part2.accept(equalsPart2))
-                    || (pair.part1.accept(equalsPart2) && pair.part2.accept(equalsPart1));
+                return pair.part1.accept(equalsPart1) && pair.part2.accept(equalsPart2);
             }
             return false;
         }
@@ -48,61 +46,41 @@ public class IrCfgTestUtil {
      * Asserts the equality of a graph by checking that it contains every
      * asserted node and edges.
      * @param start The CFG being tested.
-     * @param expectedNodes The out and in edges of each node in {@code nodes}
-     *                      does not matter.
-     * @param expectedEdges The order of the CFGNodes in the edge pair does
-     *                      not matter;
+     * @param expectedNodes
+     * @param expectedEdges
      */
     public static boolean assertEqualGraphs(CFGNode start,
             List<CFGNode> expectedNodes, List<Pair<CFGNode, CFGNode>> expectedEdges) {
         List<CFGNode> actualNodes = getAllNodes(start);
         List<CFGPair> actualEdges = getAllEdges(start);
 
-        boolean sameEdges = expectedEdges.stream().map(pair ->
-            new CFGPair(pair.part1(), pair.part2()))
-        .collect(Collectors.toSet()).equals(actualEdges);
-
-        for (CFGNode node: expectedNodes) {
-            Optional<CFGNode> check = containsCFG(node, actualNodes);
-            if (check.isPresent()) {
-                actualNodes.remove(check.get());
-            } else {
-                return false;
-            }
+        var expectedEdgesMod = expectedEdges.stream().map(pair ->
+                new CFGPair(pair.part1(), pair.part2())).collect(Collectors.toList());
+        boolean sameEdges = actualEdges.size() == expectedEdges.size();
+        for (CFGPair p: expectedEdgesMod) {
+            if (!actualEdges.contains(p))
+                sameEdges = false;
         }
-        return sameEdges && actualNodes.isEmpty();
-    }
-
-    /**
-     * Checks if {@code node} is contained in {@code set} using an equals
-     * predicated defined in an instance of {@code CFGNodeEqualVisitor}.
-     *
-     * <p> The contents of the nodes are equal. The incoming and outgoing
-     * edges do not matter.
-     *
-     * @param node
-     * @param set
-     * @return If it is contained inside of {@code set}, then an {@code Optional} value
-     * containing that node from {@code set} is returned. Otherwise,
-     * {@code Optional.empty()} is returned.
-     */
-    private static Optional<CFGNode> containsCFG(CFGNode node, List<CFGNode> set) {
-        var equalVisitor = new CFGNodeEqualVisitor(node);
-        for (CFGNode nodeOfSet: set) {
-            if (nodeOfSet.accept(equalVisitor)) {
-                return Optional.of(nodeOfSet);
-            }
+        for (CFGPair p: actualEdges) {
+            if (!expectedEdgesMod.contains(p))
+                sameEdges = false;
         }
-        return Optional.empty();
-    }
 
+        boolean sameNodes = actualNodes.size() == expectedNodes.size();
+        for (CFGNode n: expectedNodes) {
+            if (!actualNodes.contains(n))
+                sameEdges = false;
+        }
+        for (CFGNode n: actualNodes) {
+            if (!expectedNodes.contains(n))
+                sameEdges = false;
+        }
+        return sameEdges && sameNodes;
+    }
 
     /**
      *
      * Checks that two CFG nodes are equal.
-     * <p>
-     * The contents of the nodes are equal. The incoming and outgoing
-     * edges do not matter.
      *
      */
     private static class CFGNodeEqualVisitor implements IrCFGVisitor<Boolean> {
@@ -165,7 +143,7 @@ public class IrCfgTestUtil {
 
 
     /**
-     * Returns a set of all nodes in a CFG graph.
+     * Returns a list of all nodes in a CFG graph.
      */
     private static List<CFGNode> getAllNodes(CFGNode start) {
         List<CFGNode> nodes = new LinkedList<>();
@@ -183,7 +161,7 @@ public class IrCfgTestUtil {
 
 
     /**
-     * Returns a set of all edges in a CFG graph.
+     * Returns a list of all edges in a CFG graph.
      */
     private static List<CFGPair> getAllEdges(CFGNode start) {
         List<CFGNode> visited = new LinkedList<>();
