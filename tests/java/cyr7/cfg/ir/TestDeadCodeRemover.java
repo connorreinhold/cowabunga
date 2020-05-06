@@ -39,6 +39,13 @@ class TestDeadCodeRemover {
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
 
+
+        // Running it again should remove y = 15
+        start = new DeadCodeElimOptimization().optimize(root);
+        expectedNodes = Set.of(root, returnNode);
+        expectedEdges = Set.of(new Pair<>(root, returnNode));
+        assertTrue(IrCfgTestUtil.assertEqualGraphs(
+                start, expectedNodes, expectedEdges));
     }
 
 }
