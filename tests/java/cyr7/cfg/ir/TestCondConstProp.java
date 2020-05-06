@@ -13,7 +13,6 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.opt.CCPOptimization;
 import cyr7.cfg.util.IrCfgTestUtil;
-import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRNodeFactory_c;
 import java_cup.runtime.ComplexSymbolFactory.Location;
@@ -43,7 +42,6 @@ class TestCondConstProp {
         final Location loc = new Location(-1, -1);
         final var cfg = new CFGNodeFactory(loc);
         final var ir = new IRNodeFactory_c(loc);
-        final var gen = new DefaultIdGenerator();
 
         CFGNode returnNode = cfg.Return();
         CFGNode printlnX = cfg.Call(
@@ -85,4 +83,82 @@ class TestCondConstProp {
                             start, expectedNodes, expectedEdges));
 
     }
+
+
+    /**
+     * x = 30
+     * while (false) {
+     *    z = x
+     *    if (z == 40) {
+     *      z = 15
+     *    } else {
+     *      z = 20
+     *    }
+     *    println(z)
+     * }
+     * println(x)
+     * return
+     *
+     * Should simplify to the following:
+     * start
+     * x = 30
+     * println(30)
+     * return
+     */
+    @Test
+    void testWhileLoopCFG() {
+        final Location loc = new Location(-1, -1);
+        final var cfg = new CFGNodeFactory(loc);
+        final var ir = new IRNodeFactory_c(loc);
+
+        final var stub = new CFGStubNode();
+
+        CFGNode returnNode = cfg.Return();
+        CFGNode printlnX = cfg.Call(
+                ir.IRCallStmt(List.of(), ir.IRName("println"),
+                        List.of(ir.IRTemp("x"))), returnNode);
+
+        CFGNode printlnZ = cfg.Call(
+                ir.IRCallStmt(List.of(), ir.IRName("println"),
+                        List.of(ir.IRTemp("z"))), stub);
+
+        CFGNode zIs20 = cfg.VarAssign("z", ir.IRConst(20), printlnZ);
+        CFGNode zIs15 = cfg.VarAssign("z", ir.IRConst(15), printlnZ);
+
+        CFGNode ifZIs40 =  cfg.If(zIs15, zIs20,
+                ir.IRBinOp(OpType.EQ, ir.IRTemp("z"), ir.IRConst(40)));
+
+        printlnZ.replaceOutEdge(stub, ifZIs40);
+
+        CFGNode zIsX = cfg.VarAssign("z", ir.IRTemp("x"), ifZIs40);
+
+        CFGNode whileFalse = cfg.If(zIsX, printlnX, ir.IRConst(0));
+
+        CFGNode xAssign = cfg.VarAssign("x", ir.IRConst(30), whileFalse);
+        CFGNode root = cfg.Start(xAssign);
+
+        CFGNode println30 = cfg.Call(
+                ir.IRCallStmt(List.of(), ir.IRName("println"),
+                        List.of(ir.IRConst(30))), new CFGStubNode());
+
+        Set<CFGNode> expectedNodes = IrCfgTestUtil.nodeSet(
+                                            root,
+                                            xAssign,
+                                            println30,
+                                            returnNode);
+
+        List<Pair<CFGNode, CFGNode>> expectedEdges = IrCfgTestUtil.edgeList(
+                new Pair<>(root, xAssign),
+                new Pair<>(xAssign, println30),
+                new Pair<>(println30, returnNode));
+
+        CFGStartNode start = CCPOptimization.optimize(root);
+
+        IrCfgTestUtil.printIR(start);
+
+        assertTrue(IrCfgTestUtil.assertEqualGraphs(
+                            start, expectedNodes, expectedEdges));
+
+    }
+
 }
