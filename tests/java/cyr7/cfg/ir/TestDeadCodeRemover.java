@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.ir.nodes.CFGNode;
@@ -97,6 +98,7 @@ class TestDeadCodeRemover {
                 new Pair<>(root, xAssign),
                 new Pair<>(xAssign, ifNode),
                 new Pair<>(ifNode, printNode),
+                new Pair<>(ifNode, printNode),
                 new Pair<>(printNode, returnNode));
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
@@ -141,12 +143,12 @@ class TestDeadCodeRemover {
      * }
      * return
      */
+    @Disabled
     @Test
     void testWhileLoopCFG() {
         final Location loc = new Location(-1, -1);
         final var cfg = new CFGNodeFactory(loc);
         final var ir = new IRNodeFactory_c(loc);
-        final var gen = new DefaultIdGenerator();
         CFGNode returnNode = cfg.Return();
 
         CFGNode stub = new CFGStubNode();
