@@ -14,7 +14,6 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.opt.CopyPropagationOptimization;
-import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cfg.util.IrCfgTestUtil;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.nodes.IRBinOp.OpType;
@@ -138,7 +137,7 @@ class TestCopyPropagation {
 
         CFGNode root = cfg.Start(setRV);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
 
         Set<CFGNode> expectedNodes = Set.of(root, setRV, returnNode);
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
@@ -154,45 +153,59 @@ class TestCopyPropagation {
 
     /**
      * x = 0;
+     * y = 0;
      * while (x < 12) {
      *    y = x
-     *    x = x + 1
+     *    x = y + 1
      * }
-     * return
+     * return y
      */
     @Test
     void testWhileLoopCFG() {
         final Location loc = new Location(-1, -1);
         final var cfg = new CFGNodeFactory(loc);
         final var ir = new IRNodeFactory_c(loc);
+        final var gen = new DefaultIdGenerator();
+
         CFGNode returnNode = cfg.Return();
+
+        CFGNode setRV = cfg.VarAssign(gen.retTemp(0), ir.IRTemp("y"), returnNode);
 
         CFGNode stub = new CFGStubNode();
 
         CFGNode xIncrement = cfg.VarAssign("x",
-                ir.IRBinOp(OpType.ADD, ir.IRTemp("x"), ir.IRConst(1)),
-                stub);
+                ir.IRBinOp(OpType.ADD, ir.IRTemp("y"), ir.IRConst(1)), stub);
 
         CFGNode yIsX = cfg.VarAssign("y", ir.IRTemp("x"), xIncrement);
 
-        CFGNode whileIfNode = cfg.If(yIsX, returnNode,
+        CFGNode whileIfNode = cfg.If(yIsX, setRV,
                 ir.IRBinOp(OpType.LT, ir.IRTemp("x"), ir.IRConst(12)));
 
         xIncrement.replaceOutEdge(stub, whileIfNode);
 
-        CFGNode setX = cfg.VarAssign("x", ir.IRConst(0), whileIfNode);
+        CFGNode setY = cfg.VarAssign("y", ir.IRConst(0), whileIfNode);
+
+        CFGNode setX = cfg.VarAssign("x", ir.IRConst(0), setY);
 
         CFGNode root = cfg.Start(setX);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
 
-        Set<CFGNode> expectedNodes = Set.of(root, setX, whileIfNode, xIncrement, returnNode);
+        CFGNode altXIncrement = cfg.VarAssign("x",
+                ir.IRBinOp(OpType.ADD, ir.IRTemp("x"), ir.IRConst(1)), whileIfNode);
+
+        Set<CFGNode> expectedNodes = Set.of(root, setX, setY,
+                whileIfNode, yIsX, altXIncrement, setRV, returnNode);
+
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, setX),
-                new Pair<>(setX, whileIfNode),
-                new Pair<>(whileIfNode, xIncrement),
-                new Pair<>(xIncrement, whileIfNode),
-                new Pair<>(whileIfNode, returnNode)
+                new Pair<>(setX, setY),
+                new Pair<>(setY, whileIfNode),
+                new Pair<>(whileIfNode, yIsX),
+                new Pair<>(yIsX, altXIncrement),
+                new Pair<>(altXIncrement, whileIfNode),
+                new Pair<>(whileIfNode, setRV),
+                new Pair<>(setRV, returnNode)
                 );
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(

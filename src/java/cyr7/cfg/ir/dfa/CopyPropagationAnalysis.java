@@ -2,6 +2,7 @@ package cyr7.cfg.ir.dfa;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 
@@ -31,11 +32,10 @@ public class CopyPropagationAnalysis implements
             @Override
             public CopyPropLattice transfer(CFGCallNode n, CopyPropLattice in) {
                 Map<String, String> updated = new HashMap<>(in.copies);
-
                 // Kill all previous copies that map to the newly defined
                 // variable.
                 n.call.collectors().forEach(def -> {
-                    updated.values().removeAll(Collections.singleton(def));
+                    updated.remove(def);
                 });
                 return new CopyPropLattice(updated);
             }
@@ -69,7 +69,7 @@ public class CopyPropagationAnalysis implements
 
                 // Kill all previous copies that map to the newly defined
                 // variable.
-                updated.values().removeAll(Collections.singleton(n.variable));
+                updated.remove(n.variable);
                 if (n.value instanceof IRTemp) {
                     String source = ((IRTemp)n.value).name();
                     updated.put(n.variable, source);
@@ -86,14 +86,13 @@ public class CopyPropagationAnalysis implements
     @Override
     public CopyPropLattice meet(CopyPropLattice lhs, CopyPropLattice rhs) {
         Map<String, String> updated = new HashMap<>(lhs.copies);
-        rhs.copies.forEach((val, copyOf) -> {
-            if (updated.containsKey(val)
-                    && !copyOf.equals(updated.get(val)) ) {
-                updated.remove(val);
-            } else {
-                updated.put(val, copyOf);
+        for (String key: new HashSet<>(updated.keySet())) {
+            if (!rhs.copies.containsKey(key)) {
+                updated.remove(key);
+            } else if (!rhs.copies.get(key).equals(updated.get(key))) {
+                updated.remove(key);
             }
-        });
+        }
         return new CopyPropLattice(updated);
     }
 
