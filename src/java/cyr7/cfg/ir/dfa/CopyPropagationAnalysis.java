@@ -87,7 +87,8 @@ public class CopyPropagationAnalysis implements
     public CopyPropLattice meet(CopyPropLattice lhs, CopyPropLattice rhs) {
         Map<String, String> updated = new HashMap<>(lhs.copies);
         rhs.copies.forEach((val, copyOf) -> {
-            if (updated.containsKey(val)) {
+            if (updated.containsKey(val)
+                    && !copyOf.equals(updated.get(val)) ) {
                 updated.remove(val);
             } else {
                 updated.put(val, copyOf);

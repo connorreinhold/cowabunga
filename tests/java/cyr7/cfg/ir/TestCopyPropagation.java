@@ -76,9 +76,9 @@ class TestCopyPropagation {
      * if (x > 30) {
      *    y = x
      * } else {
-     *    z = x
+     *    y = x
      * }
-     * println(x)
+     * println(y)
      * return
      */
     @Test
@@ -88,27 +88,34 @@ class TestCopyPropagation {
         final var ir = new IRNodeFactory_c(loc);
         CFGNode returnNode = cfg.Return();
         CFGNode printNode = cfg.Call(
-                ir.IRCallStmt(List.of(), ir.IRName("println"), List.of(ir.IRTemp("x"))),
-                returnNode);
+                ir.IRCallStmt(List.of(), ir.IRName("println"),
+                        List.of(ir.IRTemp("y"))), returnNode);
 
-        CFGNode zIsX = cfg.VarAssign("z", ir.IRTemp("x"), printNode);
-        CFGNode yIsX = cfg.VarAssign("y", ir.IRTemp("x"), printNode);
+        CFGNode yIsX1 = cfg.VarAssign("y", ir.IRTemp("x"), printNode);
+        CFGNode yIsX2 = cfg.VarAssign("y", ir.IRTemp("x"), printNode);
 
-        CFGNode ifNode = cfg.If(yIsX, zIsX,
+        CFGNode ifNode = cfg.If(yIsX2, yIsX1,
                     ir.IRBinOp(OpType.GT, ir.IRTemp("x"), ir.IRConst(30)));
 
         CFGNode xAssign = cfg.VarAssign("x", ir.IRConst(30), ifNode);
         CFGNode root = cfg.Start(xAssign);
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+
+        CFGNode printNodeOpt = cfg.Call(
+                ir.IRCallStmt(List.of(), ir.IRName("println"),
+                        List.of(ir.IRTemp("x"))), returnNode);
 
         Set<CFGNode> expectedNodes = Set.of(root, xAssign, ifNode,
-                                            printNode, returnNode);
+                                            yIsX1, yIsX2,
+                                            printNodeOpt, returnNode);
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, xAssign),
                 new Pair<>(xAssign, ifNode),
-                new Pair<>(ifNode, printNode),
-                new Pair<>(ifNode, printNode),
+                new Pair<>(ifNode, yIsX1),
+                new Pair<>(ifNode, yIsX2),
+                new Pair<>(yIsX1, printNode),
+                new Pair<>(yIsX2, printNode),
                 new Pair<>(printNode, returnNode));
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(

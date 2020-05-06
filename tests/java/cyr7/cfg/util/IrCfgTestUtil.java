@@ -72,12 +72,12 @@ public class IrCfgTestUtil {
         for (CFGNode n: expectedNodes) {
             var equalsVisitor = new CFGNodeEqualVisitor(n);
             if (!actualNodes.stream().anyMatch(node -> node.accept(equalsVisitor)))
-                sameEdges = false;
+                sameNodes = false;
         }
         for (CFGNode n: actualNodes) {
             var equalsVisitor = new CFGNodeEqualVisitor(n);
             if (!expectedNodes.stream().anyMatch(node -> node.accept(equalsVisitor)))
-                sameEdges = false;
+                sameNodes = false;
         }
         return sameEdges && sameNodes;
     }

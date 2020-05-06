@@ -48,7 +48,8 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
         while (!this.nextNodes.isEmpty()) {
             var next = this.nextNodes.remove();
 
-            // Replaces variables with copies in the mapping, and updates the neighboring edges.
+            // Replaces variables with copies in the mapping,
+            // and updates the neighboring edges.
             next.accept(this);
 
             this.visited.add(next);
