@@ -64,7 +64,7 @@ class TestCopyPropagation {
                 new Pair<>(deadAssign, zIsDoubleY),
                 new Pair<>(zIsDoubleY, returnNode));
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+        CFGStartNode start = CopyPropagationOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -118,7 +118,7 @@ class TestCopyPropagation {
                 new Pair<>(yIsX2, printNodeOpt),
                 new Pair<>(printNodeOpt, returnNode));
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+        CFGStartNode start = CopyPropagationOptimization.optimize(root);
 
         IrCfgTestUtil.printIR(start);
 
@@ -148,7 +148,7 @@ class TestCopyPropagation {
                 new Pair<>(root, setRV),
                 new Pair<>(setRV, returnNode));
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+        CFGStartNode start = CopyPropagationOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -215,7 +215,7 @@ class TestCopyPropagation {
 
 
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+        CFGStartNode start = CopyPropagationOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -305,7 +305,7 @@ class TestCopyPropagation {
                 new Pair<>(cIsAPlusB, printlnC),
                 new Pair<>(printlnC, returnNode));
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+        CFGStartNode start = CopyPropagationOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -333,7 +333,7 @@ class TestCopyPropagation {
                 new Pair<>(root, loopNode),
                 new Pair<>(loopNode, loopNode));
 
-        CFGStartNode start = new CopyPropagationOptimization().optimize(root);
+        CFGStartNode start = CopyPropagationOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));

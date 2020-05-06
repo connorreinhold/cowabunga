@@ -23,36 +23,44 @@ import cyr7.ir.interpret.Configuration;
 
 public class DeadCodeElimOptimization {
 
-    private Set<CFGNode> visited;
-    private Queue<CFGNode> nextNodes;
+    private DeadCodeElimOptimization() {}
 
-    public DeadCodeElimOptimization() {
-        this.visited = Collections.emptySet();
-        this.nextNodes = new LinkedList<>();
-    }
-
-    public CFGStartNode optimize(CFGNode start) {
+    /**
+     * Performs one passing of dead code elimination.
+     * <p>
+     * A CFGNode is considered "dead" if it is a variable assignment node, but
+     * that assigned variable is never used in the rest of program flow.
+     *
+     * @param start The {@link CFGStartNode start} node of the IR CFG.
+     * @return The same {@code start} node, but the CFG has been optimized with
+     *         one passing of dead code elimination.
+     */
+    public static CFGStartNode optimize(CFGNode start) {
         // Mapping from CFGNode to the out lattices.
         CFGStartNode startNode = (CFGStartNode)start;
         var result = WorklistAnalysis.analyze((CFGStartNode)start,
                                    IrLiveVariableAnalysis.INSTANCE);
-        this.visited = new HashSet<>();
-        this.nextNodes = new LinkedList<>();
-        this.nextNodes.add(start);
+        Set<CFGNode> visited = new HashSet<>();
+        Queue<CFGNode> nextNodes = new LinkedList<>();
+        nextNodes.add(start);
 
         final ReplaceDeadCodeVisitor visitor = new ReplaceDeadCodeVisitor(result);
 
-        while (!this.nextNodes.isEmpty()) {
-            var next = this.nextNodes.remove();
+        while (!nextNodes.isEmpty()) {
+            var next = nextNodes.remove();
 
-            // Replaces variables with copies in the mapping, and updates the neighboring edges.
+            /**
+             * If a CFG node n may be eliminated because it is "dead", then
+             * the out nodes of the nodes n' that precede n will be changed
+             * to the out node of n.
+             */
             next.accept(visitor);
 
-            this.visited.add(next);
+            visited.add(next);
 
             for (CFGNode out: next.out()) {
-                if (!this.visited.contains(out)) {
-                    this.nextNodes.add(out);
+                if (!visited.contains(out)) {
+                    nextNodes.add(out);
                 }
             }
 
@@ -60,7 +68,7 @@ public class DeadCodeElimOptimization {
         return startNode;
     }
 
-    private class ReplaceDeadCodeVisitor implements IrCFGVisitor<CFGNode> {
+    private static class ReplaceDeadCodeVisitor implements IrCFGVisitor<CFGNode> {
 
         private Map<CFGNode, IrLiveVarLattice> result;
 

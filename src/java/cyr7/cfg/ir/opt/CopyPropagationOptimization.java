@@ -24,40 +24,43 @@ import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.ir.nodes.IRExpr;
 
-public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
+public class CopyPropagationOptimization {
 
-    private Map<CFGNode, CopyPropLattice> result;
+    private CopyPropagationOptimization() {}
 
-    private Set<CFGNode> visited;
-    private Queue<CFGNode> nextNodes;
-
-    public CopyPropagationOptimization() {
-        this.result = Collections.emptyMap();
-        this.visited = Collections.emptySet();
-        this.nextNodes = new LinkedList<>();
-    }
-
-    public CFGStartNode optimize(CFGNode start) {
+    /**
+     * Performs one passing of copy propagation.
+     * <p>
+     * Generally, if copies of variables/temporariess are available for
+     * a variable {@code x}, then {@code x} is replaced with the variable
+     * in the set of copies with the earliest definition.
+     * <p>
+     * @param start The {@link CFGStartNode start} node of the IR CFG.
+     * @return The same {@code start} node, but the CFG has been optimized with
+     *         one passing of copy propagation.
+     */
+    public static CFGStartNode optimize(CFGNode start) {
         // Mapping from CFGNode to the out lattices.
         CFGStartNode startNode = (CFGStartNode)start;
-        this.result = WorklistAnalysis.analyze((CFGStartNode)start,
-                CopyPropagationAnalysis.INSTANCE);
-        this.visited = new HashSet<>();
-        this.nextNodes = new LinkedList<>();
-        this.nextNodes.add(start);
+        final var visitor = new CFGVarReplacementVisitor(
+                WorklistAnalysis.analyze((CFGStartNode)start,
+                CopyPropagationAnalysis.INSTANCE));
+        Set<CFGNode> visited = new HashSet<>();
+        Queue<CFGNode> nextNodes = new LinkedList<>();
+        nextNodes.add(start);
 
-        while (!this.nextNodes.isEmpty()) {
-            var next = this.nextNodes.remove();
+        while (!nextNodes.isEmpty()) {
+            var next = nextNodes.remove();
 
             // Replaces variables with copies in the mapping,
             // and updates the neighboring edges.
-            next.accept(this);
+            next.accept(visitor);
 
-            this.visited.add(next);
+            visited.add(next);
 
             for (CFGNode out: next.out()) {
-                if (!this.visited.contains(out)) {
-                    this.nextNodes.add(out);
+                if (!visited.contains(out)) {
+                    nextNodes.add(out);
                 }
             }
 
@@ -65,63 +68,73 @@ public class CopyPropagationOptimization implements IrCFGVisitor<CFGNode> {
         return startNode;
     }
 
-    @Override
-    public CFGNode visit(CFGCallNode n) {
-        final var lattice = this.result.get(n);
+    private static class CFGVarReplacementVisitor
+                                    implements IrCFGVisitor<CFGNode> {
 
-        final List<IRExpr> args = n.call.args().stream().map(arg -> {
-            return ReplaceTempIRVisitor.instance.replace(arg, lattice.copies);
-        }).collect(Collectors.toList());
-        final var call = new IRCallStmt(n.location(), n.call.collectors(),
-                                                n.call.target(), args);
-        n.call = call;
-        return n;
-    }
+        private Map<CFGNode, CopyPropLattice> result;
+
+        public CFGVarReplacementVisitor(Map<CFGNode, CopyPropLattice> result) {
+            this.result = Collections.unmodifiableMap(result);
+        }
+
+        @Override
+        public CFGNode visit(CFGCallNode n) {
+            final var lattice = this.result.get(n);
+
+            final List<IRExpr> args = n.call.args().stream().map(arg -> {
+                return IRTempReplacer.replace(arg, lattice.copies);
+            }).collect(Collectors.toList());
+            final var call = new IRCallStmt(n.location(), n.call.collectors(),
+                    n.call.target(), args);
+            n.call = call;
+            return n;
+        }
 
 
-    @Override
-    public CFGNode visit(CFGIfNode n) {
-        // For copy propagation, true and false are the same.
-        final var lattice = this.result.get(n);
+        @Override
+        public CFGNode visit(CFGIfNode n) {
+            // For copy propagation, true and false are the same.
+            final var lattice = this.result.get(n);
 
-        final var condition = ReplaceTempIRVisitor.instance.replace(n.cond, lattice.copies);
-        n.cond = condition;
-        return n;
-    }
+            final var condition = IRTempReplacer.replace(n.cond, lattice.copies);
+            n.cond = condition;
+            return n;
+        }
 
-    @Override
-    public CFGNode visit(CFGVarAssignNode n) {
-        final var lattice = this.result.get(n);
+        @Override
+        public CFGNode visit(CFGVarAssignNode n) {
+            final var lattice = this.result.get(n);
 
-        final var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
-        n.value = value;
-        return n;
-    }
+            final var value = IRTempReplacer.replace(n.value, lattice.copies);
+            n.value = value;
+            return n;
+        }
 
-    @Override
-    public CFGNode visit(CFGMemAssignNode n) {
-        final var lattice = this.result.get(n);
+        @Override
+        public CFGNode visit(CFGMemAssignNode n) {
+            final var lattice = this.result.get(n);
 
-        final var value = ReplaceTempIRVisitor.instance.replace(n.value, lattice.copies);
-        final var mem = ReplaceTempIRVisitor.instance.replace(n.target, lattice.copies);
-        n.value = value;
-        n.target = mem;
-        return n;
-    }
+            final var value = IRTempReplacer.replace(n.value, lattice.copies);
+            final var mem = IRTempReplacer.replace(n.target, lattice.copies);
+            n.value = value;
+            n.target = mem;
+            return n;
+        }
 
-    @Override
-    public CFGNode visit(CFGReturnNode n) {
-        return n;
-    }
+        @Override
+        public CFGNode visit(CFGReturnNode n) {
+            return n;
+        }
 
-    @Override
-    public CFGNode visit(CFGStartNode n) {
-        return n;
-    }
+        @Override
+        public CFGNode visit(CFGStartNode n) {
+            return n;
+        }
 
-    @Override
-    public CFGNode visit(CFGSelfLoopNode n) {
-        return n;
+        @Override
+        public CFGNode visit(CFGSelfLoopNode n) {
+            return n;
+        }
     }
 
 }

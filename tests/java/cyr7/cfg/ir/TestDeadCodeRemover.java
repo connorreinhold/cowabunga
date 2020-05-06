@@ -48,7 +48,7 @@ class TestDeadCodeRemover {
                 new Pair<>(root, firstAssign),
                 new Pair<>(firstAssign, returnNode));
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = DeadCodeElimOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -57,7 +57,7 @@ class TestDeadCodeRemover {
         expectedNodes = IrCfgTestUtil.nodeSet(root, returnNode);
         expectedEdges = IrCfgTestUtil.edgeList(new Pair<>(root, returnNode));
 
-        start = new DeadCodeElimOptimization().optimize(root);
+        start = DeadCodeElimOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                 start, expectedNodes, expectedEdges));
@@ -102,7 +102,7 @@ class TestDeadCodeRemover {
                 new Pair<>(ifNode, printNode),
                 new Pair<>(printNode, returnNode));
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = DeadCodeElimOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -129,7 +129,7 @@ class TestDeadCodeRemover {
                 new Pair<>(root, setRV),
                 new Pair<>(setRV, returnNode));
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = DeadCodeElimOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -179,7 +179,7 @@ class TestDeadCodeRemover {
                 new Pair<>(whileIfNode, returnNode)
                 );
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = DeadCodeElimOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
@@ -204,7 +204,7 @@ class TestDeadCodeRemover {
                 new Pair<>(root, loopNode),
                 new Pair<>(loopNode, loopNode));
 
-        CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
+        CFGStartNode start = DeadCodeElimOptimization.optimize(root);
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                             start, expectedNodes, expectedEdges));
