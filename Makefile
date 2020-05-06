@@ -32,11 +32,11 @@ zip:
 	git archive HEAD -o cowabunga.zip
 
 integration.complex:
-	echo '\033[0;32m' 'Precompiling assembly with complex tiler...' '\033[0m' 
+	echo "\033[0;32m" 'Precompiling assembly with complex tiler...' "\033[0m"
 	find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler complex
 	find tests/resources/integration/ -name '*.s_COMPLEX' -print0 | sort -z | xargs -0 wc -l
 
 integration.basic:
-	echo '\033[0;32m' 'Precompiling assembly with basic tiler...' '\033[0m'
+	echo "\033[0;32m" 'Precompiling assembly with basic tiler...' "\033[0m"
 	find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler basic
 	find tests/resources/integration/ -name '*.s_BASIC' -print0 | sort -z | xargs -0 wc -l	
