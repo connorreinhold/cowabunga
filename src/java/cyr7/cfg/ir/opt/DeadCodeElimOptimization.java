@@ -49,11 +49,6 @@ public class DeadCodeElimOptimization {
 
             this.visited.add(next);
 
-            for (CFGNode in: next.in()) {
-                if (!this.visited.contains(in)) {
-                    this.nextNodes.add(in);
-                }
-            }
             for (CFGNode out: next.out()) {
                 if (!this.visited.contains(out)) {
                     this.nextNodes.add(out);
@@ -94,6 +89,8 @@ public class DeadCodeElimOptimization {
             if (!this.isAReturn(n.variable)
                     && !defined.contains(n.variable)) {
                 // Remove n from the graph.
+                // For every incoming node, replace their out node with
+                // this node's out node.
                 for (CFGNode incoming: n.in()) {
                     for (CFGNode out: n.out()) {
                         incoming.replaceOutEdge(n, out);

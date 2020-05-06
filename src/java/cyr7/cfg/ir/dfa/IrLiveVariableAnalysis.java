@@ -1,6 +1,7 @@
 package cyr7.cfg.ir.dfa;
 
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -112,6 +113,23 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
      *
      */
     public static class IrLiveVarLattice {
+        @Override
+        public int hashCode() {
+            return Objects.hash(liveVars);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (!(obj instanceof IrLiveVarLattice)) {
+                return false;
+            }
+            IrLiveVarLattice other = (IrLiveVarLattice) obj;
+            return Objects.equals(liveVars, other.liveVars);
+        }
+
         public final Set<String> liveVars;
 
         public IrLiveVarLattice() {
@@ -129,6 +147,7 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
                                             IrLiveVarLattice rhs) {
             return new IrLiveVarLattice(Sets.union(lhs.liveVars, rhs.liveVars));
         }
+
     }
 
 }

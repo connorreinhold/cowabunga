@@ -3,8 +3,8 @@ package cyr7.cfg.ir;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
+import java.util.Set;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.ir.nodes.CFGNode;
@@ -43,7 +43,7 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        List<CFGNode> expectedNodes = List.of(root, firstAssign, returnNode);
+        Set<CFGNode> expectedNodes = Set.of(root, firstAssign, returnNode);
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, firstAssign),
                 new Pair<>(firstAssign, returnNode));
@@ -54,7 +54,7 @@ class TestDeadCodeRemover {
 
         // Running it again should remove y = 15
         start = new DeadCodeElimOptimization().optimize(root);
-        expectedNodes = List.of(root, returnNode);
+        expectedNodes = Set.of(root, returnNode);
         expectedEdges = List.of(new Pair<>(root, returnNode));
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
                 start, expectedNodes, expectedEdges));
@@ -92,7 +92,7 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        List<CFGNode> expectedNodes = List.of(root, xAssign, ifNode,
+        Set<CFGNode> expectedNodes = Set.of(root, xAssign, ifNode,
                                             printNode, returnNode);
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, xAssign),
@@ -123,7 +123,7 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        List<CFGNode> expectedNodes = List.of(root, setRV, returnNode);
+        Set<CFGNode> expectedNodes = Set.of(root, setRV, returnNode);
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, setRV),
                 new Pair<>(setRV, returnNode));
@@ -143,7 +143,6 @@ class TestDeadCodeRemover {
      * }
      * return
      */
-    @Disabled
     @Test
     void testWhileLoopCFG() {
         final Location loc = new Location(-1, -1);
@@ -170,12 +169,13 @@ class TestDeadCodeRemover {
 
         CFGStartNode start = new DeadCodeElimOptimization().optimize(root);
 
-        List<CFGNode> expectedNodes = List.of(root, setX, whileIfNode, xIncrement, returnNode);
+        Set<CFGNode> expectedNodes = Set.of(root, setX, whileIfNode, xIncrement, returnNode);
         List<Pair<CFGNode, CFGNode>> expectedEdges = List.of(
                 new Pair<>(root, setX),
                 new Pair<>(setX, whileIfNode),
                 new Pair<>(whileIfNode, xIncrement),
-                new Pair<>(whileIfNode, xIncrement)
+                new Pair<>(xIncrement, whileIfNode),
+                new Pair<>(whileIfNode, returnNode)
                 );
 
         assertTrue(IrCfgTestUtil.assertEqualGraphs(
