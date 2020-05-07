@@ -1,23 +1,100 @@
 package cyr7.cfg.util;
 
+import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
+import cyr7.ir.nodes.IRStmt;
 import polyglot.util.Pair;
 
 public class IrCfgTestUtil {
+
+    public static void printIR(CFGStartNode start) {
+        IRStmt result = CFGFlattener.flatten(start);
+        System.out.println(result);
+    }
+
+    public static Set<CFGNode> nodeSet(CFGNode ...nodes) {
+        var cloner = new CfgNodeClonerVisitor();
+        Set<CFGNode> nodeSet = new HashSet<>();
+        for (CFGNode n: nodes) {
+            nodeSet.add(n.accept(cloner));
+        }
+        return nodeSet;
+    }
+
+    @SafeVarargs
+    public static List<Pair<CFGNode, CFGNode>>
+                edgeList(Pair<CFGNode, CFGNode> ... edges) {
+        var cloner = new CfgNodeClonerVisitor();
+        List<Pair<CFGNode, CFGNode>> edgeList = new ArrayList<>();
+        for (Pair<CFGNode, CFGNode> e: edges) {
+            edgeList.add(new Pair<>(e.part1().accept(cloner),
+                                   e.part2().accept(cloner)));
+        }
+        return edgeList;
+    }
+
+
+    public static class CfgNodeClonerVisitor implements IrCFGVisitor<CFGNode> {
+
+        private final CFGNode stubReference = new CFGStubNode();
+
+        @Override
+        public CFGNode visit(CFGCallNode n) {
+            return new CFGCallNode(n.location(), n.call, stubReference);
+        }
+
+        @Override
+        public CFGNode visit(CFGIfNode n) {
+            return new CFGIfNode(n.location(), stubReference,
+                                    stubReference, n.cond);
+        }
+
+        @Override
+        public CFGNode visit(CFGVarAssignNode n) {
+            return new CFGVarAssignNode(n.location(), n.variable,
+                    n.value, stubReference);
+        }
+
+        @Override
+        public CFGNode visit(CFGMemAssignNode n) {
+            return new CFGMemAssignNode(n.location(), n.target,
+                    n.value, stubReference);
+        }
+
+        @Override
+        public CFGNode visit(CFGReturnNode n) {
+            return new CFGReturnNode(n.location());
+        }
+
+        @Override
+        public CFGNode visit(CFGStartNode n) {
+            return new CFGStartNode(n.location(), stubReference);
+        }
+
+        @Override
+        public CFGNode visit(CFGSelfLoopNode n) {
+            return new CFGSelfLoopNode();
+        }
+
+    }
+
 
     private IrCfgTestUtil() {}
 
@@ -70,13 +147,16 @@ public class IrCfgTestUtil {
 
         boolean sameNodes = actualNodes.size() == expectedNodes.size();
         for (CFGNode n: expectedNodes) {
-            if (!actualNodes.contains(n))
-                sameEdges = false;
+            var equalsVisitor = new CFGNodeEqualVisitor(n);
+            if (!actualNodes.stream().anyMatch(node -> node.accept(equalsVisitor)))
+                sameNodes = false;
         }
         for (CFGNode n: actualNodes) {
-            if (!expectedNodes.contains(n))
-                sameEdges = false;
+            var equalsVisitor = new CFGNodeEqualVisitor(n);
+            if (!expectedNodes.stream().anyMatch(node -> node.accept(equalsVisitor)))
+                sameNodes = false;
         }
+
         return sameEdges && sameNodes;
     }
 
@@ -141,6 +221,11 @@ public class IrCfgTestUtil {
             return nodeToCompare instanceof CFGStartNode;
         }
 
+        @Override
+        public Boolean visit(CFGSelfLoopNode n) {
+            return nodeToCompare instanceof CFGSelfLoopNode;
+        }
+
     }
 
 
@@ -149,7 +234,7 @@ public class IrCfgTestUtil {
      */
     private static Set<CFGNode> getAllNodes(CFGNode start) {
         Set<CFGNode> nodes = new HashSet<>();
-        Queue<CFGNode> list = new LinkedList<>();
+        Queue<CFGNode> list = new ArrayDeque<>();
         list.add(start);
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
@@ -166,8 +251,8 @@ public class IrCfgTestUtil {
      * Returns a list of all edges in a CFG graph.
      */
     private static List<CFGPair> getAllEdges(CFGNode start) {
-        List<CFGPair> edges = new LinkedList<>();
-        Queue<CFGNode> list = new LinkedList<>(getAllNodes(start));
+        List<CFGPair> edges = new ArrayList<>();
+        Queue<CFGNode> list = new ArrayDeque<>(getAllNodes(start));
         while (!list.isEmpty()) {
             CFGNode node = list.remove();
             for (CFGNode outNode: node.out()) {

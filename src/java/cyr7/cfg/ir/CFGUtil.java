@@ -49,6 +49,32 @@ public final class CFGUtil {
         outputDotForFunctionIR(result.get(functionName), writer);
     }
 
+    public static Map<String, CFGNode> generateAllInitialDot(
+            Reader reader,
+            String filename,
+            IxiFileOpener fileOpener) throws Exception {
+        IRCompUnit lowered = IRUtil.generateInitialIR(
+                reader,
+                filename,
+                fileOpener,
+                new DefaultIdGenerator());
+        return CFGConstructor.constructCFG(lowered);
+    }
+
+    public static Map<String, CFGNode> generateAllFinalDot(
+            Reader reader,
+            String filename,
+            IxiFileOpener fileOpener,
+            LowerConfiguration lowerConfiguration) throws Exception {
+        IRCompUnit lowered = IRUtil.generateIR(
+                reader,
+                filename,
+                fileOpener,
+                lowerConfiguration,
+                new DefaultIdGenerator());
+        return CFGConstructor.constructCFG(lowered);
+    }
+
     public static void outputDotForFunctionIR(CFGNode node, Writer writer) {
         PrintWriter printer = new PrintWriter(writer);
         IrCFGDotVisitor dv = new IrCFGDotVisitor();

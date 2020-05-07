@@ -36,4 +36,8 @@ public final class CFGNodeFactory {
         return new CFGVarAssignNode(location, variable, value, out);
     }
 
+    public CFGSelfLoopNode SelfLoop() {
+        return new CFGSelfLoopNode();
+    }
+
 }

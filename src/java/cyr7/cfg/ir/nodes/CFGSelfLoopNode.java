@@ -7,42 +7,38 @@ import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class CFGStubNode extends CFGNode {
+public class CFGSelfLoopNode extends CFGNode {
 
-    public CFGStubNode() {
+    public CFGSelfLoopNode() {
         super(new Location(-1, -1));
     }
 
     @Override
     public List<CFGNode> out() {
-        return List.of();
+        return List.of(this);
     }
 
     @Override
     public <T> T accept(IrCFGVisitor<T> visitor) {
-        throw new UnsupportedOperationException("Cannot visit stub node");
-    }
-
-    @Override
-    public void replaceOutEdge(CFGNode stub, CFGNode n) {
-        throw new UnsupportedOperationException("Cannot convert in stub node");
+        return visitor.visit(this);
     }
 
     @Override
     public <T> List<T> acceptForward(
             ForwardTransferFunction<T> transferFunction, T input) {
-        throw new UnsupportedOperationException("Cannot accept forward in stub node");
+        return List.of(transferFunction.transfer(this, input));
     }
 
     @Override
     public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction,
             T input) {
-        throw new UnsupportedOperationException("Cannot accept backward in stub node");
+        return transferFunction.transfer(this, input);
     }
 
     @Override
-    public String toString() {
-        return "Stub";
+    public void replaceOutEdge(CFGNode previous, CFGNode newTarget) {
+        throw new UnsupportedOperationException(
+                "The out nodes of a self loop cannot be replaced");
     }
 
 }

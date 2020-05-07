@@ -1,5 +1,6 @@
 package cyr7.ir;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -307,7 +308,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         List<IRExpr> arraySizes = this.getArraySizeExprs(n.type);
 
         List<IRStmt> stmts = new ArrayList<IRStmt>();
-        Queue<IRTemp> sizeTemps = new LinkedList<IRTemp>();
+        Queue<IRTemp> sizeTemps = new ArrayDeque<IRTemp>();
 
         for (int i = 0; i < arraySizes.size(); i++) {
             IRTemp sizeTemp = make.IRTemp(generator.newTemp());

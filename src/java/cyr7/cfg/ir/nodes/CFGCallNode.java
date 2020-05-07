@@ -1,17 +1,17 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.List;
+
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-import java.util.List;
-
 public class CFGCallNode extends CFGNode {
 
     // This includes both procedures and function calls
-    public final IRCallStmt call;
+    public IRCallStmt call;
     private CFGNode out;
 
     public CFGCallNode(Location location, IRCallStmt call, CFGNode out) {
@@ -20,6 +20,10 @@ public class CFGCallNode extends CFGNode {
         this.out = out;
 
         this.updateIns();
+    }
+
+    public CFGNode outNode() {
+        return out;
     }
 
     @Override
@@ -33,13 +37,13 @@ public class CFGCallNode extends CFGNode {
     }
 
     @Override
-    public void convertFromStub(CFGStubNode stub, CFGNode n) {
-        if (out == stub) {
+    public void replaceOutEdge(CFGNode previous, CFGNode n) {
+        if (out == previous) {
             this.out = n;
             this.updateIns();
         } else {
             throw new UnsupportedOperationException(
-                    "Cannot change out node unless it was originally a stub node.");
+                    "Cannot replace node arbitrarily.");
         }
     }
 
@@ -54,7 +58,7 @@ public class CFGCallNode extends CFGNode {
             T input) {
         return transferFunction.transfer(this, input);
     }
-    
+
     @Override
     public String toString() {
         String callString = call.toString().replaceAll("\n", "");

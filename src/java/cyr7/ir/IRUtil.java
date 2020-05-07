@@ -8,12 +8,11 @@ import java.io.Writer;
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
 import cyr7.ir.block.TraceOptimizer;
-import cyr7.ir.fold.IRConstFoldVisitor;
-import cyr7.ir.fold.LIRConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRNode;
+import cyr7.ir.optimize.IRConstFoldVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.IxiFileOpener;
@@ -59,7 +58,7 @@ public class IRUtil {
 
         if (lowerConfiguration.cFoldEnabled) {
             IRNode node =
-                compUnit.accept(new LIRConstFoldVisitor()).assertSecond();
+                compUnit.accept(new IRConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
@@ -111,6 +110,24 @@ public class IRUtil {
         printer.flush();
     }
 
+    public static void initialIRGen(
+            Reader reader,
+            Writer writer,
+            String filename,
+            IxiFileOpener fileOpener) throws Exception {
+
+        IRCompUnit lowered = generateInitialIR(
+                reader,
+                filename,
+                fileOpener,
+                new DefaultIdGenerator());
+
+        SExpPrinter printer
+                = new CodeWriterSExpPrinter(new PrintWriter(writer));
+        lowered.printSExp(printer);
+        printer.flush();
+    }
+
     public static void irRun(
         Reader reader,
         Writer writer,
@@ -137,6 +154,21 @@ public class IRUtil {
         node.printSExp(printer);
         printer.flush();
         return writer.toString();
+    }
+
+    public static IRCompUnit generateInitialIR(
+            Reader reader,
+            String filename,
+            IxiFileOpener fileOpener,
+            IdGenerator generator) throws Exception {
+
+        Node result = ParserUtil.parseNode(reader, filename, false);
+        TypeCheckUtil.typeCheck(result, fileOpener);
+
+        IRCompUnit compUnit = (IRCompUnit)
+                result.accept(new ASTToIRVisitor(generator)).assertSecond();
+
+        return compUnit;
     }
 
     public static IRCompUnit generateIR(
