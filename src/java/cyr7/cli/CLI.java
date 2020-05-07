@@ -24,6 +24,7 @@ import org.apache.commons.cli.ParseException;
 
 import cyr7.cfg.ir.CFGUtil;
 import cyr7.cfg.ir.nodes.CFGNode;
+import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.ir.IRUtil;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.lexer.LexerUtil;
@@ -702,7 +703,7 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    Map<String, CFGNode> functions = CFGUtil.generateAllInitialDot(
+                    Map<String, CFGStartNode> functions = CFGUtil.generateAllInitialDot(
                             input,
                             filename,
                             opener
@@ -726,7 +727,7 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    Map<String, CFGNode> functions = CFGUtil.generateAllFinalDot(
+                    Map<String, CFGStartNode> functions = CFGUtil.generateAllFinalDot(
                             input,
                             filename,
                             opener,
