@@ -76,8 +76,8 @@ public enum ASMAbstract {
         for (int i = 0; i < temporariesForCalleeSaved.length; i++) {
             String temp = temporariesForCalleeSaved[i];
             body.add(make.Mov(
-                arg.temp(temp, ASMRegSize.QWORD),
-                ASMConstants.CALLEE_SAVED_REGISTERS[i]));
+                ASMConstants.CALLEE_SAVED_REGISTERS[i],
+                arg.temp(temp, ASMRegSize.QWORD)));
         }
 
         return body;
@@ -94,8 +94,11 @@ public enum ASMAbstract {
         lines.addAll(List.of(
             new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),
-            make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps))));
+            make.Mov(ASMReg.RBP, ASMReg.RSP)));
+
+        if (numberOfTemps > 0) {
+            lines.add(make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+        }
 
         if (stackNeedsAdjustment(numberOfTemps)) {
             // make it so the stack is always 16-byte aligned on entry to the
@@ -113,8 +116,11 @@ public enum ASMAbstract {
             lines.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
 
+        if (numberOfTemps > 0) {
+            lines.add(make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+        }
+
         lines.addAll(List.of(
-            make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
             make.Mov(ASMReg.RSP, ASMReg.RBP),
             make.Pop(ASMReg.RBP),
             make.Ret()));

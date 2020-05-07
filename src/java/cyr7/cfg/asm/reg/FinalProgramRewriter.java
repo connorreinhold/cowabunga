@@ -3,6 +3,7 @@ package cyr7.cfg.asm.reg;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMInstr;
+import cyr7.x86.asm.ASMInstrType;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMMemArg;
 import cyr7.x86.asm.ASMReg;
@@ -13,9 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 final class FinalProgramRewriter implements Runnable {
 
@@ -47,7 +46,11 @@ final class FinalProgramRewriter implements Runnable {
 
     @Override
     public void run() {
-        for (int i = program.size() - 1; i >= 0; i--) {
+        // the last instruction of the program should be
+        assert ((ASMInstr) program.get(program.size() - 1)).type
+            == ASMInstrType.RETQ;
+
+        for (int i = program.size() - 2; i >= 0; i--) {
             if (coalescedMoves.contains(i)) {
                 continue;
             }

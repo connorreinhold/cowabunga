@@ -21,9 +21,9 @@ final class CoalescingHeuristic {
     }
 
     public boolean ok(ASMTempRegArg t, ASMTempRegArg r) {
-        return graph.degree(t) < precolored.size()
+        return graph.degree(t) < K
             || precolored.contains(t)
-            || graph.adjacent(t).contains(r);
+            || graph.adjacentSet(t, r);
     }
 
     public boolean conservative(Set<ASMTempRegArg> nodes) {

@@ -31,6 +31,10 @@ final class InterferenceGraph {
     }
 
     public void addEdge(ASMTempRegArg lhs, ASMTempRegArg rhs) {
+        if (lhs.equals(rhs)) {
+            return;
+        }
+
         addPartialEdge(lhs, rhs);
         addPartialEdge(rhs, lhs);
     }
@@ -43,6 +47,14 @@ final class InterferenceGraph {
             this.edges.put(from, set);
             set.add(to);
         }
+    }
+
+    public Set<ASMTempRegArg> adjList(ASMTempRegArg node) {
+        if (!edges.containsKey(node) || precolored.contains(node)) {
+            return Collections.emptySet();
+        }
+
+        return edges.get(node);
     }
 
     public Set<ASMTempRegArg> adjacent(ASMTempRegArg node) {
