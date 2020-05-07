@@ -4,8 +4,14 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.util.Map;
 
 import cyr7.ast.Node;
+import cyr7.cfg.ir.constructor.CFGConstructor;
+import cyr7.cfg.ir.flatten.CFGFlattener;
+import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.opt.CopyPropagationOptimization;
+import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.Optimization;
 import cyr7.cli.OptimizationSetting;
@@ -26,14 +32,19 @@ public class IRUtil {
 
     public static class LowerConfiguration {
 
-        public final OptimizationSetting optimizationSetting;
+        public final OptimizationSetting settings;
         public final boolean traceEnabled;
 
-        public LowerConfiguration(OptimizationSetting setting,
+        public LowerConfiguration(OptimizationSetting settings,
                                  boolean traceEnabled) {
-            this.optimizationSetting = setting;
+            this.settings = settings;
             this.traceEnabled = traceEnabled;
         }
+
+        public String description() {
+            return settings.description();
+        }
+
     }
 
     public static IRCompUnit lower(
@@ -41,10 +52,10 @@ public class IRUtil {
         IdGenerator generator,
         LowerConfiguration lowerConfiguration) {
 
-        final var cFoldEnabled = lowerConfiguration.optimizationSetting
-                                    .getOptimizationSetting(Optimization.CF);
+        final boolean cFoldEnabled = lowerConfiguration.settings
+                                    .get(Optimization.CF);
 
-        CLI.debugPrint("Constant Folding Enabled: " + cFoldEnabled);
+        CLI.debugPrint(lowerConfiguration.description());
 
         CLI.lazyDebugPrint(compUnit, unit -> "MIR: \n" + unit);
 
@@ -68,6 +79,32 @@ public class IRUtil {
             compUnit = (IRCompUnit) node;
         }
 
+        Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
+        if (lowerConfiguration.settings.get(Optimization.COPY)) {
+            cfg.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = CopyPropagationOptimization
+                                            .optimize(cfg.get(functionName));
+                cfg.put(functionName, optimizedCfg);
+            });
+        }
+
+        if (lowerConfiguration.settings.get(Optimization.DCE)) {
+            cfg.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = DeadCodeElimOptimization
+                                            .optimize(cfg.get(functionName));
+                cfg.put(functionName, optimizedCfg);
+            });
+        }
+
+        if (lowerConfiguration.settings.get(Optimization.DCE)) {
+            cfg.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = DeadCodeElimOptimization
+                                            .optimize(cfg.get(functionName));
+                cfg.put(functionName, optimizedCfg);
+            });
+        }
+
+        compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
