@@ -1,14 +1,5 @@
 package cyr7.cfg.asm;
 
-import cyr7.cfg.asm.constructor.AsmCFGConstructor;
-import cyr7.cfg.asm.dot.AsmCFGDotVisitor;
-import cyr7.cfg.asm.nodes.AsmCFGNode;
-import cyr7.cfg.asm.nodes.AsmCFGStartNode;
-import cyr7.ir.IRUtil.LowerConfiguration;
-import cyr7.x86.ASMUtil;
-import cyr7.x86.asm.ASMLine;
-import polyglot.util.Pair;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -16,6 +7,16 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.List;
+
+import cyr7.cfg.asm.constructor.AsmCFGConstructor;
+import cyr7.cfg.asm.dot.AsmCFGDotVisitor;
+import cyr7.cfg.asm.nodes.AsmCFGNode;
+import cyr7.cfg.asm.nodes.AsmCFGStartNode;
+import cyr7.cli.OptimizationSetting;
+import cyr7.ir.IRUtil.LowerConfiguration;
+import cyr7.x86.ASMUtil;
+import cyr7.x86.asm.ASMLine;
+import polyglot.util.Pair;
 
 public final class AsmCFGUtil {
 
@@ -46,7 +47,7 @@ public final class AsmCFGUtil {
             reader,
             "testJunk.xi",
             null,
-            new LowerConfiguration(true, true));
+            new LowerConfiguration(new OptimizationSetting(), true));
         AsmCFGConstructor cfgConstructor = new AsmCFGConstructor(lines);
         AsmCFGStartNode startNode = cfgConstructor.constructAsmCFG();
         Writer writer = new PrintWriter(System.out);

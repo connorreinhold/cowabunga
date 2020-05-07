@@ -4,12 +4,11 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
-import cyr7.ir.IRUtil;
+import cyr7.cli.OptimizationSetting;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.x86.asm.ASMLine;
@@ -17,7 +16,7 @@ import cyr7.x86.asm.ASMLine;
 public class testJunk {
     public static void main(String[] args) throws Exception {
         String fileName = "testJunk.xi";
-        LowerConfiguration lowerConfiguration = new LowerConfiguration(true, true);
+        LowerConfiguration lowerConfiguration = new LowerConfiguration(new OptimizationSetting(), true);
         test(getReader(fileName), fileName, false, null, lowerConfiguration);
     }
     

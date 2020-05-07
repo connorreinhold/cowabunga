@@ -25,6 +25,7 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import cyr7.ir.IRUtil.LowerConfiguration;
+import cyr7.cli.OptimizationSetting;
 import cyr7.integration.Run.RunConfiguration;
 
 public abstract class TestProgram {
@@ -45,8 +46,10 @@ public abstract class TestProgram {
 
     @Test
     void testLirNoOptimizations() throws Exception {
+        final var setting = new OptimizationSetting();
+        setting.disableAllOptimizations();
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(false, false),
+                new LowerConfiguration(setting, false),
                 configuration());
         assertEquals(expected(), result);
     }
@@ -54,15 +57,16 @@ public abstract class TestProgram {
     @Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(true, false),
+                new LowerConfiguration(new OptimizationSetting(), false),
                 configuration());
         assertEquals(expected(), result);
     }
 
     @Test
     void testLirTraceEnabled() throws Exception {
+        final var setting = new OptimizationSetting();
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(false, true),
+                new LowerConfiguration(setting, true),
                 configuration());
         assertEquals(expected(), result);
     }
@@ -70,7 +74,7 @@ public abstract class TestProgram {
     @Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(true, true),
+                new LowerConfiguration(new OptimizationSetting(), true),
                 configuration());
         assertEquals(expected(), result);
     }

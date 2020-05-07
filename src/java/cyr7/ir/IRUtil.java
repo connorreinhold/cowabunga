@@ -7,6 +7,8 @@ import java.io.Writer;
 
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
+import cyr7.cli.Optimization;
+import cyr7.cli.OptimizationSetting;
 import cyr7.ir.block.TraceOptimizer;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
@@ -24,14 +26,14 @@ public class IRUtil {
 
     public static class LowerConfiguration {
 
-        public final boolean cFoldEnabled;
+        public final OptimizationSetting optimizationSetting;
         public final boolean traceEnabled;
 
-        public LowerConfiguration(boolean cFoldEnabled, boolean traceEnabled) {
-            this.cFoldEnabled = cFoldEnabled;
+        public LowerConfiguration(OptimizationSetting setting,
+                                 boolean traceEnabled) {
+            this.optimizationSetting = setting;
             this.traceEnabled = traceEnabled;
         }
-
     }
 
     public static IRCompUnit lower(
@@ -39,11 +41,14 @@ public class IRUtil {
         IdGenerator generator,
         LowerConfiguration lowerConfiguration) {
 
-        CLI.debugPrint("Constant Folding Enabled: " + lowerConfiguration.cFoldEnabled);
+        final var cFoldEnabled = lowerConfiguration.optimizationSetting
+                                    .getOptimizationSetting(Optimization.CF);
+
+        CLI.debugPrint("Constant Folding Enabled: " + cFoldEnabled);
 
         CLI.lazyDebugPrint(compUnit, unit -> "MIR: \n" + unit);
 
-        if (lowerConfiguration.cFoldEnabled) {
+        if (cFoldEnabled) {
             IRNode node = compUnit.accept(new IRConstFoldVisitor()).assertSecond();
             compUnit = (IRCompUnit) node;
             CLI.lazyDebugPrint(compUnit, unit -> "Constant-Folded MIR: \n" + unit);
@@ -56,7 +61,7 @@ public class IRUtil {
             compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
-        if (lowerConfiguration.cFoldEnabled) {
+        if (cFoldEnabled) {
             IRNode node =
                 compUnit.accept(new IRConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;

@@ -14,9 +14,6 @@ import java.nio.file.Paths;
 import java.util.Map;
 import java.util.function.Function;
 
-import cyr7.cfg.ir.CFGUtil;
-import cyr7.cfg.ir.nodes.CFGNode;
-import cyr7.x86.ASMUtil.TilerConf;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -25,6 +22,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import cyr7.cfg.ir.CFGUtil;
+import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.ir.IRUtil;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.lexer.LexerUtil;
@@ -32,21 +31,23 @@ import cyr7.parser.ParserUtil;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
 import cyr7.x86.ASMUtil;
+import cyr7.x86.ASMUtil.TilerConf;
 
 public class CLI {
 
-    final static private String usage = "xic [options] <source files>";
-    final static private int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
-    final static private int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
-    final static private PrintWriter writer = new PrintWriter(System.out);
-    final static private HelpFormatter helpFormatter = new HelpFormatter();
-    final static private Options options = createOptions();
-    final static private CommandLineParser parser = new DefaultParser();
+    private static final String usage = "xic [options] <source files>";
+    private static final int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
+    private static final int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
+    private static final PrintWriter writer = new PrintWriter(System.out);
+    private static final HelpFormatter helpFormatter = new HelpFormatter();
+    private static final Options options = createOptions();
+    private static final CommandLineParser parser = new DefaultParser();
 
     private static boolean debugPrintingEnabled = false;
     private static ASMUtil.TilerConf tiler = TilerConf.COMPLEX;
 
-    private static boolean cFoldEnabled = true;
+    private static final OptimizationSetting optSettings = new OptimizationSetting();
+
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
@@ -368,29 +369,23 @@ public class CLI {
      */
     static CommandLine parseCommand(String[] args)
             throws ParseException {
-        boolean hasBeenDisabled = false;
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("-O")) {
                 String optShort = args[i].substring(args[i].indexOf('O') + 1);
-                boolean noModifier = true;
-
                 if (optShort.startsWith("-no-")) {
+                    // Disable only optimization <opt>
                     optShort = optShort.substring(optShort.indexOf("-no-") + 4);
-                    noModifier = false;
-                } else if (!hasBeenDisabled) {
-                    cFoldEnabled = false;
-                    hasBeenDisabled = true;
+                    Optimization opt = Optimization.parse(optShort);
+                    optSettings.setOptimization(opt, false);
+                } else if (optShort.isBlank()) {
+                    // Disable all optimization
+                    optSettings.disableAllOptimizations();
+                } else {
+                    // Enable optimization
+                    Optimization opt = Optimization.parse(optShort);
+                    optSettings.setOptimization(opt, true);
                 }
-
-                Optimization opt = Optimization.parse(optShort);
-
-                switch(opt) {
-                    case CF:
-                        cFoldEnabled = true && noModifier;
-                        args[i] = "";
-                    default:
-                        break;
-                }
+                args[i] = "";
             }
         }
 
@@ -655,8 +650,7 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-
-            LowerConfiguration lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
+            LowerConfiguration lowerConfiguration = new LowerConfiguration(optSettings, true);
 
             if (wantsInitialIRGen) {
                 debugPrint("Generate initial intermediate code for: " + filename);

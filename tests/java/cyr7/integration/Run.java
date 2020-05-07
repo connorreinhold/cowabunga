@@ -25,6 +25,7 @@ import cyr7.ast.stmt.ProcedureStmtNode;
 import cyr7.ast.toplevel.FunctionDeclNode;
 import cyr7.ast.toplevel.FunctionHeaderDeclNode;
 import cyr7.ast.toplevel.XiProgramNode;
+import cyr7.cli.Optimization;
 import cyr7.ir.ASTToIRVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
@@ -116,7 +117,8 @@ public final class Run {
 
         IRCompUnit lowered = IRUtil.lower(compUnit, generator, lowerConfiguration);
 
-        if (lowerConfiguration.cFoldEnabled) {
+        if (lowerConfiguration.optimizationSetting
+                              .getOptimizationSetting(Optimization.CF)) {
             assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
         }
         if (lowerConfiguration.traceEnabled) {

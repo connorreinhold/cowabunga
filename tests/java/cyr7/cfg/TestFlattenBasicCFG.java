@@ -3,8 +3,10 @@ package cyr7.cfg;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGNode;
+import cyr7.cli.OptimizationSetting;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
+import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -70,7 +72,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main(): int { a:int = 3; while (true) { while(true) { } } if (133 > 0) { return 43 } return 12 }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "while.xi", null, new IRUtil.LowerConfiguration(true, true),
+                "while.xi", null, new LowerConfiguration(new OptimizationSetting(), true),
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
@@ -84,7 +86,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main() { while (true) { } }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "while.xi", null, new IRUtil.LowerConfiguration(true, true),
+                "while.xi", null, new LowerConfiguration(new OptimizationSetting(), true),
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
@@ -99,7 +101,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main(): int { return 13 }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "return.xi", null, new IRUtil.LowerConfiguration(true, true),
+                "return.xi", null, new LowerConfiguration(new OptimizationSetting(), true),
                 new DefaultIdGenerator());
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
@@ -120,7 +122,7 @@ class TestFlattenBasicCFG {
                 + "}";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "nestedControls.xi", null, new IRUtil.LowerConfiguration(true, true),
+                "nestedControls.xi", null, new LowerConfiguration(new OptimizationSetting(), true),
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
@@ -133,7 +135,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main() { }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "nestedControls.xi", null, new IRUtil.LowerConfiguration(true, true),
+                "nestedControls.xi", null, new LowerConfiguration(new OptimizationSetting(), true),
                 new DefaultIdGenerator());
 
         Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
