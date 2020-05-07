@@ -1,5 +1,6 @@
 package cyr7.ir.block;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -15,7 +16,7 @@ final class BlockTraceGenerator {
 
     public static List<List<BasicBlock>> getTraces(List<BasicBlock> basicBlocks) {
         List<List<BasicBlock>> traces = new LinkedList<>();
-        Queue<BasicBlock> queue = new LinkedList<>(basicBlocks);
+        Queue<BasicBlock> queue = new ArrayDeque<>(basicBlocks);
         Set<BasicBlock> markedBlocks = new HashSet<>();
 
         Map<String, BasicBlock> labelToBlock = new HashMap<>();

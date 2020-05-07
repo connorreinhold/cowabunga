@@ -8,12 +8,11 @@ import java.io.Writer;
 import cyr7.ast.Node;
 import cyr7.cli.CLI;
 import cyr7.ir.block.TraceOptimizer;
-import cyr7.ir.fold.IRConstFoldVisitor;
-import cyr7.ir.fold.LIRConstFoldVisitor;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRNode;
+import cyr7.ir.optimize.IRConstFoldVisitor;
 import cyr7.ir.visit.CheckConstFoldedIRVisitor;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.IxiFileOpener;
@@ -59,7 +58,7 @@ public class IRUtil {
 
         if (lowerConfiguration.cFoldEnabled) {
             IRNode node =
-                compUnit.accept(new LIRConstFoldVisitor()).assertSecond();
+                compUnit.accept(new IRConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
         }
