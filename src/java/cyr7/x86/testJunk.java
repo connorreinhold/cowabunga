@@ -43,7 +43,7 @@ public class testJunk {
         IdGenerator idGenerator = new DefaultIdGenerator();
         IRCompUnit compUnit = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
         ASMRegAllocGenerator asmGenerator = new ASMRegAllocGenerator(ComplexTiler::new, idGenerator);
-        System.out.println(asmGenerator.generate(compUnit));
+        asmGenerator.generate(compUnit);
     }
 
 }

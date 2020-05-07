@@ -10,7 +10,6 @@ import cyr7.x86.reg_allocator.ASMGenerator;
 import cyr7.x86.tiler.TilerFactory;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,11 +42,12 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
         System.out.println("--- ABSTRACT ASSEMBLY ---");
         print(abstractASM);
 
+        SpillMemAllocator spillAllocator = new SpillMemAllocator();
         int count = 0;
         RegisterAllocator registerAllocator;
         do {
             registerAllocator
-                = new RegisterAllocator(abstractASM, funcDecl.name(), generator);
+                = new RegisterAllocator(abstractASM, funcDecl.name(), generator, spillAllocator);
             registerAllocator.run();
 
             System.out.println("Spilled nodes: " + registerAllocator.spilledNodes().stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", ")));
@@ -69,10 +69,10 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
         print(registerAllocator.program());
         System.out.println(registerAllocator.coalescedMoves());
 
-        var keyvalues = registerAllocator.coloring().entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getIntelArg())).collect(Collectors.toList());
-        for (var keyvalue : keyvalues) {
-            System.out.println(keyvalue.getKey().getIntelArg() + " -> " + registerAllocator.registers()[keyvalue.getValue()].getIntelArg());
-        }
+//        var keyvalues = registerAllocator.coloring().entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getIntelArg())).collect(Collectors.toList());
+//        for (var keyvalue : keyvalues) {
+//            System.out.println(keyvalue.getKey().getIntelArg() + " -> " + registerAllocator.registers()[keyvalue.getValue()].getIntelArg());
+//        }
 
         FinalProgramRewriter rewriter = new FinalProgramRewriter(
             registerAllocator.program(),
@@ -84,16 +84,17 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
 
         List<ASMLine> prologue = ASMAbstract.createPrologue(
             funcDecl.name(),
-            registerAllocator.allocatedTemps());
+            spillAllocator.allocatedTemps());
 
         List<ASMLine> epilogue = ASMAbstract.createEpilogue(
-            registerAllocator.allocatedTemps());
+            spillAllocator.allocatedTemps());
 
         List<ASMLine> lines = new ArrayList<>(
             prologue.size() + rewriter.rewritten().size() + epilogue.size());
         lines.addAll(prologue);
         lines.addAll(rewriter.rewritten());
         lines.addAll(epilogue);
+        System.out.println("--- FINAL PROGRAM ---");
         print(lines);
         return lines;
     }

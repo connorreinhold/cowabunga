@@ -20,6 +20,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 import cyr7.x86.visitor.TempVisitor;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -63,15 +64,17 @@ final class RegisterAllocator {
     private ArrayList<ASMLine> functionBody;
     private final String mangledName;
 
-    private SpillMemAllocator spillAllocator = new SpillMemAllocator();
+    private final SpillMemAllocator spillAllocator;
 
     public RegisterAllocator(
         List<ASMLine> functionBody,
         String mangledName,
         ASMReg[] availableRegisters,
-        IdGenerator generator) {
+        IdGenerator generator,
+        SpillMemAllocator spillAllocator) {
 
-        ArrayList<ASMLine> augmentedFunctionBody = new ArrayList<>(functionBody);
+        ArrayList<ASMLine> augmentedFunctionBody =
+            new ArrayList<>(functionBody);
         augmentedFunctionBody.add(ASMLineFactory.instance.Ret());
 
         this.availableRegisters = availableRegisters;
@@ -80,12 +83,18 @@ final class RegisterAllocator {
         this.generator = generator;
         this.functionBody = augmentedFunctionBody;
         this.mangledName = mangledName;
+        this.spillAllocator = spillAllocator;
 
         init();
     }
 
-    public RegisterAllocator(List<ASMLine> functionBody, String mangledName, IdGenerator generator) {
-        this(functionBody, mangledName, DEFAULT_AVAILABLE_REGISTERS, generator);
+    public RegisterAllocator(
+        List<ASMLine> functionBody,
+        String mangledName,
+        IdGenerator generator,
+        SpillMemAllocator spillAllocator) {
+
+        this(functionBody, mangledName, DEFAULT_AVAILABLE_REGISTERS, generator, spillAllocator);
     }
 
     private final Worklists worklists = new Worklists();
@@ -117,10 +126,6 @@ final class RegisterAllocator {
         return functionBody;
     }
 
-    public int allocatedTemps() {
-        return spillAllocator.allocatedTemps();
-    }
-
     public HashSet<Integer> coalescedMoves() {
         return moves.coalesced;
     }
@@ -138,30 +143,31 @@ final class RegisterAllocator {
     public void run() {
         build();
         makeWorklist();
+
         do {
+//            System.out.println("Simplify: " + worklists.simplify.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(",")));
+//            System.out.println("Freeze: " + worklists.freeze.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(",")));
+//            System.out.println("Spill: " + worklists.spill.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(",")));
+
 //            Set<ASMTempRegArg> worklistUnions = Sets.union(
-//                    Sets.union(precolored, worklists.simplify),
-//                    Sets.union(worklists.freeze, worklists.spill));
-//            assert worklists.simplify.stream().allMatch(node ->
-//                graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size());
-//            assert worklists.freeze.stream().allMatch(node ->
-//                graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size());
-//            assert worklists.spill.stream().allMatch(node ->
-//                graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size());
-//
-//            assert worklists.simplify.stream().allMatch(node ->
-//                graph.degree(node) < K && Sets.intersection(
-//                    moves.getMoves(node),
-//                    Sets.union(moves.active, worklists.moves)
-//                ).isEmpty());
-//
-//            assert worklists.freeze.stream().allMatch(node ->
-//                graph.degree(node) < K && !Sets.intersection(
-//                    moves.getMoves(node),
-//                    Sets.union(moves.active, worklists.moves)
-//                ).isEmpty());
-//
-//            assert worklists.spill.stream().allMatch(node -> graph.degree(node) >= K);
+//                Sets.union(precolored, worklists.simplify),
+//                Sets.union(worklists.freeze, worklists.spill));
+//            for (ASMTempRegArg node : worklists.simplify) {
+//                assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
+//                assert graph.degree(node) < K;
+//                assert Sets.intersection(moves.getMoves(node),
+//                    Sets.union(moves.active, worklists.moves)).isEmpty();
+//            }
+//            for (ASMTempRegArg node : worklists.freeze) {
+//                assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
+//                assert graph.degree(node) < K;
+//                assert !Sets.intersection(moves.getMoves(node),
+//                    Sets.union(moves.active, worklists.moves)).isEmpty();
+//            }
+//            for (ASMTempRegArg node : worklists.spill) {
+//                assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
+//                assert graph.degree(node) >= K;
+//            }
 
             if (!worklists.simplify.isEmpty()) {
                 simplify();
@@ -201,24 +207,38 @@ final class RegisterAllocator {
     private void build() {
         AsmCFGConstructor constructor = new AsmCFGConstructor(functionBody);
         AsmCFGStartNode cfg = constructor.constructAsmCFG();
-        Map<AsmCFGNode, Set<ASMTempRegArg>> liveVariables
+        Map<AsmCFGNode, Set<ASMTempRegArg>> liveInVariables
             = WorklistAnalysis.analyze(
             cfg,
             new LiveVariableAnalysis(mangledName));
 
-        graph = new InterferenceGraph(precolored, selectStack, coalescedNodes);
-        for (var keyValue : liveVariables.entrySet()) {
-            List<ASMTempRegArg> args = new ArrayList<>(keyValue.getValue());
+        Map<AsmCFGNode, Set<ASMTempRegArg>> liveOutVariables = new HashMap<>();
+        for (var entry : liveInVariables.entrySet()) {
+            List<AsmCFGNode> prevs = entry.getKey().inNodes();
+            for (AsmCFGNode prev : prevs) {
+                if (liveOutVariables.containsKey(prev)) {
+                    Set<ASMTempRegArg> newLiveOut
+                        = Sets.union(liveOutVariables.get(prev), entry.getValue());
+                    liveOutVariables.put(prev, newLiveOut);
+                } else {
+                    liveOutVariables.put(prev, entry.getValue());
+                }
+            }
+        }
 
+        graph = new InterferenceGraph(precolored, selectStack, coalescedNodes);
+        for (var keyValue : liveOutVariables.entrySet()) {
             HashSet<ASMTempRegArg> live = new HashSet<>(keyValue.getValue());
             if (keyValue.getKey() instanceof AsmCFGSourceNode) {
-                ASMInstr instr = ((AsmCFGSourceNode) keyValue.getKey()).sourceInstr();
+                ASMInstr instr =
+                    ((AsmCFGSourceNode) keyValue.getKey()).sourceInstr();
                 if (Util.isMoveInstruction(instr)) {
                     live.removeAll(keyValue.getKey().accept(new UsesVisitor(Set.of(ASMConstants.RETURN_REGISTERS))));
                 }
             }
 
-            Set<ASMTempRegArg> defs = keyValue.getKey().accept(new DefsVisitor());
+            Set<ASMTempRegArg> defs =
+                keyValue.getKey().accept(new DefsVisitor());
             live.addAll(defs);
             for (ASMTempRegArg d : defs) {
                 for (ASMTempRegArg l : live) {
@@ -269,19 +289,19 @@ final class RegisterAllocator {
     private void simplify() {
         ASMTempRegArg n = worklists.simplify.removeFirst();
         selectStack.push(n);
-        // this automatically decrements the degree in the graph
 
         for (ASMTempRegArg m : graph.adjacent(n)) {
-            degreeDecremented(m);
+            decrementDegree(m);
         }
     }
 
-    private void degreeDecremented(ASMTempRegArg m) {
-        if (graph.degree(m) == K - 1) {
+    private void decrementDegree(ASMTempRegArg m) {
+        int degree = graph.decrementDegree(m);
+        if (degree == K) {
             enableMoves(Sets.union(Set.of(m), graph.adjacent(m)));
 
-            boolean removed = worklists.spill.remove(m);
-            assert removed;
+            assert worklists.spill.contains(m);
+            worklists.spill.remove(m);
 
             if (moves.nodeIsMoveRelated(m)) {
                 worklists.freeze.add(m);
@@ -342,9 +362,9 @@ final class RegisterAllocator {
             addWorklist(v);
         } else if (
             (precolored.contains(u)
-            && graph.adjacent(v).stream().allMatch(t -> coalescingHeuristic.ok(t, u)))
-            || (!precolored.contains(u)
-            && coalescingHeuristic.conservative(
+                && graph.adjacent(v).stream().allMatch(t -> coalescingHeuristic.ok(t, u)))
+                || (!precolored.contains(u)
+                && coalescingHeuristic.conservative(
                 Sets.union(graph.adjacent(u), graph.adjacent(v))))) {
 
             moves.coalesced.add(move);
@@ -371,7 +391,7 @@ final class RegisterAllocator {
 
         for (ASMTempRegArg t : graph.adjacent(v)) {
             graph.addEdge(t, u);
-            degreeDecremented(t);
+            decrementDegree(t);
         }
 
         if (graph.degree(u) >= K && worklists.freeze.contains(u)) {
@@ -451,6 +471,10 @@ final class RegisterAllocator {
         for (ASMTempRegArg n : coalescedNodes) {
             coloring.put(n, coloring.get(alias.get(n)));
         }
+    }
+
+    private String string(Collection<? extends ASMTempRegArg> collection) {
+        return collection.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
     }
 
 }
