@@ -1,7 +1,6 @@
 package cyr7.cfg.ir.opt;
 
 import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
-import cyr7.ir.fold.LIRConstFoldVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
@@ -31,18 +30,13 @@ public class IRTempToConstant {
      * {@link LatticeElement lattice} value. If no values are replaced, then
      * the original {@code expr} is returned.
      *
-     * <p>
-     * Constant folding is performed if possible.
-     *
      * @param expr The expression that may have temporaries to be replaced.
      * @param lattice The lattice mappings from conditional constant
      *                propagation.
      * @return The expression {@code expr} with temporaries replaced.
      */
     public static IRExpr replace(IRExpr expr, LatticeElement lattice) {
-        var constFolder = new LIRConstFoldVisitor();
-        return expr.accept(new IRReplaceTempVisitor(lattice))
-                   .accept(constFolder).assertFirst();
+        return expr.accept(new IRReplaceTempVisitor(lattice));
     }
 
     private static class IRReplaceTempVisitor implements MyIRVisitor<IRExpr> {

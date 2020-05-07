@@ -1,4 +1,4 @@
-package cyr7.ir.fold;
+package cyr7.ir.optimize;
 
 import java.math.BigInteger;
 import java.util.HashMap;
@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -44,7 +43,6 @@ import edu.cornell.cs.cs4120.util.InternalCompilerError;
  * For any node, the fields of nodes are recursively folded. The returned node
  * has all of its child nodes folded if possible.
  *
- * @author ayang
  *
  */
 public class IRConstFoldVisitor
