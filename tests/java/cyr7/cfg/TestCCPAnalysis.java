@@ -68,7 +68,7 @@ public class TestCCPAnalysis {
             line2);
         CFGStartNode line0 = make.Start(line1);
 
-        var result = WorklistAnalysis.analyze(line0, CCPAnalysis.INSTANCE);
+        var result = WorklistAnalysis.analyze(line0, CCPAnalysis.INSTANCE).out();
         assertEquals(
             Map.of(
                 line1, LatticeElement.reachable(Map.of())),
@@ -157,7 +157,7 @@ public class TestCCPAnalysis {
             line1Point1);
         CFGStartNode line0 = make.Start(line1);
 
-        var result = WorklistAnalysis.analyze(line0, CCPAnalysis.INSTANCE);
+        var result = WorklistAnalysis.analyze(line0, CCPAnalysis.INSTANCE).out();
         System.out.println(result);
         assertEquals(
             Map.of(

@@ -1,18 +1,18 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.List;
+
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-import java.util.List;
-
 public class CFGIfNode extends CFGNode {
 
     private CFGNode trueBranch;
     private CFGNode falseBranch;
-    public final IRExpr cond;
+    public IRExpr cond;
 
     public CFGIfNode(Location location, CFGNode trueBranch,
             CFGNode falseBranch, IRExpr cond) {
@@ -43,15 +43,20 @@ public class CFGIfNode extends CFGNode {
     }
 
     @Override
-    public void convertFromStub(CFGStubNode stub, CFGNode n) {
-        if (trueBranch == stub) {
-            this.trueBranch = n;
-        } else if (falseBranch == stub) {
-            this.falseBranch = n;
-        } else {
+    public void replaceOutEdge(CFGNode previous, CFGNode n) {
+        if (falseBranch != previous && trueBranch != previous) {
             throw new UnsupportedOperationException(
-                    "Cannot change out node unless it was originally a stub node.");
+                    "Cannot replace node arbitrarily.");
         }
+
+        if (trueBranch == previous) {
+            this.trueBranch = n;
+        }
+
+        if (falseBranch == previous) {
+            this.falseBranch = n;
+        }
+
         this.updateIns();
     }
 
