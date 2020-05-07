@@ -1,11 +1,11 @@
-package cyr7.cfg.ir.dfa;
+package cyr7.cfg.ir.dfa.loops;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import cyr7.cfg.ir.dfa.ForwardDataflowAnalysis;
+import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -18,7 +18,7 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
     
     INSTANCE;
 
-    private enum InfiniteSet implements Set<CFGNode> {
+    public enum InfiniteSet implements Set<CFGNode> {
         INSTANCE;
 
         @Override
@@ -83,6 +83,11 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public void clear() {
+        }
+        
+        @Override
+        public String toString() {
+            return "[∞]";
         }
     }
     

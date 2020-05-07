@@ -10,9 +10,9 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import cyr7.C;
-import cyr7.cfg.ir.dfa.DominatorAnalysis;
-import cyr7.cfg.ir.dfa.DominatorUtil;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
+import cyr7.cfg.ir.dfa.loops.DominatorAnalysis;
+import cyr7.cfg.ir.dfa.loops.DominatorUtil;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGNodeFactory;
 import cyr7.cfg.ir.nodes.CFGStartNode;

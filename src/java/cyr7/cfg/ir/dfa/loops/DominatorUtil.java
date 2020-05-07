@@ -1,9 +1,10 @@
-package cyr7.cfg.ir.dfa;
+package cyr7.cfg.ir.dfa.loops;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+import cyr7.cfg.ir.dfa.loops.DominatorAnalysis.InfiniteSet;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.util.Sets;
 
@@ -17,7 +18,13 @@ public final class DominatorUtil {
                 Set<CFGNode> meet;
                 if (map.containsKey(outEdges.getKey())) {
                     // Each time a node is visited, take the meet with previous incoming edges
-                    meet = Sets.intersection(map.get(outEdges.getKey()), outEdges.getValue());
+                    if (outEdges.getValue() == InfiniteSet.INSTANCE) {
+                        meet = map.get(outEdges.getKey());
+                    } else if (map.get(outEdges.getKey()) == InfiniteSet.INSTANCE) {
+                        meet = outEdges.getValue();
+                    } else {
+                        meet = Sets.intersection(map.get(outEdges.getKey()), outEdges.getValue());
+                    }
                 } else {
                     meet = outEdges.getValue();
                 }
@@ -28,7 +35,6 @@ public final class DominatorUtil {
         }
         return map;
     }
-    
     
     private DominatorUtil() { }
 }

@@ -1,6 +1,5 @@
 package cyr7.cfg.ir.dfa;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -11,6 +10,8 @@ import java.util.Set;
 
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGVarAssignNode;
+import cyr7.util.Sets;
 
 public final class WorklistAnalysis {
 
@@ -33,6 +34,7 @@ public final class WorklistAnalysis {
         
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
+            //System.out.println(node);
             L inValue = node.in()
                 .stream()
                 .map(n -> out.get(n).get(node))
@@ -42,16 +44,22 @@ public final class WorklistAnalysis {
                 // return node for a backward analysis
                 .orElse(analysis.topValue());
             in.put(node, inValue);
-
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
+            if (node instanceof CFGVarAssignNode && ((CFGVarAssignNode) node).variable.equals("A")) {
+                //System.out.println(node+": "+output);
+            }
             for (int i = 0; i < node.out().size(); i++) {
                 CFGNode outEdge = node.out().get(i);
+
                 L oldOutValue = out.get(node).get(outEdge);
+
                 if (!oldOutValue.equals(output.get(i))) {
                     out.get(node).put(outEdge, output.get(i));
                     worklist.add(outEdge);
                 }
             }
+            //System.out.println(out);
+            //System.out.println("------------");
         }
 
         return out;
