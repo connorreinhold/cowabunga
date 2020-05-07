@@ -2,6 +2,7 @@ package cyr7.cli;
 
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.Map;
 
 public class OptimizationSetting {
 
@@ -12,8 +13,14 @@ public class OptimizationSetting {
     public OptimizationSetting() {
         this.enableOptimizations = true;
 
-        this.settings = new EnumMap<>(new HashMap<>());
-        this.settings.keySet().forEach(opt -> this.settings.put(opt, true));
+        final Map<Optimization, Boolean> enumToBoolHashMap = new HashMap<>();
+        enumToBoolHashMap.put(Optimization.REG, true);
+        // EnumMap requires at least one mapping to be instantiated.
+        this.settings = new EnumMap<>(enumToBoolHashMap);
+
+        for (Optimization opt: Optimization.values()) {
+            this.settings.put(opt, true);
+        }
     }
 
     public boolean noOptimizationsEnabled() {

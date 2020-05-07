@@ -117,8 +117,8 @@ public final class Run {
 
         IRCompUnit lowered = IRUtil.lower(compUnit, generator, lowerConfiguration);
 
-        if (lowerConfiguration.optimizationSetting
-                              .getOptimizationSetting(Optimization.CF)) {
+        if (lowerConfiguration.settings
+                              .get(Optimization.CF)) {
             assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
         }
         if (lowerConfiguration.traceEnabled) {
