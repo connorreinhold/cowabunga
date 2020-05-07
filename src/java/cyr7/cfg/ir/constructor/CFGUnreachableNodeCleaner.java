@@ -3,7 +3,6 @@ package cyr7.cfg.ir.constructor;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.Set;
 
 import cyr7.cfg.ir.nodes.CFGNode;
@@ -45,6 +44,7 @@ public class CFGUnreachableNodeCleaner {
      * @param n
      */
     private void epilogueProcess(CFGNode n) {
+        this.reachableNodes.add(n);
         this.visitedNodes.add(n);
         for (CFGNode outgoing: n.out()) {
             if (!this.visitedNodes.contains(outgoing)) {
@@ -74,7 +74,7 @@ public class CFGUnreachableNodeCleaner {
      * Otherwise {@code false}.
      */
     private boolean isNotReachable(CFGNode n) {
-        final Deque<CFGNode> stack = new LinkedList<>();
+        final Deque<CFGNode> stack = new ArrayDeque<>();
         final Set<CFGNode> dfsVisited = new HashSet<>();
         stack.push(n);
         while (!stack.isEmpty()) {
