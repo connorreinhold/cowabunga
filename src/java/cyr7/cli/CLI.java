@@ -413,6 +413,21 @@ public class CLI {
         return name;
     }
 
+    private static String demangleFunction(String mangled) {
+        mangled = mangled.substring(mangled.indexOf("I") + 1);
+        mangled = mangled.substring(0, mangled.lastIndexOf('_'));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mangled.length(); i++) {
+            if (mangled.charAt(i) == '_') {
+                sb.append('_');
+                i = i + 1;
+            } else {
+                sb.append(mangled.charAt(i));
+            }
+        }
+        return sb.toString();
+    }
+
     /**
      * Return {@code true} if {@code file} is a {@literal .xi} file. Otherwise,
      * return {@code false}.
@@ -466,7 +481,8 @@ public class CLI {
                     printHelpMessage();
                     break;
                 case "ro":
-                    ;
+                    writer.print("cf");
+                    break;
                 case "l":
                     wantsLexing = true;
                     break;
@@ -496,26 +512,34 @@ public class CLI {
                     break;
                 }
                 case "oir": {
-                    Phase p = Phase.parse(cmd.getOptionValue("phase"));
-                    switch (p) {
-                        case INITIAL:
-                            wantsInitialDotGen = true;
-                        case FINAL:
-                            wantsFinalDotGen = true;
-                        default:
-                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("phase"));
-                    }
-                }
-                case "ocfg": {
-                    Phase p = Phase.parse(cmd.getOptionValue("phase"));
+                    Phase p = Phase.parse(cmd.getOptionValue("oir"));
                     switch (p) {
                         case INITIAL:
                             wantsInitialIRGen = true;
+                            break;
+                        case FINAL:
+                            wantsFinalIRGen = true;
+                            break;
+                        default:
+                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("oir"));
+                            break;
+                    }
+                    break;
+                }
+                case "ocfg": {
+                    Phase p = Phase.parse(cmd.getOptionValue("ocfg"));
+                    switch (p) {
+                        case INITIAL:
+                            wantsInitialDotGen = true;
+                            break;
                         case FINAL:
                             wantsFinalDotGen = true;
+                            break;
                         default:
-                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("phase"));
+                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("ocfg"));
+                            break;
                     }
+                    break;
                 }
                 case "O":
                     break;
@@ -638,14 +662,15 @@ public class CLI {
                 debugPrint("Generate initial intermediate code for: " + filename);
                 try {
                     Path path = Path.of(filename);
+                    String irFilename = getMainFilename(path) + "_initial";
                     input = getReader(filename);
                     output = getWriter(destinationRoot.getAbsolutePath(),
-                            filename + "_initial",
+                            irFilename,
                             "ir");
                     IRUtil.initialIRGen(
                             input,
-                             output,
-                            path.getFileName().toString(),
+                            output,
+                            irFilename,
                             opener
                     );
                 } catch (Exception e) {
@@ -659,9 +684,10 @@ public class CLI {
                 debugPrint("Generate final intermediate code for: " + filename);
                 try {
                     Path path = Path.of(filename);
+                    String irFilename = getMainFilename(path) + "_final";
                     input = getReader(filename);
                     output = getWriter(destinationRoot.getAbsolutePath(),
-                            filename + "_final",
+                            irFilename,
                             "ir");
                     IRUtil.irGen(
                             input,
@@ -687,11 +713,13 @@ public class CLI {
                             filename,
                             opener
                     );
-                    for (String functionName: functions.keySet()) {
+                    for (String f: functions.keySet()) {
+                        String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_initial";
+                        System.out.println();
                         output = getWriter(destinationRoot.getAbsolutePath(),
-                                filename + "_" + functionName + "_initial",
+                                functionFilename,
                                 "dot");
-                        CFGUtil.outputDotForFunctionIR(functions.get(functionName), output);
+                        CFGUtil.outputDotForFunctionIR(functions.get(f), output);
                     }
                 } catch (Exception e) {
                     debugPrint(e);
@@ -710,11 +738,13 @@ public class CLI {
                             opener,
                             lowerConfiguration
                     );
-                    for (String functionName: functions.keySet()) {
+                    for (String f: functions.keySet()) {
+                        String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_final";
+                        System.out.println(functionFilename);
                         output = getWriter(destinationRoot.getAbsolutePath(),
-                                filename + "_" + functionName + "_final",
+                                functionFilename,
                                 "dot");
-                        CFGUtil.outputDotForFunctionIR(functions.get(functionName), output);
+                        CFGUtil.outputDotForFunctionIR(functions.get(f), output);
                     }
                 } catch (Exception e) {
                     debugPrint(e);
