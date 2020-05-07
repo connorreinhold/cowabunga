@@ -42,7 +42,6 @@ public enum WorklistAnalysis {
                 worklist.addAll(node.inNodes());
             }
         }
-
         return in;
     }
 

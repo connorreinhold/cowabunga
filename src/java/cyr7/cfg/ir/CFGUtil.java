@@ -12,7 +12,6 @@ import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
 import polyglot.util.Pair;
 
-import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
@@ -50,8 +49,30 @@ public final class CFGUtil {
         outputDotForFunctionIR(result.get(functionName), writer);
     }
 
-    public static void printDotForFunctionIR(CFGNode node) {
-        outputDotForFunctionIR(node, new OutputStreamWriter(System.out));
+    public static Map<String, CFGNode> generateAllInitialDot(
+            Reader reader,
+            String filename,
+            IxiFileOpener fileOpener) throws Exception {
+        IRCompUnit lowered = IRUtil.generateInitialIR(
+                reader,
+                filename,
+                fileOpener,
+                new DefaultIdGenerator());
+        return CFGConstructor.constructCFG(lowered);
+    }
+
+    public static Map<String, CFGNode> generateAllFinalDot(
+            Reader reader,
+            String filename,
+            IxiFileOpener fileOpener,
+            LowerConfiguration lowerConfiguration) throws Exception {
+        IRCompUnit lowered = IRUtil.generateIR(
+                reader,
+                filename,
+                fileOpener,
+                lowerConfiguration,
+                new DefaultIdGenerator());
+        return CFGConstructor.constructCFG(lowered);
     }
 
     public static void outputDotForFunctionIR(CFGNode node, Writer writer) {

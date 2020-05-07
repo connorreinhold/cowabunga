@@ -47,6 +47,6 @@ public abstract class CFGNode {
         }
     }
 
-    public abstract void convertFromStub(CFGStubNode stub, CFGNode n);
+    public abstract void replaceOutEdge(CFGNode previous, CFGNode newTarget);
 
 }

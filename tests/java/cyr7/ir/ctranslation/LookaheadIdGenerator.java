@@ -31,6 +31,11 @@ public final class LookaheadIdGenerator implements IdGenerator {
         return temp(tempCounter++);
     }
 
+    @Override
+    public String newTemp(String description) {
+        return String.format("_t_%s_%d", description, tempCounter++);
+    }
+
     /**
      * Peek the next label with some offset.
      *

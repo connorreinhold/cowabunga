@@ -5,6 +5,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
@@ -32,26 +33,22 @@ public class IrCFGDotVisitor implements IrCFGVisitor<Optional<Void>> {
     }
 
     public List<String> getDotNodes() {
-        return this.nodes.stream().map(
-                node -> nodeToLabel.get(node)).collect(Collectors.toList());
+        return this.nodes.stream().map(node -> nodeToLabel.get(node)).collect(Collectors.toList());
     }
 
-    public List<Pair<String,String>> getDotEdges() {
-        return this.edges.stream().map(
-                nodePair -> {
-                    System.out.println(nodePair.part1());
-                    return new Pair<>(
-                        nodeToLabel.get(nodePair.part1()),
-                        nodeToLabel.get(nodePair.part2()));
-                }).collect(Collectors.toList());
+    public List<Pair<String, String>> getDotEdges() {
+        return this.edges.stream().map(nodePair -> {
+            System.out.println(nodePair.part1());
+            return new Pair<>(nodeToLabel.get(nodePair.part1()), nodeToLabel.get(nodePair.part2()));
+        }).collect(Collectors.toList());
     }
 
     public void addDotInfo(CFGNode n) {
         id++;
-        String label = n.toString() + "[id=" + id+"]";
+        String label = n.toString() + "[id=" + id + "]";
         nodeToLabel.put(n, label);
         nodes.add(n);
-        for(CFGNode inc: n.in()) {
+        for (CFGNode inc : n.in()) {
             edges.add(new Pair<>(inc, n));
         }
     }
@@ -113,6 +110,15 @@ public class IrCFGDotVisitor implements IrCFGVisitor<Optional<Void>> {
         }
         addDotInfo(n);
         n.out().get(0).accept(this);
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CFGSelfLoopNode n) {
+        if (nodeToLabel.containsKey(n)) {
+            return Optional.empty();
+        }
+        addDotInfo(n);
         return Optional.empty();
     }
 }

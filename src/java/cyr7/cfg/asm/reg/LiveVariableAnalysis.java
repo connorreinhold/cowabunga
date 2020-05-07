@@ -8,7 +8,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 import java.util.Collections;
 import java.util.Set;
 
-final class LiveVariableAnalysis
+public final class LiveVariableAnalysis
     implements BackwardDataflowAnalysis<Set<ASMTempRegArg>> {
 
     private final UsesVisitor uses;

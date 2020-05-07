@@ -10,6 +10,7 @@ import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.BinOpInterpreter;
@@ -34,7 +35,6 @@ import cyr7.util.Sets;
 import cyr7.visitor.MyIRVisitor;
 
 public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
-
     INSTANCE;
 
     @Override
@@ -375,6 +375,15 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                     n.value.accept(new AbstractInterpreter(in));
                 values.put(n.variable, result);
             });
+        }
+
+        @Override
+        public LatticeElement transfer(CFGSelfLoopNode n, LatticeElement in) {
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
+            }
+
+            return in;
         }
 
     }

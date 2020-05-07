@@ -11,8 +11,11 @@ import java.io.Reader;
 import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Map;
 import java.util.function.Function;
 
+import cyr7.cfg.ir.CFGUtil;
+import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.x86.ASMUtil.TilerConf;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -41,14 +44,17 @@ public class CLI {
     final static private CommandLineParser parser = new DefaultParser();
 
     private static boolean debugPrintingEnabled = false;
-    private static boolean optimizationsEnabled = true;
     private static ASMUtil.TilerConf tiler = TilerConf.COMPLEX;
 
     private static boolean cFoldEnabled = true;
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
     private static boolean wantsTypechecking = false;
+    private static boolean wantsInitialIRGen = false;
+    private static boolean wantsFinalIRGen = false;
     private static boolean wantsIrGen = false;
+    private static boolean wantsInitialDotGen = false;
+    private static boolean wantsFinalDotGen = false;
     private static boolean wantsMirRun = false;
     private static boolean wantsIrRun = false;
     private static boolean wantsAssembly = true;
@@ -83,6 +89,15 @@ public class CLI {
                 .desc("Print a synopsis of options")
                 .hasArg(false)
                 .argName(null)
+                .numberOfArgs(0)
+                .required(false)
+                .build();
+
+        Option reportOpts = Option
+                .builder("ro")
+                .longOpt("report-opts")
+                .desc("Outputs a list of optimizations supported by the compiler")
+                .hasArg(false)
                 .numberOfArgs(0)
                 .required(false)
                 .build();
@@ -186,10 +201,42 @@ public class CLI {
         Option optimizations = Option
                 .builder("O")
                 .longOpt(null)
-                .desc("Disable optimizations")
+                .desc("Use O<opt> to enable optimization <opt>.\n" +
+                        "If one of these options is used, other optimizations are off by default unless otherwise\n" +
+                        "enabled.\nThe following optimizations are supported:\n" +
+                        "-Constant Folding\n" +
+                        "Use O-no-<opt> to disable only optimization <opt>.\n" +
+                        "Use only O to disable all optimizations. This option is redundant if one of the -O<opt> " +
+                        "options is used.")
                 .hasArg(false)
                 .argName(null)
                 .numberOfArgs(0)
+                .required(false)
+                .build();
+
+        Option irOptions = Option
+                .builder("oir")
+                .longOpt("optir")
+                .desc("Report the intermediate code at the specified phase of optimization.\n" +
+                        "Available phases are:\n" +
+                        "- initial\n" +
+                        "- final")
+                .hasArg(true)
+                .argName("phase")
+                .numberOfArgs(1)
+                .required(false)
+                .build();
+
+        Option cfgOptions = Option
+                .builder("ocfg")
+                .longOpt("optcfg")
+                .desc("Report the cfg at the specified phase of optimization.\n" +
+                        "Available phases are:\n" +
+                        "- initial\n" +
+                        "- final")
+                .hasArg(true)
+                .argName("phase")
+                .numberOfArgs(1)
                 .required(false)
                 .build();
 
@@ -204,16 +251,6 @@ public class CLI {
                 .build();
 
         // For internal testing
-        Option cFoldOpt = Option
-                .builder("cfolddisabled")
-                .longOpt(null)
-                .desc("Disable constant folding optimizations")
-                .hasArg(false)
-                .argName(null)
-                .numberOfArgs(0)
-                .required(false)
-                .build();
-
         Option version = Option
                 .builder("v")
                 .longOpt("version")
@@ -275,14 +312,16 @@ public class CLI {
             .build();
 
         return options.addOption(help)
+                .addOption(reportOpts)
                 .addOption(lex)
                 .addOption(parse)
                 .addOption(typecheck)
                 .addOption(irGen)
                 .addOption(irRun)
                 .addOption(mirRun)
+                .addOption(irOptions)
+                .addOption(cfgOptions)
                 .addOption(optimizations)
-                .addOption(cFoldOpt)
                 .addOption(source)
                 .addOption(libpath)
                 .addOption(destination)
@@ -329,9 +368,34 @@ public class CLI {
      */
     static CommandLine parseCommand(String[] args)
             throws ParseException {
+        boolean hasBeenDisabled = false;
+        for (int i = 0; i < args.length; i++) {
+            if (args[i].startsWith("-O")) {
+                String optShort = args[i].substring(args[i].indexOf('O') + 1);
+                boolean noModifier = true;
+
+                if (optShort.startsWith("-no-")) {
+                    optShort = optShort.substring(optShort.indexOf("-no-") + 4);
+                    noModifier = false;
+                } else if (!hasBeenDisabled) {
+                    cFoldEnabled = false;
+                    hasBeenDisabled = true;
+                }
+
+                Optimization opt = Optimization.parse(optShort);
+
+                switch(opt) {
+                    case CF:
+                        cFoldEnabled = true && noModifier;
+                        args[i] = "";
+                    default:
+                        break;
+                }
+            }
+        }
+
         return parser.parse(options, args);
     }
-
 
     /**
      * Returns the filename without its extension if an extension exists.
@@ -347,6 +411,21 @@ public class CLI {
         }
 
         return name;
+    }
+
+    private static String demangleFunction(String mangled) {
+        mangled = mangled.substring(mangled.indexOf("I") + 1);
+        mangled = mangled.substring(0, mangled.lastIndexOf('_'));
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < mangled.length(); i++) {
+            if (mangled.charAt(i) == '_') {
+                sb.append('_');
+                i = i + 1;
+            } else {
+                sb.append(mangled.charAt(i));
+            }
+        }
+        return sb.toString();
     }
 
     /**
@@ -401,6 +480,9 @@ public class CLI {
                 case "h":
                     printHelpMessage();
                     break;
+                case "ro":
+                    writer.print("cf");
+                    break;
                 case "l":
                     wantsLexing = true;
                     break;
@@ -429,16 +511,42 @@ public class CLI {
                     assemblyRoot = new File(directory);
                     break;
                 }
-                case "O":
-                    optimizationsEnabled = false;
-                    break;
-                case "tos": {
-                    target= OperatingSystem.parse(cmd.getOptionValue("tos"));
+                case "oir": {
+                    Phase p = Phase.parse(cmd.getOptionValue("oir"));
+                    switch (p) {
+                        case INITIAL:
+                            wantsInitialIRGen = true;
+                            break;
+                        case FINAL:
+                            wantsFinalIRGen = true;
+                            break;
+                        default:
+                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("oir"));
+                            break;
+                    }
                     break;
                 }
-                case "cfolddisabled":
-                    cFoldEnabled = false;
+                case "ocfg": {
+                    Phase p = Phase.parse(cmd.getOptionValue("ocfg"));
+                    switch (p) {
+                        case INITIAL:
+                            wantsInitialDotGen = true;
+                            break;
+                        case FINAL:
+                            wantsFinalDotGen = true;
+                            break;
+                        default:
+                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("ocfg"));
+                            break;
+                    }
                     break;
+                }
+                case "O":
+                    break;
+                case "tos": {
+                    target = OperatingSystem.parse(cmd.getOptionValue("tos"));
+                    break;
+                }
                 case "sourcepath": {
                     String directory = cmd.getOptionValue("sourcepath");
                     sourceRoot = new File(directory);
@@ -547,11 +655,101 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            LowerConfiguration lowerConfiguration;
-            if (!optimizationsEnabled) {
-                lowerConfiguration = new LowerConfiguration(false, true);
-            } else {
-                lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
+
+            LowerConfiguration lowerConfiguration = new LowerConfiguration(cFoldEnabled, true);
+
+            if (wantsInitialIRGen) {
+                debugPrint("Generate initial intermediate code for: " + filename);
+                try {
+                    Path path = Path.of(filename);
+                    String irFilename = getMainFilename(path) + "_initial";
+                    input = getReader(filename);
+                    output = getWriter(destinationRoot.getAbsolutePath(),
+                            irFilename,
+                            "ir");
+                    IRUtil.initialIRGen(
+                            input,
+                            output,
+                            irFilename,
+                            opener
+                    );
+                } catch (Exception e) {
+                    debugPrint(e);
+                    writer.write(e.getMessage());
+                }
+                closeIOStreams(input, output);
+            }
+
+            if (wantsFinalIRGen) {
+                debugPrint("Generate final intermediate code for: " + filename);
+                try {
+                    Path path = Path.of(filename);
+                    String irFilename = getMainFilename(path) + "_final";
+                    input = getReader(filename);
+                    output = getWriter(destinationRoot.getAbsolutePath(),
+                            irFilename,
+                            "ir");
+                    IRUtil.irGen(
+                            input,
+                            output,
+                            path.getFileName().toString(),
+                            opener,
+                            lowerConfiguration
+                    );
+                } catch (Exception e) {
+                    debugPrint(e);
+                    writer.write(e.getMessage());
+                }
+                closeIOStreams(input, output);
+            }
+
+            if (wantsInitialDotGen) {
+                debugPrint("Generate initial dot for: " + filename);
+                try {
+                    Path path = Path.of(filename);
+                    input = getReader(filename);
+                    Map<String, CFGNode> functions = CFGUtil.generateAllInitialDot(
+                            input,
+                            filename,
+                            opener
+                    );
+                    for (String f: functions.keySet()) {
+                        String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_initial";
+                        System.out.println();
+                        output = getWriter(destinationRoot.getAbsolutePath(),
+                                functionFilename,
+                                "dot");
+                        CFGUtil.outputDotForFunctionIR(functions.get(f), output);
+                    }
+                } catch (Exception e) {
+                    debugPrint(e);
+                    writer.write(e.getMessage());
+                }
+            }
+
+            if (wantsFinalDotGen) {
+                debugPrint("Generate final dot for: " + filename);
+                try {
+                    Path path = Path.of(filename);
+                    input = getReader(filename);
+                    Map<String, CFGNode> functions = CFGUtil.generateAllFinalDot(
+                            input,
+                            filename,
+                            opener,
+                            lowerConfiguration
+                    );
+                    for (String f: functions.keySet()) {
+                        String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_final";
+                        System.out.println(functionFilename);
+                        output = getWriter(destinationRoot.getAbsolutePath(),
+                                functionFilename,
+                                "dot");
+                        CFGUtil.outputDotForFunctionIR(functions.get(f), output);
+                    }
+                } catch (Exception e) {
+                    debugPrint(e);
+                    writer.write(e.getMessage());
+                }
             }
 
             if (wantsIrGen) {

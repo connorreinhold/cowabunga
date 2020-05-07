@@ -1,8 +1,8 @@
 package cyr7.cfg.ir.dfa;
 
+import java.util.ArrayDeque;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -13,12 +13,12 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 
 public final class WorklistAnalysis {
 
-    public static <L> Map<CFGNode, Map<CFGNode, L>> analyze(
+    public static <L> DfaResult<L> analyze(
         CFGStartNode cfg,
         ForwardDataflowAnalysis<L> analysis) {
 
         Set<CFGNode> allNodes = getAllNodes(cfg);
-        Queue<CFGNode> worklist = new LinkedList<>(allNodes);
+        Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
 
         Map<CFGNode, L> in = new HashMap<>();
         Map<CFGNode, Map<CFGNode, L>> out = new HashMap<>();
@@ -53,12 +53,54 @@ public final class WorklistAnalysis {
             }
         }
 
-        return out;
+        return new DfaResult<>(in, out);
     }
+
+    public static <L> Map<CFGNode, L> analyze(
+            CFGStartNode cfg,
+            BackwardDataflowAnalysis<L> analysis) {
+
+            Set<CFGNode> allNodes = getAllNodes(cfg);
+            Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
+
+            Map<CFGNode, L> in = new HashMap<>();
+            Map<CFGNode, L> out = new HashMap<>();
+
+            for (CFGNode node : allNodes) {
+                out.put(node, analysis.topValue());
+                in.put(node, analysis.topValue());
+            }
+
+            while (!worklist.isEmpty()) {
+                CFGNode node = worklist.remove();
+
+                L outValue = node.out()
+                    .stream()
+                    .map(n -> in.get(n))
+                    .reduce(analysis::meet)
+                    // the set of in-nodes to a node should never be empty
+                    // unless it's the start node for a forward analysis or a
+                    // return node for a backward analysis
+                    .orElse(analysis.topValue());
+                out.put(node, outValue);
+
+                L originalInValue = in.get(node);
+                L inValue= node.acceptBackward(analysis.transfer(), outValue);
+                in.put(node, inValue);
+
+                if (!originalInValue.equals(inValue)) {
+                    for (CFGNode incoming: node.in()) {
+                        worklist.add(incoming);
+                    }
+                }
+            }
+            return out;
+        }
+
 
     private static Set<CFGNode> getAllNodes(CFGStartNode cfg) {
         Set<CFGNode> nodes = new HashSet<>();
-        Queue<CFGNode> worklist = new LinkedList<>();
+        Queue<CFGNode> worklist = new ArrayDeque<>();
         worklist.add(cfg);
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
