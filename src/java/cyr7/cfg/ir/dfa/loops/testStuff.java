@@ -10,7 +10,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.ir.constructor.CFGConstructor;
+import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
@@ -33,29 +35,27 @@ public class testStuff {
             new DefaultIdGenerator());
         Map<String, CFGNode> cfgResult = CFGConstructor.constructCFG(lowered);
         CFGStartNode start = (CFGStartNode) cfgResult.get("_Imain_paai");
-        System.out.println(start.out().get(0).out().get(0).in());
-        
+        //System.out.println(start.out().get(0).out().get(0).in());
+        //AsmCFGUtil.testGenerateDotAsm();
         //BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor();
         //start.accept(bv);
         
-        Map<CFGNode, Map<CFGNode, Set<CFGNode>>> result = 
+        DfaResult<Set<CFGNode>> result = 
                 WorklistAnalysis.analyze(start, DominatorAnalysis.INSTANCE);
 
-        for(Map.Entry<CFGNode, Map<CFGNode, Set<CFGNode>>> entry: result.entrySet()) {
-            //System.out.println(entry.getKey()+": "+entry.getValue());
-        }
-        //Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result);
-        //findLoops(cleanedDominators);
+        Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
+        // System.out.println(cleanedDominators);
+        findLoops(cleanedDominators);
     }
     
     public static Map<CFGNode, Set<CFGNode>> findLoops(Map<CFGNode, Set<CFGNode>> dominators) {
         for(Map.Entry<CFGNode, Set<CFGNode>> pair: dominators.entrySet()) {
-            System.out.println(pair.getKey()+": "+pair.getValue());
+            //System.out.println(pair.getKey()+": "+pair.getValue());
             CFGNode node = pair.getKey();
             for(CFGNode out: node.out()) {
                 if (pair.getValue().contains(out)) {
                     Set<CFGNode> reachable = backwardsSearch(node, out);
-                    //System.out.println(reachable);
+                    System.out.println(node);
                 }
             }
         }

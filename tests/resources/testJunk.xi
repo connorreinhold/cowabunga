@@ -1,12 +1,8 @@
 main(args: int[][]) {
-    a:int = 1
-    if (a == 2) {
-       C:int = 9
-       D:int = 5
-    } else {
-       D:int = 7
-    }
-    B:int = 2
-    C:int = 3
-    D:int = 4
+  A:int = 1
+  while(A < 3) {
+      A = A + 1
+      B:int = A
+      A = A + 5
+  }
 }

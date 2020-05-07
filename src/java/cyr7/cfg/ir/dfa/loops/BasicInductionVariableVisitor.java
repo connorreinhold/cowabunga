@@ -11,6 +11,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
+import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
@@ -130,5 +131,11 @@ public class BasicInductionVariableVisitor implements IrCFGVisitor<Optional<Void
         n.out().get(0).accept(this);
         visited.add(n);
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CFGSelfLoopNode n) {
+        // TODO Auto-generated method stub
+        return null;
     }
 }

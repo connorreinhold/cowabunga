@@ -72,7 +72,7 @@ public class TestDominatorAnalysis {
 
         var result = WorklistAnalysis.analyze(line0, DominatorAnalysis.INSTANCE);
         
-        Map<CFGNode, Set<CFGNode>> dominators = DominatorUtil.generateMap(result);
+        Map<CFGNode, Set<CFGNode>> dominators = DominatorUtil.generateMap(result.out());
         
         assertEquals(Set.of(line0, line1), 
                 dominators.get(line1));
@@ -139,7 +139,7 @@ public class TestDominatorAnalysis {
         CFGStartNode line0 = make.Start(line1);
 
         var result = WorklistAnalysis.analyze(line0, DominatorAnalysis.INSTANCE);
-        Map<CFGNode, Set<CFGNode>> dominators = DominatorUtil.generateMap(result);
+        Map<CFGNode, Set<CFGNode>> dominators = DominatorUtil.generateMap(result.out());
         
         assertEquals(Set.of(line0, line1), 
                 dominators.get(line1));
@@ -181,13 +181,13 @@ public class TestDominatorAnalysis {
                 line2);
         CFGNode line3 = make.VarAssign("x", makeIR.IRConst(5), 
                 line4);
-        line2.convertFromStub(line3Stub, line3);
+        line2.replaceOutEdge(line3Stub, line3);
         CFGNode line1 = make.VarAssign("x", makeIR.IRConst(12), 
                 line2);
         CFGStartNode line0 = make.Start(line1);
 
         var result = WorklistAnalysis.analyze(line0, DominatorAnalysis.INSTANCE);
-        Map<CFGNode, Set<CFGNode>> dominators = DominatorUtil.generateMap(result);
+        Map<CFGNode, Set<CFGNode>> dominators = DominatorUtil.generateMap(result.out());
         
         assertEquals(Set.of(line0, line1), 
                 dominators.get(line1));
