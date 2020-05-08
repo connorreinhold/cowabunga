@@ -111,8 +111,9 @@ final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
     @Override
     public Set<ASMTempRegArg> visit(AsmCFGReturnNode n) {
         // why do this? Appel p. 228
-        return Sets.union(returnRegisters,
-            Set.of(ASMConstants.CALLEE_SAVED_REGISTERS));
+//        return Sets.union(returnRegisters,
+//            Sets.difference(Set.of(ASMConstants.CALLEE_SAVED_REGISTERS), Set.of(ASMReg.RSP, ASMReg.RBP)));
+        return Set.of();
     }
 
     @Override

@@ -15,9 +15,11 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 final class FinalProgramRewriter implements Runnable {
 
+    private final Set<ASMTempRegArg> precolored;
     private final ArrayList<ASMLine> program;
     private final HashMap<ASMTempRegArg, Integer> coloring;
     private final ASMReg[] registers;
@@ -27,12 +29,14 @@ final class FinalProgramRewriter implements Runnable {
     private final List<ASMLine> rewritten = new ArrayList<>();
 
     public FinalProgramRewriter(
+        Set<ASMTempRegArg> precolored,
         ArrayList<ASMLine> program,
         HashMap<ASMTempRegArg, Integer> coloring,
         ASMReg[] registers,
         HashSet<Integer> coalescedMoves,
         Alias alias) {
 
+        this.precolored = precolored;
         this.program = new ArrayList<>(program);
         this.coloring = coloring;
         this.registers = registers;
@@ -90,6 +94,11 @@ final class FinalProgramRewriter implements Runnable {
     }
 
     private ASMReg reg(ASMTempRegArg temp) {
+        if (temp instanceof ASMReg && !precolored.contains(temp)) {
+            // rsp or rbp
+            return (ASMReg) temp;
+        }
+
         ASMReg reg = registers[coloring.get(alias.get(temp))];
         if (temp instanceof ASMTempArg) {
             ASMTempArg tempArg = (ASMTempArg) temp;

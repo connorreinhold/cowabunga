@@ -44,8 +44,6 @@ final class RegisterAllocator {
         ASMReg.RBX,
         ASMReg.RSI,
         ASMReg.RDI,
-        ASMReg.RSP,
-        ASMReg.RBP,
         ASMReg.R8,
         ASMReg.R9,
         ASMReg.R10,
@@ -64,14 +62,11 @@ final class RegisterAllocator {
     private ArrayList<ASMLine> functionBody;
     private final String mangledName;
 
-    private final SpillMemAllocator spillAllocator;
-
     public RegisterAllocator(
         List<ASMLine> functionBody,
         String mangledName,
         ASMReg[] availableRegisters,
-        IdGenerator generator,
-        SpillMemAllocator spillAllocator) {
+        IdGenerator generator) {
 
         ArrayList<ASMLine> augmentedFunctionBody =
             new ArrayList<>(functionBody);
@@ -83,7 +78,6 @@ final class RegisterAllocator {
         this.generator = generator;
         this.functionBody = augmentedFunctionBody;
         this.mangledName = mangledName;
-        this.spillAllocator = spillAllocator;
 
         init();
     }
@@ -91,10 +85,9 @@ final class RegisterAllocator {
     public RegisterAllocator(
         List<ASMLine> functionBody,
         String mangledName,
-        IdGenerator generator,
-        SpillMemAllocator spillAllocator) {
+        IdGenerator generator) {
 
-        this(functionBody, mangledName, DEFAULT_AVAILABLE_REGISTERS, generator, spillAllocator);
+        this(functionBody, mangledName, DEFAULT_AVAILABLE_REGISTERS, generator);
     }
 
     private final Worklists worklists = new Worklists();
@@ -136,6 +129,10 @@ final class RegisterAllocator {
 
     public HashSet<ASMTempRegArg> spilledNodes() {
         return spilledNodes;
+    }
+
+    public Set<ASMTempRegArg> precolored() {
+        return precolored;
     }
 
     // run
@@ -229,6 +226,8 @@ final class RegisterAllocator {
         graph = new InterferenceGraph(precolored, selectStack, coalescedNodes);
         for (var keyValue : liveOutVariables.entrySet()) {
             HashSet<ASMTempRegArg> live = new HashSet<>(keyValue.getValue());
+            live.removeAll(Set.of(ASMReg.RSP, ASMReg.RBP));
+
             if (keyValue.getKey() instanceof AsmCFGSourceNode) {
                 ASMInstr instr =
                     ((AsmCFGSourceNode) keyValue.getKey()).sourceInstr();
@@ -256,6 +255,12 @@ final class RegisterAllocator {
                 ASMArg arg2 = moveInstr.args.get(1);
                 if (arg1 instanceof ASMTempRegArg
                     && arg2 instanceof ASMTempRegArg) {
+
+                    if (arg1 instanceof ASMReg && !precolored.contains(arg1)) {
+                        continue;
+                    } else if (arg2 instanceof ASMReg && !precolored.contains(arg2))  {
+                        continue;
+                    }
 
                     moves.assoc((ASMTempRegArg) arg1, move);
                     moves.assoc((ASMTempRegArg) arg2, move);
