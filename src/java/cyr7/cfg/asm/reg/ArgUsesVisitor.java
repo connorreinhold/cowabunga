@@ -13,7 +13,7 @@ import cyr7.x86.visitor.ASMArgVisitor;
 import java.util.Collections;
 import java.util.Set;
 
-public enum ArgUsesVisitor implements ASMArgVisitor<Set<ASMTempRegArg>> {
+enum ArgUsesVisitor implements ASMArgVisitor<Set<ASMTempRegArg>> {
     INSTANCE;
 
     @Override

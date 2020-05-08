@@ -16,6 +16,8 @@ public interface IdGenerator {
      */
     String newTemp();
 
+    String newTemp(String description);
+
     /**
      * Generating a temp for the nth return value
      */

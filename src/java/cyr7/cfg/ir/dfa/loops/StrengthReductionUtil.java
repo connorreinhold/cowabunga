@@ -20,9 +20,9 @@ import cyr7.cfg.ir.dfa.WorklistAnalysis;
 import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cli.OptConfig;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.nodes.IRCompUnit;
 
 public class StrengthReductionUtil {
@@ -36,7 +36,7 @@ public class StrengthReductionUtil {
             reader,
             "testJunk.xi",
             null,
-            new LowerConfiguration(true, true),
+            OptConfig.none(),
             new DefaultIdGenerator());
         Map<String, CFGNode> cfgResult = CFGConstructor.constructCFG(lowered);
         CFGStartNode start = (CFGStartNode) cfgResult.get("_Imain_paai");

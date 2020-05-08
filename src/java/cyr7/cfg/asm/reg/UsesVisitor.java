@@ -15,7 +15,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 import java.util.Collections;
 import java.util.Set;
 
-public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
+final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
 
     private final Set<ASMReg> returnRegisters;
 
@@ -82,14 +82,15 @@ public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case SETL:
             case SETG:
             case SETGE:
+            case JMP:
                 return Collections.emptySet();
 
             case CQO:
-                break;
+                return Set.of(ASMReg.RAX);
+
             // control flow
             // these are represented as an inherent part of the CFG
             case RETQ:
-            case JMP:
             case JE:
             case JNE:
             case JLE:
@@ -110,8 +111,9 @@ public final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
     @Override
     public Set<ASMTempRegArg> visit(AsmCFGReturnNode n) {
         // why do this? Appel p. 228
-        return Sets.union(returnRegisters,
-            Set.of(ASMConstants.CALLEE_SAVED_REGISTERS));
+//        return Sets.union(returnRegisters,
+//            Sets.difference(Set.of(ASMConstants.CALLEE_SAVED_REGISTERS), Set.of(ASMReg.RSP, ASMReg.RBP)));
+        return Set.of();
     }
 
     @Override

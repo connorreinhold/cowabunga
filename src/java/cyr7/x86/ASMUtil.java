@@ -1,9 +1,10 @@
 package cyr7.x86;
 
+import cyr7.cfg.asm.reg.ASMRegAllocGenerator;
+import cyr7.cli.OptConfig;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
 import cyr7.ir.IdGenerator;
-import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.x86.asm.ASMLine;
@@ -34,14 +35,19 @@ public final class ASMUtil {
         Reader reader,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration,
+        OptConfig optConfig,
         TilerConf tiler
     ) throws Exception {
         IdGenerator idGenerator = new DefaultIdGenerator();
         IRCompUnit compUnit
-            = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
-        ASMGenerator asmGenerator
-            = new ASMTrivialRegAllocGenerator(tiler.getFactory(), idGenerator);
+            = IRUtil.generateIR(reader, filename, fileOpener, optConfig, idGenerator);
+
+        ASMGenerator asmGenerator;
+        if (optConfig.reg()) {
+            asmGenerator = new ASMRegAllocGenerator(tiler.getFactory(), idGenerator);
+        } else {
+            asmGenerator = new ASMTrivialRegAllocGenerator(tiler.getFactory(), idGenerator);
+        }
         return asmGenerator.generate(compUnit);
     }
 
@@ -50,13 +56,13 @@ public final class ASMUtil {
             Writer writer,
             String filename,
             IxiFileOpener fileOpener,
-            LowerConfiguration lowerConfiguration,
+            OptConfig optConfig,
             TilerConf tiler
     ) {
         try {
             writer.append(".intel_syntax noprefix").append(System.lineSeparator());
 
-            List<ASMLine> lines = generateASM(reader, filename, fileOpener, lowerConfiguration, tiler);
+            List<ASMLine> lines = generateASM(reader, filename, fileOpener, optConfig, tiler);
             for (ASMLine line: lines) {
                 writer.append(line.getIntelAssembly()).append(System.lineSeparator());
             }
@@ -69,11 +75,11 @@ public final class ASMUtil {
         Reader reader,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration
+        OptConfig optConfig
     ) throws Exception {
         IdGenerator idGenerator = new DefaultIdGenerator();
         IRCompUnit compUnit
-            = IRUtil.generateIR(reader, filename, fileOpener, lowerConfiguration, idGenerator);
+            = IRUtil.generateIR(reader, filename, fileOpener, optConfig, idGenerator);
         ASMGenerator asmGenerator
             = new ASMAbstractGenerator(TilerFactory.complexTilerFactory(), idGenerator);
         return asmGenerator.generate(compUnit);
@@ -83,10 +89,10 @@ public final class ASMUtil {
         Reader reader,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration
+        OptConfig optConfig
     ) {
         try {
-            List<ASMLine> lines = generateAbstractASM(reader, filename, fileOpener, lowerConfiguration);
+            List<ASMLine> lines = generateAbstractASM(reader, filename, fileOpener, optConfig);
             for (ASMLine line : lines) {
                 System.out.println(line.getIntelAssembly());
             }

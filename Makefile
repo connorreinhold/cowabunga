@@ -4,21 +4,11 @@ mylexer:
 myparser:
 	java -jar dependencies/java_cup.jar -locations -parser "XiParser" -destdir ./src/java/cyr7/parser/ ./src/java/cyr7/parser/xi.cup
 
-cowabunga: myparser mylexer 
+cowabunga: myparser mylexer
 
-test: gradle.test gradle.asmtest xth.test
-
-gradle.test:
-	./xic-build -ea
-	make integration.complex
-	make integration.basic
-	gradle precompiledASMTest
-
-gradle.asmtest:
-	./xic-build -ea -enableAssemblyLevelAssertions
-	make integration.complex
-	make integration.basic
-	gradle precompiledASMOnlyTest
+test.all:
+	gradle test
+	make xth.test
 
 xth.test:
 	cd \
@@ -31,12 +21,3 @@ zip:
 	rm -f cowabunga.zip
 	git archive HEAD -o cowabunga.zip
 
-integration.complex:
-	echo "\033[0;32m" 'Precompiling assembly with complex tiler...' "\033[0m"
-	find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler complex
-	find tests/resources/integration/ -name '*.s_COMPLEX' -print0 | sort -z | xargs -0 wc -l
-
-integration.basic:
-	echo "\033[0;32m" 'Precompiling assembly with basic tiler...' "\033[0m"
-	find tests/resources/integration/ -name '*.xi' | xargs ~/shared/cowabunga/xic -libpath tests/resources/integration/lib/ -taggedASMFile -tiler basic
-	find tests/resources/integration/ -name '*.s_BASIC' -print0 | sort -z | xargs -0 wc -l	

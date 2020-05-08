@@ -2,7 +2,9 @@ package cyr7.integration.knapsack;
 
 import cyr7.integration.Run.RunConfiguration;
 import cyr7.integration.TestProgram;
+import org.junit.jupiter.api.Tag;
 
+@Tag("core")
 public class TestKnapsack5 extends TestProgram {
     @Override
     protected String filename() {

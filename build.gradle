@@ -45,9 +45,7 @@ sourceSets {
 }
 
 test {
-    useJUnitPlatform {
-        excludeTags 'precompiledAssembly'
-    }
+    useJUnitPlatform()
     enableAssertions = true
     testLogging {
         events "passed", "skipped", "failed"
@@ -57,22 +55,10 @@ test {
     }
 }
 
-task precompiledASMTest(type: Test) {
+task coreTest(type: Test) {
+    dependsOn assemble
     useJUnitPlatform {
-        excludeTags 'compilesAssembly'
-    }
-    enableAssertions = true
-    testLogging {
-        events "passed", "skipped", "failed"
-        showStandardStreams = true
-        showStackTraces = true
-        exceptionFormat = 'full'
-    }
-}
-
-task precompiledASMOnlyTest(type: Test) {
-    useJUnitPlatform {
-        includeTags 'precompiledAssembly'
+        includeTags 'core'
     }
     enableAssertions = true
     testLogging {

@@ -15,7 +15,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 import java.util.Collections;
 import java.util.Set;
 
-public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
+final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
 
     @Override
     public Set<ASMTempRegArg> visit(AsmCFGOpNode n) {
@@ -62,7 +62,7 @@ public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             // push and pop
             case PUSHQ:
             case POPQ:
-                return Set.of(ASMReg.RSP);
+                return Set.of();
 
             // compare
             case CMPQ:
@@ -76,10 +76,12 @@ public final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
                     MangledNameParser.returnRegisters(mangledName),
                     Set.of(ASMConstants.CALLER_SAVED_REGISTERS));
 
+            case JMP:
+                return Set.of();
+
             // control flow
             // these are represented as an inherent part of the CFG
             case RETQ:
-            case JMP:
             case JE:
             case JNE:
             case JLE:

@@ -1,6 +1,7 @@
 package cyr7.integration;
 
 import cyr7.integration.Run.RunConfiguration;
+import org.junit.jupiter.api.Tag;
 
 /**
  * Note this interpreter does not care about precedence. So 1 - 1 * 3 = 0
@@ -12,6 +13,7 @@ import cyr7.integration.Run.RunConfiguration;
  * @author ayang
  *
  */
+@Tag("core")
 public class TestExprInterpreter extends TestProgram {
 
     @Override

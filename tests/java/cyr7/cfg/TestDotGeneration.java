@@ -8,10 +8,10 @@ import java.io.Reader;
 import java.io.StringReader;
 
 import cyr7.cfg.ir.CFGUtil;
+import cyr7.cli.OptConfig;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.typecheck.IxiFileOpener;
 
 class TestDotGeneration {
@@ -56,7 +56,7 @@ class TestDotGeneration {
 
         Reader r = new StringReader(prgmString);
         FileWriter w = new FileWriter("output.dot");
-        LowerConfiguration config = new LowerConfiguration(true, true);
+        OptConfig config = OptConfig.cfOnly();
         try {
             IRUtil.irGen(r, new PrintWriter(System.out), "main", new Opener(), config);
             CFGUtil.generateDot(r, w, "main", new Opener(), config, "_Imain_p");

@@ -1,5 +1,8 @@
 package cyr7.integration;
 
+import org.junit.jupiter.api.Tag;
+
+@Tag("core")
 public class TestArrayEquality extends TestProgram {
 
     @Override
