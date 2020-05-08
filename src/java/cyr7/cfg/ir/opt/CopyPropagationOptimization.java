@@ -132,7 +132,7 @@ public class CopyPropagationOptimization {
         @Override
         public CFGNode visit(CFGBlockNode n) {
             final var lattice = new HashMap<>(this.result.get(n).copies);
-            n.block = new CFGBlockVarReplacementVisitor(lattice, n.block).replaceBlock();
+            n.block = new CFGBlockVarReplacementVisitor(lattice, n).replaceBlock();
             n.refreshDfaSets();
             return n;
         }
@@ -157,9 +157,9 @@ public class CopyPropagationOptimization {
             private final Map<String, String> copies;
             private final CFGNode topNode;
 
-            public CFGBlockVarReplacementVisitor(Map<String, String> copies, CFGNode node) {
+            public CFGBlockVarReplacementVisitor(Map<String, String> copies, CFGBlockNode node) {
                 this.copies = copies;
-                this.topNode = node;
+                this.topNode = node.block;
             }
 
             public CFGNode replaceBlock() {

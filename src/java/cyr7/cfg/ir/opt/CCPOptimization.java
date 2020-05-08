@@ -77,7 +77,7 @@ public class CCPOptimization {
                 n.outNode().in().removeAll(Collections.singleton(n));
                 return n;
             } else {
-                n.block = new CFGBlockDeadCodeVisitor(incoming, n.block).replaceBlock();
+                n.block = new CFGBlockDeadCodeVisitor(incoming, n).replaceBlock();
                 n.refreshDfaSets();
                 return n;
             }
@@ -194,9 +194,9 @@ public class CCPOptimization {
             private LatticeElement elements;
             private final CFGNode firstNode;
 
-            public CFGBlockDeadCodeVisitor(LatticeElement elements, CFGNode node) {
+            public CFGBlockDeadCodeVisitor(LatticeElement elements, CFGBlockNode node) {
                 this.elements = elements;
-                this.firstNode = node;
+                this.firstNode = node.block;
             }
 
             public CFGNode replaceBlock() {

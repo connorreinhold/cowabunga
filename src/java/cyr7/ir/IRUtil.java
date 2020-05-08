@@ -44,11 +44,22 @@ public class IRUtil {
         }
 
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
-        compUnit = TraceOptimizer.optimize(compUnit, generator);
+//        compUnit = TraceOptimizer.optimize(compUnit, generator);
         if (optConfig.cf()) {
-//            final var functionToBlocks =
-//                    TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+            {
+                final var functionToBlocks =
+                        TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+                final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+                alt.keySet().stream().forEach(functionName -> {
+                    var optimizedCfg = alt.get(functionName);
+//                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
+//                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                    alt.put(functionName, optimizedCfg);
+                });
+            }
 
+            compUnit = TraceOptimizer.optimize(compUnit, generator);
             Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
             cfg.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = cfg.get(functionName);
@@ -59,6 +70,8 @@ public class IRUtil {
             });
             compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
+        } else {
+            compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);

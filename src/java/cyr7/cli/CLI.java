@@ -734,7 +734,6 @@ public class CLI {
                             optConfig);
                     for (String f: functions.keySet()) {
                         String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_final";
-                        System.out.println(functionFilename);
                         output = getWriter(destinationRoot.getAbsolutePath(),
                                 functionFilename,
                                 "dot");

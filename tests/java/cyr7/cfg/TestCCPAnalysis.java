@@ -158,7 +158,6 @@ public class TestCCPAnalysis {
         CFGStartNode line0 = make.Start(line1);
 
         var result = WorklistAnalysis.analyze(line0, CCPAnalysis.INSTANCE).out();
-        System.out.println(result);
         assertEquals(
             Map.of(
                 line1, LatticeElement.reachable(Map.of())),

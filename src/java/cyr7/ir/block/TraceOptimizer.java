@@ -45,7 +45,6 @@ public final class TraceOptimizer {
             }
 
             List<BasicBlock> blocks = BlockGenerator.getBlocks(generator, statements);
-            System.out.println(blocks);
             List<List<BasicBlock>> traces = BlockTraceGenerator.getTraces(blocks);
             List<List<BasicBlock>> optimizedTraces = BlockTraceOptimizer.optimized(traces);
             blockLists.put(name, optimizedTraces);

@@ -49,12 +49,13 @@ public class BlockCfgConstructor {
     public static CFGStartNode construct(List<List<BasicBlock>> blocks) {
         final Map<String, CFGNode> labelToCFG = new HashMap<>();
         final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG = new ArrayDeque<>();
-        CFGStartNode startNode;
         for (int i = 1; i < blocks.size(); i++) {
             buildCfgComponent(blocks.get(i), labelToCFG, jumpTargetFromCFG);
         }
-        Optional<CFGNode> topNode =
+
+        final Optional<CFGNode> topNode =
                 buildCfgComponent(blocks.get(0), labelToCFG, jumpTargetFromCFG);
+        final CFGStartNode startNode;
         if (topNode.isPresent()) {
             startNode = new CFGStartNode(new Location(-1, -1), topNode.get());
         } else {
@@ -65,9 +66,9 @@ public class BlockCfgConstructor {
          * Join the unconnected jump nodes.
          */
         while (!jumpTargetFromCFG.isEmpty()) {
-            var nextPair = jumpTargetFromCFG.poll();
-            CFGStubNode stub = nextPair.part1();
-            String target = nextPair.part2();
+            final var nextPair = jumpTargetFromCFG.poll();
+            final CFGStubNode stub = nextPair.part1();
+            final String target = nextPair.part2();
 
             if (labelToCFG.containsKey(target)) {
                 CFGNode targetNode = labelToCFG.get(target);
@@ -109,28 +110,47 @@ public class BlockCfgConstructor {
         return successor;
     }
 
-
-    // TODO assign successor;
     private static class BlockCfgConstructorVisitor
                             implements MyIRVisitor<CFGNode>{
 
         private Map<String, CFGNode> labelToCFG;
         private Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG;
+
+        /**
+         * The out node of the CFG Block, which is to be set as the out node
+         * when the CFG Block node is instantiated.
+         * <p>
+         * If the out node is unknown i.e. a block with no jump statements,
+         * do not create a block node and return the successor.
+         */
         private Optional<CFGNode> outNode;
+
         private CFGNode successor;
-        private Set<String> topLabel;
+        private Set<String> labelSets;
 
         protected BlockCfgConstructorVisitor() {
             this.labelToCFG = new HashMap<>();
             this.jumpTargetFromCFG = new LinkedList<>();
             this.outNode = Optional.empty();
-            topLabel = new HashSet<>();
+            this.labelSets = new HashSet<>();
         }
 
         private CFGStubNode createStubNode() {
             return new CFGStubNode();
         }
 
+        /**
+         * Creates a linear CFG node tree, associated with the label, i.e. the
+         * first statement in the list of statements.
+         *
+         * @param stmts
+         * @param labelToCFG A mapping from labels to CFG trees.
+         * @param jumpTargetFromCFG A queue of stub nodes and a jump target pairs
+         *                          where the jump target is the CFG node that
+         *                          will replace the stub node.
+         * @param successor The CFG node that would come immediately after
+         *                  this linear CFG tree.
+         */
         protected Pair<Set<String>, CFGNode> execute(List<IRStmt> stmts,
                 Map<String, CFGNode> labelToCFG,
                 Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG,
@@ -138,9 +158,7 @@ public class BlockCfgConstructor {
 
             this.labelToCFG = labelToCFG;
             this.jumpTargetFromCFG = jumpTargetFromCFG;
-            successor.ifPresentOrElse(s -> {
-                this.successor = s;
-            }, () -> this.successor = this.createStubNode());
+            this.successor = successor.map(s -> s).orElse(this.createStubNode());
 
             final var stmtArray = new ArrayList<>(stmts);
             for (int i = stmtArray.size() - 1; i >= 0; i--) {
@@ -148,15 +166,15 @@ public class BlockCfgConstructor {
                 this.successor = stmt.accept(this);
             }
             if (outNode.isEmpty()) {
-                throw new AssertionError("Missing out node");
+                return new Pair<>(labelSets, this.successor);
             } else if (this.successor instanceof CFGStubNode) {
-                return new Pair<>(topLabel, outNode.get());
+                return new Pair<>(labelSets, outNode.get());
             } else {
                 final var block =
                         new CFGBlockNode(new Location(-1, -1),
                                          this.successor,
                                          outNode.get());
-                return new Pair<>(topLabel, block);
+                return new Pair<>(labelSets, block);
             }
         }
 
@@ -190,7 +208,6 @@ public class BlockCfgConstructor {
             }
         }
 
-
         @Override
         public CFGNode visit(IRJump n) {
             if (n.target() instanceof IRName) {
@@ -214,7 +231,7 @@ public class BlockCfgConstructor {
 
         @Override
         public CFGNode visit(IRLabel n) {
-            this.topLabel.add(n.name());
+            this.labelSets.add(n.name());
             return successor;
         }
 

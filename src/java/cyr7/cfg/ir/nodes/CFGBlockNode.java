@@ -23,12 +23,21 @@ public class CFGBlockNode extends CFGNode {
     private Set<String> killSet;
     private Map<String, String> genSet;
 
+    /**
+     * A block of CFG nodes, where for all nodes in {@code block}, all outgoing
+     * and incoming point to nodes within {@code block}. Additionally,
+     * {@code block} is a linear CFG tree, i.e. for each node, there is only
+     * at most one incoming edge and one outgoing edge.
+     */
     public CFGBlockNode(Location location, CFGNode block,
             CFGNode outNode) {
         super(location);
         this.block = block;
         this.outNode = outNode;
         this.updateIns();
+
+        this.refreshDfaSets();
+
         repOk();
     }
 
