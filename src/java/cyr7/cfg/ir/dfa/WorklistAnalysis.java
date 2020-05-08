@@ -76,7 +76,7 @@ public final class WorklistAnalysis {
 
                 L outValue = node.out()
                     .stream()
-                    .map(n -> in.get(n))
+                    .map(in::get)
                     .reduce(analysis::meet)
                     // the set of in-nodes to a node should never be empty
                     // unless it's the start node for a forward analysis or a

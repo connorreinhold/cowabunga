@@ -47,7 +47,7 @@ public class CCPOptimization {
             visited.add(next);
 
             for (CFGNode out: next.out()) {
-                if (!visited.contains(out)) {
+                if (!visited.contains(out) && !nextNodes.contains(out)) {
                     nextNodes.add(out);
                 }
             }

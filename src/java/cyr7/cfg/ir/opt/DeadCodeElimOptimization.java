@@ -59,7 +59,7 @@ public class DeadCodeElimOptimization {
             visited.add(next);
 
             for (CFGNode out: next.out()) {
-                if (!visited.contains(out)) {
+                if (!visited.contains(out) && !nextNodes.contains(out)) {
                     nextNodes.add(out);
                 }
             }
@@ -95,12 +95,14 @@ public class DeadCodeElimOptimization {
             // If variable is not defined, then remove from graph. Unless
             // it is being assigned to a return value temp.
             Set<String> defined = this.result.get(n).liveVars;
+            if (n.toString().equals("expr=(TEMP nextExpr)")) {
+                System.out.println("Stop here");
+            }
             if (!this.isAReturn(n.variable)
                     && !defined.contains(n.variable)) {
                 // Remove n from the graph.
                 // For every incoming node, replace their out node with
                 // this node's out node.
-                System.out.println("Incoming");
                 for (CFGNode incoming: n.in()) {
                     for (CFGNode out: n.out()) {
                         incoming.replaceOutEdge(n, out);

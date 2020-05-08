@@ -12,7 +12,7 @@ import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.opt.CCPOptimization;
+import cyr7.cfg.ir.opt.CopyPropagationOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.Optimization;
 import cyr7.cli.OptimizationSetting;
@@ -106,31 +106,17 @@ public class IRUtil {
 
         if (lowerConfiguration.traceEnabled) {
             Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
-//        if (lowerConfiguration.settings.get(Optimization.COPY)) {
-//            cfg.keySet().stream().forEach(functionName -> {
-//                var optimizedCfg = CopyPropagationOptimization
-//                                            .optimize(cfg.get(functionName));
-//                cfg.put(functionName, optimizedCfg);
-//            });
-//        }
-//
-//        if (lowerConfiguration.settings.get(Optimization.CP)) {
             cfg.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = CCPOptimization
+                var optimizedCfg = CopyPropagationOptimization
                                             .optimize(cfg.get(functionName));
                 cfg.put(functionName, optimizedCfg);
             });
-//        }
-
-//            if (lowerConfiguration.settings.get(Optimization.DCE)) {
-//                cfg.keySet().stream().forEach(functionName -> {
-//                    var optimizedCfg = DeadCodeElimOptimization
-//                            .optimize(cfg.get(functionName));
-//                    cfg.put(functionName, optimizedCfg);
-//                });
-//            }
+//            cfg.keySet().stream().forEach(functionName -> {
+//                var optimizedCfg = DeadCodeElimOptimization
+//                        .optimize(cfg.get(functionName));
+//                cfg.put(functionName, optimizedCfg);
+//            });
             compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
-//            System.out.println(compUnit);
         } else {
         }
 
