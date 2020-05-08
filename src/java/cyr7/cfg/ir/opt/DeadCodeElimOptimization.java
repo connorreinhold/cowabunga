@@ -10,6 +10,7 @@ import java.util.Set;
 import cyr7.cfg.ir.dfa.IrLiveVariableAnalysis;
 import cyr7.cfg.ir.dfa.IrLiveVariableAnalysis.IrLiveVarLattice;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -133,6 +134,12 @@ public class DeadCodeElimOptimization {
         @Override
         public CFGNode visit(CFGSelfLoopNode n) {
             return n;
+        }
+
+        @Override
+        public CFGNode visit(CFGBlockNode n) {
+            // TODO Auto-generated method stub
+            return null;
         }
     }
 

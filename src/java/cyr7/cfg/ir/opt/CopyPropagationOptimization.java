@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis;
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis.CopyPropLattice;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -115,12 +116,16 @@ public class CopyPropagationOptimization {
         @Override
         public CFGNode visit(CFGMemAssignNode n) {
             final var lattice = this.result.get(n);
-
             final var value = IRTempReplacer.replace(n.value, lattice.copies);
             final var mem = IRTempReplacer.replace(n.target, lattice.copies);
             n.value = value;
             n.target = mem;
             return n;
+        }
+
+        @Override
+        public CFGNode visit(CFGBlockNode n) {
+            return null;
         }
 
         @Override

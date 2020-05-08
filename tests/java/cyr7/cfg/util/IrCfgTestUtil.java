@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.flatten.CFGFlattener;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -91,6 +92,11 @@ public class IrCfgTestUtil {
         @Override
         public CFGNode visit(CFGSelfLoopNode n) {
             return new CFGSelfLoopNode();
+        }
+
+        @Override
+        public CFGNode visit(CFGBlockNode n) {
+            return new CFGBlockNode(n.location(), n.block, stubReference);
         }
 
     }
@@ -212,6 +218,29 @@ public class IrCfgTestUtil {
         }
 
         @Override
+        public Boolean visit(CFGBlockNode n) {
+            if (nodeToCompare instanceof CFGBlockNode) {
+                CFGBlockNode block = (CFGBlockNode)nodeToCompare;
+                CFGNode nodeToCompareToTraverse = block.block;
+                CFGNode incomingNodeToTraverse = n.block;
+
+                while (!(nodeToCompareToTraverse instanceof CFGStubNode)
+                        && !(incomingNodeToTraverse instanceof CFGStubNode)) {
+                    if (incomingNodeToTraverse
+                            .accept(new CFGNodeEqualVisitor(nodeToCompareToTraverse))) {
+                        nodeToCompareToTraverse = nodeToCompareToTraverse.out().get(0);
+                        incomingNodeToTraverse = incomingNodeToTraverse.out().get(0);
+                    } else {
+                        return false;
+                    }
+                }
+                return nodeToCompareToTraverse instanceof CFGStubNode
+                        && incomingNodeToTraverse instanceof CFGStubNode;
+            }
+            return false;
+        }
+
+        @Override
         public Boolean visit(CFGReturnNode n) {
             return nodeToCompare instanceof CFGReturnNode;
         }
@@ -225,7 +254,6 @@ public class IrCfgTestUtil {
         public Boolean visit(CFGSelfLoopNode n) {
             return nodeToCompare instanceof CFGSelfLoopNode;
         }
-
     }
 
 
