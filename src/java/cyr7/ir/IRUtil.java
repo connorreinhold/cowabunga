@@ -10,7 +10,7 @@ import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.opt.CopyPropagationOptimization;
+import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -53,7 +53,7 @@ public class IRUtil {
             compUnit = (IRCompUnit) node;
             Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
             cfg.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = CopyPropagationOptimization
+                var optimizedCfg = DeadCodeElimOptimization
                                             .optimize(cfg.get(functionName));
                 cfg.put(functionName, optimizedCfg);
             });
