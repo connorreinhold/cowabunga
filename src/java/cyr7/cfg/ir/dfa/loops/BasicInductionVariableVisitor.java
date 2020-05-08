@@ -21,100 +21,95 @@ import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
 
-public class BasicInductionVariableVisitor implements IrCFGVisitor<Optional<Void>> {
+public class BasicInductionVariableVisitor
+        implements IrCFGVisitor<Optional<Void>> {
 
-    // Keep track of basic induction variables along with what they are incremented by each loop
-    Map<String, Long> mapVarToInc;
+    // Keep track of basic induction variables
+    Set<String> inductionVars;
     Set<CFGNode> visited;
-    
+    Set<CFGNode> reachable;
+
     // If Temp a = ____ of wrong format, a cannot be a basic IV
     Set<String> invalidVars;
-    
-    // TODO: pass in the set of nodes that form the loop.
-    public BasicInductionVariableVisitor() {
-        visited = new HashSet<CFGNode>();
-        mapVarToInc = new HashMap<String, Long>();
-        invalidVars = new HashSet<String>();
+
+    // Pass in the set of nodes that form the loop.
+    public BasicInductionVariableVisitor(Set<CFGNode> reachable) {
+        this.visited = new HashSet<CFGNode>();
+        this.inductionVars = new HashSet<String>();
+        this.invalidVars = new HashSet<String>();
+        this.reachable = reachable;
     }
-    
+
     @Override
     public Optional<Void> visit(CFGCallNode n) {
-        if (visited.contains(n)) {
+        if (visited.contains(n) || !reachable.contains(n)) {
             return Optional.empty();
         }
-        n.out().get(0).accept(this);
         visited.add(n);
+        n.out().get(0).accept(this);
         return Optional.empty();
     }
 
     @Override
     public Optional<Void> visit(CFGIfNode n) {
-        if (visited.contains(n)) {
+        if (visited.contains(n) || !reachable.contains(n)) {
             return Optional.empty();
         }
+        visited.add(n);
         n.out().get(0).accept(this);
         n.out().get(1).accept(this);
-        visited.add(n);
         return Optional.empty();
     }
 
     @Override
     public Optional<Void> visit(CFGVarAssignNode n) {
-        if (visited.contains(n) || invalidVars.contains(n.variable)) {
+        if (visited.contains(n) || invalidVars.contains(n.variable)
+                || !reachable.contains(n)) {
             return Optional.empty();
         }
         boolean validInductionVariable = false;
-        Long loopInc = 0l;
         if (n.value instanceof IRBinOp) {
             IRBinOp binOp = (IRBinOp) n.value;
-            if (binOp.opType() == OpType.ADD) {
-                if (isCorrectTemp(binOp.left(), n.variable) 
-                        && isConst(binOp.right())) {
-                    // If a = a + CONST
-                    loopInc = ((IRConst) binOp.right()).value();
-                    if (mapVarToInc.containsKey(n.variable)) {
-                        loopInc += mapVarToInc.get(n.variable);
-                    }
-                    validInductionVariable = true;
-                } else if (isCorrectTemp(binOp.right(), n.variable)
-                        && isConst(binOp.left())) {
-                    // If a = CONST + a
-                    loopInc = ((IRConst) binOp.left()).value();
-                    if (mapVarToInc.containsKey(n.variable)) {
-                        loopInc += mapVarToInc.get(n.variable);
-                    }
-                    validInductionVariable = true;
-                }
+            if ((binOp.opType() == OpType.ADD || binOp.opType() == OpType.SUB)
+                    && isCorrectTemp(binOp.left(), n.variable)
+                    && isConst(binOp.right())) {
+                // If a = a +/- CONST
+                validInductionVariable = true;
+            } else if (binOp.opType() == OpType.ADD 
+                    && isCorrectTemp(binOp.right(), n.variable)
+                    && isConst(binOp.left())) {
+                // If a = CONST + a
+                validInductionVariable = true;
             }
         }
         if (validInductionVariable) {
-            mapVarToInc.put(n.variable, loopInc);
+            inductionVars.add(n.variable);
         } else {
             invalidVars.add(n.variable);
         }
-        n.out().get(0).accept(this);
         visited.add(n);
+        n.out().get(0).accept(this);
         return Optional.empty();
     }
-    
+
     private static boolean isCorrectTemp(IRExpr node, String target) {
-        if (node instanceof IRTemp && ((IRTemp)node).name().equals(target)) {
+        if (node instanceof IRTemp && ((IRTemp) node).name().equals(target)) {
             return true;
         }
         return false;
     }
-    
+
     private static boolean isConst(IRExpr node) {
         return node instanceof IRConst;
     }
 
     @Override
     public Optional<Void> visit(CFGMemAssignNode n) {
-        if (visited.contains(n)) {
+        if (visited.contains(n) || !reachable.contains(n)) {
             return Optional.empty();
         }
-        n.out().get(0).accept(this);
         visited.add(n);
+        n.out().get(0).accept(this);
         return Optional.empty();
     }
 
@@ -125,17 +120,16 @@ public class BasicInductionVariableVisitor implements IrCFGVisitor<Optional<Void
 
     @Override
     public Optional<Void> visit(CFGStartNode n) {
-        if (visited.contains(n)) {
+        if (visited.contains(n) || !reachable.contains(n)) {
             return Optional.empty();
         }
-        n.out().get(0).accept(this);
         visited.add(n);
+        n.out().get(0).accept(this);
         return Optional.empty();
     }
 
     @Override
     public Optional<Void> visit(CFGSelfLoopNode n) {
-        // TODO Auto-generated method stub
-        return null;
+        return Optional.empty();
     }
 }

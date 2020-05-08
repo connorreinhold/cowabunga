@@ -12,6 +12,7 @@ import java.util.Stack;
 
 import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.ir.constructor.CFGConstructor;
+import cyr7.cfg.ir.dfa.CCPAnalysis;
 import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
 import cyr7.cfg.ir.nodes.CFGNode;
@@ -35,16 +36,11 @@ public class testStuff {
             new DefaultIdGenerator());
         Map<String, CFGNode> cfgResult = CFGConstructor.constructCFG(lowered);
         CFGStartNode start = (CFGStartNode) cfgResult.get("_Imain_paai");
-        //System.out.println(start.out().get(0).out().get(0).in());
-        //AsmCFGUtil.testGenerateDotAsm();
-        //BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor();
-        //start.accept(bv);
         
         DfaResult<Set<CFGNode>> result = 
                 WorklistAnalysis.analyze(start, DominatorAnalysis.INSTANCE);
 
         Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
-        // System.out.println(cleanedDominators);
         findLoops(cleanedDominators);
     }
     
@@ -53,9 +49,15 @@ public class testStuff {
             //System.out.println(pair.getKey()+": "+pair.getValue());
             CFGNode node = pair.getKey();
             for(CFGNode out: node.out()) {
+                // If there is an out edge to a dominator of this node
                 if (pair.getValue().contains(out)) {
                     Set<CFGNode> reachable = backwardsSearch(node, out);
-                    System.out.println(node);
+                    //System.out.println(reachable);
+                    BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
+                    out.accept(bv);
+                    DerivedInductionVariableAnalysis inductionAnalysis = new DerivedInductionVariableAnalysis(bv.inductionVars);
+                    var result = WorklistAnalysis.analyzeSubsection(reachable, inductionAnalysis).out();
+                    System.out.println(result);
                 }
             }
         }
@@ -76,6 +78,7 @@ public class testStuff {
             }
             reachable.add(next);
         }
+        reachable.add(head);
         return reachable;
     }
     

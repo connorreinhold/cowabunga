@@ -18,8 +18,8 @@ public class CFGConstructor {
 
         c.functions().forEach((name, fn) -> {
             CFGNode fBody = fn.body().accept(new CFGConstructorVisitor());
-            //var cleaner = new CFGUnreachableNodeCleaner();
-            //fBody = cleaner.removeUnreachableNodes((CFGStartNode) fBody);
+            var cleaner = new CFGUnreachableNodeCleaner();
+            fBody = cleaner.removeUnreachableNodes((CFGStartNode) fBody);
             cfgCollection.put(name, fBody);
          });
         return cfgCollection;

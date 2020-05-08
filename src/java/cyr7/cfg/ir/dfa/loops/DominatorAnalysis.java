@@ -162,8 +162,7 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public Set<CFGNode> transfer(CFGSelfLoopNode n, Set<CFGNode> in) {
-            // TODO Auto-generated method stub
-            return null;
+            return Sets.union(Set.of(), Set.of(n));
         }
         
     }

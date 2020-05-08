@@ -10,16 +10,27 @@ import java.util.Set;
 
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.nodes.CFGVarAssignNode;
-import cyr7.util.Sets;
 
 public final class WorklistAnalysis {
 
+    public static <L> DfaResult<L> analyzeSubsection(
+            Set<CFGNode> reachable,
+            ForwardDataflowAnalysis<L> analysis) {
+        return runAnalysis(reachable, analysis);
+    }
+    
     public static <L> DfaResult<L> analyze(
-        CFGStartNode cfg,
-        ForwardDataflowAnalysis<L> analysis) {
-
+            CFGStartNode cfg,
+            ForwardDataflowAnalysis<L> analysis) {
+        
         Set<CFGNode> allNodes = getAllNodes(cfg);
+        return runAnalysis(allNodes, analysis);
+    }
+    
+    private static <L> DfaResult<L> runAnalysis(
+            Set<CFGNode> allNodes,
+            ForwardDataflowAnalysis<L> analysis) {
+        
         Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
 
         Map<CFGNode, L> in = new HashMap<>();
@@ -45,9 +56,6 @@ public final class WorklistAnalysis {
                 .orElse(analysis.topValue());
             in.put(node, inValue);
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
-            if (node instanceof CFGVarAssignNode && ((CFGVarAssignNode) node).variable.equals("A")) {
-                //System.out.println(node+": "+output);
-            }
             for (int i = 0; i < node.out().size(); i++) {
                 CFGNode outEdge = node.out().get(i);
 
@@ -58,12 +66,11 @@ public final class WorklistAnalysis {
                     worklist.add(outEdge);
                 }
             }
-            //System.out.println(out);
-            //System.out.println("------------");
         }
 
         return new DfaResult<>(in, out);
     }
+    
 
     public static <L> Map<CFGNode, L> analyze(
             CFGStartNode cfg,
@@ -105,7 +112,6 @@ public final class WorklistAnalysis {
             }
             return out;
         }
-
 
     private static Set<CFGNode> getAllNodes(CFGStartNode cfg) {
         Set<CFGNode> nodes = new HashSet<>();
