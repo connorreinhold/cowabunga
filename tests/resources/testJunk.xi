@@ -1,8 +1,10 @@
 main(args: int[][]) {
-  A:int = 1
-  while(A < 3) {
-      A = A + 1
-      B:int = A
-      A = A + 5
+  x:int = 12
+  a:int = 4
+  while (x < 12) {
+       x = x + 1
+       a = x - 2
   }
+  x = 2
+  a = 5
 }

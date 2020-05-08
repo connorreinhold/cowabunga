@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.Reader;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -24,7 +25,8 @@ import cyr7.ir.IRUtil;
 import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.nodes.IRCompUnit;
 
-public class testStuff {
+public class StrengthReductionUtil {
+    
     public static void main(String[] args) throws Exception {
         File f = new File("tests/resources/testJunk.xi");
         FileReader fr = new FileReader(f);
@@ -43,35 +45,34 @@ public class testStuff {
                 WorklistAnalysis.analyze(start, DominatorAnalysis.INSTANCE);
 
         Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
-        findLoops(cleanedDominators);
+        runIVAnalysis(cleanedDominators);
     }
     
-    public static Map<CFGNode, Set<CFGNode>> findLoops(Map<CFGNode, Set<CFGNode>> dominators) {
+    // Returns head of loop mapped to IV analysis for each node in the loop
+    public static Map<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> runIVAnalysis(
+            Map<CFGNode, Set<CFGNode>> dominators) {
+        
+        Map<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> loopIVAnalysis = new HashMap<>();
         for(Map.Entry<CFGNode, Set<CFGNode>> pair: dominators.entrySet()) {
-            //System.out.println(pair.getKey()+": "+pair.getValue());
             CFGNode node = pair.getKey();
             for(CFGNode out: node.out()) {
                 // If there is an out edge to a dominator of this node
                 if (pair.getValue().contains(out)) {
-                    System.out.println();
-                    System.out.println();
-                    System.out.println();
-                    System.out.println();
-                    System.out.println("---------------------");
+                    // Found a loop
                     Set<CFGNode> reachable = backwardsSearch(node, out);
-                    System.out.println(reachable);
+                    //System.out.println(reachable);
                     BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
                     out.accept(bv);
                     DerivedInductionVariableAnalysis inductionAnalysis = 
                             new DerivedInductionVariableAnalysis(bv.inductionVars, out);
                     var result = WorklistAnalysis.analyzeSubsection(out, reachable, inductionAnalysis).out();
-                    for(Entry<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> entry: result.entrySet()) {
-                        System.out.println(entry.getValue());
-                    }
+                    //System.out.println(result);
+                    loopIVAnalysis.put(out, InductionVariableUtil.generateMap(result));
                 }
             }
         }
-        return dominators;
+        System.out.println(loopIVAnalysis);
+        return loopIVAnalysis;
     }
     
     // Precondition: tail is dominated by head.

@@ -158,31 +158,50 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
             if (n.value instanceof IRBinOp) {
                 IRBinOp expr = (IRBinOp) n.value;
                 
-                var constTemp = BiPatternBuilder
+                var constTempCommute = BiPatternBuilder
                     .left()
                     .instOf(IRConst.class)
                     .right()
                     .instOf(IRTemp.class)
                     .finish()
                     .enableCommutes();
+                
+                var tempMinusConst = BiPatternBuilder
+                        .left()
+                        .instOf(IRTemp.class)
+                        .right()
+                        .instOf(IRConst.class)
+                        .finish();
                 InductionVariable newIV = null;
-                if (expr.opType() == OpType.MUL && constTemp.matches(new Object[]{expr.left(), expr.right()})) {
-                    long constant = constTemp.leftObj().value();
-                    String referenced = constTemp.rightObj().name();
+                if (expr.opType() == OpType.MUL && constTempCommute.matches(new Object[]{expr.left(), expr.right()})) {
+                    // a = i * c
+                    long constant = constTempCommute.leftObj().value();
+                    String referenced = constTempCommute.rightObj().name();
                     if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
                         newIV = new DefinedInductionVariable(
                                 updatedMap.get(referenced).basicRef(),
                                 updatedMap.get(referenced).getFactor()*constant,
                                 updatedMap.get(referenced).getOffset()*constant);
                     }
-                } else if(expr.opType() == OpType.ADD && constTemp.matches(new Object[]{expr.left(), expr.right()})) {
-                    long constant = constTemp.leftObj().value();
-                    String referenced = constTemp.rightObj().name();
+                } else if(expr.opType() == OpType.ADD && constTempCommute.matches(new Object[]{expr.left(), expr.right()})) {
+                     // a = i + c
+                    long constant = constTempCommute.leftObj().value();
+                    String referenced = constTempCommute.rightObj().name();
                     if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
                         newIV = new DefinedInductionVariable(
                                 updatedMap.get(referenced).basicRef(),
                                 updatedMap.get(referenced).getFactor(),
                                 updatedMap.get(referenced).getOffset()+constant);
+                    }
+                } else if (expr.opType() == OpType.SUB && tempMinusConst.matches(new Object[]{expr.left(), expr.right()})) {
+                    // a = i - c
+                    long constant = tempMinusConst.rightObj().value();
+                    String referenced = tempMinusConst.leftObj().name();
+                    if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
+                        newIV = new DefinedInductionVariable(
+                                updatedMap.get(referenced).basicRef(),
+                                updatedMap.get(referenced).getFactor(),
+                                updatedMap.get(referenced).getOffset()-constant);
                     }
                 }
                 if (newIV == null) {

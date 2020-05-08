@@ -10,6 +10,7 @@ import cyr7.util.Sets;
 
 public final class DominatorUtil {
     
+    // Generates a map of CFG nodes to all nodes that dominate them
     public static Map<CFGNode, Set<CFGNode>> generateMap(
             Map<CFGNode, Map<CFGNode, Set<CFGNode>>> worklistOutput) {
         Map<CFGNode, Set<CFGNode>> map = new HashMap<>();
