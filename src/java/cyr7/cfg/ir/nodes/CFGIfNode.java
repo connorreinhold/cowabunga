@@ -46,12 +46,6 @@ public class CFGIfNode extends CFGNode {
     @Override
     public void replaceOutEdge(CFGNode previous, CFGNode n) {
         if (falseBranch != previous && trueBranch != previous) {
-            System.out.println(System.identityHashCode(previous));
-            System.out.println(System.identityHashCode(trueBranch));
-//            System.out.println();
-            System.out.println(falseBranch);
-            System.out.println(trueBranch);
-            System.out.println(trueBranch != previous);
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }

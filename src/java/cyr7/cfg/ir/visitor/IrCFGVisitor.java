@@ -1,5 +1,6 @@
 package cyr7.cfg.ir.visitor;
 
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -23,5 +24,7 @@ public interface IrCFGVisitor<R> {
     R visit(CFGStartNode n);
 
     R visit(CFGSelfLoopNode n);
+
+    R visit(CFGBlockNode n);
 
 }

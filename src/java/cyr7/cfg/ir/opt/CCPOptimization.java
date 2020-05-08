@@ -1,6 +1,7 @@
 package cyr7.cfg.ir.opt;
 
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRName;
 
 public class CCPOptimization {
 
@@ -56,7 +58,6 @@ public class CCPOptimization {
         return startNode;
     }
 
-    // TODO: Removing nodes if they are unreachable
     private static class CcpCfgTransformationVisitor implements IrCFGVisitor<CFGNode> {
 
         private final Map<CFGNode, LatticeElement> incomingLattices;
@@ -70,6 +71,15 @@ public class CCPOptimization {
 
         @Override
         public CFGNode visit(CFGCallNode n) {
+            if (((IRName)n.call.target()).name().equals("_IAck_it2ii")) {
+                System.out.println("LOL");
+            }
+            final var incomingLattice = incomingLattices.get(n);
+            if (incomingLattice.unreachable()) {
+                // Remove this node as the incoming node of the next.
+                n.outNode().in().removeAll(Collections.singleton(n));
+                return n;
+            }
             final var lattice = incomingLattices.get(n);
             final IRCallStmt call = n.call;
             List<IRExpr> updatedArgs = call.args().stream().map(arg -> {
@@ -90,10 +100,11 @@ public class CCPOptimization {
 
             final var trueBranch = n.trueBranch();
             final var falseBranch = n.falseBranch();
+
             if (incomingLattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                trueBranch.in().remove(n);
-                falseBranch.in().remove(n);
+                trueBranch.in().removeAll(Collections.singleton(n));
+                falseBranch.in().removeAll(Collections.singleton(n));
                 return n;
             }
 
@@ -101,14 +112,14 @@ public class CCPOptimization {
             if (outgoingLattice.get(trueBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
                 // false branch
-                falseBranch.in().remove(n);
+                trueBranch.in().removeAll(Collections.singleton(n));
                 for (CFGNode incoming: n.in()) {
                     incoming.replaceOutEdge(n, falseBranch);
                 }
             } else if (outgoingLattice.get(falseBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
                 // true branch
-                trueBranch.in().remove(n);
+                falseBranch.in().removeAll(Collections.singleton(n));
                 for (CFGNode incoming: n.in()) {
                     incoming.replaceOutEdge(n, trueBranch);
                 }
@@ -121,7 +132,7 @@ public class CCPOptimization {
             final var lattice = incomingLattices.get(n);
             if (lattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                n.outNode().in().remove(n);
+                n.outNode().in().removeAll(Collections.singleton(n));
                 return n;
             }
             n.value = IRTempToConstant.replace(n.value, lattice);
@@ -133,7 +144,7 @@ public class CCPOptimization {
             final var lattice = incomingLattices.get(n);
             if (lattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                n.outNode().in().remove(n);
+                n.outNode().in().removeAll(Collections.singleton(n));
                 return n;
             }
             n.value = IRTempToConstant.replace(n.value, lattice);
@@ -151,7 +162,7 @@ public class CCPOptimization {
             final var lattice = incomingLattices.get(n);
             if (lattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
-                n.outNode().in().remove(n);
+                n.outNode().in().removeAll(Collections.singleton(n));
                 return n;
             }
             return n;

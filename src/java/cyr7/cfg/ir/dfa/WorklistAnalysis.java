@@ -33,6 +33,7 @@ public final class WorklistAnalysis {
         long work = 0;
         while (!worklist.isEmpty()) {
             work++;
+            final long size = worklist.size();
             CFGNode node = worklist.remove();
             L inValue = node.in()
                 .stream()

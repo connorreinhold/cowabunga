@@ -10,8 +10,6 @@ import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.opt.CopyPropagationOptimization;
-import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -45,21 +43,21 @@ public class IRUtil {
         }
 
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
-        compUnit = TraceOptimizer.optimize(compUnit, generator);
-
         if (optConfig.cf()) {
-            IRNode node =
-                compUnit.accept(new IRConstFoldVisitor()).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
+            compUnit = TraceOptimizer.optimize(compUnit, generator);
+            final var functionToBlocks =
+                    TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+
             Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
             cfg.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = cfg.get(functionName);
-                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+//                optimizedCfg = CCPOptimization.optimize(optimizedCfg);
+//                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+//                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
                 cfg.put(functionName, optimizedCfg);
             });
             compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
+            compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         }
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);

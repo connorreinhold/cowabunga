@@ -7,16 +7,23 @@ import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class CFGSelfLoopNode extends CFGNode {
+public class CFGBlockNode extends CFGNode {
 
-    public CFGSelfLoopNode() {
-        super(new Location(-1, -1));
+    public final CFGNode block;
+    public CFGNode outNode;
+
+    public CFGBlockNode(Location location, CFGNode block,
+            CFGNode outNode) {
+        super(location);
+        this.block = block;
+        this.outNode = outNode;
+        this.updateIns();
         repOk();
     }
 
     @Override
     public List<CFGNode> out() {
-        return List.of(this);
+        return List.of(outNode);
     }
 
     @Override
@@ -33,14 +40,19 @@ public class CFGSelfLoopNode extends CFGNode {
     @Override
     public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction,
             T input) {
-
         return transferFunction.transfer(this, input);
     }
 
     @Override
     public void replaceOutEdge(CFGNode previous, CFGNode newTarget) {
-        throw new UnsupportedOperationException(
-                "The out nodes of a self loop cannot be replaced");
+        if (outNode == previous) {
+            this.outNode = newTarget;
+            this.updateIns();
+        } else {
+            throw new UnsupportedOperationException(
+                    "Cannot replace node arbitrarily.");
+        }
+        repOk();
     }
 
 }

@@ -1,6 +1,8 @@
 package cyr7.ir.block;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import cyr7.ir.IdGenerator;
@@ -17,6 +19,21 @@ public final class TraceOptimizer {
         IRNodeFactory factory = new IRNodeFactory_c(compUnit.location());
 
         IRCompUnit optimized = factory.IRCompUnit(compUnit.name());
+        final var functionToBlocks = getOptimizedBasicBlocks(compUnit, generator);
+
+        functionToBlocks.forEach((name, blocks) -> {
+            List<IRStmt> flattenedStmts = flatten(blocks);
+            final var originalFunction = compUnit.getFunction(name);
+            IRSeq newBody = new IRSeq(compUnit.location(), flattenedStmts);
+            IRFuncDecl funcDecl = new IRFuncDecl(originalFunction.location(),
+                    name, newBody, originalFunction.type());
+            optimized.appendFunc(funcDecl);
+        });
+        return optimized;
+    }
+
+    public static Map<String, List<List<BasicBlock>>> getOptimizedBasicBlocks(IRCompUnit compUnit, IdGenerator generator) {
+        Map<String, List<List<BasicBlock>>> blockLists = new HashMap<>();
 
         compUnit.functions().forEach((name, decl) -> {
             List<IRStmt> statements;
@@ -27,18 +44,14 @@ public final class TraceOptimizer {
             }
 
             List<BasicBlock> blocks = BlockGenerator.getBlocks(generator, statements);
+            System.out.println(blocks);
             List<List<BasicBlock>> traces = BlockTraceGenerator.getTraces(blocks);
             List<List<BasicBlock>> optimizedTraces = BlockTraceOptimizer.optimized(traces);
-            List<IRStmt> flattenedStmts = flatten(optimizedTraces);
-            IRSeq newBody = new IRSeq(decl.body().location(), flattenedStmts);
-
-            IRFuncDecl funcDecl = new IRFuncDecl(decl.location(), decl.name(),
-                    newBody, decl.type());
-            optimized.appendFunc(funcDecl);
+            blockLists.put(name, optimizedTraces);
         });
-
-        return optimized;
+        return blockLists;
     }
+
 
     private static List<IRStmt> flatten(List<List<BasicBlock>> traces) {
         return traces.stream()
