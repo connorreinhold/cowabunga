@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class TestProgram {
@@ -226,7 +227,7 @@ public abstract class TestProgram {
         runAssemblyTest(TilerConf.COMPLEX, OptConfig.none());
     }
 
-    @Timeout(30 * 1000) // 60 seconds
+    @Timeout(value=30, unit=SECONDS) // 30 seconds
     @EnabledOnOs({OS.LINUX})
     @Test
     void testRegisterAllocator() throws Exception {
