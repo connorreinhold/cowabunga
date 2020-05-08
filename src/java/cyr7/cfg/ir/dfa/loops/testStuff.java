@@ -7,6 +7,7 @@ import java.io.Reader;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
@@ -15,6 +16,7 @@ import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.dfa.CCPAnalysis;
 import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
+import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.ir.DefaultIdGenerator;
@@ -51,13 +53,16 @@ public class testStuff {
             for(CFGNode out: node.out()) {
                 // If there is an out edge to a dominator of this node
                 if (pair.getValue().contains(out)) {
+                    System.out.println("---------------------");
                     Set<CFGNode> reachable = backwardsSearch(node, out);
                     //System.out.println(reachable);
                     BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
                     out.accept(bv);
                     DerivedInductionVariableAnalysis inductionAnalysis = new DerivedInductionVariableAnalysis(bv.inductionVars);
-                    var result = WorklistAnalysis.analyzeSubsection(reachable, inductionAnalysis).out();
-                    System.out.println(result);
+                    var result = WorklistAnalysis.analyzeSubsection(out, reachable, inductionAnalysis).out();
+                    for(Entry<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> entry: result.entrySet()) {
+                        //System.out.println(entry.getKey()+": "+entry.getValue());
+                    }
                 }
             }
         }
@@ -72,7 +77,7 @@ public class testStuff {
         while(nodes.size() > 0) {
             CFGNode next = nodes.pop();
             for (CFGNode in: next.in()) {
-                if (in != head) {
+                if (in != head && !reachable.contains(in)) {
                     nodes.push(in);
                 }
             }

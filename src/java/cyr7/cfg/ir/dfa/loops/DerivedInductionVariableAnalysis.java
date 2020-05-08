@@ -127,38 +127,47 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
         public Map<String, InductionVariable> transfer(CFGVarAssignNode n,
                 Map<String, InductionVariable> in) {
             String variable = n.variable;
+            Map<String, InductionVariable> updatedMap = new HashMap<String, InductionVariable>(in);
             if (n.value instanceof IRBinOp) {
                 IRBinOp expr = (IRBinOp) n.value;
                 
-                var pattern = BiPatternBuilder
+                var constTemp = BiPatternBuilder
                     .left()
                     .instOf(IRConst.class)
                     .right()
                     .instOf(IRTemp.class)
                     .finish()
                     .enableCommutes();
-
-                if (expr.opType() == OpType.MUL && pattern.matches(new Object[]{expr.left(), expr.right()})) {
-                    long constant = pattern.leftObj().value();
-                    String referenced = pattern.rightObj().name();
-                    if (in.containsKey(referenced) && in.get(referenced) instanceof DefinedInductionVariable) {
+                System.out.println(n+": "+in);
+                if (expr.opType() == OpType.MUL && constTemp.matches(new Object[]{expr.left(), expr.right()})) {
+                    long constant = constTemp.leftObj().value();
+                    String referenced = constTemp.rightObj().name();
+                    if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
                         InductionVariable newIV = new DefinedInductionVariable(
-                                in.get(referenced).basicRef(),
-                                in.get(referenced).getFactor()*constant,
-                                in.get(referenced).getOffset()*constant);
-                        in.put(variable, newIV);
+                                updatedMap.get(referenced).basicRef(),
+                                updatedMap.get(referenced).getFactor()*constant,
+                                updatedMap.get(referenced).getOffset()*constant);
+                        updatedMap.put(variable, newIV);
                     }
-                } else if("Replace" == variable) {
-                    // Place more binop patterns here.
+                } else if(expr.opType() == OpType.ADD && constTemp.matches(new Object[]{expr.left(), expr.right()})) {
+                    long constant = constTemp.leftObj().value();
+                    String referenced = constTemp.rightObj().name();
+                    if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
+                        InductionVariable newIV = new DefinedInductionVariable(
+                                updatedMap.get(referenced).basicRef(),
+                                updatedMap.get(referenced).getFactor(),
+                                updatedMap.get(referenced).getOffset()+constant);
+                        updatedMap.put(variable, newIV);
+                    }
                 } else {
                     // Does not match any binop patterns
-                    in.put(variable, NotInductionVariable.INSTANCE);
+                    updatedMap.put(variable, NotInductionVariable.INSTANCE);
                 }
                         
             } else {
-                in.put(variable, NotInductionVariable.INSTANCE);
+                updatedMap.put(variable, NotInductionVariable.INSTANCE);
             }
-            return in;
+            return updatedMap;
         }
 
         @Override

@@ -21,5 +21,10 @@ public class DefinedInductionVariable implements InductionVariable {
         public long getOffset() {
             return offset;
         }
+        
+        @Override
+        public String toString() {
+            return String.format("<%s, %d, %d>", basicRef, factor, offset);
+        }
     }
     

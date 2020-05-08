@@ -18,4 +18,9 @@ package cyr7.cfg.ir.dfa.loops.inductionvars;
         public long getOffset() {
             return 0;
         }
+        
+        @Override
+        public String toString() {
+            return String.format("<Not IV>");
+        }
     }

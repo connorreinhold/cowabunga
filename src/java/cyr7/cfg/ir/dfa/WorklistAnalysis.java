@@ -14,9 +14,10 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 public final class WorklistAnalysis {
 
     public static <L> DfaResult<L> analyzeSubsection(
+            CFGNode start,
             Set<CFGNode> reachable,
             ForwardDataflowAnalysis<L> analysis) {
-        return runAnalysis(reachable, analysis);
+        return runAnalysis(start, reachable, analysis);
     }
     
     public static <L> DfaResult<L> analyze(
@@ -24,10 +25,11 @@ public final class WorklistAnalysis {
             ForwardDataflowAnalysis<L> analysis) {
         
         Set<CFGNode> allNodes = getAllNodes(cfg);
-        return runAnalysis(allNodes, analysis);
+        return runAnalysis(cfg, allNodes, analysis);
     }
     
     private static <L> DfaResult<L> runAnalysis(
+            CFGNode start,
             Set<CFGNode> allNodes,
             ForwardDataflowAnalysis<L> analysis) {
         
@@ -46,14 +48,19 @@ public final class WorklistAnalysis {
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
             //System.out.println(node);
-            L inValue = node.in()
-                .stream()
-                .map(n -> out.get(n).get(node))
-                .reduce(analysis::meet)
-                // the set of in-nodes to a node should never be empty
-                // unless it's the start node for a forward analysis or a
-                // return node for a backward analysis
-                .orElse(analysis.topValue());
+            L inValue;
+            if (node == start) {
+                inValue = analysis.topValue();
+            } else {
+                inValue = node.in()
+                    .stream()
+                    .map(n -> out.get(n).get(node))
+                    .reduce(analysis::meet)
+                    // the set of in-nodes to a node should never be empty
+                    // unless it's the start node for a forward analysis or a
+                    // return node for a backward analysis
+                    .orElse(analysis.topValue());
+            }
             in.put(node, inValue);
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
             for (int i = 0; i < node.out().size(); i++) {
