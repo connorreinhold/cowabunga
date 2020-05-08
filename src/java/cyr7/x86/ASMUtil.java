@@ -1,5 +1,6 @@
 package cyr7.x86;
 
+import cyr7.cfg.asm.reg.ASMRegAllocGenerator;
 import cyr7.cli.OptConfig;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
@@ -40,8 +41,13 @@ public final class ASMUtil {
         IdGenerator idGenerator = new DefaultIdGenerator();
         IRCompUnit compUnit
             = IRUtil.generateIR(reader, filename, fileOpener, optConfig, idGenerator);
-        ASMGenerator asmGenerator
-            = new ASMTrivialRegAllocGenerator(tiler.getFactory(), idGenerator);
+
+        ASMGenerator asmGenerator;
+        if (optConfig.reg()) {
+            asmGenerator = new ASMRegAllocGenerator(tiler.getFactory(), idGenerator);
+        } else {
+            asmGenerator = new ASMTrivialRegAllocGenerator(tiler.getFactory(), idGenerator);
+        }
         return asmGenerator.generate(compUnit);
     }
 

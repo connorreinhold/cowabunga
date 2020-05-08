@@ -39,8 +39,8 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
         List<ASMLine> abstractASM
             = ASMAbstract.generateBody(funcDecl, generator, tilerFactory);
 
-        System.out.println("--- ABSTRACT ASSEMBLY ---");
-        print(abstractASM);
+//        System.out.println("--- ABSTRACT ASSEMBLY ---");
+//        print(abstractASM);
 
         SpillMemAllocator spillAllocator = new SpillMemAllocator();
         int count = 0;
@@ -50,7 +50,7 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
                 = new RegisterAllocator(abstractASM, funcDecl.name(), generator, spillAllocator);
             registerAllocator.run();
 
-            System.out.println("Spilled nodes: " + registerAllocator.spilledNodes().stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", ")));
+//            System.out.println("Spilled nodes: " + registerAllocator.spilledNodes().stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", ")));
             if (!registerAllocator.spilledNodes().isEmpty()) {
                 SpillProgramRewriter rewriter = new SpillProgramRewriter(
                     generator,
@@ -61,13 +61,13 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
 
                 abstractASM = rewriter.rewritten();
 
-                System.out.println("Iterations: " + ++count);
+//                System.out.println("Iterations: " + ++count);
             }
         } while (!registerAllocator.spilledNodes().isEmpty());
 
-        System.out.println("--- REGISTER ALLOCATED ---");
-        print(registerAllocator.program());
-        System.out.println(registerAllocator.coalescedMoves());
+//        System.out.println("--- REGISTER ALLOCATED ---");
+//        print(registerAllocator.program());
+//        System.out.println(registerAllocator.coalescedMoves());
 
 //        var keyvalues = registerAllocator.coloring().entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getIntelArg())).collect(Collectors.toList());
 //        for (var keyvalue : keyvalues) {
@@ -94,8 +94,8 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
         lines.addAll(prologue);
         lines.addAll(rewriter.rewritten());
         lines.addAll(epilogue);
-        System.out.println("--- FINAL PROGRAM ---");
-        print(lines);
+//        System.out.println("--- FINAL PROGRAM ---");
+//        print(lines);
         return lines;
     }
 
