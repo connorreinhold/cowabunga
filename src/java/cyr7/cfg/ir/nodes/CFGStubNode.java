@@ -67,4 +67,9 @@ public class CFGStubNode extends CFGNode {
         throw new AssertionError("Stub node has no kill set");
     }
 
+    @Override
+    public void refreshDfaSets() {
+        throw new AssertionError("Stub node has no dfa sets");
+    }
+
 }

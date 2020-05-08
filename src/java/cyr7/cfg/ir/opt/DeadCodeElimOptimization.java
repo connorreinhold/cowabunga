@@ -1,11 +1,14 @@
 package cyr7.cfg.ir.opt;
 
+import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.dfa.IrLiveVariableAnalysis;
 import cyr7.cfg.ir.dfa.IrLiveVariableAnalysis.IrLiveVarLattice;
@@ -18,9 +21,11 @@ import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.interpret.Configuration;
+import cyr7.ir.visit.IRExprVarsVisitor;
 
 public class DeadCodeElimOptimization {
 
@@ -96,9 +101,6 @@ public class DeadCodeElimOptimization {
             // If variable is not defined, then remove from graph. Unless
             // it is being assigned to a return value temp.
             Set<String> defined = this.result.get(n).liveVars;
-            if (n.toString().equals("expr=(TEMP nextExpr)")) {
-                System.out.println("Stop here");
-            }
             if (!this.isAReturn(n.variable)
                     && !defined.contains(n.variable)) {
                 // Remove n from the graph.
@@ -114,6 +116,14 @@ public class DeadCodeElimOptimization {
             } else {
                 return n;
             }
+        }
+
+        @Override
+        public CFGNode visit(CFGBlockNode n) {
+            n.block = new CFGBlockDeadCodeVisitor(this.result.get(n).liveVars, n)
+                        .replaceBlock();
+            n.refreshDfaSets();
+            return n;
         }
 
         @Override
@@ -136,11 +146,93 @@ public class DeadCodeElimOptimization {
             return n;
         }
 
-        @Override
-        public CFGNode visit(CFGBlockNode n) {
-            // TODO Auto-generated method stub
-            return null;
+        private static class CFGBlockDeadCodeVisitor implements IrCFGVisitor<CFGNode> {
+
+            private final Set<String> defined;
+            private final CFGNode firstNode;
+            private final Deque<CFGNode> ordering;
+
+            public CFGBlockDeadCodeVisitor(Set<String> defined, CFGNode node) {
+                this.defined = defined;
+                this.firstNode = node;
+                this.ordering = new ArrayDeque<>();
+
+                var topNode = node;
+                while (!(topNode instanceof CFGStubNode)) {
+                    this.ordering.addFirst(node);
+                    topNode = topNode.out().get(0);
+                }
+
+            }
+
+            public CFGNode replaceBlock() {
+                while (!ordering.isEmpty()) {
+                    final var nextNode = ordering.pop();
+                    nextNode.accept(this);
+                }
+                return this.firstNode;
+            }
+
+            @Override
+            public CFGNode visit(CFGCallNode n) {
+                defined.removeAll(n.call.collectors());
+                defined.addAll(n.call.args().stream()
+                        .flatMap(arg -> arg.accept(IRExprVarsVisitor.INSTANCE).stream())
+                        .collect(Collectors.toSet()));
+                n.refreshDfaSets();
+                return n;
+            }
+
+            @Override
+            public CFGNode visit(CFGVarAssignNode n) {
+                if (!defined.contains(n.variable)) {
+                    // Remove this node
+                    for (CFGNode incoming: n.in()) {
+                        incoming.replaceOutEdge(n, n.outNode());
+                    }
+                    n.outNode().in().remove(n);
+                } else {
+                    defined.remove(n.variable);
+                    defined.addAll(n.value.accept(IRExprVarsVisitor.INSTANCE));
+                }
+                return n;
+            }
+
+            @Override
+            public CFGNode visit(CFGMemAssignNode n) {
+                defined.addAll(n.target.accept(IRExprVarsVisitor.INSTANCE));
+                defined.addAll(n.value.accept(IRExprVarsVisitor.INSTANCE));
+                n.refreshDfaSets();
+                return n;
+            }
+
+
+            @Override
+            public CFGNode visit(CFGReturnNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGStartNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGSelfLoopNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGBlockNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGIfNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
         }
+
     }
 
 }

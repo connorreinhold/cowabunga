@@ -13,6 +13,7 @@ import cyr7.cfg.ir.dfa.CCPAnalysis;
 import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
 import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -20,11 +21,11 @@ import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.ir.nodes.IRExpr;
-import cyr7.ir.nodes.IRName;
 
 public class CCPOptimization {
 
@@ -70,10 +71,20 @@ public class CCPOptimization {
         }
 
         @Override
-        public CFGNode visit(CFGCallNode n) {
-            if (((IRName)n.call.target()).name().equals("_IAck_it2ii")) {
-                System.out.println("LOL");
+        public CFGNode visit(CFGBlockNode n) {
+            var incoming = incomingLattices.get(n);
+            if (incoming.unreachable()) {
+                n.outNode().in().removeAll(Collections.singleton(n));
+                return n;
+            } else {
+                n.block = new CFGBlockDeadCodeVisitor(incoming, n.block).replaceBlock();
+                n.refreshDfaSets();
+                return n;
             }
+        }
+
+        @Override
+        public CFGNode visit(CFGCallNode n) {
             final var incomingLattice = incomingLattices.get(n);
             if (incomingLattice.unreachable()) {
                 // Remove this node as the incoming node of the next.
@@ -90,6 +101,7 @@ public class CCPOptimization {
                                     call.collectors(),
                                     call.target(),
                                     updatedArgs);
+            n.refreshDfaSets();
             return n;
         }
 
@@ -124,6 +136,7 @@ public class CCPOptimization {
                     incoming.replaceOutEdge(n, trueBranch);
                 }
             }
+            n.refreshDfaSets();
             return n;
         }
 
@@ -136,6 +149,7 @@ public class CCPOptimization {
                 return n;
             }
             n.value = IRTempToConstant.replace(n.value, lattice);
+            n.refreshDfaSets();
             return n;
         }
 
@@ -149,6 +163,7 @@ public class CCPOptimization {
             }
             n.value = IRTempToConstant.replace(n.value, lattice);
             n.target = IRTempToConstant.replace(n.target, lattice);
+            n.refreshDfaSets();
             return n;
         }
 
@@ -171,6 +186,82 @@ public class CCPOptimization {
         @Override
         public CFGNode visit(CFGSelfLoopNode n) {
             return n;
+        }
+
+
+        private static class CFGBlockDeadCodeVisitor implements IrCFGVisitor<CFGNode> {
+
+            private LatticeElement elements;
+            private final CFGNode firstNode;
+
+            public CFGBlockDeadCodeVisitor(LatticeElement elements, CFGNode node) {
+                this.elements = elements;
+                this.firstNode = node;
+            }
+
+            public CFGNode replaceBlock() {
+                var nextNode = firstNode;
+                while (!(nextNode instanceof CFGStubNode)) {
+                    nextNode = nextNode.accept(this);
+                    elements = nextNode.acceptForward(CCPAnalysis.INSTANCE.transfer(), elements).get(0);
+                }
+                return this.firstNode;
+            }
+
+            @Override
+            public CFGNode visit(CFGCallNode n) {
+                final IRCallStmt call = n.call;
+                List<IRExpr> updatedArgs = call.args().stream().map(arg -> {
+                    return IRTempToConstant.replace(arg, elements);
+                }).collect(Collectors.toList());
+                n.call = new IRCallStmt(n.location(),
+                                        call.collectors(),
+                                        call.target(),
+                                        updatedArgs);
+                n.refreshDfaSets();
+                return n.outNode();
+            }
+
+            @Override
+            public CFGNode visit(CFGVarAssignNode n) {
+                n.value = IRTempToConstant.replace(n.value, elements);
+                n.refreshDfaSets();
+                return n;
+            }
+
+            @Override
+            public CFGNode visit(CFGMemAssignNode n) {
+                n.value = IRTempToConstant.replace(n.value, elements);
+                n.target = IRTempToConstant.replace(n.target, elements);
+                n.refreshDfaSets();
+                return n;
+            }
+
+
+            @Override
+            public CFGNode visit(CFGReturnNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGStartNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGSelfLoopNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGBlockNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGIfNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
         }
 
     }

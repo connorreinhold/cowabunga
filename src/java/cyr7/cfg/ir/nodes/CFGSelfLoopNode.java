@@ -66,4 +66,9 @@ public class CFGSelfLoopNode extends CFGNode {
         return Collections.emptySet();
     }
 
+    @Override
+    public void refreshDfaSets() {
+        return;
+    }
+
 }

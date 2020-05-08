@@ -1,6 +1,9 @@
 package cyr7.cfg.ir.nodes;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -12,8 +15,13 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGBlockNode extends CFGNode {
 
-    public final CFGNode block;
+    public CFGNode block;
     private CFGNode outNode;
+
+    private Set<String> useSet;
+    private Set<String> defSet;
+    private Set<String> killSet;
+    private Map<String, String> genSet;
 
     public CFGBlockNode(Location location, CFGNode block,
             CFGNode outNode) {
@@ -74,26 +82,40 @@ public class CFGBlockNode extends CFGNode {
 
     @Override
     public Set<String> defs() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableSet(this.defSet);
     }
 
     @Override
     public Set<String> uses() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableSet(this.useSet);
     }
 
     @Override
     public Map<String, String> gens() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableMap(this.genSet);
     }
 
     @Override
     public Set<String> kills() {
-        // TODO Auto-generated method stub
-        return null;
+        return Collections.unmodifiableSet(this.killSet);
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = new HashSet<>();
+        this.genSet = new HashMap<>();
+        this.defSet = new HashSet<>();
+        this.killSet = new HashSet<>();
+
+        var topNode = this.block;
+        while (!(topNode instanceof CFGStubNode)) {
+            this.useSet.addAll(topNode.uses());
+            this.defSet.addAll(topNode.defs());
+            this.genSet.putAll(topNode.gens());
+            this.killSet.addAll(topNode.kills());
+            topNode = topNode.out().get(0);
+        }
+        return;
     }
 
 }

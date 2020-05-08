@@ -67,4 +67,6 @@ public abstract class CFGNode {
     public abstract Map<String, String> gens();
     public abstract Set<String> kills();
 
+    public abstract void refreshDfaSets();
+
 }

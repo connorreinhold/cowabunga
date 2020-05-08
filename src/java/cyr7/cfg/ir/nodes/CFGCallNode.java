@@ -19,20 +19,16 @@ public class CFGCallNode extends CFGNode {
     public IRCallStmt call;
     private CFGNode out;
 
-    private final Set<String> useSet;
-    private final Set<String> defSet;
-    private final Set<String> killSet;
+    private Set<String> useSet;
+    private Set<String> defSet;
+    private Set<String> killSet;
 
     public CFGCallNode(Location location, IRCallStmt call, CFGNode out) {
         super(location);
         this.call = call;
         this.out = out;
 
-        this.useSet = call.args().stream().flatMap(arg -> {
-            return arg.accept(IRExprVarsVisitor.INSTANCE).stream();
-        }).collect(Collectors.toSet());
-        this.defSet = Set.copyOf(call.collectors());
-        this.killSet = Set.copyOf(call.collectors());
+        this.refreshDfaSets();
 
         this.updateIns();
         repOk();
@@ -100,5 +96,14 @@ public class CFGCallNode extends CFGNode {
     @Override
     public Set<String> kills() {
         return Collections.unmodifiableSet(this.killSet);
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = call.args().stream().flatMap(arg -> {
+            return arg.accept(IRExprVarsVisitor.INSTANCE).stream();
+        }).collect(Collectors.toSet());
+        this.defSet = Set.copyOf(call.collectors());
+        this.killSet = Set.copyOf(call.collectors());
     }
 }

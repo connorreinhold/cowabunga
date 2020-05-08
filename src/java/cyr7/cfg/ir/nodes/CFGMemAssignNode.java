@@ -19,7 +19,7 @@ public class CFGMemAssignNode extends CFGNode {
     public IRExpr value;
     private CFGNode out;
 
-    private final Set<String> useSet;
+    private Set<String> useSet;
 
     public CFGMemAssignNode(
         Location location,
@@ -32,9 +32,7 @@ public class CFGMemAssignNode extends CFGNode {
         this.value = value;
         this.out = out;
 
-        this.useSet = Sets.union(
-                        value.accept(IRExprVarsVisitor.INSTANCE),
-                        target.accept(IRExprVarsVisitor.INSTANCE));
+        this.refreshDfaSets();
 
         this.updateIns();
         repOk();
@@ -103,5 +101,10 @@ public class CFGMemAssignNode extends CFGNode {
         return Collections.emptySet();
     }
 
-
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = Sets.union(
+                value.accept(IRExprVarsVisitor.INSTANCE),
+                target.accept(IRExprVarsVisitor.INSTANCE));
+    }
 }

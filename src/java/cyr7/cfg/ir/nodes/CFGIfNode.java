@@ -18,7 +18,7 @@ public class CFGIfNode extends CFGNode {
     private CFGNode falseBranch;
     public IRExpr cond;
 
-    private final Set<String> useSet;
+    private Set<String> useSet;
 
     public CFGIfNode(Location location, CFGNode trueBranch,
             CFGNode falseBranch, IRExpr cond) {
@@ -27,7 +27,7 @@ public class CFGIfNode extends CFGNode {
         this.falseBranch = falseBranch;
         this.cond = cond;
 
-        this.useSet = cond.accept(IRExprVarsVisitor.INSTANCE);
+        this.refreshDfaSets();
 
         this.updateIns();
         repOk();
@@ -107,6 +107,11 @@ public class CFGIfNode extends CFGNode {
     @Override
     public Set<String> kills() {
         return Collections.emptySet();
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = cond.accept(IRExprVarsVisitor.INSTANCE);
     }
 
 }

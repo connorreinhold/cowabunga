@@ -7,11 +7,13 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.BinOpInterpreter;
 import cyr7.ir.nodes.IRBinOp;
@@ -400,6 +402,21 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 return LatticeElement.unreachable;
             }
             return in;
+        }
+
+        @Override
+        public LatticeElement transfer(CFGBlockNode n, LatticeElement in) {
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
+            }
+
+            LatticeElement traversedLattice = in;
+            var topNode = n.block;
+            while (!(topNode instanceof CFGStubNode)) {
+                traversedLattice = n.acceptForward(this, traversedLattice)
+                                    .get(0);
+            }
+            return traversedLattice;
         }
 
     }

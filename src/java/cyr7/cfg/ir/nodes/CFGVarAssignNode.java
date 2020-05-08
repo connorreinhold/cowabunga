@@ -19,10 +19,10 @@ public class CFGVarAssignNode extends CFGNode {
     public String variable;
     public IRExpr value;
     private CFGNode outNode;
-    private final Set<String> useSet;
-    private final Set<String> defSet;
-    private final Set<String> killSet;
-    private final Map<String, String> genSet;
+    private Set<String> useSet;
+    private Set<String> defSet;
+    private Set<String> killSet;
+    private Map<String, String> genSet;
 
     public CFGVarAssignNode(Location location, String variable, IRExpr value,
             CFGNode outNode) {
@@ -31,15 +31,7 @@ public class CFGVarAssignNode extends CFGNode {
         this.value = value;
         this.outNode = outNode;
 
-        this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);
-        this.defSet = Collections.singleton(variable);
-
-        this.killSet = Collections.singleton(variable);
-        this.genSet = new HashMap<>();
-        if (value instanceof IRTemp) {
-            String source = ((IRTemp)value).name();
-            genSet.put(variable, source);
-        }
+        this.refreshDfaSets();
 
         this.updateIns();
         repOk();
@@ -109,6 +101,19 @@ public class CFGVarAssignNode extends CFGNode {
     @Override
     public Set<String> kills() {
         return Collections.unmodifiableSet(this.killSet);
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);
+        this.defSet = Collections.singleton(variable);
+
+        this.killSet = Collections.singleton(variable);
+        this.genSet = new HashMap<>();
+        if (value instanceof IRTemp) {
+            String source = ((IRTemp)value).name();
+            genSet.put(variable, source);
+        }
     }
 
 }

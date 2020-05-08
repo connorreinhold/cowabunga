@@ -85,4 +85,9 @@ public class CFGStartNode extends CFGNode {
     public Set<String> kills() {
         return Collections.emptySet();
     }
+
+    @Override
+    public void refreshDfaSets() {
+        return;
+    }
 }
