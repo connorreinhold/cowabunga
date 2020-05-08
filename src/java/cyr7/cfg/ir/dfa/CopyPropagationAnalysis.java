@@ -4,15 +4,16 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis.CopyPropLattice;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
-import cyr7.ir.nodes.IRTemp;
 
 public enum CopyPropagationAnalysis implements
         ForwardDataflowAnalysis<CopyPropLattice> {
@@ -35,8 +36,9 @@ public enum CopyPropagationAnalysis implements
                 Map<String, String> updated = new HashMap<>(in.copies);
                 // Kill all previous copies that map to the newly defined
                 // variable.
-                n.call.collectors().forEach(updated::remove);
-                updated.values().removeAll(n.call.collectors());
+                Set<String> defs = n.defs();
+                defs.forEach(updated::remove);
+                updated.values().removeAll(defs);
                 return new CopyPropLattice(updated);
             }
 
@@ -70,12 +72,8 @@ public enum CopyPropagationAnalysis implements
                 // Kill all previous copies that map to the newly defined
                 // variable.
                 updated.remove(n.variable);
-                updated.values().removeAll(Collections.singleton(n.variable));
-                if (n.value instanceof IRTemp) {
-                    String source = ((IRTemp)n.value).name();
-                    updated.put(n.variable, source);
-                }
-
+                updated.values().removeAll(n.kills());
+                updated.putAll(n.gens());
                 return new CopyPropLattice(updated);
             }
 
@@ -83,6 +81,13 @@ public enum CopyPropagationAnalysis implements
             public CopyPropLattice transfer(CFGSelfLoopNode n,
                     CopyPropLattice in) {
                 return in.clone();
+            }
+
+            @Override
+            public CopyPropLattice transfer(CFGBlockNode n,
+                    CopyPropLattice in) {
+                // TODO Auto-generated method stub
+                return null;
             }
         };
     }
