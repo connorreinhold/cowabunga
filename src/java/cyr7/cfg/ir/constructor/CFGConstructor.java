@@ -5,6 +5,7 @@ import java.util.Map;
 
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCompUnit;
+import cyr7.ir.nodes.IRSeq;
 
 public class CFGConstructor {
 
@@ -16,6 +17,7 @@ public class CFGConstructor {
         Map<String, CFGStartNode> cfgCollection = new HashMap<>();
 
         c.functions().forEach((name, fn) -> {
+            System.out.println("Size of stmts for " + name + ": " + ((IRSeq)fn.body()).stmts().size());
             CFGStartNode fBody = (CFGStartNode)fn.body().accept(new CFGConstructorVisitor());
             var cleaner = new CFGUnreachableNodeCleaner();
             fBody = cleaner.removeUnreachableNodes(fBody);

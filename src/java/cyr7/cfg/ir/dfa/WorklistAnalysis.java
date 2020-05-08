@@ -30,7 +30,9 @@ public final class WorklistAnalysis {
             out.put(node, outEdges);
         }
 
+        long work = 0;
         while (!worklist.isEmpty()) {
+            work++;
             CFGNode node = worklist.remove();
             L inValue = node.in()
                 .stream()
@@ -43,16 +45,19 @@ public final class WorklistAnalysis {
             in.put(node, inValue);
 
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
-            for (int i = 0; i < node.out().size(); i++) {
-                CFGNode outEdge = node.out().get(i);
+            final List<CFGNode> outNodes = node.out();
+            final int numOfOutNodes = outNodes.size();
+            for (int i = 0; i < numOfOutNodes; i++) {
+                CFGNode outEdge = outNodes.get(i);
+                L newOutValue = output.get(i);
                 L oldOutValue = out.get(node).get(outEdge);
-                if (!oldOutValue.equals(output.get(i))) {
-                    out.get(node).put(outEdge, output.get(i));
+                if (!oldOutValue.equals(newOutValue)) {
+                    out.get(node).put(outEdge, newOutValue);
                     worklist.add(outEdge);
                 }
             }
         }
-
+        System.out.println("Forward Analysis work: " + work);
         return new DfaResult<>(in, out);
     }
 
@@ -71,7 +76,9 @@ public final class WorklistAnalysis {
                 in.put(node, analysis.topValue());
             }
 
+            long work = 0;
             while (!worklist.isEmpty()) {
+                work++;
                 CFGNode node = worklist.remove();
 
                 L outValue = node.out()
@@ -86,14 +93,12 @@ public final class WorklistAnalysis {
 
                 L originalInValue = in.get(node);
                 L inValue= node.acceptBackward(analysis.transfer(), outValue);
-                in.put(node, inValue);
-
                 if (!originalInValue.equals(inValue)) {
-                    for (CFGNode incoming: node.in()) {
-                        worklist.add(incoming);
-                    }
+                    in.put(node, inValue);
+                    worklist.addAll(node.in());
                 }
             }
+            System.out.println("Backward Analysis work: " + work);
             return out;
         }
 
