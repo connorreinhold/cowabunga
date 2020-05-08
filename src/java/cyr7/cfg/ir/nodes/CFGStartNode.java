@@ -15,6 +15,7 @@ public class CFGStartNode extends CFGNode {
         super(location);
         this.out = out;
         this.updateIns();
+        repOk();
     }
 
     @Override
@@ -40,6 +41,7 @@ public class CFGStartNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
+        repOk();
     }
 
     @Override

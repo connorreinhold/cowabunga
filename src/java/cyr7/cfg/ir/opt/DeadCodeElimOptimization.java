@@ -100,6 +100,7 @@ public class DeadCodeElimOptimization {
                 // Remove n from the graph.
                 // For every incoming node, replace their out node with
                 // this node's out node.
+                System.out.println("Incoming");
                 for (CFGNode incoming: n.in()) {
                     for (CFGNode out: n.out()) {
                         incoming.replaceOutEdge(n, out);

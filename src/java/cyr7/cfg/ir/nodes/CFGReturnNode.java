@@ -12,6 +12,7 @@ public class CFGReturnNode extends CFGNode {
     public CFGReturnNode(Location location) {
         super(location);
         this.updateIns();
+        repOk();
     }
 
     @Override
@@ -26,6 +27,7 @@ public class CFGReturnNode extends CFGNode {
 
     @Override
     public void replaceOutEdge(CFGNode stub, CFGNode n) {
+        repOk();
         return;
     }
 

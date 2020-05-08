@@ -22,6 +22,7 @@ public class CFGVarAssignNode extends CFGNode {
         this.outNode = outNode;
 
         this.updateIns();
+        repOk();
     }
 
     @Override
@@ -47,6 +48,7 @@ public class CFGVarAssignNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
+        repOk();
     }
 
     @Override

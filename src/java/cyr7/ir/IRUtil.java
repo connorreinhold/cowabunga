@@ -12,6 +12,7 @@ import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.opt.CCPOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.Optimization;
 import cyr7.cli.OptimizationSetting;
@@ -113,22 +114,23 @@ public class IRUtil {
 //            });
 //        }
 //
-//        if (lowerConfiguration.settings.get(Optimization.DCE)) {
-//            cfg.keySet().stream().forEach(functionName -> {
-//                var optimizedCfg = DeadCodeElimOptimization
-//                                            .optimize(cfg.get(functionName));
-//                cfg.put(functionName, optimizedCfg);
-//            });
-//        }
-//
-        if (lowerConfiguration.settings.get(Optimization.DCE)) {
+//        if (lowerConfiguration.settings.get(Optimization.CP)) {
             cfg.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = DeadCodeElimOptimization
+                var optimizedCfg = CCPOptimization
                                             .optimize(cfg.get(functionName));
                 cfg.put(functionName, optimizedCfg);
             });
-        }
+//        }
+
+//            if (lowerConfiguration.settings.get(Optimization.DCE)) {
+//                cfg.keySet().stream().forEach(functionName -> {
+//                    var optimizedCfg = DeadCodeElimOptimization
+//                            .optimize(cfg.get(functionName));
+//                    cfg.put(functionName, optimizedCfg);
+//                });
+//            }
             compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
+//            System.out.println(compUnit);
         } else {
         }
 

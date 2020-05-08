@@ -12,6 +12,15 @@ public abstract class CFGNode {
 
     protected final List<CFGNode> in;
 
+    protected void repOk() {
+        for (CFGNode n: this.out()) {
+            if (!n.in().contains(this)) throw new RuntimeException();
+        }
+        for (CFGNode n: this.in()) {
+            if (!n.out().contains(this)) throw new RuntimeException();
+        }
+    }
+
     private final Location location;
 
     protected CFGNode(Location location) {
