@@ -2,6 +2,8 @@ package cyr7.cfg.ir.nodes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
@@ -57,5 +59,12 @@ public abstract class CFGNode {
     }
 
     public abstract void replaceOutEdge(CFGNode previous, CFGNode newTarget);
+
+
+    public abstract Set<String> defs();
+    public abstract Set<String> uses();
+
+    public abstract Map<String, String> gens();
+    public abstract Set<String> kills();
 
 }

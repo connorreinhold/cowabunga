@@ -1,11 +1,17 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRTemp;
+import cyr7.ir.visit.IRExprVarsVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGVarAssignNode extends CFGNode {
@@ -13,6 +19,10 @@ public class CFGVarAssignNode extends CFGNode {
     public String variable;
     public IRExpr value;
     private CFGNode outNode;
+    private final Set<String> useSet;
+    private final Set<String> defSet;
+    private final Set<String> killSet;
+    private final Map<String, String> genSet;
 
     public CFGVarAssignNode(Location location, String variable, IRExpr value,
             CFGNode outNode) {
@@ -20,6 +30,16 @@ public class CFGVarAssignNode extends CFGNode {
         this.variable = variable;
         this.value = value;
         this.outNode = outNode;
+
+        this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);
+        this.defSet = Collections.singleton(variable);
+
+        this.killSet = Collections.singleton(variable);
+        this.genSet = new HashMap<>();
+        if (value instanceof IRTemp) {
+            String source = ((IRTemp)value).name();
+            genSet.put(variable, source);
+        }
 
         this.updateIns();
         repOk();
@@ -69,4 +89,26 @@ public class CFGVarAssignNode extends CFGNode {
                                   .replaceAll("\n", "");
         return String.format("%s=%s", variable, valueString);
     }
+
+
+    @Override
+    public Set<String> defs() {
+        return Collections.unmodifiableSet(this.defSet);
+    }
+
+    @Override
+    public Set<String> uses() {
+        return Collections.unmodifiableSet(this.useSet);
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        return Collections.unmodifiableMap(this.genSet);
+    }
+
+    @Override
+    public Set<String> kills() {
+        return Collections.unmodifiableSet(this.killSet);
+    }
+
 }

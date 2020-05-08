@@ -6,11 +6,14 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.dfa.IrLiveVariableAnalysis.IrLiveVarLattice;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.visit.IRExprVarsVisitor;
 import cyr7.util.Sets;
@@ -113,6 +116,16 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
                 IrLiveVarLattice out) {
             return transfer(Collections.emptySet(),
                     out.liveVars, Collections.emptySet());
+        }
+
+        @Override
+        public IrLiveVarLattice transfer(CFGBlockNode n, IrLiveVarLattice out) {
+            CFGNode nodeToTraverse = n.block;
+            IrLiveVarLattice outgoing = out;
+            while (!(nodeToTraverse instanceof CFGStubNode)) {
+                outgoing = n.acceptBackward(this, outgoing);
+            }
+            return outgoing;
         }
     }
 

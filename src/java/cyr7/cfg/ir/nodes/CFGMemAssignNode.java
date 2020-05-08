@@ -1,11 +1,16 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.visit.IRExprVarsVisitor;
+import cyr7.util.Sets;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGMemAssignNode extends CFGNode {
@@ -13,6 +18,8 @@ public class CFGMemAssignNode extends CFGNode {
     public IRExpr target;
     public IRExpr value;
     private CFGNode out;
+
+    private final Set<String> useSet;
 
     public CFGMemAssignNode(
         Location location,
@@ -24,6 +31,11 @@ public class CFGMemAssignNode extends CFGNode {
         this.target = target;
         this.value = value;
         this.out = out;
+
+        this.useSet = Sets.union(
+                        value.accept(IRExprVarsVisitor.INSTANCE),
+                        target.accept(IRExprVarsVisitor.INSTANCE));
+
         this.updateIns();
         repOk();
     }
@@ -70,4 +82,26 @@ public class CFGMemAssignNode extends CFGNode {
         String valueString = target.toString().replaceAll("\n", "");
         return targetString + "=" + valueString;
     }
+
+    @Override
+    public Set<String> defs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> uses() {
+        return Collections.unmodifiableSet(this.useSet);
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Set<String> kills() {
+        return Collections.emptySet();
+    }
+
+
 }

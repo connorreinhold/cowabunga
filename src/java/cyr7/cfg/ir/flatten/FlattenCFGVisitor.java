@@ -38,7 +38,7 @@ public class FlattenCFGVisitor
      * A wrapper class so that stmts can be compared via pointer addresses,
      * instead of their overwritten equals() methods.
      */
-    class IRStmtWrapper {
+    private class IRStmtWrapper {
 
         private Optional<IRLabel> label;
         private Optional<IRJump> jump;
