@@ -873,6 +873,12 @@ public class CLI {
         }
     }
 
+    public static <T> void lazyDebugPrint(Runnable runnable) {
+        if (debugPrintingEnabled) {
+            runnable.run();
+        }
+    }
+
     public static void debugPrint(Exception e) {
         if (debugPrintingEnabled) {
             e.printStackTrace();

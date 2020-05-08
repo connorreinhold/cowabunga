@@ -14,14 +14,39 @@ import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.Reader;
+import java.io.StringReader;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 public class testJunk {
 
+    private static class Opener implements IxiFileOpener {
+
+        @Override
+        public Reader openIxiLibraryFile(String name) throws FileNotFoundException {
+            if (name.equals("conv")) {
+                return new StringReader(
+                    "parseInt(str: int[]): int, bool\n"
+                        + "unparseInt(n: int): int[]\n"
+                );
+            } else if (name.equals("io")) {
+                return new StringReader(
+                    "print(str: int[])\n"
+                        + "println(str: int[])\n"
+                        + "readln() : int[]\n"
+                        + "getchar() : int\n"
+                        + "eof() : bool\n"
+                );
+            } else {
+                throw new FileNotFoundException(name);
+            }
+        }
+
+    }
+
     public static void main(String[] args) throws Exception {
         String fileName = "testJunk.xi";
-        test(getReader(fileName), fileName, false, null, OptConfig.allEnabled());
+        test(getReader(fileName), fileName, false, new Opener(), OptConfig.allEnabled());
     }
 
     public static Reader getReader(String fileName) throws FileNotFoundException {

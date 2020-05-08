@@ -1,8 +1,8 @@
-main(args: int[][]) {
-    a: int = 1;
-    b: int = f(a, 2, 3, 4, 5, 6, 7, 8);
-}
+use io
+use conv
 
-f(a: int, b: int, c: int, d: int, e: int, g: int, h: int, i: int): int {
-    return a + 1;
+main(args: int[][]) {
+        a: int = 5
+        b: int = 6
+        println(unparseInt(a / b))
 }

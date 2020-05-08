@@ -26,8 +26,7 @@ public class ASMConstants {
     };
 
     public static final ASMReg[] CALLEE_SAVED_REGISTERS = {
-        ASMReg.RBP,
-        ASMReg.RSP,
+//        ASMReg.RBP,
         ASMReg.RBX,
         ASMReg.R12,
         ASMReg.R13,
@@ -36,15 +35,14 @@ public class ASMConstants {
     };
 
     public static final ASMReg[] CALLER_SAVED_REGISTERS = {
-        ASMReg.RAX,
         ASMReg.RCX,
-        ASMReg.RDX,
         ASMReg.RSI,
         ASMReg.RDI,
         ASMReg.R8,
         ASMReg.R9,
         ASMReg.R10,
-        ASMReg.R11
+        ASMReg.R11,
+        ASMReg.RSP
     };
 
     public static String returnLabel(String mangledName) {

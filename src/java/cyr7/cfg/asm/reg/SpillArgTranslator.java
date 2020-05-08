@@ -129,7 +129,9 @@ final class SpillArgTranslator implements Runnable {
     }
 
     private ASMTempArg makeNewSpillTemp(ASMRegSize size) {
-        return makeArg.temp(idGenerator.newTemp("spill"), size);
+        ASMTempArg temp = makeArg.temp(idGenerator.newTemp("spill"), size);
+        spillAllocator.addNewTemp(temp);
+        return temp;
     }
 
     private ASMAddrExpr addrOfSpilledTemp(ASMTempArg tempArg) {

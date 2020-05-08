@@ -26,7 +26,7 @@ final class FinalProgramRewriter implements Runnable {
     private final HashSet<Integer> coalescedMoves;
     private final Alias alias;
 
-    private final List<ASMLine> rewritten = new ArrayList<>();
+    private final ArrayList<ASMLine> rewritten = new ArrayList<>();
 
     public FinalProgramRewriter(
         Set<ASMTempRegArg> precolored,
@@ -44,7 +44,7 @@ final class FinalProgramRewriter implements Runnable {
         this.alias = alias;
     }
 
-    public List<ASMLine> rewritten() {
+    public ArrayList<ASMLine> rewritten() {
         return rewritten;
     }
 

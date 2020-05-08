@@ -18,6 +18,7 @@ import cyr7.x86.tiler.TilerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public enum ASMAbstract {
     ;
@@ -44,6 +45,12 @@ public enum ASMAbstract {
             body.add(make.Mov(
                 arg.temp(temp, ASMRegSize.QWORD),
                 ASMConstants.CALLEE_SAVED_REGISTERS[i]));
+        }
+
+        for (ASMReg callerSaved : Set.of(ASMReg.RCX, ASMReg.R10, ASMReg.R11)) {
+            if (callerSaved != ASMReg.RSP) {
+                body.add(make.Mov(callerSaved, arg.constant(0)));
+            }
         }
 
         // add overspill ret values temp
