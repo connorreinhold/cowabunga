@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 
@@ -44,10 +45,11 @@ public final class WorklistAnalysis {
             }
             out.put(node, outEdges);
         }
-        
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
-            //System.out.println(node);
+            if (!allNodes.contains(node)) {
+                continue;
+            }
             L inValue;
             if (node == start) {
                 inValue = analysis.topValue();
@@ -65,9 +67,7 @@ public final class WorklistAnalysis {
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
             for (int i = 0; i < node.out().size(); i++) {
                 CFGNode outEdge = node.out().get(i);
-
                 L oldOutValue = out.get(node).get(outEdge);
-
                 if (!oldOutValue.equals(output.get(i))) {
                     out.get(node).put(outEdge, output.get(i));
                     worklist.add(outEdge);

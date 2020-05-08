@@ -53,15 +53,20 @@ public class testStuff {
             for(CFGNode out: node.out()) {
                 // If there is an out edge to a dominator of this node
                 if (pair.getValue().contains(out)) {
+                    System.out.println();
+                    System.out.println();
+                    System.out.println();
+                    System.out.println();
                     System.out.println("---------------------");
                     Set<CFGNode> reachable = backwardsSearch(node, out);
-                    //System.out.println(reachable);
+                    System.out.println(reachable);
                     BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
                     out.accept(bv);
-                    DerivedInductionVariableAnalysis inductionAnalysis = new DerivedInductionVariableAnalysis(bv.inductionVars);
+                    DerivedInductionVariableAnalysis inductionAnalysis = 
+                            new DerivedInductionVariableAnalysis(bv.inductionVars, out);
                     var result = WorklistAnalysis.analyzeSubsection(out, reachable, inductionAnalysis).out();
                     for(Entry<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> entry: result.entrySet()) {
-                        //System.out.println(entry.getKey()+": "+entry.getValue());
+                        System.out.println(entry.getValue());
                     }
                 }
             }

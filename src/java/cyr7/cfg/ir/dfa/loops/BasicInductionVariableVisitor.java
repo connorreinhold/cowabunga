@@ -17,6 +17,7 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
+import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
@@ -67,42 +68,44 @@ public class BasicInductionVariableVisitor
                 || !reachable.contains(n)) {
             return Optional.empty();
         }
-        boolean validInductionVariable = false;
+        
+        var tempPlusConst = BiPatternBuilder
+                .left()
+                .instOf(IRTemp.class)
+                .and(temp -> temp.name().equals(n.variable))
+                .right()
+                .instOf(IRConst.class)
+                .finish()
+                .enableCommutes();
+        
+        var tempMinusConst = BiPatternBuilder
+                .left()
+                .instOf(IRTemp.class)
+                .and(temp -> temp.name().equals(n.variable))
+                .right()
+                .instOf(IRConst.class)
+                .finish();
+
         if (n.value instanceof IRBinOp) {
             IRBinOp binOp = (IRBinOp) n.value;
-            if ((binOp.opType() == OpType.ADD || binOp.opType() == OpType.SUB)
-                    && isCorrectTemp(binOp.left(), n.variable)
-                    && isConst(binOp.right())) {
-                // If a = a +/- CONST
-                validInductionVariable = true;
-            } else if (binOp.opType() == OpType.ADD 
-                    && isCorrectTemp(binOp.right(), n.variable)
-                    && isConst(binOp.left())) {
-                // If a = CONST + a
-                validInductionVariable = true;
+            if (binOp.opType() == OpType.ADD && 
+                    tempPlusConst.matches(new Object[]{binOp.left(), binOp.right()})) {
+                inductionVars.add(n.variable);
+            } else if (binOp.opType() == OpType.SUB &&
+                    tempMinusConst.matches(new Object[]{binOp.left(), binOp.right()})) {
+                inductionVars.add(n.variable);
+            } else {
+                invalidVars.add(n.variable);
             }
-        }
-        if (validInductionVariable) {
-            inductionVars.add(n.variable);
         } else {
             invalidVars.add(n.variable);
         }
+        
         visited.add(n);
         n.out().get(0).accept(this);
         return Optional.empty();
     }
-
-    private static boolean isCorrectTemp(IRExpr node, String target) {
-        if (node instanceof IRTemp && ((IRTemp) node).name().equals(target)) {
-            return true;
-        }
-        return false;
-    }
-
-    private static boolean isConst(IRExpr node) {
-        return node instanceof IRConst;
-    }
-
+    
     @Override
     public Optional<Void> visit(CFGMemAssignNode n) {
         if (visited.contains(n) || !reachable.contains(n)) {

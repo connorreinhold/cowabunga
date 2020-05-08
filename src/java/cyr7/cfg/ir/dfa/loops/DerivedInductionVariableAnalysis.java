@@ -36,19 +36,22 @@ import cyr7.x86.pattern.BiPatternBuilder;
     Note: Undefined IVs are not contained in a node's map.
  */
 public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis<Map<String, InductionVariable>> {
-    private final Map<String, InductionVariable> top;
+    private final Map<String, InductionVariable> basicIVMap;
+    private final CFGNode start;
     
-    public DerivedInductionVariableAnalysis(Set<String> basicVars) {
+    public DerivedInductionVariableAnalysis(Set<String> basicVars, CFGNode start) {
         Map<String, InductionVariable> temp = new HashMap<>();
         for(String variable: basicVars) {
             temp.put(variable, new DefinedInductionVariable(variable, 1, 0));
         }
-        top = Collections.unmodifiableMap(temp);
+        this.basicIVMap = Collections.unmodifiableMap(temp);
+        this.start = start;
+        
     }
 
     @Override
     public Map<String, InductionVariable> topValue() {
-        return top;
+        return new HashMap<>();
     }
 
     @Override
@@ -69,9 +72,6 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                     // Feel like there might be an issue here
                     meet.put(variable, NotInductionVariable.INSTANCE);
                 }
-            } else {
-                // if RHS has value and LHS is undefined
-                meet.put(variable, rhs.get(variable));
             }
         }
         
@@ -87,45 +87,72 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
 
     @Override
     public ForwardTransferFunction<Map<String, InductionVariable>> transfer() {
+        TransferFunction.INSTANCE.updateTransferFunction(basicIVMap, start);
         return TransferFunction.INSTANCE;
     }
     
     private enum TransferFunction implements ForwardTransferFunction<Map<String, InductionVariable>> {
         INSTANCE;
 
+        private CFGNode start;
+        private Map<String, InductionVariable> basicIVMap;
+        
+        private void updateTransferFunction(Map<String, InductionVariable> basicIVMap, CFGNode start) {
+            this.start = start;
+            this.basicIVMap = basicIVMap;
+        }
+        
         @Override
         public Map<String, InductionVariable> transfer(CFGCallNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             return in;
         }
 
         @Override
         public Map<String, InductionVariable> transferTrue(CFGIfNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             return in;
         }
 
         @Override
         public Map<String, InductionVariable> transferFalse(CFGIfNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             return in;
         }
 
         @Override
         public Map<String, InductionVariable> transfer(CFGMemAssignNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             return in;
         }
 
         @Override
         public Map<String, InductionVariable> transfer(CFGStartNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             return in;
         }
 
         @Override
         public Map<String, InductionVariable> transfer(CFGVarAssignNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             String variable = n.variable;
             Map<String, InductionVariable> updatedMap = new HashMap<String, InductionVariable>(in);
             if (n.value instanceof IRBinOp) {
@@ -138,30 +165,30 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                     .instOf(IRTemp.class)
                     .finish()
                     .enableCommutes();
-                System.out.println(n+": "+in);
+                InductionVariable newIV = null;
                 if (expr.opType() == OpType.MUL && constTemp.matches(new Object[]{expr.left(), expr.right()})) {
                     long constant = constTemp.leftObj().value();
                     String referenced = constTemp.rightObj().name();
                     if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
-                        InductionVariable newIV = new DefinedInductionVariable(
+                        newIV = new DefinedInductionVariable(
                                 updatedMap.get(referenced).basicRef(),
                                 updatedMap.get(referenced).getFactor()*constant,
                                 updatedMap.get(referenced).getOffset()*constant);
-                        updatedMap.put(variable, newIV);
                     }
                 } else if(expr.opType() == OpType.ADD && constTemp.matches(new Object[]{expr.left(), expr.right()})) {
                     long constant = constTemp.leftObj().value();
                     String referenced = constTemp.rightObj().name();
                     if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
-                        InductionVariable newIV = new DefinedInductionVariable(
+                        newIV = new DefinedInductionVariable(
                                 updatedMap.get(referenced).basicRef(),
                                 updatedMap.get(referenced).getFactor(),
                                 updatedMap.get(referenced).getOffset()+constant);
-                        updatedMap.put(variable, newIV);
                     }
-                } else {
-                    // Does not match any binop patterns
+                }
+                if (newIV == null) {
                     updatedMap.put(variable, NotInductionVariable.INSTANCE);
+                } else {
+                    updatedMap.put(variable, newIV);
                 }
                         
             } else {
@@ -173,6 +200,9 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
         @Override
         public Map<String, InductionVariable> transfer(CFGSelfLoopNode n,
                 Map<String, InductionVariable> in) {
+            if (n == start) {
+                in = basicIVMap;
+            }
             return in;
         }
 
