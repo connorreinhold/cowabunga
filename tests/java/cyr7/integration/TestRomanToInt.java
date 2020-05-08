@@ -1,25 +1,10 @@
 package cyr7.integration;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
 import cyr7.integration.Run.RunConfiguration;
+import org.junit.jupiter.api.Tag;
 
+@Tag("core")
 public class TestRomanToInt extends TestProgram {
-
-    private long[] parseString(String s) {
-        Character[] charObjectArray = s.chars().mapToObj(c -> (char) c)
-                .toArray(Character[]::new);
-        Long[] longArray = Arrays.asList(charObjectArray).stream().map(c -> {
-            return Long.valueOf(c.charValue());
-        }).collect(Collectors.toList()).toArray(new Long[] {});
-
-        long[] primArr = new long[longArray.length];
-        for (int i = 0; i < longArray.length; i++) {
-            primArr[i] = longArray[i].longValue();
-        }
-        return primArr;
-    }
 
     @Override
     protected String filename() {

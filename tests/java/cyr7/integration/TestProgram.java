@@ -1,6 +1,12 @@
 package cyr7.integration;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import cyr7.cli.OptConfig;
+import cyr7.cli.Optimization;
+import cyr7.integration.Run.RunConfiguration;
+import cyr7.x86.ASMUtil.TilerConf;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -11,21 +17,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import cyr7.x86.ASMUtil.TilerConf;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
-
-import cyr7.ir.IRUtil.LowerConfiguration;
-import cyr7.integration.Run.RunConfiguration;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class TestProgram {
 
@@ -46,32 +44,24 @@ public abstract class TestProgram {
     @Test
     void testLirNoOptimizations() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(false, false),
-                configuration());
+            OptConfig.none(),
+            configuration());
         assertEquals(expected(), result);
     }
 
     @Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(true, false),
-                configuration());
-        assertEquals(expected(), result);
-    }
-
-    @Test
-    void testLirTraceEnabled() throws Exception {
-        String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(false, true),
-                configuration());
+            OptConfig.cfOnly(),
+            configuration());
         assertEquals(expected(), result);
     }
 
     @Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
-                new LowerConfiguration(true, true),
-                configuration());
+            OptConfig.allEnabled(),
+            configuration());
         assertEquals(expected(), result);
     }
 
@@ -94,19 +84,19 @@ public abstract class TestProgram {
     }
 
     private String executeCommand(
-        boolean wantsResult,
+        boolean throwOnError,
         Optional<File> stdin,
         String... command)
         throws InterruptedException, IOException {
 
-        System.out.println("Executing command: "+Arrays.toString(command));
+        System.out.print(String.join(" ", command));
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
         var redirectedTarget = File.createTempFile("redirect", null);
         var redirectedError = File.createTempFile("redirectError", null);
-        redirectedTarget.setExecutable(true);
-        redirectedTarget.setReadable(true);
-        redirectedTarget.setWritable(true);
+        assert redirectedTarget.setExecutable(true);
+        assert redirectedTarget.setReadable(true);
+        assert redirectedTarget.setWritable(true);
 
         stdin.ifPresent(process::redirectInput);
 
@@ -114,38 +104,45 @@ public abstract class TestProgram {
         process.redirectError(redirectedError);
         Process runner = process.start();
         runner.waitFor();
-        if (wantsResult) {
-            InputStream resultStream = new BufferedInputStream(
-                    new FileInputStream(redirectedTarget));
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    resultStream));
-            List<String> output = reader
-                .lines().collect(Collectors.toList());
-
-            resultStream = new BufferedInputStream(
-                new FileInputStream(redirectedError));
-            reader = new BufferedReader(new InputStreamReader(
+        InputStream resultStream = new BufferedInputStream(
+                new FileInputStream(redirectedTarget));
+        BufferedReader reader = new BufferedReader(new InputStreamReader(
                 resultStream));
-            output.addAll(reader
-                .lines()
-                .map(x -> "ERROR: " + x)
-                .collect(Collectors.toList()));
+        List<String> output = reader
+            .lines().collect(Collectors.toList());
 
-            var builder = new StringBuilder(String.join("\n", output));
-            if (this.newLineExists(redirectedTarget)) {
-                builder.append('\n');
-            }
-            reader.close();
-            resultStream.close();
-            redirectedTarget.delete();
-            return builder.toString();
-        } else {
-            redirectedTarget.delete();
-            return "";
+        resultStream = new BufferedInputStream(
+            new FileInputStream(redirectedError));
+        reader = new BufferedReader(new InputStreamReader(
+            resultStream));
+        output.addAll(
+            reader
+            .lines()
+            .map(x -> "ERROR: " + x)
+            .collect(Collectors.toList()));
+
+        var builder = new StringBuilder(String.join("\n", output));
+        if (this.newLineExists(redirectedTarget)) {
+            builder.append('\n');
         }
+        reader.close();
+        resultStream.close();
+        assert redirectedTarget.delete();
+
+        if (throwOnError && runner.exitValue() != 0) {
+            throw new RuntimeException(
+                "\nUnable to execute command \""
+                    + String.join(" ", command)
+                    + "\": \n" + builder.toString());
+        }
+
+        return builder.toString();
     }
 
-    private void runAssemblyTest(TilerConf tilerConf, boolean assemblyPrecompiled) throws Exception {
+    private void runAssemblyTest(
+        TilerConf tilerConf,
+        OptConfig optConfig) throws Exception {
+
         File linkerFile = new File(linkerFilename);
         if (!linkerFile.exists()) {
             System.out.println("Cannot find linker file in ~/runtime");
@@ -156,22 +153,18 @@ public abstract class TestProgram {
             return;
         }
 
-        if (assemblyPrecompiled) {
-            Files.deleteIfExists(Path.of(getTestAssemblyFilename())) ;
-
-            Files.copy(
-                Path.of(getTestAssemblyFilename(tilerConf)),
-                Path.of(getTestAssemblyFilename()));
-        } else {
-            System.out.println(this.executeCommand(true,
-                Optional.empty(),
-                "./xic",
-                "-libpath",
-                this.libpath(),
-                "-tiler",
-                tilerConf.name(),
-                this.getTestXiFilename()));
-        }
+        List<String> arguments = new ArrayList<>(List.of(
+            "./xic",
+            "-libpath",
+            this.libpath(),
+            "-tiler",
+            tilerConf.name()));
+        arguments.addAll(optConfig.convertToCLI());
+        arguments.add(this.getTestXiFilename());
+        System.out.println(this.executeCommand(
+            true,
+            Optional.empty(),
+            arguments.toArray(new String[0])));
 
         File tmpFile = File.createTempFile("temp_" + filename(), "");
         tmpFile.setExecutable(true);
@@ -188,15 +181,15 @@ public abstract class TestProgram {
 
         Optional<File> stdinFile;
         RunConfiguration configuration = configuration();
-        if (!configuration.stdin.isEmpty()) {
-            File stdinFileReal = File.createTempFile("temp_stdin_" + filename(), "");
-            stdinFileReal.setReadable(true);
-            stdinFileReal.setWritable(true);
-            tmpFile.deleteOnExit();
+            if (!configuration.stdin.isEmpty()) {
+                File stdinFileReal = File.createTempFile("temp_stdin_" + filename(), "");
+                stdinFileReal.setReadable(true);
+                stdinFileReal.setWritable(true);
+                tmpFile.deleteOnExit();
 
-            stdinFile = Optional.of(stdinFileReal);
+                stdinFile = Optional.of(stdinFileReal);
 
-            FileWriter writer = new FileWriter(stdinFileReal);
+                FileWriter writer = new FileWriter(stdinFileReal);
             writer.write(configuration.stdin);
             writer.flush();
             writer.close();
@@ -210,7 +203,7 @@ public abstract class TestProgram {
         System.arraycopy(args, 0, command, 1, args.length);
 
         String result = this.executeCommand(
-            true,
+            false,
             stdinFile,
             command);
 
@@ -221,31 +214,21 @@ public abstract class TestProgram {
     }
 
     @EnabledOnOs({OS.LINUX})
-    @Tag("compilesAssembly")
     @Test
     void testBasicTilerAssembly() throws Exception {
-        runAssemblyTest(TilerConf.BASIC, false);
+        runAssemblyTest(TilerConf.BASIC, OptConfig.none());
     }
 
     @EnabledOnOs({OS.LINUX})
-    @Tag("compilesAssembly")
     @Test
     void testComplexTilerAssembly() throws Exception {
-        runAssemblyTest(TilerConf.COMPLEX, false);
+        runAssemblyTest(TilerConf.COMPLEX, OptConfig.none());
     }
 
     @EnabledOnOs({OS.LINUX})
-    @Tag("precompiledAssembly")
     @Test
-    void testBasicTilerAssemblyPrecompiled() throws Exception {
-        runAssemblyTest(TilerConf.BASIC, true);
-    }
-
-    @EnabledOnOs({OS.LINUX})
-    @Tag("precompiledAssembly")
-    @Test
-    void testComplexTilerAssemblyPrecompiled() throws Exception {
-        runAssemblyTest(TilerConf.COMPLEX, true);
+    void testRegisterAllocator() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, OptConfig.of(Optimization.REG));
     }
 
     // Source:

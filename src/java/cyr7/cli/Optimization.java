@@ -1,6 +1,7 @@
 package cyr7.cli;
 
 public enum Optimization {
+
     CF,
     REG,
     MC,
