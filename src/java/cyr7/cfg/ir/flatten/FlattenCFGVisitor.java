@@ -2,6 +2,7 @@ package cyr7.cfg.ir.flatten;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -9,6 +10,7 @@ import java.util.Optional;
 import java.util.Queue;
 import java.util.stream.Collectors;
 
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -16,6 +18,7 @@ import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.DefaultIdGenerator;
@@ -40,22 +43,31 @@ public class FlattenCFGVisitor
         private Optional<IRLabel> label;
         private Optional<IRJump> jump;
 
-        protected final Optional<IRStmt> stmt;
+        protected final List<IRStmt> stmt;
+
+        public IRStmtWrapper(List<IRStmt> stmts) {
+            this.stmt = Collections.unmodifiableList(stmts);
+            this.label = Optional.empty();
+            this.jump = Optional.empty();
+        }
 
         public IRStmtWrapper(IRStmt stmt) {
-            this.stmt = Optional.of(stmt);
+            this.stmt = List.of(stmt);
             this.label = Optional.empty();
             this.jump = Optional.empty();
         }
 
         public IRStmtWrapper() {
-            this.stmt = Optional.empty();
+            this.stmt = List.of();
             this.label = Optional.empty();
             this.jump = Optional.empty();
         }
 
         public Location location() {
-            return stmt.map(s -> s.location()).orElse(new Location(-1, -1));
+            if (stmt.isEmpty())
+                return new Location(-1, -1);
+            else
+                return stmt.get(0).location();
         }
 
         public void setLabel(String label) {
@@ -162,6 +174,10 @@ public class FlattenCFGVisitor
         return new IRStmtWrapper(s);
     }
 
+    private IRStmtWrapper wrapStmt(List<IRStmt> s) {
+        return new IRStmtWrapper(s);
+    }
+
     private IRStmtWrapper wrapStmt() {
         return new IRStmtWrapper();
     }
@@ -188,7 +204,7 @@ public class FlattenCFGVisitor
         return this.stmts.stream().flatMap(wrapper -> {
             final List<IRStmt> content = new ArrayList<>();
             wrapper.label.ifPresent(lbl -> content.add(lbl));
-            wrapper.stmt.ifPresent(s -> content.add(s));
+            wrapper.stmt.forEach(s -> content.add(s));
             wrapper.jump.ifPresent(jump -> content.add(jump));
             return content.stream();
         }).collect(Collectors.toList());
@@ -221,7 +237,8 @@ public class FlattenCFGVisitor
     private void appendStmt(CFGNode n, IRStmtWrapper stmt) {
         final var wrappedStmt = stmt;
         this.stmts.add(wrappedStmt);
-        this.wrapStmt().label.ifPresent(lbl -> this.cfgNodeToLabels.put(n, lbl.name()));
+        this.wrapStmt().label.ifPresent(lbl ->
+                this.cfgNodeToLabels.put(n, lbl.name()));
         this.cfgNodeToIRStmt.put(n, wrappedStmt);
     }
 
@@ -348,4 +365,79 @@ public class FlattenCFGVisitor
         }
         return Optional.empty();
     }
+
+    @Override
+    public Optional<CFGNode> visit(CFGBlockNode n) {
+        if (!this.performProcessIfVisited(n)) {
+            List<IRStmt> stmts = new FlattenCFGBlockVisitor().getStmts(n.block);
+            final var stmt = this.wrapStmt(stmts);
+            this.appendStmt(n, stmt);
+            this.epilogueProcess(n, stmt);
+            final CFGNode next = n.out().get(0);
+            return Optional.of(next);
+        }
+        return Optional.empty();
+    }
+
+
+    private class FlattenCFGBlockVisitor implements IrCFGVisitor<IRStmt> {
+
+        private IRNodeFactory createMake(CFGNode n) {
+            return new IRNodeFactory_c(n.location());
+        }
+
+        public List<IRStmt> getStmts(CFGNode topNode) {
+            final var stmts = new ArrayList<IRStmt>();
+            CFGNode blockToTraverse = topNode;
+            while (!(blockToTraverse instanceof CFGStubNode)) {
+                stmts.add(blockToTraverse.accept(this));
+            }
+            return stmts;
+        }
+
+        @Override
+        public IRStmt visit(CFGCallNode n) {
+            return n.call;
+        }
+
+        @Override
+        public IRStmt visit(CFGIfNode n) {
+            throw new AssertionError("Cannot have nested if node inside block");
+        }
+
+        @Override
+        public IRStmt visit(CFGVarAssignNode n) {
+            final var make = this.createMake(n);
+            return make.IRMove(make.IRTemp(n.variable), n.value);
+        }
+
+        @Override
+        public IRStmt visit(CFGMemAssignNode n) {
+            final var make = this.createMake(n);
+            return make.IRMove(n.target, n.value);
+        }
+
+        @Override
+        public IRStmt visit(CFGReturnNode n) {
+            throw new AssertionError("Cannot have return node inside block");
+        }
+
+        @Override
+        public IRStmt visit(CFGStartNode n) {
+            throw new AssertionError("Cannot have start node inside block");
+        }
+
+        @Override
+        public IRStmt visit(CFGSelfLoopNode n) {
+            throw new AssertionError("Cannot have self-loop node inside block");
+        }
+
+        @Override
+        public IRStmt visit(CFGBlockNode n) {
+            throw new AssertionError("Cannot have nested cfg block node");
+        }
+
+    }
+
+
 }
