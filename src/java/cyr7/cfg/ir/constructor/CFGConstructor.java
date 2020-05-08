@@ -18,7 +18,8 @@ public class CFGConstructor {
         Map<String, CFGStartNode> cfgCollection = new HashMap<>();
 
         c.functions().forEach((name, fn) -> {
-            CFGStartNode fBody = (CFGStartNode)fn.body().accept(new CFGConstructorVisitor());
+            CFGStartNode fBody = (CFGStartNode)fn.body()
+                                    .accept(new CFGConstructorVisitor());
             var cleaner = new CFGUnreachableNodeCleaner();
             fBody = cleaner.removeUnreachableNodes(fBody);
             cfgCollection.put(name, fBody);

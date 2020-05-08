@@ -32,7 +32,8 @@ public final class TraceOptimizer {
         return optimized;
     }
 
-    public static Map<String, List<List<BasicBlock>>> getOptimizedBasicBlocks(IRCompUnit compUnit, IdGenerator generator) {
+    public static Map<String, List<List<BasicBlock>>>
+           getOptimizedBasicBlocks(IRCompUnit compUnit, IdGenerator generator) {
         Map<String, List<List<BasicBlock>>> blockLists = new HashMap<>();
 
         compUnit.functions().forEach((name, decl) -> {
