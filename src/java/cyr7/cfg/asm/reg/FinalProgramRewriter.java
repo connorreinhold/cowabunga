@@ -90,7 +90,20 @@ final class FinalProgramRewriter implements Runnable {
     }
 
     private ASMReg reg(ASMTempRegArg temp) {
-        return registers[coloring.get(alias.get(temp))];
+        ASMReg reg = registers[coloring.get(alias.get(temp))];
+        if (temp instanceof ASMTempArg) {
+            ASMTempArg tempArg = (ASMTempArg) temp;
+            switch (tempArg.size) {
+                case QWORD:
+                    return reg;
+                case BYTE:
+                    return reg.correspondingByteReg();
+                default:
+                    return reg;
+            }
+        } else {
+            return reg;
+        }
     }
 
 }
