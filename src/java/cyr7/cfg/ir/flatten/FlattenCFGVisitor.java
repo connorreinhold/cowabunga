@@ -4,7 +4,6 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -131,6 +130,18 @@ public class FlattenCFGVisitor
         this.stmts = new ArrayList<>();
         this.generator = new DefaultIdGenerator();
     }
+
+
+    protected FlattenCFGVisitor(IdGenerator generator) {
+        this.visitedNodes = new HashSet<>();
+        this.cfgNodeToLabels = new IdentityHashMap<>();
+        this.cfgNodeToIRStmt = new IdentityHashMap<>();
+        this.trueBranches = new ArrayDeque<>();
+        this.stmts = new ArrayList<>();
+        this.generator = generator;
+    }
+
+
 
     /**
      * Sets node {@code n} to be visited and the predecessor node for the next

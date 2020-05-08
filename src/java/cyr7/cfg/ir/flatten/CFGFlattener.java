@@ -5,6 +5,8 @@ import java.util.Map;
 
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.ir.DefaultIdGenerator;
+import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.ir.nodes.IRSeq;
@@ -15,12 +17,20 @@ public class CFGFlattener {
     public static IRCompUnit flatten(Location location, String filename,
                 Map<String, CFGStartNode> cfgMap) {
         Map<String, IRFuncDecl> functions = new HashMap<>();
+        IdGenerator generator = new DefaultIdGenerator();
         cfgMap.forEach((functionName, startNode) -> {
+            IRSeq flattened = flatten(startNode, generator);
             IRFuncDecl function = new IRFuncDecl(startNode.location(),
-                        functionName, flatten(startNode));
+                        functionName, flattened);
             functions.put(functionName, function);
         });
         return new IRCompUnit(location, filename, functions);
+    }
+
+    public static IRSeq flatten(CFGStartNode root, IdGenerator generator) {
+        var flattener = new FlattenCFGVisitor(generator);
+        root.accept(flattener);
+        return new IRSeq(root.location(), flattener.getFunctionBody());
     }
 
     public static IRSeq flatten(CFGNode root) {

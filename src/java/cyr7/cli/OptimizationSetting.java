@@ -27,8 +27,12 @@ public class OptimizationSetting {
         return !this.enableOptimizations;
     }
 
-    public void disableAllOptimizations() {
+    public void completeDisableOptimizations() {
         this.enableOptimizations = false;
+        this.softDisableAll();
+    }
+
+    public void softDisableAll() {
         for (Optimization v: Optimization.values()) {
             this.setOptimization(v, false);
         }

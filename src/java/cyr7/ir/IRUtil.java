@@ -1,7 +1,9 @@
 package cyr7.ir;
 
+import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
@@ -10,8 +12,6 @@ import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.opt.CopyPropagationOptimization;
-import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.Optimization;
 import cyr7.cli.OptimizationSetting;
@@ -29,6 +29,30 @@ import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class IRUtil {
+
+    private static class Opener implements IxiFileOpener {
+        @Override
+        public Reader openIxiLibraryFile(String name) throws FileNotFoundException {
+            if (name.equals("conv")) {
+                return new StringReader(
+                    "parseInt(str: int[]): int, bool\n"
+                    + "unparseInt(n: int): int[]\n"
+                );
+            } else if (name.equals("io")) {
+                return new StringReader(
+                    "print(str: int[])\n"
+                    + "println(str: int[])\n"
+                    + "readln() : int[]\n"
+                    + "getchar() : int\n"
+                    + "eof() : bool\n"
+                );
+            } else {
+                throw new FileNotFoundException(name);
+            }
+        }
+
+    }
+
 
     public static class LowerConfiguration {
 
@@ -79,15 +103,24 @@ public class IRUtil {
             compUnit = (IRCompUnit) node;
         }
 
-        Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
-        if (lowerConfiguration.settings.get(Optimization.COPY)) {
-            cfg.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = CopyPropagationOptimization
-                                            .optimize(cfg.get(functionName));
-                cfg.put(functionName, optimizedCfg);
-            });
-        }
-
+        if (lowerConfiguration.traceEnabled) {
+            Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
+//        if (lowerConfiguration.settings.get(Optimization.COPY)) {
+//            cfg.keySet().stream().forEach(functionName -> {
+//                var optimizedCfg = CopyPropagationOptimization
+//                                            .optimize(cfg.get(functionName));
+//                cfg.put(functionName, optimizedCfg);
+//            });
+//        }
+//
+//        if (lowerConfiguration.settings.get(Optimization.DCE)) {
+//            cfg.keySet().stream().forEach(functionName -> {
+//                var optimizedCfg = DeadCodeElimOptimization
+//                                            .optimize(cfg.get(functionName));
+//                cfg.put(functionName, optimizedCfg);
+//            });
+//        }
+//
         if (lowerConfiguration.settings.get(Optimization.DCE)) {
             cfg.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = DeadCodeElimOptimization
@@ -95,16 +128,10 @@ public class IRUtil {
                 cfg.put(functionName, optimizedCfg);
             });
         }
-
-        if (lowerConfiguration.settings.get(Optimization.DCE)) {
-            cfg.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = DeadCodeElimOptimization
-                                            .optimize(cfg.get(functionName));
-                cfg.put(functionName, optimizedCfg);
-            });
+            compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
+        } else {
         }
 
-        compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));

@@ -380,7 +380,7 @@ public class CLI {
                     optSettings.setOptimization(opt, false);
                 } else if (optShort.isBlank()) {
                     // Disable all optimization
-                    optSettings.disableAllOptimizations();
+                    optSettings.completeDisableOptimizations();
                 } else {
                     // Enable optimization
                     Optimization opt = Optimization.parse(optShort);
