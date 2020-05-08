@@ -2,7 +2,9 @@ package cyr7.integration.brainf;
 
 import cyr7.integration.Run.RunConfiguration;
 import cyr7.integration.TestProgram;
+import org.junit.jupiter.api.Tag;
 
+@Tag("core")
 public class TestBrainfHelloWorld extends TestProgram {
 
     @Override

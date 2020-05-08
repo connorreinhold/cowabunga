@@ -38,12 +38,6 @@ public class TestPrintSpam extends TestProgram {
 
     @Disabled
     @Override
-    void testLirTraceEnabled() throws Exception {
-        super.testLirTraceEnabled();
-    }
-
-    @Disabled
-    @Override
     void testLirAllEnabled() throws Exception {
         super.testLirAllEnabled();
     }

@@ -10,9 +10,9 @@ import cyr7.cfg.ir.dot.IrCFGDotVisitor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cli.OptConfig;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
@@ -37,14 +37,14 @@ public final class CFGUtil {
             Writer writer,
             String filename,
             IxiFileOpener fileOpener,
-            LowerConfiguration lowerConfiguration,
+            OptConfig optConfig,
             String functionName) throws Exception {
 
         IRCompUnit lowered = IRUtil.generateIR(
                 reader,
                 filename,
                 fileOpener,
-                lowerConfiguration,
+                optConfig,
                 new DefaultIdGenerator());
         Map<String, CFGStartNode> result = CFGConstructor.constructCFG(lowered);
         outputDotForFunctionIR(result.get(functionName), writer);
@@ -66,12 +66,12 @@ public final class CFGUtil {
             Reader reader,
             String filename,
             IxiFileOpener fileOpener,
-            LowerConfiguration lowerConfiguration) throws Exception {
+            OptConfig optConfig) throws Exception {
         IRCompUnit lowered = IRUtil.generateIR(
                 reader,
                 filename,
                 fileOpener,
-                lowerConfiguration,
+                optConfig,
                 new DefaultIdGenerator());
         return CFGConstructor.constructCFG(lowered);
     }

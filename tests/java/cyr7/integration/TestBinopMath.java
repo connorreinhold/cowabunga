@@ -1,7 +1,8 @@
 package cyr7.integration;
 
-import cyr7.integration.Run.RunConfiguration;
+import org.junit.jupiter.api.Tag;
 
+@Tag("core")
 public class TestBinopMath extends TestProgram {
 
     private final long[] array = new long[]

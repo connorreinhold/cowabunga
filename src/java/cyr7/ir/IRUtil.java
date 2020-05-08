@@ -1,9 +1,7 @@
 package cyr7.ir;
 
-import java.io.FileNotFoundException;
 import java.io.PrintWriter;
 import java.io.Reader;
-import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.util.Map;
@@ -14,8 +12,7 @@ import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.opt.CopyPropagationOptimization;
 import cyr7.cli.CLI;
-import cyr7.cli.Optimization;
-import cyr7.cli.OptimizationSetting;
+import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.lowering.LoweringVisitor;
@@ -31,93 +28,36 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class IRUtil {
 
-    private static class Opener implements IxiFileOpener {
-        @Override
-        public Reader openIxiLibraryFile(String name) throws FileNotFoundException {
-            if (name.equals("conv")) {
-                return new StringReader(
-                    "parseInt(str: int[]): int, bool\n"
-                    + "unparseInt(n: int): int[]\n"
-                );
-            } else if (name.equals("io")) {
-                return new StringReader(
-                    "print(str: int[])\n"
-                    + "println(str: int[])\n"
-                    + "readln() : int[]\n"
-                    + "getchar() : int\n"
-                    + "eof() : bool\n"
-                );
-            } else {
-                throw new FileNotFoundException(name);
-            }
-        }
-
-    }
-
-
-    public static class LowerConfiguration {
-
-        public final OptimizationSetting settings;
-        public final boolean traceEnabled;
-
-        public LowerConfiguration(OptimizationSetting settings,
-                                 boolean traceEnabled) {
-            this.settings = settings;
-            this.traceEnabled = traceEnabled;
-        }
-
-        public String description() {
-            return settings.description();
-        }
-
-    }
-
     public static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
-        LowerConfiguration lowerConfiguration) {
+        OptConfig optConfig) {
 
-        final boolean cFoldEnabled = lowerConfiguration.settings
-                                    .get(Optimization.CF);
-
-        CLI.debugPrint(lowerConfiguration.description());
+        CLI.debugPrint("Constant Folding Enabled: " + optConfig.cf());
 
         CLI.lazyDebugPrint(compUnit, unit -> "MIR: \n" + unit);
 
-        if (cFoldEnabled) {
+        if (optConfig.cf()) {
             IRNode node = compUnit.accept(new IRConstFoldVisitor()).assertSecond();
             compUnit = (IRCompUnit) node;
             CLI.lazyDebugPrint(compUnit, unit -> "Constant-Folded MIR: \n" + unit);
         }
 
-        compUnit =
-            compUnit.accept(new LoweringVisitor(generator)).assertThird();
+        compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
+        compUnit = TraceOptimizer.optimize(compUnit, generator);
 
-        if (lowerConfiguration.traceEnabled) {
-            compUnit = TraceOptimizer.optimize(compUnit, generator);
-        }
-
-        if (cFoldEnabled) {
+        if (optConfig.cf()) {
             IRNode node =
                 compUnit.accept(new IRConstFoldVisitor()).assertSecond();
             assert node instanceof IRCompUnit;
             compUnit = (IRCompUnit) node;
-        }
-
-        if (lowerConfiguration.traceEnabled) {
             Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
             cfg.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = CopyPropagationOptimization
                                             .optimize(cfg.get(functionName));
                 cfg.put(functionName, optimizedCfg);
             });
-//            cfg.keySet().stream().forEach(functionName -> {
-//                var optimizedCfg = DeadCodeElimOptimization
-//                        .optimize(cfg.get(functionName));
-//                cfg.put(functionName, optimizedCfg);
-//            });
             compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
-        } else {
         }
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
@@ -152,13 +92,13 @@ public class IRUtil {
         Writer writer,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration) throws Exception {
+        OptConfig optConfig) throws Exception {
 
         IRCompUnit lowered = generateIR(
             reader,
             filename,
             fileOpener,
-            lowerConfiguration,
+            optConfig,
             new DefaultIdGenerator());
 
         SExpPrinter printer
@@ -190,13 +130,13 @@ public class IRUtil {
         Writer writer,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration) throws Exception {
+        OptConfig optConfig) throws Exception {
 
         IRCompUnit lowered = generateIR(
             reader,
             filename,
             fileOpener,
-            lowerConfiguration,
+            optConfig,
             new DefaultIdGenerator());
 
         IRSimulator sim = new IRSimulator(lowered);
@@ -222,17 +162,14 @@ public class IRUtil {
         Node result = ParserUtil.parseNode(reader, filename, false);
         TypeCheckUtil.typeCheck(result, fileOpener);
 
-        IRCompUnit compUnit = (IRCompUnit)
-                result.accept(new ASTToIRVisitor(generator)).assertSecond();
-
-        return compUnit;
+        return (IRCompUnit) result.accept(new ASTToIRVisitor(generator)).assertSecond();
     }
 
     public static IRCompUnit generateIR(
         Reader reader,
         String filename,
         IxiFileOpener fileOpener,
-        LowerConfiguration lowerConfiguration,
+        OptConfig optConfig,
         IdGenerator generator) throws Exception {
 
         Node result = ParserUtil.parseNode(reader, filename, false);
@@ -241,7 +178,7 @@ public class IRUtil {
         IRCompUnit compUnit = (IRCompUnit)
             result.accept(new ASTToIRVisitor(generator)).assertSecond();
 
-        return lower(compUnit, generator, lowerConfiguration);
+        return lower(compUnit, generator, optConfig);
     }
 
 }

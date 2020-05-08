@@ -23,10 +23,8 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 import cyr7.cfg.ir.CFGUtil;
-import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.IxiFileOpener;
@@ -36,18 +34,22 @@ import cyr7.x86.ASMUtil.TilerConf;
 
 public class CLI {
 
-    private static final String usage = "xic [options] <source files>";
-    private static final int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
-    private static final int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
-    private static final PrintWriter writer = new PrintWriter(System.out);
-    private static final HelpFormatter helpFormatter = new HelpFormatter();
-    private static final Options options = createOptions();
-    private static final CommandLineParser parser = new DefaultParser();
+    private static final Optimization[] SUPPORTED_OPTIMIZATIONS = {
+        Optimization.CF, Optimization.REG
+    };
+
+    final static private String usage = "xic [options] <source files>";
+    final static private int consoleWidth = HelpFormatter.DEFAULT_WIDTH;
+    final static private int leftPadding = HelpFormatter.DEFAULT_LEFT_PAD;
+    final static private PrintWriter writer = new PrintWriter(System.out);
+    final static private HelpFormatter helpFormatter = new HelpFormatter();
+    final static private Options options = createOptions();
+    final static private CommandLineParser parser = new DefaultParser();
 
     private static boolean debugPrintingEnabled = false;
     private static ASMUtil.TilerConf tiler = TilerConf.COMPLEX;
 
-    private static final OptimizationSetting optSettings = new OptimizationSetting();
+    private static OptConfig optConfig = OptConfig.of(SUPPORTED_OPTIMIZATIONS);
 
     private static boolean wantsLexing = false;
     private static boolean wantsParsing = false;
@@ -60,7 +62,6 @@ public class CLI {
     private static boolean wantsMirRun = false;
     private static boolean wantsIrRun = false;
     private static boolean wantsAssembly = true;
-    private static boolean wantsTaggedASMFile = false;
     public static boolean wantsCommentedAssembly = false;
 
     /**
@@ -290,15 +291,6 @@ public class CLI {
             .required(false)
             .build();
 
-        Option taggedAssembly = Option
-            .builder("taggedASMFile")
-            .desc("Change the file extension to .s_basic or .s_complex depending on the tiler used")
-            .hasArg(false)
-            .argName(null)
-            .numberOfArgs(0)
-            .required(false)
-            .build();
-
         Option enableAssemblyLevelAssertions = Option
             .builder("enableAssemblyLevelAssertions")
             .desc("Enable sanity checks for the compiler at the assembly level.")
@@ -334,7 +326,6 @@ public class CLI {
                 .addOption(debugPrinting)
                 .addOption(noAssembly)
                 .addOption(tiler)
-                .addOption(taggedAssembly)
                 .addOption(enableAssemblyLevelAssertions)
                 .addOption(assemblyComments);
     }
@@ -370,21 +361,33 @@ public class CLI {
      */
     static CommandLine parseCommand(String[] args)
             throws ParseException {
+        boolean hasBeenDisabled = false;
+        boolean noModifier = true;
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("-O")) {
                 String optShort = args[i].substring(args[i].indexOf('O') + 1);
                 if (optShort.startsWith("-no-")) {
                     // Disable only optimization <opt>
                     optShort = optShort.substring(optShort.indexOf("-no-") + 4);
-                    Optimization opt = Optimization.parse(optShort);
-                    optSettings.setOptimization(opt, false);
-                } else if (optShort.isBlank()) {
-                    // Disable all optimization
-                    optSettings.completeDisableOptimizations();
-                } else {
-                    // Enable optimization
-                    Optimization opt = Optimization.parse(optShort);
-                    optSettings.setOptimization(opt, true);
+                    noModifier = false;
+                } else if (!hasBeenDisabled) {
+                    optConfig.disableAll();
+                    hasBeenDisabled = true;
+                }
+
+                Optimization opt = Optimization.parse(optShort);
+
+                switch(opt) {
+                    case CF:
+                        optConfig.set(Optimization.CF, noModifier);
+                        args[i] = "";
+                        break;
+                    case REG:
+                        optConfig.set(Optimization.REG, noModifier);
+                        args[i] = "";
+                        break;
+                    default:
+                        break;
                 }
                 args[i] = "";
             }
@@ -477,7 +480,9 @@ public class CLI {
                     printHelpMessage();
                     break;
                 case "ro":
-                    writer.print("cf");
+                    for (Optimization optimization : SUPPORTED_OPTIMIZATIONS) {
+                        writer.write(optimization.name().toLowerCase());
+                    }
                     break;
                 case "l":
                     wantsLexing = true;
@@ -570,10 +575,6 @@ public class CLI {
                     }
                     break;
 
-                case "taggedASMFile":
-                     wantsTaggedASMFile = true;
-                     break;
-
                 case "enableAssemblyLevelAssertions":
                     assemblyLevelAssertionsEnabled = true;
                     break;
@@ -651,8 +652,6 @@ public class CLI {
                 closeIOStreams(input, output);
             }
 
-            LowerConfiguration lowerConfiguration = new LowerConfiguration(optSettings, true);
-
             if (wantsInitialIRGen) {
                 debugPrint("Generate initial intermediate code for: " + filename);
                 try {
@@ -685,11 +684,11 @@ public class CLI {
                             irFilename,
                             "ir");
                     IRUtil.irGen(
-                            input,
-                            output,
-                            path.getFileName().toString(),
-                            opener,
-                            lowerConfiguration
+                        input,
+                        output,
+                        path.getFileName().toString(),
+                        opener,
+                        optConfig
                     );
                 } catch (Exception e) {
                     debugPrint(e);
@@ -727,12 +726,12 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    Map<String, CFGStartNode> functions = CFGUtil.generateAllFinalDot(
+                    Map<String, CFGStartNode> functions =
+                        CFGUtil.generateAllFinalDot(
                             input,
                             filename,
                             opener,
-                            lowerConfiguration
-                    );
+                            optConfig);
                     for (String f: functions.keySet()) {
                         String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_final";
                         System.out.println(functionFilename);
@@ -758,8 +757,7 @@ public class CLI {
                         output,
                         path.getFileName().toString(),
                         opener,
-                        lowerConfiguration
-                    );
+                        optConfig);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
@@ -797,8 +795,7 @@ public class CLI {
                         output,
                         filename,
                         opener,
-                        lowerConfiguration
-                    );
+                        optConfig);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
@@ -810,16 +807,12 @@ public class CLI {
                 debugPrint("Generate and interpret assembly code for: " + filename);
                 try {
                     input = getReader(filename);
-                    if (!wantsTaggedASMFile) {
-                        output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
-                    } else {
-                        output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s" + "_" + tiler.name());
-                    }
-                    ASMUtil.writeASM(input, output, filename, opener, lowerConfiguration, tiler);
+                    output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
+                    ASMUtil.writeASM(input, output, filename, opener, optConfig, tiler);
 
                     if (debugPrintingEnabled) {
                         input = getReader(filename);
-                        ASMUtil.printDebugASM(input, filename, opener, lowerConfiguration);
+                        ASMUtil.printDebugASM(input, filename, opener, optConfig);
                     }
                 } catch (Exception e) {
                     debugPrint(e);

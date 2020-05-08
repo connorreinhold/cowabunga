@@ -25,11 +25,10 @@ import cyr7.ast.stmt.ProcedureStmtNode;
 import cyr7.ast.toplevel.FunctionDeclNode;
 import cyr7.ast.toplevel.FunctionHeaderDeclNode;
 import cyr7.ast.toplevel.XiProgramNode;
-import cyr7.cli.Optimization;
+import cyr7.cli.OptConfig;
 import cyr7.ir.ASTToIRVisitor;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IRUtil.LowerConfiguration;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRCompUnit;
@@ -113,23 +112,21 @@ public final class Run {
     private static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
-        LowerConfiguration lowerConfiguration) {
+        OptConfig optConfig) {
 
-        IRCompUnit lowered = IRUtil.lower(compUnit, generator, lowerConfiguration);
+        IRCompUnit lowered = IRUtil.lower(compUnit, generator, optConfig);
 
-        if (lowerConfiguration.settings
-                              .get(Optimization.CF)) {
+        if (optConfig.cf()) {
             assertTrue(lowered.aggregateChildren(new CheckConstFoldedIRVisitor()));
         }
-        if (lowerConfiguration.traceEnabled) {
-            CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
-            boolean checkLowered = lowered.aggregateChildren(visitor);
-            if (!checkLowered) {
-                fail("Program is not lowered, but it's supposed to be!: "
-                    + sexp(lowered)
-                    + "\nOffending node: "
-                    + visitor.noncanonical());
-            }
+
+        CheckCanonicalIRVisitor visitor = new CheckCanonicalIRVisitor();
+        boolean checkLowered = lowered.aggregateChildren(visitor);
+        if (!checkLowered) {
+            fail("Program is not lowered, but it's supposed to be!: "
+                + sexp(lowered)
+                + "\nOffending node: "
+                + visitor.noncanonical());
         }
 
         return lowered;
@@ -196,7 +193,7 @@ public final class Run {
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 
-    public static String lirRun(String program, LowerConfiguration lowerConfiguration, RunConfiguration runConfiguration) throws Exception {
+    public static String lirRun(String program, OptConfig optConfig, RunConfiguration runConfiguration) throws Exception {
         Reader reader = new StringReader(program);
 
         XiProgramNode result = (XiProgramNode) ParserUtil.parseNode(reader, "Run", false);
@@ -212,7 +209,7 @@ public final class Run {
             compUnit = (IRCompUnit) node;
         }
 
-        IRCompUnit lowered = lower(compUnit, generator, lowerConfiguration);
+        IRCompUnit lowered = lower(compUnit, generator, optConfig);
 
         InputStream systemIn = System.in;
         InputStream inputStream = new ByteArrayInputStream(runConfiguration.stdin.getBytes());

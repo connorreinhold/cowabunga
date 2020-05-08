@@ -30,7 +30,7 @@ public enum ASMAbstract {
         IdGenerator generator,
         TilerFactory tilerFactory) {
 
-        String returnLbl = "end_" + funcDecl.name();
+        String returnLabel = ASMConstants.returnLabel(funcDecl.name());
 
         List<ASMLine> body = new ArrayList<>();
 
@@ -62,22 +62,22 @@ public enum ASMAbstract {
         MyIRVisitor<TilerData> tiler = tilerFactory.constructTiler(
             generator,
             funcDecl.numOfReturnValues(),
-            returnLbl,
+            returnLabel,
             addrOfOverspillRetValues,
             true);
         body.addAll(funcDecl.body().accept(tiler).optimalInstructions);
 
         // add return label
 
-        body.add(new ASMLabel(returnLbl));
+        body.add(new ASMLabel(returnLabel));
 
         // move callee saved registers out of temps
 
         for (int i = 0; i < temporariesForCalleeSaved.length; i++) {
             String temp = temporariesForCalleeSaved[i];
             body.add(make.Mov(
-                arg.temp(temp, ASMRegSize.QWORD),
-                ASMConstants.CALLEE_SAVED_REGISTERS[i]));
+                ASMConstants.CALLEE_SAVED_REGISTERS[i],
+                arg.temp(temp, ASMRegSize.QWORD)));
         }
 
         return body;
@@ -94,8 +94,11 @@ public enum ASMAbstract {
         lines.addAll(List.of(
             new ASMLabel(mangledFunctionName),
             make.Push(ASMReg.RBP),
-            make.Mov(ASMReg.RBP, ASMReg.RSP),
-            make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps))));
+            make.Mov(ASMReg.RBP, ASMReg.RSP)));
+
+        if (numberOfTemps > 0) {
+            lines.add(make.Sub(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+        }
 
         if (stackNeedsAdjustment(numberOfTemps)) {
             // make it so the stack is always 16-byte aligned on entry to the
@@ -113,8 +116,11 @@ public enum ASMAbstract {
             lines.add(make.Add(ASMReg.RSP, arg.constant(8)));
         }
 
+        if (numberOfTemps > 0) {
+            lines.add(make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)));
+        }
+
         lines.addAll(List.of(
-            make.Add(ASMReg.RSP, arg.constant(8L * numberOfTemps)),
             make.Mov(ASMReg.RSP, ASMReg.RBP),
             make.Pop(ASMReg.RBP),
             make.Ret()));

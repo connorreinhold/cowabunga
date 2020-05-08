@@ -1,7 +1,9 @@
 package cyr7.integration;
 
 import cyr7.integration.Run.RunConfiguration;
+import org.junit.jupiter.api.Tag;
 
+@Tag("core")
 public class TestSignificantInversions extends TestProgram {
     
     public static String[] parseSigInversionsArgs(String input) {
