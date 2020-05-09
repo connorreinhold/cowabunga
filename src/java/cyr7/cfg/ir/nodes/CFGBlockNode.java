@@ -27,7 +27,6 @@ public class CFGBlockNode extends CFGNode {
         var topNode = block;
         var previous = block;
         while (true) {
-
             assert !(topNode instanceof CFGStubNode);
             assert !(topNode instanceof CFGIfNode);
             assert !(topNode instanceof CFGSelfLoopNode);
@@ -53,8 +52,7 @@ public class CFGBlockNode extends CFGNode {
      * {@code block} is a linear CFG tree, i.e. for each node, there is only
      * at most one incoming edge and one outgoing edge.
      */
-    public CFGBlockNode(Location location, CFGNode block,
-            CFGNode outNode) {
+    public CFGBlockNode(Location location, CFGNode block, CFGNode outNode) {
         super(location);
         this.block = block;
         this.outNode = outNode;
@@ -98,6 +96,7 @@ public class CFGBlockNode extends CFGNode {
         CFGNode nodeToTraverse = this.block;
         while (!(nodeToTraverse instanceof CFGStubNode)) {
             descriptions.add(nodeToTraverse.toString());
+            nodeToTraverse = nodeToTraverse.out().get(0);
         }
         return String.join("\n", descriptions);
     }

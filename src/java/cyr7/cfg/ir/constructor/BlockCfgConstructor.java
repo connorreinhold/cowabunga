@@ -49,17 +49,20 @@ public class BlockCfgConstructor {
     public static CFGStartNode construct(List<List<BasicBlock>> blocks) {
         final Map<String, CFGNode> labelToCFG = new HashMap<>();
         final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG = new ArrayDeque<>();
-        for (int i = 1; i < blocks.size(); i++) {
-            buildCfgComponent(blocks.get(i), labelToCFG, jumpTargetFromCFG);
+        Optional<CFGNode> successor = Optional.empty();
+        for (int i = blocks.size() - 1; i >= 1; i--) {
+            successor = buildCfgComponent(blocks.get(i),
+                    labelToCFG, jumpTargetFromCFG, successor);
         }
-
         final Optional<CFGNode> topNode =
-                buildCfgComponent(blocks.get(0), labelToCFG, jumpTargetFromCFG);
+                buildCfgComponent(blocks.get(0), labelToCFG,
+                                  jumpTargetFromCFG, successor);
         final CFGStartNode startNode;
         if (topNode.isPresent()) {
             startNode = new CFGStartNode(new Location(-1, -1), topNode.get());
         } else {
-            throw new AssertionError("Content of program is empty. No return node found");
+            throw new AssertionError("Content of program is empty. "
+                                    + "No return node found");
         }
 
         /**
@@ -91,10 +94,18 @@ public class BlockCfgConstructor {
         return startNode;
     }
 
+    /**
+     * Condenses a sequence of basic blocks into CFG nodes.
+     * @param sequence
+     * @param labelToCFG
+     * @param jumpTargetFromCFG
+     * @param successor
+     * @return
+     */
     private static Optional<CFGNode> buildCfgComponent(List<BasicBlock> sequence,
             Map<String, CFGNode> labelToCFG,
-            Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG) {
-        Optional<CFGNode> successor = Optional.empty();
+            Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG,
+            Optional<CFGNode> successor) {
         for (int j = sequence.size() - 1; j >= 0; j--) {
             final var visitor = new BlockCfgConstructorVisitor();
             final BasicBlock block = sequence.get(j);
@@ -126,7 +137,13 @@ public class BlockCfgConstructor {
         private Optional<CFGNode> outNode;
 
         private CFGNode successor;
+        private CFGNode nodeOfNextBlock;
         private Set<String> labelSets;
+
+        /**
+         * Number of linear CFG nodes.
+         */
+        private long depth;
 
         protected BlockCfgConstructorVisitor() {
             this.labelToCFG = new HashMap<>();
@@ -156,79 +173,46 @@ public class BlockCfgConstructor {
                 Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG,
                 Optional<CFGNode> successor) {
 
+            this.depth = 0;
             this.labelToCFG = labelToCFG;
             this.jumpTargetFromCFG = jumpTargetFromCFG;
-            this.successor = successor.map(s -> s).orElse(this.createStubNode());
+            this.nodeOfNextBlock = successor.map(s -> s)
+                                .orElse(new CFGReturnNode(new Location(-1, -1)));
 
             final var stmtArray = new ArrayList<>(stmts);
+            final var finalStub = this.createStubNode();
+            this.successor = finalStub;
             for (int i = stmtArray.size() - 1; i >= 0; i--) {
                 var stmt = stmtArray.get(i);
                 this.successor = stmt.accept(this);
             }
-            if (outNode.isEmpty()) {
+            if (this.successor == finalStub && this.outNode.isEmpty()) {
+                return new Pair<>(labelSets, this.nodeOfNextBlock);
+            } else if (this.successor == finalStub && this.outNode.isPresent()) {
+                return new Pair<>(labelSets, this.outNode.get());
+            } else if (this.depth == 1 && this.outNode.isEmpty()) {
+                this.successor.replaceOutEdge(finalStub, this.nodeOfNextBlock);
                 return new Pair<>(labelSets, this.successor);
-            } else if (this.successor instanceof CFGStubNode) {
-                return new Pair<>(labelSets, outNode.get());
-            } else {
-                final var block =
-                        new CFGBlockNode(new Location(-1, -1),
+            } else if (this.depth == 1 && this.outNode.isPresent()) {
+                this.successor.replaceOutEdge(finalStub, this.outNode.get());
+                return new Pair<>(labelSets, this.successor);
+            } else if (this.outNode.isEmpty()) {
+                // Create a block
+                final var block = new CFGBlockNode(new Location(-1, -1),
                                          this.successor,
-                                         outNode.get());
+                                         this.nodeOfNextBlock);
+                return new Pair<>(labelSets, block);
+            } else {
+                final var block = new CFGBlockNode(new Location(-1, -1),
+                        this.successor,
+                        this.outNode.get());
                 return new Pair<>(labelSets, block);
             }
         }
 
-        @Override
-        public CFGNode visit(IRSeq n) {
-            throw new UnsupportedOperationException(
-                    "Cannot enter the IRSeq visitor.");
-        }
-
-        @Override
-        public CFGNode visit(IRCallStmt n) {
-            return new CFGCallNode(n.location(), n, successor);
-        }
-
-        @Override
-        public CFGNode visit(IRCJump n) {
-            // IR should be lowered, meaning false branches are fall-throughs.
-            String trueBranch = n.trueLabel();
-            if (this.labelToCFG.containsKey(trueBranch)) {
-                outNode = Optional.of(new CFGIfNode(n.location(),
-                        this.labelToCFG.get(trueBranch),
-                        successor, n.cond()));
-                return this.createStubNode();
-            } else {
-                // Create stub node, and connect target to the stub node.
-                CFGStubNode stub = this.createStubNode();
-                outNode = Optional.of(new CFGIfNode(n.location(),
-                        stub, successor, n.cond()));
-                this.jumpTargetFromCFG.add(new Pair<>(stub, trueBranch));
-                return this.createStubNode();
-            }
-        }
-
-        @Override
-        public CFGNode visit(IRJump n) {
-            if (n.target() instanceof IRName) {
-                String target = ((IRName) n.target()).name();
-                if (this.labelToCFG.containsKey(target)) {
-                    // Make successor the target node.
-                    outNode = Optional.of(this.labelToCFG.get(target));
-                    return this.createStubNode();
-                } else {
-                    // Create a stub node for later computation
-                    CFGStubNode stub = this.createStubNode();
-                    this.jumpTargetFromCFG.add(new Pair<>(stub, target));
-                    outNode = Optional.of(stub);
-                    return this.createStubNode();
-                }
-            } else {
-                throw new UnsupportedOperationException(
-                        "IRJump contains a non-name target.");
-            }
-        }
-
+        /**
+         * May return the stub node.
+         */
         @Override
         public CFGNode visit(IRLabel n) {
             this.labelSets.add(n.name());
@@ -237,6 +221,7 @@ public class BlockCfgConstructor {
 
         @Override
         public CFGNode visit(IRMove n) {
+            this.depth++;
             if (n.target() instanceof IRTemp) {
                 IRTemp temp = (IRTemp) n.target();
                 return new CFGVarAssignNode(n.location(),
@@ -247,6 +232,50 @@ public class BlockCfgConstructor {
             }
         }
 
+        @Override
+        public CFGNode visit(IRCallStmt n) {
+            this.depth++;
+            return new CFGCallNode(n.location(), n, successor);
+        }
+
+        @Override
+        public CFGNode visit(IRCJump n) {
+            String trueBranch = n.trueLabel();
+            if (this.labelToCFG.containsKey(trueBranch)) {
+                outNode = Optional.of(new CFGIfNode(n.location(),
+                        this.labelToCFG.get(trueBranch),
+                        successor, n.cond()));
+                return successor;
+            } else {
+                // Create stub node, and connect target to the stub node.
+                CFGStubNode stub = this.createStubNode();
+                outNode = Optional.of(new CFGIfNode(n.location(),
+                        stub, successor, n.cond()));
+                this.jumpTargetFromCFG.add(new Pair<>(stub, trueBranch));
+                return successor;
+            }
+        }
+
+        @Override
+        public CFGNode visit(IRJump n) {
+            if (n.target() instanceof IRName) {
+                String target = ((IRName) n.target()).name();
+                if (this.labelToCFG.containsKey(target)) {
+                    // Make successor the target node.
+                    outNode = Optional.of(this.labelToCFG.get(target));
+                    return successor;
+                } else {
+                    // Create a stub node for later computation
+                    CFGStubNode stub = this.createStubNode();
+                    this.jumpTargetFromCFG.add(new Pair<>(stub, target));
+                    outNode = Optional.of(stub);
+                    return successor;
+                }
+            } else {
+                throw new UnsupportedOperationException(
+                        "IRJump contains a non-name target.");
+            }
+        }
 
         @Override
         public CFGNode visit(IRReturn n) {
@@ -309,6 +338,12 @@ public class BlockCfgConstructor {
         public CFGNode visit(IRTemp n) {
             throw new UnsupportedOperationException(
                     "Cannot use IR expressions in this visitor.");
+        }
+
+        @Override
+        public CFGNode visit(IRSeq n) {
+            throw new UnsupportedOperationException(
+                    "Cannot enter the IRSeq visitor.");
         }
 
     }
