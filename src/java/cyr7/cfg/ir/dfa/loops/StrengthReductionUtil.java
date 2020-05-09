@@ -22,7 +22,7 @@ import cyr7.ir.IRUtil;
 import cyr7.ir.nodes.IRCompUnit;
 
 public class StrengthReductionUtil {
-    
+
     public static void main(String[] args) throws Exception {
         File f = new File("tests/resources/testJunk.xi");
         FileReader fr = new FileReader(f);
@@ -34,20 +34,20 @@ public class StrengthReductionUtil {
             null,
             OptConfig.none(),
             new DefaultIdGenerator());
-        Map<String, CFGNode> cfgResult = CFGConstructor.constructCFG(lowered);
-        CFGStartNode start = (CFGStartNode) cfgResult.get("_Imain_paai");
-        
-        DfaResult<Set<CFGNode>> result = 
+        Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
+        CFGStartNode start = cfgResult.get("_Imain_paai");
+
+        DfaResult<Set<CFGNode>> result =
                 WorklistAnalysis.analyze(start, DominatorAnalysis.INSTANCE);
 
         Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
         runIVAnalysis(cleanedDominators);
     }
-    
+
     // Returns head of loop mapped to IV analysis for each node in the loop
     public static Map<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> runIVAnalysis(
             Map<CFGNode, Set<CFGNode>> dominators) {
-        
+
         Map<CFGNode, Map<CFGNode, Map<String, InductionVariable>>> loopIVAnalysis = new HashMap<>();
         for(Map.Entry<CFGNode, Set<CFGNode>> pair: dominators.entrySet()) {
             CFGNode node = pair.getKey();
@@ -59,7 +59,7 @@ public class StrengthReductionUtil {
                     //System.out.println(reachable);
                     BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
                     out.accept(bv);
-                    DerivedInductionVariableAnalysis inductionAnalysis = 
+                    DerivedInductionVariableAnalysis inductionAnalysis =
                             new DerivedInductionVariableAnalysis(bv.inductionVars, out);
                     var result = WorklistAnalysis.analyzeSubsection(out, reachable, inductionAnalysis).out();
                     //System.out.println(result);
@@ -69,7 +69,7 @@ public class StrengthReductionUtil {
         }
         return loopIVAnalysis;
     }
-    
+
     // Precondition: tail is dominated by head.
     public static Set<CFGNode> backwardsSearch(CFGNode tail, CFGNode head) {
         Set<CFGNode> reachable = new HashSet<CFGNode>();
@@ -87,5 +87,5 @@ public class StrengthReductionUtil {
         reachable.add(head);
         return reachable;
     }
-    
+
 }
