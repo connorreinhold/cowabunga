@@ -280,7 +280,7 @@ public class BlockCfgConstructor {
         @Override
         public CFGNode visit(IRReturn n) {
             outNode = Optional.of(new CFGReturnNode(n.location()));
-            return this.createStubNode();
+            return successor;
         }
 
         @Override
