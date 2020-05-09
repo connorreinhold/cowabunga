@@ -1,17 +1,14 @@
 package cyr7.cfg.ir.dfa.loops;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import cyr7.cfg.ir.dfa.ForwardDataflowAnalysis;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
 import cyr7.cfg.ir.dfa.loops.inductionvars.DefinedInductionVariable;
-import cyr7.cfg.ir.dfa.loops.DominatorAnalysis.InfiniteSet;
 import cyr7.cfg.ir.dfa.loops.inductionvars.NotInductionVariable;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
@@ -22,12 +19,8 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRConst;
-import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.util.Sets;
-import cyr7.x86.asm.ASMArg;
-import cyr7.x86.asm.ASMTempArg;
 import cyr7.x86.pattern.BiPatternBuilder;
 /**
  * This class is used for determining all possible induction variables and their relationships 
@@ -163,12 +156,16 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                     .instOf(IRConst.class)
                     .right()
                     .instOf(IRTemp.class)
+                    .and(temp -> updatedMap.containsKey(temp.name()) 
+                            && updatedMap.get(temp.name()) instanceof DefinedInductionVariable)
                     .finish()
                     .enableCommutes();
                 
                 var tempMinusConst = BiPatternBuilder
                         .left()
                         .instOf(IRTemp.class)
+                        .and(temp -> updatedMap.containsKey(temp.name()) 
+                                && updatedMap.get(temp.name()) instanceof DefinedInductionVariable)
                         .right()
                         .instOf(IRConst.class)
                         .finish();
@@ -177,32 +174,26 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                     // a = i * c
                     long constant = constTempCommute.leftObj().value();
                     String referenced = constTempCommute.rightObj().name();
-                    if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
-                        newIV = new DefinedInductionVariable(
-                                updatedMap.get(referenced).basicRef(),
-                                updatedMap.get(referenced).getFactor()*constant,
-                                updatedMap.get(referenced).getOffset()*constant);
-                    }
+                    newIV = new DefinedInductionVariable(
+                        updatedMap.get(referenced).basicRef(),
+                        updatedMap.get(referenced).getFactor()*constant,
+                        updatedMap.get(referenced).getOffset()*constant);
                 } else if(expr.opType() == OpType.ADD && constTempCommute.matches(new Object[]{expr.left(), expr.right()})) {
                      // a = i + c
                     long constant = constTempCommute.leftObj().value();
                     String referenced = constTempCommute.rightObj().name();
-                    if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
-                        newIV = new DefinedInductionVariable(
-                                updatedMap.get(referenced).basicRef(),
-                                updatedMap.get(referenced).getFactor(),
-                                updatedMap.get(referenced).getOffset()+constant);
-                    }
+                    newIV = new DefinedInductionVariable(
+                        updatedMap.get(referenced).basicRef(),
+                        updatedMap.get(referenced).getFactor(),
+                        updatedMap.get(referenced).getOffset()+constant);
                 } else if (expr.opType() == OpType.SUB && tempMinusConst.matches(new Object[]{expr.left(), expr.right()})) {
                     // a = i - c
                     long constant = tempMinusConst.rightObj().value();
                     String referenced = tempMinusConst.leftObj().name();
-                    if (updatedMap.containsKey(referenced) && updatedMap.get(referenced) instanceof DefinedInductionVariable) {
-                        newIV = new DefinedInductionVariable(
-                                updatedMap.get(referenced).basicRef(),
-                                updatedMap.get(referenced).getFactor(),
-                                updatedMap.get(referenced).getOffset()-constant);
-                    }
+                    newIV = new DefinedInductionVariable(
+                        updatedMap.get(referenced).basicRef(),
+                        updatedMap.get(referenced).getFactor(),
+                        updatedMap.get(referenced).getOffset()-constant);
                 }
                 if (newIV == null) {
                     updatedMap.put(variable, NotInductionVariable.INSTANCE);

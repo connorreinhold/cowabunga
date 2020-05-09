@@ -6,15 +6,11 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.Stack;
 
-import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.ir.constructor.CFGConstructor;
-import cyr7.cfg.ir.dfa.CCPAnalysis;
 import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
 import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
@@ -71,7 +67,6 @@ public class StrengthReductionUtil {
                 }
             }
         }
-        System.out.println(loopIVAnalysis);
         return loopIVAnalysis;
     }
     
