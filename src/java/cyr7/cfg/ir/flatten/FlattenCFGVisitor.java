@@ -331,6 +331,7 @@ public class FlattenCFGVisitor
 
             Optional<CFGNode> next = Optional.of(n.out().get(0));
             while (next.isPresent()) {
+                System.out.println(next);
                 next = next.get().accept(this);
             }
 

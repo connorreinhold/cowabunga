@@ -244,13 +244,13 @@ public class BlockCfgConstructor {
             if (this.labelToCFG.containsKey(trueBranch)) {
                 outNode = Optional.of(new CFGIfNode(n.location(),
                         this.labelToCFG.get(trueBranch),
-                        successor, n.cond()));
+                        this.nodeOfNextBlock, n.cond()));
                 return successor;
             } else {
                 // Create stub node, and connect target to the stub node.
                 CFGStubNode stub = this.createStubNode();
                 outNode = Optional.of(new CFGIfNode(n.location(),
-                        stub, successor, n.cond()));
+                        stub, this.nodeOfNextBlock, n.cond()));
                 this.jumpTargetFromCFG.add(new Pair<>(stub, trueBranch));
                 return successor;
             }

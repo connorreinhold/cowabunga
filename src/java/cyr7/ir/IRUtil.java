@@ -59,13 +59,6 @@ public class IRUtil {
 //                });
                 final var alternateIR =
                         CFGFlattener.flatten(compUnit.location(), compUnit.name(), alt);
-//                System.out.println('\n');
-//                System.out.println('\n');
-//                System.out.println('\n');
-//                System.out.println(alternateIR);
-//                System.out.println('\n');
-//                System.out.println('\n');
-//                System.out.println('\n');
                 compUnit = alternateIR;
             }
 
