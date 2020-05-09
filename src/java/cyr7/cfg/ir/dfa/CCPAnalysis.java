@@ -413,8 +413,9 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             LatticeElement traversedLattice = in;
             var topNode = n.block;
             while (!(topNode instanceof CFGStubNode)) {
-                traversedLattice = n.acceptForward(this, traversedLattice)
+                traversedLattice = topNode.acceptForward(this, traversedLattice)
                                     .get(0);
+                topNode = topNode.out().get(0);
             }
             return traversedLattice;
         }

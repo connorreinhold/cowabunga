@@ -13,6 +13,7 @@ import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 
 public enum CopyPropagationAnalysis implements
@@ -86,8 +87,12 @@ public enum CopyPropagationAnalysis implements
             @Override
             public CopyPropLattice transfer(CFGBlockNode n,
                     CopyPropLattice in) {
-                // TODO Auto-generated method stub
-                return null;
+                var topNode = n.block;
+                while (!(topNode instanceof CFGStubNode)) {
+                    in = topNode.acceptForward(this, in).get(0);
+                    topNode = topNode.out().get(0);
+                }
+                return in;
             }
         };
     }
