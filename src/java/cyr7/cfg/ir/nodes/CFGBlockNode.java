@@ -23,6 +23,30 @@ public class CFGBlockNode extends CFGNode {
     private Set<String> killSet;
     private Map<String, String> genSet;
 
+    private void blockRepOk() {
+        var topNode = block;
+        var previous = block;
+        while (true) {
+
+            assert !(topNode instanceof CFGStubNode);
+            assert !(topNode instanceof CFGIfNode);
+            assert !(topNode instanceof CFGSelfLoopNode);
+            assert !(topNode instanceof CFGBlockNode);
+            assert !(topNode instanceof CFGStartNode);
+            assert !(topNode instanceof CFGReturnNode);
+
+            if (topNode.in().size() != 0) {
+                assert topNode.in().size() == 1;
+                assert topNode.in().get(0) == previous;
+            }
+            assert topNode.out().size() == 1;
+            previous = topNode;
+            topNode = topNode.out().get(0);
+            if (topNode instanceof CFGStubNode)
+                break;
+        }
+    }
+
     /**
      * A block of CFG nodes, where for all nodes in {@code block}, all outgoing
      * and incoming point to nodes within {@code block}. Additionally,
@@ -39,6 +63,7 @@ public class CFGBlockNode extends CFGNode {
         this.refreshDfaSets();
 
         repOk();
+        blockRepOk();
     }
 
     @Override

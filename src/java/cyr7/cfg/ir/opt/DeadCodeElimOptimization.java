@@ -153,13 +153,13 @@ public class DeadCodeElimOptimization {
             private final Deque<CFGNode> ordering;
 
             public CFGBlockDeadCodeVisitor(Set<String> defined, CFGBlockNode node) {
-                this.defined = defined;
+                this.defined = new HashSet<>(defined);
                 this.firstNode = node.block;
                 this.ordering = new ArrayDeque<>();
 
                 var topNode = node.block;
                 while (!(topNode instanceof CFGStubNode)) {
-                    this.ordering.addFirst(node);
+                    this.ordering.addFirst(topNode);
                     System.out.println(topNode);
                     topNode = topNode.out().get(0);
                 }

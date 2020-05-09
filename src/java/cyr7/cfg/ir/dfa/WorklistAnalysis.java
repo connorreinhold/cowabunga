@@ -99,7 +99,7 @@ public final class WorklistAnalysis {
                     worklist.addAll(node.in());
                 }
             }
-            System.out.println("Backward Analysis work: " + work);
+//            System.out.println("Backward Analysis work: " + work);
             return out;
         }
 

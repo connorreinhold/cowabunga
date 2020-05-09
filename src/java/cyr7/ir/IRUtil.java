@@ -54,9 +54,19 @@ public class IRUtil {
                     var optimizedCfg = alt.get(functionName);
 //                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
 //                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-                    alt.put(functionName, optimizedCfg);
+//                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+
+//                    alt.put(functionName, optimizedCfg);
                 });
+                final var alternateIR =
+                        CFGFlattener.flatten(compUnit.location(), compUnit.name(), alt);
+                System.out.println('\n');
+                System.out.println('\n');
+                System.out.println('\n');
+//                System.out.println(alternateIR);
+                System.out.println('\n');
+                System.out.println('\n');
+                System.out.println('\n');
             }
 
             compUnit = TraceOptimizer.optimize(compUnit, generator);

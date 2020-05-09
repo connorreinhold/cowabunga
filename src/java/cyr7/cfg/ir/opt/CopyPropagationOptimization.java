@@ -158,7 +158,7 @@ public class CopyPropagationOptimization {
             private final CFGNode topNode;
 
             public CFGBlockVarReplacementVisitor(Map<String, String> copies, CFGBlockNode node) {
-                this.copies = copies;
+                this.copies = new HashMap<>(copies);
                 this.topNode = node.block;
             }
 
