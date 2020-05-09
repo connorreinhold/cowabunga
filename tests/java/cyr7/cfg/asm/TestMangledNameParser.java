@@ -4,10 +4,13 @@ import cyr7.cfg.asm.reg.MangledNameParser;
 import cyr7.semantics.types.ArrayType;
 import cyr7.semantics.types.ExpandedType;
 import cyr7.semantics.types.FunctionType;
+import cyr7.semantics.types.OrdinaryType;
 import cyr7.semantics.types.PrimitiveType;
+import cyr7.x86.asm.ASMReg;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -111,6 +114,25 @@ public class TestMangledNameParser {
                     new ArrayType(PrimitiveType.intDefault)
                 ))),
             MangledNameParser.parseFunctionType("Itesting_t2iaii").get());
+    }
+
+    @Test
+    void testSumGeometric() {
+        assertEquals(
+            new FunctionType(new ExpandedType(List.of(
+                PrimitiveType.intDefault,
+                PrimitiveType.intDefault,
+                PrimitiveType.intDefault)),
+                ExpandedType.intType),
+            MangledNameParser.parseFunctionType("_IsumGeometric_iiii").get());
+
+        assertEquals(
+            Set.of(ASMReg.RDI, ASMReg.RSI, ASMReg.RDX),
+            MangledNameParser.argRegisters("_IsumGeometric_iiii"));
+
+        assertEquals(
+            Set.of(ASMReg.RAX),
+            MangledNameParser.returnRegisters("_IsumGeometric_iiii"));
     }
 
 }
