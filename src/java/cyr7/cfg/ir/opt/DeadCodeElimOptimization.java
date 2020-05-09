@@ -152,6 +152,10 @@ public class DeadCodeElimOptimization {
             private final CFGNode firstNode;
             private final Deque<CFGNode> ordering;
 
+            private boolean isAReturn(String n) {
+                return n.startsWith(Configuration.ABSTRACT_RET_PREFIX);
+            }
+
             public CFGBlockDeadCodeVisitor(Set<String> defined, CFGBlockNode node) {
                 this.defined = new HashSet<>(defined);
                 this.firstNode = node.block;
@@ -185,7 +189,8 @@ public class DeadCodeElimOptimization {
 
             @Override
             public CFGNode visit(CFGVarAssignNode n) {
-                if (!defined.contains(n.variable)) {
+                if (!this.isAReturn(n.variable)
+                        && !defined.contains(n.variable)) {
                     // Remove this node
                     for (CFGNode incoming: n.in()) {
                         incoming.replaceOutEdge(n, n.outNode());
