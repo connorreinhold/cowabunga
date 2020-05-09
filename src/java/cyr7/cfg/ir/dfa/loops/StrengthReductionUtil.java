@@ -67,6 +67,7 @@ public class StrengthReductionUtil {
                 }
             }
         }
+        System.out.println(loopIVAnalysis);
         return loopIVAnalysis;
     }
     

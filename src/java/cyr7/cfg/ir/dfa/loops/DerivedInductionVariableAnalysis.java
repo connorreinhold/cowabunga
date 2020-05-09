@@ -169,6 +169,35 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                         .right()
                         .instOf(IRConst.class)
                         .finish();
+                
+                var constPlusTempTimesConst = BiPatternBuilder
+                        .left()
+                        .instOf(IRConst.class)
+                        .right()
+                        .instOf(IRBinOp.class)
+                        .and(binOp -> binOp.opType() == OpType.MUL)
+                        .and(x -> constTempCommute.matches(new Object[] { x.left(), x.right() }))
+                        .finish()
+                        .enableCommutes();
+                
+                var constMinusTempTimesConst = BiPatternBuilder
+                        .left()
+                        .instOf(IRConst.class)
+                        .right()
+                        .instOf(IRBinOp.class)
+                        .and(binOp -> binOp.opType() == OpType.MUL)
+                        .and(x -> constTempCommute.matches(new Object[] { x.left(), x.right() }))
+                        .finish();
+                
+                var tempTimesConstMinusConst = BiPatternBuilder
+                        .left()
+                        .instOf(IRBinOp.class)
+                        .and(binOp -> binOp.opType() == OpType.MUL)
+                        .and(x -> constTempCommute.matches(new Object[] { x.left(), x.right() }))
+                        .right()
+                        .instOf(IRConst.class)
+                        .finish();
+                
                 InductionVariable newIV = null;
                 if (expr.opType() == OpType.MUL && constTempCommute.matches(new Object[]{expr.left(), expr.right()})) {
                     // a = i * c
@@ -194,6 +223,36 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                         updatedMap.get(referenced).basicRef(),
                         updatedMap.get(referenced).getFactor(),
                         updatedMap.get(referenced).getOffset()-constant);
+                } else if (expr.opType() == OpType.ADD 
+                        && constPlusTempTimesConst.matches(new Object[] {expr.left(), expr.right()})) {
+                    // a = ci + d
+                    long offset = constPlusTempTimesConst.leftObj().value();
+                    long factor = constTempCommute.leftObj().value();
+                    String referenced = constTempCommute.rightObj().name();
+                    newIV = new DefinedInductionVariable(
+                        updatedMap.get(referenced).basicRef(),
+                        updatedMap.get(referenced).getFactor()*factor,
+                        updatedMap.get(referenced).getOffset()*factor+offset);
+                } else if (expr.opType() == OpType.SUB
+                        && constMinusTempTimesConst.matches(new Object[] {expr.left(), expr.right()})) {
+                    // a = d - ci
+                    long offset = constMinusTempTimesConst.leftObj().value();
+                    long factor = -constTempCommute.leftObj().value();
+                    String referenced = constTempCommute.rightObj().name();
+                    newIV = new DefinedInductionVariable(
+                        updatedMap.get(referenced).basicRef(),
+                        updatedMap.get(referenced).getFactor()*factor,
+                        updatedMap.get(referenced).getOffset()*factor+offset);
+                } else if (expr.opType() == OpType.SUB
+                        && tempTimesConstMinusConst.matches(new Object[] {expr.left(), expr.right()})) {
+                     // a = ci - d
+                    long offset = -tempTimesConstMinusConst.rightObj().value();
+                    long factor = constTempCommute.leftObj().value();
+                    String referenced = constTempCommute.rightObj().name();
+                    newIV = new DefinedInductionVariable(
+                        updatedMap.get(referenced).basicRef(),
+                        updatedMap.get(referenced).getFactor()*factor,
+                        updatedMap.get(referenced).getOffset()*factor+offset);
                 }
                 if (newIV == null) {
                     updatedMap.put(variable, NotInductionVariable.INSTANCE);
