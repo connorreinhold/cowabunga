@@ -1,8 +1,6 @@
 package cyr7.cfg.ir.dfa.loops;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
@@ -17,10 +15,9 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.ir.nodes.IRConst;
-import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.x86.pattern.BiPatternBuilder;
 
 public class BasicInductionVariableVisitor
         implements IrCFGVisitor<Optional<Void>> {
@@ -68,7 +65,7 @@ public class BasicInductionVariableVisitor
                 || !reachable.contains(n)) {
             return Optional.empty();
         }
-        
+
         var tempPlusConst = BiPatternBuilder
                 .left()
                 .instOf(IRTemp.class)
@@ -77,7 +74,7 @@ public class BasicInductionVariableVisitor
                 .instOf(IRConst.class)
                 .finish()
                 .enableCommutes();
-        
+
         var tempMinusConst = BiPatternBuilder
                 .left()
                 .instOf(IRTemp.class)
@@ -88,7 +85,7 @@ public class BasicInductionVariableVisitor
 
         if (n.value instanceof IRBinOp) {
             IRBinOp binOp = (IRBinOp) n.value;
-            if (binOp.opType() == OpType.ADD && 
+            if (binOp.opType() == OpType.ADD &&
                     tempPlusConst.matches(new Object[]{binOp.left(), binOp.right()})) {
                 inductionVars.add(n.variable);
             } else if (binOp.opType() == OpType.SUB &&
@@ -100,12 +97,12 @@ public class BasicInductionVariableVisitor
         } else {
             invalidVars.add(n.variable);
         }
-        
+
         visited.add(n);
         n.out().get(0).accept(this);
         return Optional.empty();
     }
-    
+
     @Override
     public Optional<Void> visit(CFGMemAssignNode n) {
         if (visited.contains(n) || !reachable.contains(n)) {
