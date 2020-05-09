@@ -24,6 +24,7 @@ public class CFGBlockNode extends CFGNode {
     private Map<String, String> genSet;
 
     private void blockRepOk() {
+        final var defined = new HashSet<String>();
         var topNode = block;
         var previous = block;
         while (true) {
@@ -33,6 +34,15 @@ public class CFGBlockNode extends CFGNode {
             assert !(topNode instanceof CFGBlockNode);
             assert !(topNode instanceof CFGStartNode);
             assert !(topNode instanceof CFGReturnNode);
+            if (topNode instanceof CFGVarAssignNode) {
+                assert !defined.contains(((CFGVarAssignNode)topNode).variable);
+                defined.add(((CFGVarAssignNode)topNode).variable);
+            } else if (topNode instanceof CFGCallNode) {
+                final var checkNode = (CFGCallNode)topNode;
+                assert !defined.stream().anyMatch(def ->
+                            !def.equals("_") && (checkNode).call.collectors().contains(def));
+                defined.addAll(checkNode.call.collectors());
+            }
 
             if (topNode.in().size() != 0) {
                 assert topNode.in().size() == 1;

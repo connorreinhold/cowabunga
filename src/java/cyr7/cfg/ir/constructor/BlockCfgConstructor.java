@@ -46,6 +46,8 @@ import polyglot.util.Pair;
 
 public class BlockCfgConstructor {
 
+    private BlockCfgConstructor() {}
+
     public static CFGStartNode construct(List<List<BasicBlock>> blocks) {
         final Map<String, CFGNode> labelToCFG = new HashMap<>();
         final Queue<Pair<CFGStubNode, String>> jumpTargetFromCFG = new ArrayDeque<>();
@@ -138,7 +140,9 @@ public class BlockCfgConstructor {
 
         private CFGNode successor;
         private CFGNode nodeOfNextBlock;
+        private Set<String> variablesDefined;
         private Set<String> labelSets;
+        private CFGStubNode finalStub;
 
         /**
          * Number of linear CFG nodes.
@@ -176,11 +180,12 @@ public class BlockCfgConstructor {
             this.depth = 0;
             this.labelToCFG = labelToCFG;
             this.jumpTargetFromCFG = jumpTargetFromCFG;
+            this.variablesDefined = new HashSet<>();
             this.nodeOfNextBlock = successor.map(s -> s)
                                 .orElse(new CFGReturnNode(new Location(-1, -1)));
 
             final var stmtArray = new ArrayList<>(stmts);
-            final var finalStub = this.createStubNode();
+            this.finalStub = this.createStubNode();
             this.successor = finalStub;
             for (int i = stmtArray.size() - 1; i >= 0; i--) {
                 var stmt = stmtArray.get(i);
@@ -224,8 +229,63 @@ public class BlockCfgConstructor {
             this.depth++;
             if (n.target() instanceof IRTemp) {
                 IRTemp temp = (IRTemp) n.target();
-                return new CFGVarAssignNode(n.location(),
+                if (this.variablesDefined.contains(temp.name())) {
+                    if (this.successor == finalStub) {
+                        throw new AssertionError("This is not possible. No other variable"
+                                + " assign nodes have been traversed in this block.");
+                    } else if (this.depth == 2 && this.outNode.isEmpty()) {
+                        // There is one definition node only, i.e. the successor.
+                        this.successor.replaceOutEdge(finalStub, this.nodeOfNextBlock);
+                        this.nodeOfNextBlock = this.successor;
+                        this.outNode = Optional.empty();
+                        this.finalStub = this.createStubNode();
+                        this.depth = 1;
+                        this.variablesDefined.clear();
+                        this.variablesDefined.add(temp.name());
+                        return new CFGVarAssignNode(n.location(),
+                                temp.name(), n.source(), this.finalStub);
+                    } else if (this.depth == 2 && this.outNode.isPresent()) {
+                        // There is a definition and an out node.
+                        this.successor.replaceOutEdge(finalStub, this.outNode.get());
+                        this.nodeOfNextBlock = this.successor;
+                        this.outNode = Optional.empty();
+                        this.finalStub = this.createStubNode();
+                        this.depth = 1;
+                        this.variablesDefined.clear();
+                        this.variablesDefined.add(temp.name());
+                        return new CFGVarAssignNode(n.location(),
+                                temp.name(), n.source(), this.finalStub);
+                    } else if (this.outNode.isEmpty()) {
+                        // Create a block
+                        final var block = new CFGBlockNode(new Location(-1, -1),
+                                                 this.successor,
+                                                 this.nodeOfNextBlock);
+                        this.nodeOfNextBlock = block;
+                        this.outNode = Optional.empty();
+                        this.finalStub = this.createStubNode();
+                        this.depth = 1;
+                        this.variablesDefined.clear();
+                        this.variablesDefined.add(temp.name());
+                        return new CFGVarAssignNode(n.location(),
+                                temp.name(), n.source(), this.finalStub);
+                    } else {
+                        final var block = new CFGBlockNode(new Location(-1, -1),
+                                                this.successor,
+                                                this.outNode.get());
+                        this.nodeOfNextBlock = block;
+                        this.outNode = Optional.empty();
+                        this.finalStub = this.createStubNode();
+                        this.depth = 1;
+                        this.variablesDefined.clear();
+                        this.variablesDefined.add(temp.name());
+                        return new CFGVarAssignNode(n.location(),
+                                temp.name(), n.source(), this.finalStub);
+                    }
+                } else {
+                    this.variablesDefined.add(temp.name());
+                    return new CFGVarAssignNode(n.location(),
                             temp.name(), n.source(), successor);
+                }
             } else {
                 return new CFGMemAssignNode(n.location(),
                             n.target(), n.source(), successor);
@@ -235,7 +295,59 @@ public class BlockCfgConstructor {
         @Override
         public CFGNode visit(IRCallStmt n) {
             this.depth++;
-            return new CFGCallNode(n.location(), n, successor);
+            if (this.variablesDefined.stream().anyMatch(def -> {
+                return n.collectors().contains(def) && !def.equals("_");
+            })) {
+                if (this.successor == finalStub) {
+                    throw new AssertionError("This is not possible. No other variable"
+                            + " assign nodes have been traversed in this block.");
+                } else if (this.depth == 2 && this.outNode.isEmpty()) {
+                    // There is one definition node only, i.e. the successor.
+                    this.successor.replaceOutEdge(finalStub, this.nodeOfNextBlock);
+                    this.nodeOfNextBlock = this.successor;
+                    this.outNode = Optional.empty();
+                    this.finalStub = this.createStubNode();
+                    this.depth = 1;
+                    this.variablesDefined.clear();
+                    this.variablesDefined.addAll(n.collectors());
+                    return new CFGCallNode(n.location(), n, this.finalStub);
+                } else if (this.depth == 2 && this.outNode.isPresent()) {
+                    // There is a definition and an out node.
+                    this.successor.replaceOutEdge(finalStub, this.outNode.get());
+                    this.nodeOfNextBlock = this.successor;
+                    this.outNode = Optional.empty();
+                    this.finalStub = this.createStubNode();
+                    this.depth = 1;
+                    this.variablesDefined.clear();
+                    this.variablesDefined.addAll(n.collectors());
+                    return new CFGCallNode(n.location(), n, this.finalStub);
+                } else if (this.outNode.isEmpty()) {
+                    // Create a block
+                    final var block = new CFGBlockNode(new Location(-1, -1),
+                                             this.successor,
+                                             this.nodeOfNextBlock);
+                    this.nodeOfNextBlock = block;
+                    this.outNode = Optional.empty();
+                    this.finalStub = this.createStubNode();
+                    this.depth = 1;
+                    this.variablesDefined.clear();
+                    this.variablesDefined.addAll(n.collectors());
+                    return new CFGCallNode(n.location(), n, this.finalStub);
+                } else {
+                    final var block = new CFGBlockNode(new Location(-1, -1),
+                            this.successor,
+                            this.outNode.get());
+                    this.nodeOfNextBlock = block;
+                    this.outNode = Optional.empty();
+                    this.finalStub = this.createStubNode();
+                    this.depth = 1;
+                    this.variablesDefined.clear();
+                    this.variablesDefined.addAll(n.collectors());
+                    return new CFGCallNode(n.location(), n, this.finalStub);
+                }
+            } else {
+                return new CFGCallNode(n.location(), n, successor);
+            }
         }
 
         @Override
