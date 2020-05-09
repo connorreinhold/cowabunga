@@ -226,6 +226,8 @@ final class RegisterAllocator {
                 if (Util.isVarToVarMove(instr)) {
                     live.removeAll(entry.getKey().accept(new UsesVisitor(mangledName)));
                 }
+
+                SpecialEdges.addSpecialEdges(instr, graph);
             }
 
             Set<ASMTempRegArg> defs = entry.getKey().accept(new DefsVisitor());
@@ -243,6 +245,7 @@ final class RegisterAllocator {
                     graph.addEdge(l, d);
                 }
             }
+
         }
 
         for (int move = 0; move < functionBody.size(); move++) {
