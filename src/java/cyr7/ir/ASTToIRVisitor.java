@@ -105,11 +105,15 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
                     isInput);
         } else if (t.isTuple()) {
             StringBuffer types = new StringBuffer();
-            t.getTypes()
-             .forEach(type -> types.append(typeIdentifier(new ExpandedType(
-                     type), isInput)));
-            return "t" + t.getTypes()
-                          .size() + types.toString();
+            t.getTypes().forEach(type ->
+                    types.append(typeIdentifier(
+                        new ExpandedType(type),
+                        isInput)));
+            if (isInput) {
+                return types.toString();
+            } else {
+                return "t" + t.getTypes().size() + types.toString();
+            }
         } else {
             throw new IllegalArgumentException("invalid type for function");
         }

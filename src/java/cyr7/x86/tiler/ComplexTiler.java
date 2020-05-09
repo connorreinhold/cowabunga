@@ -240,8 +240,8 @@ public class ComplexTiler extends BasicTiler {
             n.collectors(),
             arguments,
             instructions,
+            generator,
             stack16ByteAligned).generate());
-
 
         possibleTilings.add(super.visit(n));
 

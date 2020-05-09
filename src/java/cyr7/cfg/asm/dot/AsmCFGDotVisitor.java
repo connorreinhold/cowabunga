@@ -45,12 +45,16 @@ public class AsmCFGDotVisitor implements AsmCFGVisitor<Optional<Void>> {
 
     public void addDotInfo(AsmCFGNode n) {
         id++;
-        String label = n.toString() + "[id=" + id+"]";
+        String label = toString(n) + "[id=" + id+"]";
         nodeToLabel.put(n, label);
         nodes.add(n);
         for(AsmCFGNode inc: n.inNodes()) {
             edges.add(new Pair<>(inc, n));
         }
+    }
+
+    protected String toString(AsmCFGNode n) {
+        return n.toString();
     }
 
     @Override

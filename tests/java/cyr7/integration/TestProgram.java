@@ -5,6 +5,7 @@ import cyr7.cli.Optimization;
 import cyr7.cli.OptimizationSetting;
 import cyr7.integration.Run.RunConfiguration;
 import cyr7.x86.ASMUtil.TilerConf;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;

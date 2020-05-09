@@ -1,9 +1,11 @@
 package cyr7.x86.tiler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import cyr7.cli.CLI;
+import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCallStmt;
 import cyr7.x86.ASMConstants;
 import cyr7.x86.asm.ASMAddrExpr.ScaleValues;
@@ -13,6 +15,7 @@ import cyr7.x86.asm.ASMLine;
 import cyr7.x86.asm.ASMLineFactory;
 import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMRegSize;
+import cyr7.x86.asm.ASMTempArg;
 
 public class CallInstructionGenerator {
 
@@ -24,9 +27,12 @@ public class CallInstructionGenerator {
     private final List<String> collectors;
     private final List<ASMArg> arguments;
     private final List<ASMLine> insn;
+    private final IdGenerator generator;
     private final boolean stack16ByteAligned;
 
     private final ASMLineFactory make;
+
+    private final List<String> callerSavedRegsTemp = new ArrayList<>();
 
     public CallInstructionGenerator(
         IRCallStmt n,
@@ -35,6 +41,7 @@ public class CallInstructionGenerator {
         List<String> collectors,
         List<ASMArg> arguments,
         List<ASMLine> insn,
+        IdGenerator generator,
         boolean stack16ByteAligned) {
 
         this.n = n;
@@ -43,6 +50,7 @@ public class CallInstructionGenerator {
         this.collectors = collectors;
         this.arguments = arguments;
         this.insn = insn;
+        this.generator = generator;
         this.stack16ByteAligned = stack16ByteAligned;
 
         this.make = new ASMLineFactory(n);
@@ -55,6 +63,8 @@ public class CallInstructionGenerator {
 
         // push additional arguments onto the stack
         precallMoveArgumentsOntoStack();
+
+        precallSaveCallerSavedRegisters();
 
         if (CLI.assemblyLevelAssertionsEnabled) {
             precallAddAssemblyLevelStackAlignmentCheck();
@@ -75,7 +85,26 @@ public class CallInstructionGenerator {
         // return values that we now need to deallocate
         postcallDeallocateSpaceForAdditionalReturnArguments();
 
+        postcallRestoreCallerSavedRegisters();
+
         return new TilerData(cost, insn, Optional.empty());
+    }
+
+    private void precallSaveCallerSavedRegisters() {
+        for (int i = 0; i < ASMConstants.CALLER_SAVED_REGISTERS.length; i++) {
+            ASMReg reg = ASMConstants.CALLER_SAVED_REGISTERS[i];
+            String temp = generator.newTemp("caller_saved");
+            callerSavedRegsTemp.add(temp);
+            insn.add(make.Mov(arg.temp(temp), reg));
+        }
+    }
+
+    private void postcallRestoreCallerSavedRegisters() {
+        for (int i = 0; i < ASMConstants.CALLER_SAVED_REGISTERS.length; i++) {
+            ASMReg reg = ASMConstants.CALLER_SAVED_REGISTERS[i];
+            String temp = callerSavedRegsTemp.get(i);
+            insn.add(make.Mov(reg, arg.temp(temp)));
+        }
     }
 
     private void precallMoveArgumentsIntoRegisters() {

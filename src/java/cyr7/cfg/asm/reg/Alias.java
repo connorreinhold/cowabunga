@@ -27,4 +27,8 @@ final class Alias {
         }
     }
 
+    public void clearAliases() {
+        alias.clear();
+    }
+
 }
