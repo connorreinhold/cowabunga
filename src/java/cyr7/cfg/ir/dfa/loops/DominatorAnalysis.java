@@ -159,6 +159,14 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
         }
 
         @Override
+        public Set<CFGNode> transfer(CFGBlockNode n, Set<CFGNode> in) {
+            if (in == InfiniteSet.INSTANCE) {
+                return InfiniteSet.INSTANCE;
+            }
+            return Sets.union(in, Set.of(n));
+        }
+
+        @Override
         public Set<CFGNode> transferFalse(CFGIfNode n, Set<CFGNode> in) {
             if (in == InfiniteSet.INSTANCE) {
                 return InfiniteSet.INSTANCE;
@@ -176,11 +184,6 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
             return Set.of(n);
         }
 
-        @Override
-        public Set<CFGNode> transfer(CFGBlockNode n, Set<CFGNode> in) {
-            // TODO Auto-generated method stub
-            return null;
-        }
 
     }
 
