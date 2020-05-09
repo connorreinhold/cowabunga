@@ -16,6 +16,11 @@ public final class ASMTempArg implements ASMTempRegArg {
     }
 
     @Override
+    public ASMRegSize size() {
+        return size;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

@@ -90,9 +90,11 @@ public class ASMLineFactory {
     }
 
     public ASMInstr Mov(ASMArg dest, ASMArg source) {
-        if (dest instanceof ASMReg && ((ASMReg) dest).size() == ASMRegSize.BYTE) {
+        if (dest instanceof ASMTempRegArg
+            && ((ASMTempRegArg) dest).size() == ASMRegSize.BYTE) {
             return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
-        } else if (source instanceof ASMReg && ((ASMReg) source).size() == ASMRegSize.BYTE) {
+        } else if (source instanceof ASMTempRegArg
+            && ((ASMTempRegArg) source).size() == ASMRegSize.BYTE) {
             return new ASMInstr(ASMInstrType.MOV, List.of(dest, source), node);
         } else {
             return new ASMInstr(ASMInstrType.MOVQ, List.of(dest, source), node);
