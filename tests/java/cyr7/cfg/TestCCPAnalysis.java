@@ -28,7 +28,7 @@ public class TestCCPAnalysis {
      * 1:   x = 1
      * 2:   if x < 2
      * 3:       y = 5 + x
-     * else
+     * 4:   else
      * 5:       y = f(x)
      * 6:   z = y * y
      * <p>

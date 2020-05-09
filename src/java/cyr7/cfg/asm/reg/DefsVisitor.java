@@ -62,7 +62,7 @@ final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             // push and pop
             case PUSHQ:
             case POPQ:
-                return Set.of(ASMReg.RSP);
+                return Set.of();
 
             // compare
             case CMPQ:

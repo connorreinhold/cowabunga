@@ -878,6 +878,10 @@ public class CLI {
         }
     }
 
+    public static void enableDebugPrinting() {
+        debugPrintingEnabled = true;
+    }
+
     private static Reader getLibraryReader(String filename) throws IOException {
         Path sourcePath = Paths.get(libRoot.getAbsolutePath(), filename);
         debugPrint("Opening reader to: " + sourcePath);

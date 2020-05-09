@@ -1,5 +1,6 @@
 package cyr7.cfg.asm.reg;
 
+import cyr7.cli.CLI;
 import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
@@ -47,27 +48,27 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
         RegisterAllocator registerAllocator;
         do {
             registerAllocator
-                = new RegisterAllocator(abstractASM, funcDecl.name(), generator, spillAllocator);
+                = new RegisterAllocator(abstractASM, funcDecl.name(), generator);
             registerAllocator.run();
 
-//            System.out.println("Spilled nodes: " + registerAllocator.spilledNodes().stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", ")));
+            CLI.debugPrint("Spilled nodes: " + registerAllocator.spilledNodes().stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", ")));
             if (!registerAllocator.spilledNodes().isEmpty()) {
                 SpillProgramRewriter rewriter = new SpillProgramRewriter(
                     generator,
                     abstractASM,
                     registerAllocator.spilledNodes(),
-                    new SpillMemAllocator());
+                    spillAllocator);
                 rewriter.run();
 
                 abstractASM = rewriter.rewritten();
 
-//                System.out.println("Iterations: " + ++count);
+                CLI.debugPrint("Iterations: " + ++count);
             }
         } while (!registerAllocator.spilledNodes().isEmpty());
 
-//        System.out.println("--- REGISTER ALLOCATED ---");
-//        print(registerAllocator.program());
-//        System.out.println(registerAllocator.coalescedMoves());
+        CLI.debugPrint("--- REGISTER ALLOCATED ---");
+        print(registerAllocator.program());
+        CLI.debugPrint(registerAllocator.coalescedMoves().toString());
 
 //        var keyvalues = registerAllocator.coloring().entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getIntelArg())).collect(Collectors.toList());
 //        for (var keyvalue : keyvalues) {
@@ -75,6 +76,7 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
 //        }
 
         FinalProgramRewriter rewriter = new FinalProgramRewriter(
+            registerAllocator.precolored(),
             registerAllocator.program(),
             registerAllocator.coloring(),
             registerAllocator.registers(),
@@ -94,15 +96,14 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
         lines.addAll(prologue);
         lines.addAll(rewriter.rewritten());
         lines.addAll(epilogue);
-//        System.out.println("--- FINAL PROGRAM ---");
-//        print(lines);
+        CLI.debugPrint("--- FINAL PROGRAM ---");
+        print(lines);
         return lines;
     }
 
     private void print(List<ASMLine> lines) {
         for (int i = 0; i < lines.size(); i++) {
-            System.out.print(String.format("%2d: ", i));
-            System.out.println(lines.get(i).getIntelAssembly());
+            CLI.debugPrint(String.format("%2d: %s", i, lines.get(i).getIntelAssembly()));
         }
         System.out.flush();
     }

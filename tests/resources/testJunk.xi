@@ -1,8 +1,10 @@
 main(args: int[][]) {
-    a: int = 1;
-    b: int = f(a, 2, 3, 4, 5, 6, 7, 8);
-}
-
-f(a: int, b: int, c: int, d: int, e: int, g: int, h: int, i: int): int {
-    return a + 1;
+  x:int = 12
+  a:int = 4
+  while (x < 12) {
+       x = x + 1
+       a = x - 2
+  }
+  x = 2
+  a = 5
 }
