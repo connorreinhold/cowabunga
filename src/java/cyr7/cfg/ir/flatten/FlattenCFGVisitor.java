@@ -391,6 +391,7 @@ public class FlattenCFGVisitor
             CFGNode blockToTraverse = topNode;
             while (!(blockToTraverse instanceof CFGStubNode)) {
                 stmts.add(blockToTraverse.accept(this));
+                blockToTraverse = blockToTraverse.out().get(0);
             }
             return stmts;
         }

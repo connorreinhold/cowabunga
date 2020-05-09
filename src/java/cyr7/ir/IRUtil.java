@@ -4,13 +4,10 @@ import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.StringWriter;
 import java.io.Writer;
-import java.util.Map;
 
 import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
-import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -63,22 +60,23 @@ public class IRUtil {
                 System.out.println('\n');
                 System.out.println('\n');
                 System.out.println('\n');
-//                System.out.println(alternateIR);
+                System.out.println(alternateIR);
                 System.out.println('\n');
                 System.out.println('\n');
                 System.out.println('\n');
+                compUnit = alternateIR;
             }
 
-            compUnit = TraceOptimizer.optimize(compUnit, generator);
-            Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
-            cfg.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = cfg.get(functionName);
-//                optimizedCfg = CCPOptimization.optimize(optimizedCfg);
-//                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-                cfg.put(functionName, optimizedCfg);
-            });
-            compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
+//            compUnit = TraceOptimizer.optimize(compUnit, generator);
+//            Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
+//            cfg.keySet().stream().forEach(functionName -> {
+//                var optimizedCfg = cfg.get(functionName);
+////                optimizedCfg = CCPOptimization.optimize(optimizedCfg);
+////                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+//                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+//                cfg.put(functionName, optimizedCfg);
+//            });
+//            compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         } else {
             compUnit = TraceOptimizer.optimize(compUnit, generator);
