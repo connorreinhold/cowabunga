@@ -8,16 +8,32 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 
 public final class WorklistAnalysis {
 
+    public static <L> DfaResult<L> analyzeSubsection(
+            CFGNode start,
+            Set<CFGNode> reachable,
+            ForwardDataflowAnalysis<L> analysis) {
+        return runAnalysis(start, reachable, analysis);
+    }
+    
     public static <L> DfaResult<L> analyze(
-        CFGStartNode cfg,
-        ForwardDataflowAnalysis<L> analysis) {
-
+            CFGStartNode cfg,
+            ForwardDataflowAnalysis<L> analysis) {
+        
         Set<CFGNode> allNodes = getAllNodes(cfg);
+        return runAnalysis(cfg, allNodes, analysis);
+    }
+    
+    private static <L> DfaResult<L> runAnalysis(
+            CFGNode start,
+            Set<CFGNode> allNodes,
+            ForwardDataflowAnalysis<L> analysis) {
+        
         Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
 
         Map<CFGNode, L> in = new HashMap<>();
@@ -29,19 +45,25 @@ public final class WorklistAnalysis {
             }
             out.put(node, outEdges);
         }
-
         while (!worklist.isEmpty()) {
             CFGNode node = worklist.remove();
-            L inValue = node.in()
-                .stream()
-                .map(n -> out.get(n).get(node))
-                .reduce(analysis::meet)
-                // the set of in-nodes to a node should never be empty
-                // unless it's the start node for a forward analysis or a
-                // return node for a backward analysis
-                .orElse(analysis.topValue());
+            if (!allNodes.contains(node)) {
+                continue;
+            }
+            L inValue;
+            if (node == start) {
+                inValue = analysis.topValue();
+            } else {
+                inValue = node.in()
+                    .stream()
+                    .map(n -> out.get(n).get(node))
+                    .reduce(analysis::meet)
+                    // the set of in-nodes to a node should never be empty
+                    // unless it's the start node for a forward analysis or a
+                    // return node for a backward analysis
+                    .orElse(analysis.topValue());
+            }
             in.put(node, inValue);
-
             List<L> output = node.acceptForward(analysis.transfer(), inValue);
             for (int i = 0; i < node.out().size(); i++) {
                 CFGNode outEdge = node.out().get(i);
@@ -55,6 +77,7 @@ public final class WorklistAnalysis {
 
         return new DfaResult<>(in, out);
     }
+    
 
     public static <L> Map<CFGNode, L> analyze(
             CFGStartNode cfg,
@@ -96,7 +119,6 @@ public final class WorklistAnalysis {
             }
             return out;
         }
-
 
     private static Set<CFGNode> getAllNodes(CFGStartNode cfg) {
         Set<CFGNode> nodes = new HashSet<>();
