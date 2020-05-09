@@ -36,14 +36,17 @@ enum ArgUsesVisitor implements ASMArgVisitor<Set<ASMTempRegArg>> {
         ASMAddrExpr addr = arg.address;
         // temps/regs used by addr is
         // base (if present) union index (if present)
-        return Sets.union(
+        return Sets.difference(Sets.union(
             addr.base.map(Set::of).orElse(Set.of()),
             addr.index.map(Set::of).orElse(Set.of())
-        );
+        ), Set.of(ASMReg.RBP, ASMReg.RSP));
     }
 
     @Override
     public Set<ASMTempRegArg> accept(ASMReg arg) {
+        if (arg == ASMReg.RBP || arg == ASMReg.RSP) {
+            return Set.of();
+        }
         return Set.of(arg);
     }
 

@@ -3,13 +3,14 @@ package cyr7.cfg.asm.reg;
 import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.asm.constructor.AsmCFGConstructor;
 import cyr7.cfg.asm.dfa.WorklistAnalysis;
+import cyr7.cfg.asm.dot.AsmCFGAnalysisDotVisitor;
 import cyr7.cfg.asm.nodes.AsmCFGNode;
 import cyr7.cfg.asm.nodes.AsmCFGSourceNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
+import cyr7.cfg.ir.CFGUtil;
+import cyr7.cli.CLI;
 import cyr7.ir.IdGenerator;
-import cyr7.util.Pair;
 import cyr7.util.Sets;
-import cyr7.x86.ASMConstants;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMInstr;
 import cyr7.x86.asm.ASMLine;
@@ -20,24 +21,21 @@ import cyr7.x86.asm.ASMTempRegArg;
 import cyr7.x86.visitor.TempVisitor;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 final class RegisterAllocator {
 
-    public void log(String log) {
-        System.out.println(log);
-    }
-
-    public static final ASMReg[] DEFAULT_AVAILABLE_REGISTERS = {
+    public static final ASMReg[] REGISTERS = {
         ASMReg.RAX,
         ASMReg.RCX,
         ASMReg.RDX,
@@ -51,44 +49,39 @@ final class RegisterAllocator {
         ASMReg.R12,
         ASMReg.R13,
         ASMReg.R14,
-        ASMReg.R15,
+        ASMReg.R15
     };
 
-    private final ASMReg[] availableRegisters;
-    private final Set<ASMTempRegArg> precolored;
-    private final int K;
-    private final IdGenerator generator;
+    public static final Set<ASMTempRegArg> PRECOLORED = Set.of(REGISTERS);
+
+    public static final int K = PRECOLORED.size();
 
     private ArrayList<ASMLine> functionBody;
     private final String mangledName;
+    private final IdGenerator generator;
 
     public RegisterAllocator(
         List<ASMLine> functionBody,
         String mangledName,
-        ASMReg[] availableRegisters,
         IdGenerator generator) {
 
-        ArrayList<ASMLine> augmentedFunctionBody =
-            new ArrayList<>(functionBody);
-        augmentedFunctionBody.add(ASMLineFactory.instance.Ret());
-
-        this.availableRegisters = availableRegisters;
-        this.precolored = Set.of(availableRegisters);
-        this.K = availableRegisters.length;
         this.generator = generator;
-        this.functionBody = augmentedFunctionBody;
+        this.functionBody = new ArrayList<>(functionBody);
+        this.functionBody.add(ASMLineFactory.instance.Ret());
         this.mangledName = mangledName;
 
-        init();
+        worklists.initial.addAll(uniqueTemps(functionBody));
     }
 
-    public RegisterAllocator(
-        List<ASMLine> functionBody,
-        String mangledName,
-        IdGenerator generator) {
-
-        this(functionBody, mangledName, DEFAULT_AVAILABLE_REGISTERS, generator);
+    public List<ASMLine> program() {
+        return functionBody;
     }
+
+    public int numSpilledTemps() {
+        return spillAllocator.allocatedTemps();
+    }
+
+    private final SpillMemAllocator spillAllocator = new SpillMemAllocator();
 
     private final Worklists worklists = new Worklists();
 
@@ -105,98 +98,89 @@ final class RegisterAllocator {
     private HashMap<ASMTempRegArg, Integer> coloring;
     private CoalescingHeuristic coalescingHeuristic;
 
-    // getters
-
-    public HashMap<ASMTempRegArg, Integer> coloring() {
-        return coloring;
-    }
-
-    public ASMReg[] registers() {
-        return availableRegisters;
-    }
-
-    public ArrayList<ASMLine> program() {
-        return functionBody;
-    }
-
-    public HashSet<Integer> coalescedMoves() {
-        return moves.coalesced;
-    }
-
-    public Alias alias() {
-        return alias;
-    }
-
-    public HashSet<ASMTempRegArg> spilledNodes() {
-        return spilledNodes;
-    }
-
-    public Set<ASMTempRegArg> precolored() {
-        return precolored;
-    }
-
     // run
 
-    public void run() {
-        build();
-        makeWorklist();
-
-        do {
-//            System.out.println("Simplify: " + worklists.simplify.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(",")));
-//            System.out.println("Freeze: " + worklists.freeze.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(",")));
-//            System.out.println("Spill: " + worklists.spill.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(",")));
-
-//            Set<ASMTempRegArg> worklistUnions = Sets.union(
-//                Sets.union(precolored, worklists.simplify),
-//                Sets.union(worklists.freeze, worklists.spill));
-//            for (ASMTempRegArg node : worklists.simplify) {
-//                assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
-//                assert graph.degree(node) < K;
-//                assert Sets.intersection(moves.getMoves(node),
-//                    Sets.union(moves.active, worklists.moves)).isEmpty();
-//            }
-//            for (ASMTempRegArg node : worklists.freeze) {
-//                assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
-//                assert graph.degree(node) < K;
-//                assert !Sets.intersection(moves.getMoves(node),
-//                    Sets.union(moves.active, worklists.moves)).isEmpty();
-//            }
-//            for (ASMTempRegArg node : worklists.spill) {
-//                assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
-//                assert graph.degree(node) >= K;
-//            }
-
-            if (!worklists.simplify.isEmpty()) {
-                simplify();
-            } else if (!worklists.moves.isEmpty()) {
-                coalesce();
-            } else if (!worklists.freeze.isEmpty()) {
-                freeze();
-            } else if (!worklists.spill.isEmpty()) {
-                selectSpill();
-            }
-        } while (!worklists.simplify.isEmpty()
-            || !worklists.moves.isEmpty()
-            || !worklists.freeze.isEmpty()
-            || !worklists.spill.isEmpty());
-
-        assignColors();
-    }
-
-    private void init() {
-        coloring = new HashMap<>(K);
-        for (int i = 0; i < availableRegisters.length; i++) {
-            coloring.put(availableRegisters[i], i);
-        }
-
-        worklists.initial.addAll(uniqueTemps(functionBody));
-    }
-
-    private List<ASMTempArg> uniqueTemps(List<ASMLine> lines) {
+    private static List<ASMTempArg> uniqueTemps(List<ASMLine> lines) {
         Set<ASMTempArg> temps = new HashSet<>();
         var tempVisitor = new TempVisitor();
         lines.forEach(l -> temps.addAll(l.accept(tempVisitor)));
         return new ArrayList<>(temps);
+    }
+
+    public void run() {
+        int iterations = 0;
+        boolean rerun;
+        do {
+            CLI.debugPrint("Iterations: " + iterations++);
+            CLI.lazyDebugPrint(() -> {
+                for (int i = 0; i < functionBody.size(); i++) {
+                    CLI.debugPrint(String.format("%3d: %s", i, functionBody.get(i).getIntelAssembly()));
+                }
+                System.err.flush();
+            });
+
+            if (iterations >= 50) {
+                throw new RuntimeException("Register allocation exceeded iterations");
+            }
+
+            coloring = new HashMap<>(K);
+            for (int i = 0; i < REGISTERS.length; i++) {
+                coloring.put(REGISTERS[i], i);
+            }
+
+            assert worklists.simplify.isEmpty();
+            assert worklists.freeze.isEmpty();
+            assert spilledNodes.isEmpty();
+            assert coalescedNodes.isEmpty();
+            assert coloredNodes.isEmpty();
+            assert selectStack.isEmpty();
+
+            moves.coalesced.clear();
+            moves.constrained.clear();
+            moves.frozen.clear();
+            worklists.moves.clear();
+            moves.active.clear();
+            moves.clearMoveList();
+            alias.clearAliases();
+
+            build();
+            makeWorklist();
+
+            do {
+                if (!worklists.simplify.isEmpty()) {
+                    simplify();
+                } else if (!worklists.moves.isEmpty()) {
+                    coalesce();
+                } else if (!worklists.freeze.isEmpty()) {
+                    freeze();
+                } else if (!worklists.spill.isEmpty()) {
+                    selectSpill();
+                }
+            } while (!worklists.simplify.isEmpty()
+                || !worklists.moves.isEmpty()
+                || !worklists.freeze.isEmpty()
+                || !worklists.spill.isEmpty());
+
+            assignColors();
+
+            if (!spilledNodes.isEmpty()) {
+                rerun = true;
+
+                rewriteProgram();
+            } else {
+                rerun = false;
+
+                FinalProgramRewriter rewriter = new FinalProgramRewriter(
+                    PRECOLORED,
+                    functionBody,
+                    coloring,
+                    REGISTERS,
+                    moves.coalesced,
+                    alias);
+                rewriter.run();
+                functionBody = rewriter.rewritten();
+            }
+        } while (rerun);
     }
 
     // build
@@ -204,12 +188,10 @@ final class RegisterAllocator {
     private void build() {
         AsmCFGConstructor constructor = new AsmCFGConstructor(functionBody);
         AsmCFGStartNode cfg = constructor.constructAsmCFG();
-        Map<AsmCFGNode, Set<ASMTempRegArg>> liveInVariables
-            = WorklistAnalysis.analyze(
-            cfg,
-            new LiveVariableAnalysis(mangledName));
+        Map<AsmCFGNode, Set<? extends ASMTempRegArg>> liveInVariables
+            = WorklistAnalysis.analyze(cfg, new LiveVariableAnalysis(mangledName));
 
-        Map<AsmCFGNode, Set<ASMTempRegArg>> liveOutVariables = new HashMap<>();
+        Map<AsmCFGNode, Set<? extends ASMTempRegArg>> liveOutVariables = new HashMap<>();
         for (var entry : liveInVariables.entrySet()) {
             List<AsmCFGNode> prevs = entry.getKey().inNodes();
             for (AsmCFGNode prev : prevs) {
@@ -223,59 +205,68 @@ final class RegisterAllocator {
             }
         }
 
-        graph = new InterferenceGraph(precolored, selectStack, coalescedNodes);
-        for (var keyValue : liveOutVariables.entrySet()) {
-            HashSet<ASMTempRegArg> live = new HashSet<>(keyValue.getValue());
-            live.removeAll(Set.of(ASMReg.RSP, ASMReg.RBP));
+        CLI.lazyDebugPrint(() -> {
+            AsmCFGUtil.debugOutputDotForAnalysis(cfg, node -> {
+                if (liveOutVariables.containsKey(node)) {
+                    return liveOutVariables.get(node).stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
+                } else {
+                    return "None";
+                }
+            });
+        });
 
-            if (keyValue.getKey() instanceof AsmCFGSourceNode) {
-                ASMInstr instr =
-                    ((AsmCFGSourceNode) keyValue.getKey()).sourceInstr();
-                if (Util.isMoveInstruction(instr)) {
-                    live.removeAll(keyValue.getKey().accept(new UsesVisitor(Set.of(ASMConstants.RETURN_REGISTERS))));
+        graph = new InterferenceGraph(PRECOLORED, selectStack, coalescedNodes);
+        for (var entry : liveOutVariables.entrySet()) {
+            HashSet<ASMTempRegArg> live = new HashSet<>(entry.getValue());
+            live.remove(ASMReg.RSP);
+            live.remove(ASMReg.RBP);
+
+            if (entry.getKey() instanceof AsmCFGSourceNode) {
+                ASMInstr instr = ((AsmCFGSourceNode) entry.getKey()).sourceInstr();
+                if (Util.isVarToVarMove(instr)) {
+                    live.removeAll(entry.getKey().accept(new UsesVisitor(mangledName)));
                 }
             }
 
-            Set<ASMTempRegArg> defs =
-                keyValue.getKey().accept(new DefsVisitor());
+            Set<ASMTempRegArg> defs = entry.getKey().accept(new DefsVisitor());
             live.addAll(defs);
             for (ASMTempRegArg d : defs) {
+                if (d instanceof ASMReg && !PRECOLORED.contains(d)) {
+                    continue;
+                }
+
                 for (ASMTempRegArg l : live) {
+                    if (l instanceof ASMReg && !PRECOLORED.contains(l)) {
+                        continue;
+                    }
+
                     graph.addEdge(l, d);
                 }
             }
         }
 
-        for (int move = functionBody.size() - 1; move >= 0; move--) {
+        for (int move = 0; move < functionBody.size(); move++) {
             if (functionBody.get(move) instanceof ASMInstr
-                && Util.isMoveInstruction((ASMInstr) functionBody.get(move))) {
+                && Util.isVarToVarMove((ASMInstr) functionBody.get(move))) {
 
                 ASMInstr moveInstr = (ASMInstr) functionBody.get(move);
-                ASMArg arg1 = moveInstr.args.get(0);
-                ASMArg arg2 = moveInstr.args.get(1);
-                if (arg1 instanceof ASMTempRegArg
-                    && arg2 instanceof ASMTempRegArg) {
-
-                    if (arg1 instanceof ASMReg && !precolored.contains(arg1)) {
-                        continue;
-                    } else if (arg2 instanceof ASMReg && !precolored.contains(arg2))  {
-                        continue;
-                    }
-
-                    moves.assoc((ASMTempRegArg) arg1, move);
-                    moves.assoc((ASMTempRegArg) arg2, move);
-                    worklists.moves.add(move);
-                }
+                moves.assoc((ASMTempRegArg) moveInstr.args.get(0), move);
+                moves.assoc((ASMTempRegArg) moveInstr.args.get(1), move);
+                worklists.moves.add(move);
             }
         }
 
         this.coalescingHeuristic =
-            new CoalescingHeuristic(K, precolored, graph);
+            new CoalescingHeuristic(K, PRECOLORED, graph);
     }
 
     // make worklist
 
     private void makeWorklist() {
+        assert worklists.freeze.isEmpty();
+        assert worklists.spill.isEmpty();
+        assert worklists.simplify.isEmpty();
+
         while (!worklists.initial.isEmpty()) {
             ASMTempRegArg n = worklists.initial.removeFirst();
 
@@ -286,6 +277,26 @@ final class RegisterAllocator {
             } else {
                 worklists.simplify.add(n);
             }
+        }
+
+        Set<ASMTempRegArg> worklistUnions = Sets.union(
+            Sets.union(PRECOLORED, worklists.simplify),
+            Sets.union(worklists.freeze, worklists.spill));
+        for (ASMTempRegArg node : worklists.simplify) {
+            assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
+            assert graph.degree(node) < K;
+            assert Sets.intersection(moves.getMoves(node),
+                Sets.union(moves.active, worklists.moves)).isEmpty();
+        }
+        for (ASMTempRegArg node : worklists.freeze) {
+            assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
+            assert graph.degree(node) < K;
+            assert !Sets.intersection(moves.getMoves(node),
+                Sets.union(moves.active, worklists.moves)).isEmpty();
+        }
+        for (ASMTempRegArg node : worklists.spill) {
+            assert graph.degree(node) == Sets.intersection(graph.adjList(node), worklistUnions).size();
+            assert graph.degree(node) >= K;
         }
     }
 
@@ -332,7 +343,7 @@ final class RegisterAllocator {
     // coalesce
 
     private void addWorklist(ASMTempRegArg u) {
-        if (!precolored.contains(u)
+        if (!PRECOLORED.contains(u)
             && !moves.nodeIsMoveRelated(u)
             && graph.degree(u) < K) {
 
@@ -350,7 +361,7 @@ final class RegisterAllocator {
         ASMTempRegArg y = alias.get((ASMTempRegArg) moveInstr.args.get(1));
 
         ASMTempRegArg u, v;
-        if (precolored.contains(y)) {
+        if (PRECOLORED.contains(y)) {
             u = y;
             v = x;
         } else {
@@ -361,14 +372,14 @@ final class RegisterAllocator {
         if (u.equals(v)) {
             moves.coalesced.add(move);
             addWorklist(u);
-        } else if (precolored.contains(v) || graph.adjacentSet(u, v)) {
+        } else if (PRECOLORED.contains(v) || graph.adjacentSet(u, v)) {
             moves.constrained.add(move);
             addWorklist(u);
             addWorklist(v);
         } else if (
-            (precolored.contains(u)
+            (PRECOLORED.contains(u)
                 && graph.adjacent(v).stream().allMatch(t -> coalescingHeuristic.ok(t, u)))
-                || (!precolored.contains(u)
+                || (!PRECOLORED.contains(u)
                 && coalescingHeuristic.conservative(
                 Sets.union(graph.adjacent(u), graph.adjacent(v))))) {
 
@@ -444,8 +455,23 @@ final class RegisterAllocator {
 
     // spill
 
+    private ASMTempRegArg popFavoriteSpill() {
+        Iterator<ASMTempRegArg> iterator = worklists.spill.iterator();
+        while (iterator.hasNext()) {
+            ASMTempRegArg m = iterator.next();
+            if (m instanceof ASMReg) {
+                iterator.remove();
+                return m;
+            } else if (!((ASMTempArg) m).name.startsWith("_t_spill_")) {
+                iterator.remove();
+                return m;
+            }
+        }
+        return worklists.spill.removeFirst();
+    }
+
     private void selectSpill() {
-        ASMTempRegArg m = worklists.spill.removeFirst();
+        ASMTempRegArg m = popFavoriteSpill();
         worklists.simplify.add(m);
         freezeMoves(m);
     }
@@ -460,7 +486,7 @@ final class RegisterAllocator {
 
             for (ASMTempRegArg w : graph.adjList(n)) {
                 w = alias.get(w);
-                if (coloredNodes.contains(w) || precolored.contains(w)) {
+                if (coloredNodes.contains(w) || PRECOLORED.contains(w)) {
                     okColors.remove(coloring.get(w));
                 }
             }
@@ -478,8 +504,27 @@ final class RegisterAllocator {
         }
     }
 
-    private String string(Collection<? extends ASMTempRegArg> collection) {
-        return collection.stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
+    // rewrite program
+
+    private void rewriteProgram() {
+        CLI.debugPrint("Spilled nodes: " + spilledNodes);
+
+        SpillProgramRewriter rewriter = new SpillProgramRewriter(
+            generator,
+            functionBody,
+            spilledNodes,
+            spillAllocator
+        );
+        rewriter.run();
+        functionBody = rewriter.rewritten();
+
+        spilledNodes.clear();
+        worklists.initial.clear();
+        worklists.initial.addAll(coloredNodes);
+        worklists.initial.addAll(coalescedNodes);
+        worklists.initial.addAll(spillAllocator.newTemps());
+        coloredNodes.clear();
+        coalescedNodes.clear();
     }
 
 }

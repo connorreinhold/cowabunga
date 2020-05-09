@@ -13,14 +13,15 @@ import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempRegArg;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
-final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
+final class UsesVisitor implements AsmCFGVisitor<Set<? extends ASMTempRegArg>> {
 
-    private final Set<ASMReg> returnRegisters;
+    private final String mangledName;
 
-    public UsesVisitor(Set<ASMReg> returnRegisters) {
-        this.returnRegisters = returnRegisters;
+    public UsesVisitor(String mangledName) {
+        this.mangledName = mangledName;
     }
 
     public static Set<ASMTempRegArg> getAllArgs(ASMInstr instr) {
@@ -73,7 +74,7 @@ final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case CALLQ:
                 String mangledName = ((ASMLabelArg) instr.args.get(0)).label;
                 // A call uses its argument registers
-                return Collections.unmodifiableSet(
+                return new HashSet<>(
                     MangledNameParser.argRegisters(mangledName));
 
             case SETZ:
@@ -109,11 +110,9 @@ final class UsesVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
     }
 
     @Override
-    public Set<ASMTempRegArg> visit(AsmCFGReturnNode n) {
+    public Set<? extends ASMTempRegArg> visit(AsmCFGReturnNode n) {
         // why do this? Appel p. 228
-//        return Sets.union(returnRegisters,
-//            Sets.difference(Set.of(ASMConstants.CALLEE_SAVED_REGISTERS), Set.of(ASMReg.RSP, ASMReg.RBP)));
-        return Set.of();
+        return MangledNameParser.returnRegisters(mangledName);
     }
 
     @Override

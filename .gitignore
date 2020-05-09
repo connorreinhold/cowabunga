@@ -22,6 +22,9 @@ cowabunga.zip
 tests/xth/xthScriptAll
 tests/xth/xthScriptIntegration
 
+**/testJunk.xi
+**/testJunk.java
+
 *.pdf
 
 # CLI-generated files
