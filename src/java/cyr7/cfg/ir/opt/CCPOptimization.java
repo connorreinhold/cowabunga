@@ -201,8 +201,9 @@ public class CCPOptimization {
 
             public CFGNode replaceBlock() {
                 var nextNode = firstNode;
-                while (!(nextNode instanceof CFGStubNode)) {
+                while (true) {
                     nextNode = nextNode.accept(this);
+                    if (!(nextNode instanceof CFGStubNode)) break;
                     elements = nextNode.acceptForward(CCPAnalysis.INSTANCE.transfer(), elements).get(0);
                 }
                 return this.firstNode;
@@ -226,7 +227,7 @@ public class CCPOptimization {
             public CFGNode visit(CFGVarAssignNode n) {
                 n.value = IRTempToConstant.replace(n.value, elements);
                 n.refreshDfaSets();
-                return n;
+                return n.outNode();
             }
 
             @Override
@@ -234,7 +235,7 @@ public class CCPOptimization {
                 n.value = IRTempToConstant.replace(n.value, elements);
                 n.target = IRTempToConstant.replace(n.target, elements);
                 n.refreshDfaSets();
-                return n;
+                return n.outNode();
             }
 
 

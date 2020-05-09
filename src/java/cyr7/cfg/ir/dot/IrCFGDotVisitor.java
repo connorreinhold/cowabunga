@@ -39,7 +39,6 @@ public class IrCFGDotVisitor implements IrCFGVisitor<Optional<Void>> {
 
     public List<Pair<String, String>> getDotEdges() {
         return this.edges.stream().map(nodePair -> {
-            System.out.println(nodePair.part1());
             return new Pair<>(nodeToLabel.get(nodePair.part1()), nodeToLabel.get(nodePair.part2()));
         }).collect(Collectors.toList());
     }

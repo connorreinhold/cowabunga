@@ -164,7 +164,6 @@ public class DeadCodeElimOptimization {
                 var topNode = node.block;
                 while (!(topNode instanceof CFGStubNode)) {
                     this.ordering.addFirst(topNode);
-                    System.out.println(topNode);
                     topNode = topNode.out().get(0);
                 }
             }

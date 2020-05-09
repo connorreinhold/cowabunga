@@ -45,11 +45,9 @@ public class CopyPropagationOptimization {
     public static CFGStartNode optimize(CFGNode start) {
         // Mapping from CFGNode to the out lattices.
         CFGStartNode startNode = (CFGStartNode)start;
-        System.out.println("Starts analysis");
         final var visitor = new CFGVarReplacementVisitor(
                 WorklistAnalysis.analyze((CFGStartNode)start,
                 CopyPropagationAnalysis.INSTANCE).in());
-        System.out.println("Terminates analysis");
         Set<CFGNode> visited = new HashSet<>();
         Queue<CFGNode> nextNodes = new ArrayDeque<>();
         nextNodes.add(start);

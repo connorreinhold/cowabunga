@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
-import cyr7.cfg.ir.dfa.loops.inductionvars.InductionVariable;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 
@@ -20,20 +19,20 @@ public final class WorklistAnalysis {
             ForwardDataflowAnalysis<L> analysis) {
         return runAnalysis(start, reachable, analysis);
     }
-    
+
     public static <L> DfaResult<L> analyze(
             CFGStartNode cfg,
             ForwardDataflowAnalysis<L> analysis) {
-        
+
         Set<CFGNode> allNodes = getAllNodes(cfg);
         return runAnalysis(cfg, allNodes, analysis);
     }
-    
+
     private static <L> DfaResult<L> runAnalysis(
             CFGNode start,
             Set<CFGNode> allNodes,
             ForwardDataflowAnalysis<L> analysis) {
-        
+
         Queue<CFGNode> worklist = new ArrayDeque<>(allNodes);
 
         Map<CFGNode, L> in = new HashMap<>();
@@ -46,10 +45,7 @@ public final class WorklistAnalysis {
             out.put(node, outEdges);
         }
 
-        long work = 0;
         while (!worklist.isEmpty()) {
-            work++;
-            final long size = worklist.size();
             CFGNode node = worklist.remove();
             if (!allNodes.contains(node)) {
                 continue;
@@ -81,10 +77,9 @@ public final class WorklistAnalysis {
                 }
             }
         }
-        System.out.println("Forward Analysis work: " + work);
         return new DfaResult<>(in, out);
     }
-    
+
 
     public static <L> Map<CFGNode, L> analyze(
             CFGStartNode cfg,
@@ -123,7 +118,6 @@ public final class WorklistAnalysis {
                     worklist.addAll(node.in());
                 }
             }
-//            System.out.println("Backward Analysis work: " + work);
             return out;
         }
 
