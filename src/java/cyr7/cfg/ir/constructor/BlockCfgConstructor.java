@@ -138,10 +138,29 @@ public class BlockCfgConstructor {
          */
         private Optional<CFGNode> outNode;
 
+        /**
+         * An accumulator CFG pointer.
+         */
         private CFGNode successor;
+
+        /**
+         * The starting CFG Node of previously computed CFG-component.
+         */
         private CFGNode nodeOfNextBlock;
+
+        /**
+         * The set of variables that are defined inside a block.
+         */
         private Set<String> variablesDefined;
+
+        /**
+         * The set of labels placed at the beginnings of basic blocks.
+         */
         private Set<String> labelSets;
+
+        /**
+         * The out node of the last node in the block of nodes.
+         */
         private CFGStubNode finalStub;
 
         /**
