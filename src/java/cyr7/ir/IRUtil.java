@@ -8,8 +8,7 @@ import java.io.Writer;
 import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
-import cyr7.cfg.ir.opt.CopyPropagationOptimization;
-import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
+import cyr7.cfg.ir.opt.CCPOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -50,9 +49,9 @@ public class IRUtil {
                 final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
                 alt.keySet().stream().forEach(functionName -> {
                     var optimizedCfg = alt.get(functionName);
-                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-//                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
-                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+//                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
+//                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
 //
                     alt.put(functionName, optimizedCfg);
                 });

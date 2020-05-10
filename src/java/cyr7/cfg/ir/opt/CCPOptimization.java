@@ -124,17 +124,17 @@ public class CCPOptimization {
             if (outgoingLattice.get(trueBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
                 // false branch
-                trueBranch.in().removeAll(Collections.singleton(n));
                 for (CFGNode incoming: n.in()) {
                     incoming.replaceOutEdge(n, falseBranch);
                 }
+                trueBranch.in().removeAll(Collections.singleton(n));
             } else if (outgoingLattice.get(falseBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
                 // true branch
-                falseBranch.in().removeAll(Collections.singleton(n));
                 for (CFGNode incoming: n.in()) {
                     incoming.replaceOutEdge(n, trueBranch);
                 }
+                falseBranch.in().removeAll(Collections.singleton(n));
             }
             n.refreshDfaSets();
             return n;

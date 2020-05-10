@@ -19,7 +19,8 @@ public abstract class CFGNode {
             if (!n.in().contains(this)) throw new RuntimeException();
         }
         for (CFGNode n: this.in()) {
-            if (!n.out().contains(this)) throw new RuntimeException();
+            if (!n.out().contains(this))
+                throw new RuntimeException();
         }
     }
 

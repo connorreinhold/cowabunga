@@ -71,10 +71,11 @@ public final class WorklistAnalysis {
                         out.get(node).put(outEdge, newOutValue);
                         if (scc.nodes.contains(outEdge)) {
                             subWorklist.add(outEdge);
-                            inQueue.add(node);
+                            inQueue.add(outEdge);
                         } else if (!inQueue.contains(outEdge)) {
-                            worklist.add(nodeToScc.get(outEdge));
-                            inQueue.add(node);
+                            final var nextScc = nodeToScc.get(outEdge);
+                            worklist.add(nextScc);
+                            nextScc.nodes.forEach(inQueue::add);
                         }
                     }
                 }
