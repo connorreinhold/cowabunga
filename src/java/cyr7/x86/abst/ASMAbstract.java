@@ -47,7 +47,7 @@ public enum ASMAbstract {
                 ASMConstants.CALLEE_SAVED_REGISTERS[i]));
         }
 
-        for (ASMReg callerSaved : Set.of(ASMReg.RCX, ASMReg.R10, ASMReg.R11)) {
+        for (ASMReg callerSaved : Set.of(ASMReg.R10, ASMReg.R11)) {
             if (callerSaved != ASMReg.RSP) {
                 body.add(make.Mov(callerSaved, arg.constant(0)));
             }
