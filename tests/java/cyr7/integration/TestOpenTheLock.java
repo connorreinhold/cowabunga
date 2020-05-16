@@ -1,6 +1,7 @@
 package cyr7.integration;
 
 import cyr7.integration.Run.RunConfiguration;
+import org.junit.jupiter.api.Disabled;
 
 public class TestOpenTheLock extends TestProgram {
 
@@ -19,4 +20,10 @@ public class TestOpenTheLock extends TestProgram {
     protected RunConfiguration configuration() {
         return new RunConfiguration().bigHeap(true);
     }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocator() throws Exception {
+    }
+
 }

@@ -4,7 +4,6 @@ import cyr7.cli.OptConfig;
 import cyr7.cli.Optimization;
 import cyr7.integration.Run.RunConfiguration;
 import cyr7.x86.ASMUtil.TilerConf;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -20,12 +19,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public abstract class TestProgram {
@@ -228,10 +225,10 @@ public abstract class TestProgram {
         runAssemblyTest(TilerConf.COMPLEX, OptConfig.none());
     }
 
-    @Timeout(value=30, unit=SECONDS) // 30 seconds
+    @Timeout(value=60) // seconds
     @EnabledOnOs({OS.LINUX})
     @Test
-    void testRegisterAllocator() throws Exception {
+    protected void testRegisterAllocator() throws Exception {
         runAssemblyTest(TilerConf.COMPLEX, OptConfig.of(Optimization.REG));
     }
 

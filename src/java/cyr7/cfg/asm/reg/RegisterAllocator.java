@@ -2,6 +2,7 @@ package cyr7.cfg.asm.reg;
 
 import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.asm.constructor.AsmCFGConstructor;
+import cyr7.cfg.asm.constructor.AsmCFGUnreachableNodeCleaner;
 import cyr7.cfg.asm.dfa.WorklistAnalysis;
 import cyr7.cfg.asm.dot.AsmCFGAnalysisDotVisitor;
 import cyr7.cfg.asm.nodes.AsmCFGNode;
@@ -188,6 +189,9 @@ final class RegisterAllocator {
     private void build() {
         AsmCFGConstructor constructor = new AsmCFGConstructor(functionBody);
         AsmCFGStartNode cfg = constructor.constructAsmCFG();
+        AsmCFGUtil.debugPrintDotForFunctionAsm(cfg);
+        new AsmCFGUnreachableNodeCleaner().removeUnreachableNodes(cfg);
+        AsmCFGUtil.debugPrintDotForFunctionAsm(cfg);
         Map<AsmCFGNode, Set<? extends ASMTempRegArg>> liveInVariables
             = WorklistAnalysis.analyze(cfg, new LiveVariableAnalysis(mangledName));
 
@@ -206,6 +210,7 @@ final class RegisterAllocator {
         }
 
         CLI.lazyDebugPrint(() -> {
+            CLI.debugPrint("<-- LIVE VARIABLE ANALYSIS --> ");
             AsmCFGUtil.debugOutputDotForAnalysis(cfg, node -> {
                 if (liveOutVariables.containsKey(node)) {
                     return liveOutVariables.get(node).stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
@@ -213,6 +218,7 @@ final class RegisterAllocator {
                     return "None";
                 }
             });
+            CLI.debugPrint("<-- LIVE VARIABLE ANALYSIS --> ");
         });
 
         graph = new InterferenceGraph(PRECOLORED, selectStack, coalescedNodes);

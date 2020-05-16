@@ -1,11 +1,12 @@
 package cyr7.integration.galeshapley.duplicates;
 
-import static cyr7.integration.galeshapley.TestGaleShapley0.parseGaleShapleyArgs;
-
 import cyr7.integration.Run.RunConfiguration;
 import cyr7.integration.TestProgram;
 
+import static cyr7.integration.galeshapley.TestGaleShapley0.parseGaleShapleyArgs;
+
 public class TestGaleShapleyTimes16 extends TestProgram {
+
     @Override
     protected String filename() {
         return "galeshapleyTimes16";
