@@ -16,6 +16,7 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.BinOpInterpreter;
+import cyr7.ir.interpret.Configuration;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
@@ -39,6 +40,10 @@ import cyr7.visitor.MyIRVisitor;
 
 public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
     INSTANCE;
+
+    private static boolean isAnArg(String n) {
+        return n.startsWith(Configuration.ABSTRACT_ARG_PREFIX);
+    }
 
     @Override
     public LatticeElement topValue() {
@@ -392,20 +397,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             return in.modified(values -> {
                 VLatticeElement result =
                     n.value.accept(new AbstractInterpreter(in));
-//                if (values.containsKey(n.variable)) {
-//                    final var originalValue = values.get(n.variable);
-                    // top and top = top
-                    // top and value = value
-                    // top and bot = bot
-                    // value and top = bot
-                    // value and value = value if same, bot otherwise
-                    // value and bot = bot
-                    // bot and top = bot
-                    // bot and value = bot
-                    // bot and bot = bot
-//                } else {
                     values.put(n.variable, result);
-//                }
             });
         }
 
@@ -459,7 +451,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 right = n.right().accept(this);
 
             if (left.isTop() || right.isTop()) {
-                return VLatticeElement.bot;
+                return VLatticeElement.top;
             } else if (left.isBot() || right.isBot()) {
                 return VLatticeElement.bot;
             } else {
@@ -504,7 +496,11 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public VLatticeElement visit(IRTemp n) {
-            return env.getValue(n.name());
+            if (isAnArg(n.name())) {
+                return VLatticeElement.bot;
+            } else {
+                return env.getValue(n.name());
+            }
         }
 
         @Override
