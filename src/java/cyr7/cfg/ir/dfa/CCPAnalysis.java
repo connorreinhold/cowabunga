@@ -375,7 +375,6 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             if (in.unreachable()) {
                 return LatticeElement.unreachable;
             }
-
             return in;
         }
 
@@ -394,11 +393,20 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 return LatticeElement.unreachable;
             }
 
-            return in.modified(values -> {
-                VLatticeElement result =
-                    n.value.accept(new AbstractInterpreter(in));
+            if (n.uses().stream().allMatch(s -> {
+                final var value = in.getValue(s);
+                return !(value.isBot() || value.isTop());
+            })) {
+                return in.modified(values -> {
+                    VLatticeElement result =
+                        n.value.accept(new AbstractInterpreter(in));
                     values.put(n.variable, result);
-            });
+                });
+            } else {
+                return in.modified(values -> {
+                    values.put(n.variable, VLatticeElement.bot);
+                });
+            }
         }
 
         @Override

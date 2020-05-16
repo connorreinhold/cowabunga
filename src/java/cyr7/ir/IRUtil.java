@@ -46,20 +46,17 @@ public class IRUtil {
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
         if (optConfig.cf()) {
             {
-//                final var functionToBlocks =
-//                        TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
-//                final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
-                compUnit = TraceOptimizer.optimize(compUnit, generator);
-                final var alt = CFGConstructor.constructCFG(compUnit);
+                final var functionToBlocks =
+                        TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+                final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+//                compUnit = TraceOptimizer.optimize(compUnit, generator);
+//                final var alt = CFGConstructor.constructCFG(compUnit);
                 alt.keySet().stream().forEach(functionName -> {
                     var optimizedCfg = alt.get(functionName);
                     optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
-//                    var cleaner = new CFGUnreachableNodeCleaner();
-//                    optimizedCfg = cleaner.removeUnreachableNodes(optimizedCfg);
-//                    CFGUtil.outputDotForFunctionIR(optimizedCfg, new PrintWriter(System.out));
                     optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-//
+                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
+
                     alt.put(functionName, optimizedCfg);
                 });
                 final var alternateIR =
