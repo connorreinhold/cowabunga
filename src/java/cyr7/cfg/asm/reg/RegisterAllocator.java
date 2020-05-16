@@ -36,6 +36,8 @@ import java.util.stream.IntStream;
 
 final class RegisterAllocator {
 
+    public static final int MAX_ITERATIONS = 20;
+
     public static final ASMReg[] REGISTERS = {
         ASMReg.RAX,
         ASMReg.RCX,
@@ -108,7 +110,7 @@ final class RegisterAllocator {
         return new ArrayList<>(temps);
     }
 
-    public void run() {
+    public void run() throws RegisterAllocationFailedException {
         int iterations = 0;
         boolean rerun;
         do {
@@ -120,8 +122,8 @@ final class RegisterAllocator {
                 System.err.flush();
             });
 
-            if (iterations >= 50) {
-                throw new RuntimeException("Register allocation exceeded iterations");
+            if (iterations >= RegisterAllocator.MAX_ITERATIONS) {
+                throw new RegisterAllocationFailedException(iterations);
             }
 
             coloring = new HashMap<>(K);
