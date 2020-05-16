@@ -3,6 +3,7 @@ package cyr7.cfg.ir.opt;
 import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
@@ -124,14 +125,18 @@ public class CCPOptimization {
             if (outgoingLattice.get(trueBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
                 // false branch
-                for (CFGNode incoming: n.in()) {
+                final var incomingNodes = new LinkedList<>(n.in());
+                for (CFGNode incoming: incomingNodes) {
+                    n.in().removeAll(Collections.singleton(incoming));
                     incoming.replaceOutEdge(n, falseBranch);
                 }
                 trueBranch.in().removeAll(Collections.singleton(n));
             } else if (outgoingLattice.get(falseBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
                 // true branch
-                for (CFGNode incoming: n.in()) {
+                final var incomingNodes = new LinkedList<>(n.in());
+                for (CFGNode incoming: incomingNodes) {
+                    n.in().removeAll(Collections.singleton(incoming));
                     incoming.replaceOutEdge(n, trueBranch);
                 }
                 falseBranch.in().removeAll(Collections.singleton(n));
