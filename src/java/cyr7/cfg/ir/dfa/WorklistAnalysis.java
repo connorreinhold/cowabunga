@@ -24,6 +24,13 @@ public final class WorklistAnalysis {
         return runAnalysis(start, reachable, analysis);
     }
 
+
+    public static <L> DfaResult<L> runPrevAnalysis(
+            CFGStartNode start,
+            ForwardDataflowAnalysis<L> analysis) {
+        return runAnalysis(start, getAllNodes(start), analysis);
+    }
+
     public static <L> DfaResult<L> analyze(
             CFGStartNode cfg,
             ForwardDataflowAnalysis<L> analysis) {

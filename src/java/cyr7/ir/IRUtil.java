@@ -47,6 +47,8 @@ public class IRUtil {
                 final var functionToBlocks =
                         TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
                 final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+//                compUnit = TraceOptimizer.optimize(compUnit, generator);
+//                final var alt = CFGConstructor.constructCFG(compUnit);
                 alt.keySet().stream().forEach(functionName -> {
                     var optimizedCfg = alt.get(functionName);
 //                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
@@ -75,6 +77,7 @@ public class IRUtil {
             compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
+        System.out.println(compUnit);
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));

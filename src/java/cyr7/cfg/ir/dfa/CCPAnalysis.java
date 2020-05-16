@@ -92,7 +92,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         long value();
 
-        VLatticeElement top = new VLatticeElement() {
+        final VLatticeElement top = new VLatticeElement() {
             @Override
             public boolean isTop() {
                 return true;
@@ -114,7 +114,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             }
         };
 
-        VLatticeElement bot = new VLatticeElement() {
+        final VLatticeElement bot = new VLatticeElement() {
             @Override
             public boolean isTop() {
                 return false;
@@ -392,7 +392,20 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             return in.modified(values -> {
                 VLatticeElement result =
                     n.value.accept(new AbstractInterpreter(in));
-                values.put(n.variable, result);
+//                if (values.containsKey(n.variable)) {
+//                    final var originalValue = values.get(n.variable);
+                    // top and top = top
+                    // top and value = value
+                    // top and bot = bot
+                    // value and top = bot
+                    // value and value = value if same, bot otherwise
+                    // value and bot = bot
+                    // bot and top = bot
+                    // bot and value = bot
+                    // bot and bot = bot
+//                } else {
+                    values.put(n.variable, result);
+//                }
             });
         }
 
@@ -446,7 +459,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 right = n.right().accept(this);
 
             if (left.isTop() || right.isTop()) {
-                return VLatticeElement.top;
+                return VLatticeElement.bot;
             } else if (left.isBot() || right.isBot()) {
                 return VLatticeElement.bot;
             } else {
