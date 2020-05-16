@@ -8,5 +8,5 @@ public class TestPA5_5 extends TestProgram {
     }
 
     @Override
-    protected String expected() { return "";}
+    protected String expected() { return "success\n";}
 }
