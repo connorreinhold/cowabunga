@@ -24,6 +24,19 @@ public enum MangledNameParser {
     ;
 
     public static Optional<FunctionType> parseFunctionType(String mangledName) {
+        if (mangledName.equals("_xi_alloc")) {
+            // int -> int[]
+            return Optional.of(new FunctionType(
+                    ExpandedType.intType,
+                    new ExpandedType(new ArrayType(PrimitiveType.intDefault))
+                ));
+        } else if (mangledName.equals("_xi_out_of_bounds")) {
+            return Optional.of(new FunctionType(
+                new ExpandedType(List.of()),
+                new ExpandedType(List.of())
+            ));
+        }
+
         int lastUnderscoreIndex = mangledName.lastIndexOf('_');
         if (lastUnderscoreIndex == -1) {
             return Optional.empty();
