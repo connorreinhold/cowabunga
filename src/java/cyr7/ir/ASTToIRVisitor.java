@@ -1,5 +1,6 @@
 package cyr7.ir;
 
+import java.math.BigInteger;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -508,8 +509,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
         List<IRExpr> params = n.parameters.stream()
-            .map(stmt -> stmt.accept(this).assertFirst())
-            .collect(Collectors.toList());
+                .map(stmt -> stmt.accept(this).assertFirst())
+                .collect(Collectors.toList());
         var fType = n.getFunctionType().get();
         String encodedName = assemblyFunctionName(n.identifier, fType);
         return OneOfTwo.ofFirst(make.IRCall(make.IRName(encodedName), params,
@@ -907,8 +908,23 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     public OneOfTwo<IRExpr, IRStmt> visit(IntNegExprNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
 
+        // intercept -2^64 as literal and make it 0-(e-1)-1
+        if (n.expr instanceof LiteralIntExprNode) {
+            BigInteger literal = new BigInteger(((LiteralIntExprNode) n.expr).contents);
+            if (literal.bitLength() == 64) {
+                return OneOfTwo.ofFirst(make.IRBinOp(IRBinOp.OpType.SUB,
+                        make.IRBinOp(IRBinOp.OpType.SUB,
+                                make.IRConst(0),
+                                make.IRConst(literal.subtract(new BigInteger("1")).longValue())
+                                ),
+                        make.IRConst(1)
+                ));
+            }
+        }
+
         IRExpr e = n.expr.accept(this)
                          .assertFirst();
+
         return OneOfTwo.ofFirst(make.IRBinOp(IRBinOp.OpType.SUB,
                 make.IRConst(0),
                 e));
