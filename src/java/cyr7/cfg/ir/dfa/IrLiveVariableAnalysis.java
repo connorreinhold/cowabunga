@@ -145,6 +145,9 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
          */
         public static IrLiveVarLattice meet(IrLiveVarLattice lhs,
                                             IrLiveVarLattice rhs) {
+            if (rhs == null) {
+                System.out.println();
+            }
             return new IrLiveVarLattice(Sets.union(lhs.liveVars, rhs.liveVars));
         }
 

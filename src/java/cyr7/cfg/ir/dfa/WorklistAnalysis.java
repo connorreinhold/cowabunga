@@ -202,9 +202,7 @@ public final class WorklistAnalysis {
                 in.put(node, analysis.topValue());
             }
 
-            long work = 0;
             while (!worklist.isEmpty()) {
-                work++;
                 CFGNode node = worklist.remove();
 
                 L outValue = node.out()

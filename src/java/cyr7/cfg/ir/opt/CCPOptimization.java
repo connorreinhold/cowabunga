@@ -92,10 +92,9 @@ public class CCPOptimization {
                 n.outNode().in().removeAll(Collections.singleton(n));
                 return n;
             }
-            final var lattice = incomingLattices.get(n);
             final IRCallStmt call = n.call;
             List<IRExpr> updatedArgs = call.args().stream().map(arg -> {
-                return IRTempToConstant.replace(arg, lattice);
+                return IRTempToConstant.replace(arg, incomingLattice);
             }).collect(Collectors.toList());
 
             n.call = new IRCallStmt(n.location(),
@@ -130,6 +129,7 @@ public class CCPOptimization {
                     n.in().removeAll(Collections.singleton(incoming));
                     incoming.replaceOutEdge(n, falseBranch);
                 }
+                falseBranch.in().removeAll(Collections.singleton(n));
                 trueBranch.in().removeAll(Collections.singleton(n));
             } else if (outgoingLattice.get(falseBranch).unreachable()) {
                 // Remove this node and link the previous nodes to the
@@ -139,6 +139,7 @@ public class CCPOptimization {
                     n.in().removeAll(Collections.singleton(incoming));
                     incoming.replaceOutEdge(n, trueBranch);
                 }
+                trueBranch.in().removeAll(Collections.singleton(n));
                 falseBranch.in().removeAll(Collections.singleton(n));
             }
             n.refreshDfaSets();

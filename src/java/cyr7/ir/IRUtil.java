@@ -9,6 +9,8 @@ import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.opt.CCPOptimization;
+import cyr7.cfg.ir.opt.CopyPropagationOptimization;
+import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -51,9 +53,12 @@ public class IRUtil {
                 final var alt = CFGConstructor.constructCFG(compUnit);
                 alt.keySet().stream().forEach(functionName -> {
                     var optimizedCfg = alt.get(functionName);
-//                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
                     optimizedCfg = CCPOptimization.optimize(optimizedCfg);
-//                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+//                    var cleaner = new CFGUnreachableNodeCleaner();
+//                    optimizedCfg = cleaner.removeUnreachableNodes(optimizedCfg);
+//                    CFGUtil.outputDotForFunctionIR(optimizedCfg, new PrintWriter(System.out));
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
 //
                     alt.put(functionName, optimizedCfg);
                 });
@@ -77,7 +82,6 @@ public class IRUtil {
             compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
-        System.out.println(compUnit);
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
