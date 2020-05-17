@@ -7,8 +7,17 @@ myparser:
 cowabunga: myparser mylexer
 
 test.all:
+	./xic-build
 	gradle test
 	make xth.test
+
+gradle.test:
+	./xic-build
+	gradle test
+
+gradle.coreTest:
+	./xic-build
+	gradle coreTest
 
 xth.test:
 	cd \
