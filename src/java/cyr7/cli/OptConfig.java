@@ -48,6 +48,14 @@ public final class OptConfig {
         return enabledOptimizations.contains(Optimization.REG);
     }
 
+    public boolean dce() {
+        return enabledOptimizations.contains(Optimization.DCE);
+    }
+
+    public boolean cp() {
+        return enabledOptimizations.contains(Optimization.CP);
+    }
+
     public void set(Optimization opt, boolean enabled) {
         if (enabled) {
             enabledOptimizations.add(opt);

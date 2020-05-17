@@ -45,30 +45,39 @@ public class IRUtil {
         }
 
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
+        final var functionToBlocks =
+                TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+        final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
         if (optConfig.cf()) {
-            {
-                final var functionToBlocks =
-                        TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
-                final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
-
-                // This is here if we want to use CFGs without Blocks.
+            // This is here if we want to use CFGs without Blocks.
 //                compUnit = TraceOptimizer.optimize(compUnit, generator);
 //                final var alt = CFGConstructor.constructCFG(compUnit);
-                alt.keySet().stream().forEach(functionName -> {
-                    var optimizedCfg = alt.get(functionName);
-                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-
-                    alt.put(functionName, optimizedCfg);
-                });
-                final var alternateIR =
-                        CFGFlattener.flatten(alt, compUnit);
-                compUnit = alternateIR;
-            }
-            compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
-        } else {
-            compUnit = TraceOptimizer.optimize(compUnit, generator);
+            alt.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = alt.get(functionName);
+                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                alt.put(functionName, optimizedCfg);
+            });
         }
+        if (optConfig.cp()) {
+            alt.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = alt.get(functionName);
+                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                alt.put(functionName, optimizedCfg);
+            });
+        }
+        if (optConfig.dce()) {
+            alt.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = alt.get(functionName);
+                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                alt.put(functionName, optimizedCfg);
+            });
+        }
+        compUnit = CFGFlattener.flatten(alt, compUnit);
+        if (optConfig.cf()) {
+            compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
+        }
+
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 
