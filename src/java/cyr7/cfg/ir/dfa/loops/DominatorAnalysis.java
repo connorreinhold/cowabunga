@@ -6,6 +6,7 @@ import java.util.Set;
 
 import cyr7.cfg.ir.dfa.ForwardDataflowAnalysis;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -16,7 +17,7 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.util.Sets;
 
 public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
-    
+
     INSTANCE;
 
     public enum InfiniteSet implements Set<CFGNode> {
@@ -24,7 +25,7 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public int size() {
-            return 0;
+            return Integer.MAX_VALUE;
         }
 
         @Override
@@ -34,22 +35,22 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public boolean contains(Object o) {
-            return false;
+            return true;
         }
 
         @Override
         public Iterator<CFGNode> iterator() {
-            return null;
+            throw new UnsupportedOperationException("Cannot iterate this infinite set");
         }
 
         @Override
         public Object[] toArray() {
-            return null;
+            throw new UnsupportedOperationException("Cannot create an array from this infinite set");
         }
 
         @Override
         public <T> T[] toArray(T[] a) {
-            return null;
+            throw new UnsupportedOperationException("Cannot create an array from this infinite set");
         }
 
         @Override
@@ -64,7 +65,7 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public boolean containsAll(Collection<?> c) {
-            return false;
+            return true;
         }
 
         @Override
@@ -84,14 +85,15 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public void clear() {
+            throw new UnsupportedOperationException("Cannot clear an infinite set");
         }
-        
+
         @Override
         public String toString() {
             return "[∞]";
         }
     }
-    
+
     @Override
     public Set<CFGNode> topValue() {
         return InfiniteSet.INSTANCE;
@@ -102,6 +104,9 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
         return TransferFunction.INSTANCE;
     }
 
+    /**
+     * in[n] = intersect(out[n']) for all n' preceding n.
+     */
     @Override
     public Set<CFGNode> meet(Set<CFGNode> lhs, Set<CFGNode> rhs) {
         if (lhs == InfiniteSet.INSTANCE) {
@@ -111,7 +116,13 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
         }
         return Sets.intersection(lhs, rhs);
     }
-    
+
+    /**
+     * out[start] = {start}
+     * <p>
+     * out[n] = {n} U intersect(out[n']) for all n' preceding n.
+     *
+     */
     private enum TransferFunction implements ForwardTransferFunction<Set<CFGNode>> {
         INSTANCE;
 
@@ -122,7 +133,7 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
             }
             return Sets.union(in, Set.of(n));
         }
-        
+
         @Override
         public Set<CFGNode> transfer(CFGMemAssignNode n, Set<CFGNode> in) {
             if (in == InfiniteSet.INSTANCE) {
@@ -148,6 +159,14 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
         }
 
         @Override
+        public Set<CFGNode> transfer(CFGBlockNode n, Set<CFGNode> in) {
+            if (in == InfiniteSet.INSTANCE) {
+                return InfiniteSet.INSTANCE;
+            }
+            return Sets.union(in, Set.of(n));
+        }
+
+        @Override
         public Set<CFGNode> transferFalse(CFGIfNode n, Set<CFGNode> in) {
             if (in == InfiniteSet.INSTANCE) {
                 return InfiniteSet.INSTANCE;
@@ -157,14 +176,15 @@ public enum DominatorAnalysis implements ForwardDataflowAnalysis<Set<CFGNode>> {
 
         @Override
         public Set<CFGNode> transfer(CFGStartNode n, Set<CFGNode> in) {
-            return Sets.union(Set.of(), Set.of(n));
+            return Set.of(n);
         }
 
         @Override
         public Set<CFGNode> transfer(CFGSelfLoopNode n, Set<CFGNode> in) {
-            return Sets.union(Set.of(), Set.of(n));
+            return Set.of(n);
         }
-        
+
+
     }
-    
+
 }

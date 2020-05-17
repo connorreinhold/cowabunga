@@ -10,7 +10,12 @@ import cyr7.ir.nodes.IRLabel;
 import cyr7.ir.nodes.IRStmt;
 import cyr7.util.Util;
 
-final class BasicBlock {
+/**
+ * A basic block begins with a label and ends with a jump statement.
+ * @author ayang
+ *
+ */
+public final class BasicBlock {
 
     public final List<IRStmt> stmts;
 

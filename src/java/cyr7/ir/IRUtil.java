@@ -6,6 +6,10 @@ import java.io.StringWriter;
 import java.io.Writer;
 
 import cyr7.ast.Node;
+import cyr7.cfg.ir.constructor.CFGConstructor;
+import cyr7.cfg.ir.flatten.CFGFlattener;
+import cyr7.cfg.ir.opt.CopyPropagationOptimization;
+import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -23,6 +27,8 @@ import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class IRUtil {
 
+    private IRUtil() {}
+
     public static IRCompUnit lower(
         IRCompUnit compUnit,
         IdGenerator generator,
@@ -39,13 +45,29 @@ public class IRUtil {
         }
 
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
-        compUnit = TraceOptimizer.optimize(compUnit, generator);
-
         if (optConfig.cf()) {
-            IRNode node =
-                compUnit.accept(new IRConstFoldVisitor()).assertSecond();
-            assert node instanceof IRCompUnit;
-            compUnit = (IRCompUnit) node;
+            {
+                final var functionToBlocks =
+                        TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+                final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+
+                // This is here if we want to use CFGs without Blocks.
+//                compUnit = TraceOptimizer.optimize(compUnit, generator);
+//                final var alt = CFGConstructor.constructCFG(compUnit);
+                alt.keySet().stream().forEach(functionName -> {
+                    var optimizedCfg = alt.get(functionName);
+                    optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+
+                    alt.put(functionName, optimizedCfg);
+                });
+                final var alternateIR =
+                        CFGFlattener.flatten(compUnit.location(), compUnit.name(), alt);
+                compUnit = alternateIR;
+            }
+            compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
+        } else {
+            compUnit = TraceOptimizer.optimize(compUnit, generator);
         }
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);

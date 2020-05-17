@@ -3,16 +3,15 @@ package cyr7.cfg.ir.dfa;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.dfa.IrLiveVariableAnalysis.IrLiveVarLattice;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
-import cyr7.ir.visit.IRExprVarsVisitor;
 import cyr7.util.Sets;
 
 public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVarLattice> {
@@ -41,9 +40,6 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
     public enum LiveVarTransferFunction implements BackwardTransferFunction<IrLiveVarLattice> {
         INSTANCE;
 
-        private final IRExprVarsVisitor tempVisitor = IRExprVarsVisitor.INSTANCE;
-
-
         private IrLiveVarLattice transfer(Set<String> use, Set<String> out, Set<String> def) {
             Set<String> diff = Sets.difference(out, def);
             Set<String> total = Sets.union(use, diff);
@@ -57,11 +53,7 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
          */
         @Override
         public IrLiveVarLattice transfer(CFGCallNode n, IrLiveVarLattice out) {
-            Set<String> used = n.call.args().stream()
-                    .flatMap(arg -> arg.accept(tempVisitor).stream())
-                    .collect(Collectors.toSet());
-            Set <String> defined = Set.copyOf(n.call.collectors());
-            return transfer(used, out.liveVars, defined);
+            return transfer(n.uses(), out.liveVars, n.defs());
         }
 
         /**
@@ -71,8 +63,7 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
          */
         @Override
         public IrLiveVarLattice transfer(CFGIfNode n, IrLiveVarLattice out) {
-            Set<String> used = n.cond.accept(tempVisitor);
-            return transfer(used, out.liveVars, Collections.emptySet());
+            return transfer(n.uses(), out.liveVars, Collections.emptySet());
         }
 
         /**
@@ -82,9 +73,7 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
          */
         @Override
         public IrLiveVarLattice transfer(CFGMemAssignNode n, IrLiveVarLattice out) {
-            Set<String> used = Sets.union(n.target.accept(tempVisitor),
-                                          n.value.accept(tempVisitor));
-            return transfer(used, out.liveVars, Collections.emptySet());
+            return transfer(n.uses(), out.liveVars, Collections.emptySet());
         }
 
         /**
@@ -103,9 +92,7 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
          */
         @Override
         public IrLiveVarLattice transfer(CFGVarAssignNode n, IrLiveVarLattice out) {
-            Set<String> used = n.value.accept(tempVisitor);
-            Set <String> defined = Set.of(n.variable);
-            return transfer(used, out.liveVars, defined);
+            return transfer(n.uses(), out.liveVars, n.defs());
         }
 
         @Override
@@ -113,6 +100,11 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
                 IrLiveVarLattice out) {
             return transfer(Collections.emptySet(),
                     out.liveVars, Collections.emptySet());
+        }
+
+        @Override
+        public IrLiveVarLattice transfer(CFGBlockNode n, IrLiveVarLattice out) {
+            return transfer(n.uses(), out.liveVars, n.defs());
         }
     }
 
@@ -153,6 +145,9 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
          */
         public static IrLiveVarLattice meet(IrLiveVarLattice lhs,
                                             IrLiveVarLattice rhs) {
+            if (rhs == null) {
+                System.out.println();
+            }
             return new IrLiveVarLattice(Sets.union(lhs.liveVars, rhs.liveVars));
         }
 

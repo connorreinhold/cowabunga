@@ -1,6 +1,9 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
@@ -12,6 +15,7 @@ public class CFGReturnNode extends CFGNode {
     public CFGReturnNode(Location location) {
         super(location);
         this.updateIns();
+        repOk();
     }
 
     @Override
@@ -26,6 +30,7 @@ public class CFGReturnNode extends CFGNode {
 
     @Override
     public void replaceOutEdge(CFGNode stub, CFGNode n) {
+        repOk();
         return;
     }
 
@@ -42,5 +47,30 @@ public class CFGReturnNode extends CFGNode {
     @Override
     public String toString() {
         return "(return)";
+    }
+
+    @Override
+    public Set<String> defs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> uses() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Set<String> kills() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        return;
     }
 }

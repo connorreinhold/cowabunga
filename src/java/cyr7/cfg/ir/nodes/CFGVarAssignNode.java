@@ -1,11 +1,17 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.nodes.IRTemp;
+import cyr7.ir.visit.IRExprVarsVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGVarAssignNode extends CFGNode {
@@ -13,6 +19,10 @@ public class CFGVarAssignNode extends CFGNode {
     public String variable;
     public IRExpr value;
     private CFGNode outNode;
+    private Set<String> useSet;
+    private Set<String> defSet;
+    private Set<String> killSet;
+    private Map<String, String> genSet;
 
     public CFGVarAssignNode(Location location, String variable, IRExpr value,
             CFGNode outNode) {
@@ -21,7 +31,10 @@ public class CFGVarAssignNode extends CFGNode {
         this.value = value;
         this.outNode = outNode;
 
+        this.refreshDfaSets();
+
         this.updateIns();
+        repOk();
     }
 
     @Override
@@ -47,6 +60,7 @@ public class CFGVarAssignNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
+        repOk();
     }
 
     @Override
@@ -67,4 +81,39 @@ public class CFGVarAssignNode extends CFGNode {
                                   .replaceAll("\n", "");
         return String.format("%s=%s", variable, valueString);
     }
+
+
+    @Override
+    public Set<String> defs() {
+        return Collections.unmodifiableSet(this.defSet);
+    }
+
+    @Override
+    public Set<String> uses() {
+        return Collections.unmodifiableSet(this.useSet);
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        return Collections.unmodifiableMap(this.genSet);
+    }
+
+    @Override
+    public Set<String> kills() {
+        return Collections.unmodifiableSet(this.killSet);
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);
+        this.defSet = Collections.singleton(variable);
+
+        this.killSet = Collections.singleton(variable);
+        this.genSet = new HashMap<>();
+        if (value instanceof IRTemp) {
+            String source = ((IRTemp)value).name();
+            genSet.put(variable, source);
+        }
+    }
+
 }

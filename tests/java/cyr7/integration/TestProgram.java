@@ -1,13 +1,6 @@
 package cyr7.integration;
 
-import cyr7.cli.OptConfig;
-import cyr7.cli.Optimization;
-import cyr7.integration.Run.RunConfiguration;
-import cyr7.x86.ASMUtil.TilerConf;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -23,7 +16,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+
+import cyr7.cli.OptConfig;
+import cyr7.cli.Optimization;
+import cyr7.integration.Run.RunConfiguration;
+import cyr7.x86.ASMUtil.TilerConf;
 
 public abstract class TestProgram {
 

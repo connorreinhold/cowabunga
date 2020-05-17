@@ -1,9 +1,15 @@
 package cyr7.cfg.ir;
 
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
+
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.dot.IrCFGDotVisitor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGNode;
+import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cli.OptConfig;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
@@ -11,11 +17,6 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
 import polyglot.util.Pair;
-
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Map;
 
 public final class CFGUtil {
 
@@ -45,11 +46,11 @@ public final class CFGUtil {
                 fileOpener,
                 optConfig,
                 new DefaultIdGenerator());
-        Map<String, CFGNode> result = CFGConstructor.constructCFG(lowered);
+        Map<String, CFGStartNode> result = CFGConstructor.constructCFG(lowered);
         outputDotForFunctionIR(result.get(functionName), writer);
     }
 
-    public static Map<String, CFGNode> generateAllInitialDot(
+    public static Map<String, CFGStartNode> generateAllInitialDot(
             Reader reader,
             String filename,
             IxiFileOpener fileOpener) throws Exception {
@@ -61,7 +62,7 @@ public final class CFGUtil {
         return CFGConstructor.constructCFG(lowered);
     }
 
-    public static Map<String, CFGNode> generateAllFinalDot(
+    public static Map<String, CFGStartNode> generateAllFinalDot(
             Reader reader,
             String filename,
             IxiFileOpener fileOpener,

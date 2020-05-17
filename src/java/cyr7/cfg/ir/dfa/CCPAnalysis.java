@@ -7,14 +7,18 @@ import java.util.Set;
 import java.util.function.Consumer;
 
 import cyr7.cfg.ir.dfa.CCPAnalysis.LatticeElement;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.ir.BinOpInterpreter;
+import cyr7.ir.interpret.Configuration;
 import cyr7.ir.nodes.IRBinOp;
+import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCall;
 import cyr7.ir.nodes.IRCallStmt;
@@ -37,6 +41,10 @@ import cyr7.visitor.MyIRVisitor;
 public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
     INSTANCE;
 
+    private static boolean isAnArg(String n) {
+        return n.startsWith(Configuration.ABSTRACT_ARG_PREFIX);
+    }
+
     @Override
     public LatticeElement topValue() {
         return LatticeElement.top;
@@ -57,10 +65,9 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         Map<String, VLatticeElement> values = new HashMap<>(variables.size());
         for (String variable : variables) {
-            values.put(variable, meet(lhs.getValue(variable),
-                rhs.getValue(variable)));
+            values.put(variable,
+                    meet(lhs.getValue(variable), rhs.getValue(variable)));
         }
-
         return LatticeElement.reachable(values);
     }
 
@@ -90,7 +97,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         long value();
 
-        VLatticeElement top = new VLatticeElement() {
+        final VLatticeElement top = new VLatticeElement() {
             @Override
             public boolean isTop() {
                 return true;
@@ -112,7 +119,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             }
         };
 
-        VLatticeElement bot = new VLatticeElement() {
+        final VLatticeElement bot = new VLatticeElement() {
             @Override
             public boolean isTop() {
                 return false;
@@ -224,6 +231,16 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         VLatticeElement getValue(String variable);
 
+        /**
+         * Copies an internal mapping and performs {@code modify} on the copied
+         * mapping.
+         * <p>
+         * Then, a new {@link LatticeElement LatticeElement} with the
+         * new mapping and the reachability status is returned.
+         *
+         * @param modify
+         * @return
+         */
         LatticeElement modified(Consumer<Map<String, VLatticeElement>> modify);
 
     }
@@ -281,6 +298,13 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
     }
 
+    /**
+     * If the incoming node is unreachable, then the current node must also
+     * be unreachable.
+     *
+     * Otherwise, attempt to interpret values, if possible.
+     *
+     */
     private enum TransferFunction implements ForwardTransferFunction<LatticeElement> {
 
         INSTANCE;
@@ -333,7 +357,7 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             if (result.isTop()) {
                 // William: We can do whatever, so I guess we take the true
                 // branch?
-                return LatticeElement.unreachable;
+                return in;
             } else if (result.isBot()) {
                 return in;
             } else {
@@ -351,7 +375,6 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             if (in.unreachable()) {
                 return LatticeElement.unreachable;
             }
-
             return in;
         }
 
@@ -370,11 +393,20 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 return LatticeElement.unreachable;
             }
 
-            return in.modified(values -> {
-                VLatticeElement result =
-                    n.value.accept(new AbstractInterpreter(in));
-                values.put(n.variable, result);
-            });
+            if (n.uses().stream().allMatch(s -> {
+                final var value = in.getValue(s);
+                return !(value.isBot() || value.isTop());
+            })) {
+                return in.modified(values -> {
+                    VLatticeElement result =
+                        n.value.accept(new AbstractInterpreter(in));
+                    values.put(n.variable, result);
+                });
+            } else {
+                return in.modified(values -> {
+                    values.put(n.variable, VLatticeElement.bot);
+                });
+            }
         }
 
         @Override
@@ -382,12 +414,36 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
             if (in.unreachable()) {
                 return LatticeElement.unreachable;
             }
-
             return in;
+        }
+
+        @Override
+        public LatticeElement transfer(CFGBlockNode n, LatticeElement in) {
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
+            }
+
+            LatticeElement traversedLattice = in;
+            var topNode = n.block;
+            while (!(topNode instanceof CFGStubNode)) {
+                traversedLattice = topNode.acceptForward(this, traversedLattice)
+                                    .get(0);
+                topNode = topNode.out().get(0);
+            }
+            return traversedLattice;
         }
 
     }
 
+    /**
+     * An abstract interpreter operating on three types of values:
+     * <ol>
+     *  <li> Concrete constants
+     *  <li> Undefined variables   (top)
+     *  <li> Poly-valued variables (bot)
+     * <ol>
+     *
+     */
     private static final class AbstractInterpreter implements MyIRVisitor<VLatticeElement> {
 
         private final LatticeElement env;
@@ -408,11 +464,16 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 return VLatticeElement.bot;
             } else {
                 // they're both values
-                long value = BinOpInterpreter.interpret(
-                    n.opType(),
-                    left.value(),
-                    right.value());
-                return VLatticeElement.value(value);
+                if ((n.opType() == OpType.MOD || n.opType() == OpType.DIV)
+                        && right.value() == 0) {
+                    return VLatticeElement.bot;
+                } else {
+                    long value = BinOpInterpreter.interpret(
+                            n.opType(),
+                            left.value(),
+                            right.value());
+                    return VLatticeElement.value(value);
+                }
             }
         }
 
@@ -443,7 +504,11 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
 
         @Override
         public VLatticeElement visit(IRTemp n) {
-            return env.getValue(n.name());
+            if (isAnArg(n.name())) {
+                return VLatticeElement.bot;
+            } else {
+                return env.getValue(n.name());
+            }
         }
 
         @Override

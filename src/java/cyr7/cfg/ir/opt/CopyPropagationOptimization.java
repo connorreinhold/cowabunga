@@ -2,6 +2,7 @@ package cyr7.cfg.ir.opt;
 
 import java.util.ArrayDeque;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +13,7 @@ import java.util.stream.Collectors;
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis;
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis.CopyPropLattice;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -19,6 +21,7 @@ import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRCallStmt;
@@ -59,7 +62,7 @@ public class CopyPropagationOptimization {
             visited.add(next);
 
             for (CFGNode out: next.out()) {
-                if (!visited.contains(out)) {
+                if (!visited.contains(out) && !nextNodes.contains(out)) {
                     nextNodes.add(out);
                 }
             }
@@ -87,6 +90,7 @@ public class CopyPropagationOptimization {
             final var call = new IRCallStmt(n.location(), n.call.collectors(),
                     n.call.target(), args);
             n.call = call;
+            n.refreshDfaSets();
             return n;
         }
 
@@ -98,6 +102,7 @@ public class CopyPropagationOptimization {
 
             final var condition = IRTempReplacer.replace(n.cond, lattice.copies);
             n.cond = condition;
+            n.refreshDfaSets();
             return n;
         }
 
@@ -107,17 +112,26 @@ public class CopyPropagationOptimization {
 
             final var value = IRTempReplacer.replace(n.value, lattice.copies);
             n.value = value;
+            n.refreshDfaSets();
             return n;
         }
 
         @Override
         public CFGNode visit(CFGMemAssignNode n) {
             final var lattice = this.result.get(n);
-
             final var value = IRTempReplacer.replace(n.value, lattice.copies);
             final var mem = IRTempReplacer.replace(n.target, lattice.copies);
             n.value = value;
             n.target = mem;
+            n.refreshDfaSets();
+            return n;
+        }
+
+        @Override
+        public CFGNode visit(CFGBlockNode n) {
+            final var lattice = new HashMap<>(this.result.get(n).copies);
+            n.block = new CFGBlockVarReplacementVisitor(lattice, n).replaceBlock();
+            n.refreshDfaSets();
             return n;
         }
 
@@ -135,6 +149,88 @@ public class CopyPropagationOptimization {
         public CFGNode visit(CFGSelfLoopNode n) {
             return n;
         }
+
+        private static class CFGBlockVarReplacementVisitor implements IrCFGVisitor<CFGNode> {
+
+            private final Map<String, String> copies;
+            private final CFGNode topNode;
+
+            public CFGBlockVarReplacementVisitor(Map<String, String> copies, CFGBlockNode node) {
+                this.copies = new HashMap<>(copies);
+                this.topNode = node.block;
+            }
+
+            public CFGNode replaceBlock() {
+                var nextNode = topNode;
+                while (!(nextNode instanceof CFGStubNode)) {
+                    nextNode = nextNode.accept(this);
+                }
+                return topNode;
+            }
+
+            @Override
+            public CFGNode visit(CFGCallNode n) {
+                final var updatedArgs = n.call.args().stream().map(arg -> {
+                    return IRTempReplacer.replace(arg, copies);
+                }).collect(Collectors.toList());
+                n.call = new IRCallStmt(n.location(),
+                        n.call.collectors(), n.call.target(), updatedArgs);
+                n.refreshDfaSets();
+
+                copies.keySet().removeAll(n.call.collectors());
+                copies.values().removeAll(n.call.collectors());
+                return n.outNode();
+            }
+
+            @Override
+            public CFGNode visit(CFGVarAssignNode n) {
+                n.value = IRTempReplacer.replace(n.value, copies);
+                n.refreshDfaSets();
+
+                copies.keySet().removeAll(n.kills());
+                copies.values().removeAll(n.kills());
+                copies.putAll(n.gens());
+                return n.outNode();
+            }
+
+            @Override
+            public CFGNode visit(CFGMemAssignNode n) {
+                n.target = IRTempReplacer.replace(n.target, copies);
+                n.value = IRTempReplacer.replace(n.value, copies);
+                n.refreshDfaSets();
+
+                copies.keySet().removeAll(n.kills());
+                copies.values().removeAll(n.kills());
+                return n.outNode();
+            }
+
+
+            @Override
+            public CFGNode visit(CFGReturnNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGStartNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGSelfLoopNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGBlockNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+
+            @Override
+            public CFGNode visit(CFGIfNode n) {
+                throw new AssertionError("Node not allowed in block");
+            }
+        }
+
     }
 
 }

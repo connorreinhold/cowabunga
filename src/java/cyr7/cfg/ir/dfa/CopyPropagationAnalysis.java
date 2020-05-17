@@ -2,18 +2,19 @@ package cyr7.cfg.ir.dfa;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.CopyPropagationAnalysis.CopyPropLattice;
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
-import cyr7.ir.nodes.IRTemp;
 
 public enum CopyPropagationAnalysis implements
         ForwardDataflowAnalysis<CopyPropLattice> {
@@ -24,6 +25,9 @@ public enum CopyPropagationAnalysis implements
         return CopyPropLattice.topElement();
     }
 
+    /**
+     * Transfer function: gen[n] U (in[n] - kill[n])
+     */
     @Override
     public ForwardTransferFunction<CopyPropLattice> transfer() {
         return new ForwardTransferFunction<CopyPropLattice>() {
@@ -33,10 +37,9 @@ public enum CopyPropagationAnalysis implements
                 Map<String, String> updated = new HashMap<>(in.copies);
                 // Kill all previous copies that map to the newly defined
                 // variable.
-                n.call.collectors().forEach(def -> {
-                    updated.remove(def);
-                });
-                updated.values().removeAll(n.call.collectors());
+                Set<String> defs = n.defs();
+                defs.forEach(updated::remove);
+                updated.values().removeAll(defs);
                 return new CopyPropLattice(updated);
             }
 
@@ -70,12 +73,8 @@ public enum CopyPropagationAnalysis implements
                 // Kill all previous copies that map to the newly defined
                 // variable.
                 updated.remove(n.variable);
-                updated.values().removeAll(Collections.singleton(n.variable));
-                if (n.value instanceof IRTemp) {
-                    String source = ((IRTemp)n.value).name();
-                    updated.put(n.variable, source);
-                }
-
+                updated.values().removeAll(n.kills());
+                updated.putAll(n.gens());
                 return new CopyPropLattice(updated);
             }
 
@@ -83,6 +82,17 @@ public enum CopyPropagationAnalysis implements
             public CopyPropLattice transfer(CFGSelfLoopNode n,
                     CopyPropLattice in) {
                 return in.clone();
+            }
+
+            @Override
+            public CopyPropLattice transfer(CFGBlockNode n,
+                    CopyPropLattice in) {
+                var topNode = n.block;
+                while (!(topNode instanceof CFGStubNode)) {
+                    in = topNode.acceptForward(this, in).get(0);
+                    topNode = topNode.out().get(0);
+                }
+                return in;
             }
         };
     }
@@ -94,13 +104,10 @@ public enum CopyPropagationAnalysis implements
     @Override
     public CopyPropLattice meet(CopyPropLattice lhs, CopyPropLattice rhs) {
         Map<String, String> updated = new HashMap<>(lhs.copies);
-        for (String key: new HashSet<>(updated.keySet())) {
-            if (!rhs.copies.containsKey(key)) {
-                updated.remove(key);
-            } else if (!rhs.copies.get(key).equals(updated.get(key))) {
-                updated.remove(key);
-            }
-        }
+        updated.keySet().removeIf(key -> {
+            return !rhs.copies.containsKey(key)
+                    || !rhs.copies.get(key).equals(updated.get(key));
+        });
         return new CopyPropLattice(updated);
     }
 
@@ -124,18 +131,37 @@ public enum CopyPropagationAnalysis implements
         }
 
         /**
-         * Maps the value to the definition.
+         * Maps the definition to the value.
          * <p>
-         * Example: y = x is mapped as {x --> y}
+         * Example: y = x is mapped as {y --> x}
          */
         public final Map<String, String> copies;
 
+
+        /**
+         * Inverse of {@code copies} mapping.
+         */
+//        public final Map<String, Set<String>> inverseOfCopies;
+
+
         private CopyPropLattice() {
             this.copies = Collections.unmodifiableMap(new HashMap<>());
+//            this.inverseOfCopies = Collections.unmodifiableMap(new HashMap<>());
         }
 
         protected CopyPropLattice(Map<String, String> copies) {
             this.copies = Collections.unmodifiableMap(copies);
+
+//            Map<String, Set<String>> inverted = new HashMap<>();
+//            copies.forEach((k, v) -> {
+//                if (inverted.containsKey(v)) {
+//                    inverted.get(v).add(k);
+//                } else {
+//                    inverted.put(v, new HashSet<>());
+//                    inverted.get(v).add(k);
+//                }
+//            });
+//            this.inverseOfCopies = Collections.unmodifiableMap(inverted);
         }
 
         @Override

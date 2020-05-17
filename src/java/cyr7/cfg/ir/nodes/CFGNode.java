@@ -2,6 +2,8 @@ package cyr7.cfg.ir.nodes;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
@@ -11,6 +13,16 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 public abstract class CFGNode {
 
     protected final List<CFGNode> in;
+
+    protected void repOk() {
+        for (CFGNode n: this.out()) {
+            if (!n.in().contains(this)) throw new RuntimeException();
+        }
+        for (CFGNode n: this.in()) {
+            if (!n.out().contains(this))
+                throw new RuntimeException();
+        }
+    }
 
     private final Location location;
 
@@ -48,5 +60,14 @@ public abstract class CFGNode {
     }
 
     public abstract void replaceOutEdge(CFGNode previous, CFGNode newTarget);
+
+
+    public abstract Set<String> defs();
+    public abstract Set<String> uses();
+
+    public abstract Map<String, String> gens();
+    public abstract Set<String> kills();
+
+    public abstract void refreshDfaSets();
 
 }
