@@ -233,6 +233,13 @@ public abstract class TestProgram {
         runAssemblyTest(TilerConf.COMPLEX, OptConfig.of(Optimization.REG));
     }
 
+    @Timeout(value=60) // seconds
+    @EnabledOnOs({OS.LINUX})
+    @Test
+    protected void testRegisterAllocatorWithOptimizations() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, OptConfig.allEnabled());
+    }
+
     // Source:
     // https://stackoverflow.com/questions/28795440/check-if-a-new-line-exists-at-end-of-file
     private boolean newLineExists(File file) throws IOException {
