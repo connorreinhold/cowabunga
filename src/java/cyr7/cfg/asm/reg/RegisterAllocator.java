@@ -191,9 +191,7 @@ final class RegisterAllocator {
     private void build() {
         AsmCFGConstructor constructor = new AsmCFGConstructor(functionBody);
         AsmCFGStartNode cfg = constructor.constructAsmCFG();
-        AsmCFGUtil.debugPrintDotForFunctionAsm(cfg);
         new AsmCFGUnreachableNodeCleaner().removeUnreachableNodes(cfg);
-        AsmCFGUtil.debugPrintDotForFunctionAsm(cfg);
         Map<AsmCFGNode, Set<? extends ASMTempRegArg>> liveInVariables
             = WorklistAnalysis.analyze(cfg, new LiveVariableAnalysis(mangledName));
 
@@ -211,17 +209,17 @@ final class RegisterAllocator {
             }
         }
 
-        CLI.lazyDebugPrint(() -> {
-            CLI.debugPrint("<-- LIVE VARIABLE ANALYSIS --> ");
-            AsmCFGUtil.debugOutputDotForAnalysis(cfg, node -> {
-                if (liveOutVariables.containsKey(node)) {
-                    return liveOutVariables.get(node).stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
-                } else {
-                    return "None";
-                }
-            });
-            CLI.debugPrint("<-- LIVE VARIABLE ANALYSIS --> ");
-        });
+//        CLI.lazyDebugPrint(() -> {
+//            CLI.debugPrint("<-- LIVE VARIABLE ANALYSIS --> ");
+//            AsmCFGUtil.debugOutputDotForAnalysis(cfg, node -> {
+//                if (liveOutVariables.containsKey(node)) {
+//                    return liveOutVariables.get(node).stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", "));
+//                } else {
+//                    return "None";
+//                }
+//            });
+//            CLI.debugPrint("<-- LIVE VARIABLE ANALYSIS --> ");
+//        });
 
         graph = new InterferenceGraph(PRECOLORED, selectStack, coalescedNodes);
         for (var entry : liveOutVariables.entrySet()) {
