@@ -62,7 +62,7 @@ public class IRUtil {
                     alt.put(functionName, optimizedCfg);
                 });
                 final var alternateIR =
-                        CFGFlattener.flatten(compUnit.location(), compUnit.name(), alt);
+                        CFGFlattener.flatten(alt, compUnit);
                 compUnit = alternateIR;
             }
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();

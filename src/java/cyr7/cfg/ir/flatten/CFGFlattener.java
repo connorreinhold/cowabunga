@@ -14,17 +14,19 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGFlattener {
 
-    public static IRCompUnit flatten(Location location, String filename,
-                Map<String, CFGStartNode> cfgMap) {
+    private CFGFlattener() {}
+
+    public static IRCompUnit flatten(Map<String, CFGStartNode> cfgMap,
+                IRCompUnit compUnit) {
         Map<String, IRFuncDecl> functions = new HashMap<>();
         IdGenerator generator = new DefaultIdGenerator();
         cfgMap.forEach((functionName, startNode) -> {
             IRSeq flattened = flatten(startNode, generator);
             IRFuncDecl function = new IRFuncDecl(startNode.location(),
-                        functionName, flattened);
+                        functionName, flattened, compUnit.getFunction(functionName).type());
             functions.put(functionName, function);
         });
-        return new IRCompUnit(location, filename, functions);
+        return new IRCompUnit(compUnit.location(), compUnit.name(), functions);
     }
 
     public static IRSeq flatten(CFGStartNode root, IdGenerator generator) {
