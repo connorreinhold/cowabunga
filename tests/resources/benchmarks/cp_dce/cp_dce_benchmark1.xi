@@ -5,7 +5,8 @@ main(args: int[][]) {
         a: int = 13;  // Copy propagation in loops
         b: int = a;
         c: int = b;
-        a = c;
+        d: int = c;
+        a = d;
         i = i + a;
     }
     a = randomCall(1,2,3);
@@ -14,6 +15,6 @@ main(args: int[][]) {
 
 randomCall(a: int, b: int, c: int): int {
     // Copy propagate dead assignments
-    x: int = a; y: int = b; z: int = c;
+    v: int = b; w: int = a; x: int = a; y: int = b; z: int = c;
     return x + y + z;
 }
