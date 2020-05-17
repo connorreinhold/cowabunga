@@ -48,17 +48,6 @@ public class IRUtil {
         final var functionToBlocks =
                 TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
         final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
-        if (optConfig.cf()) {
-            // This is here if we want to use CFGs without Blocks.
-//                compUnit = TraceOptimizer.optimize(compUnit, generator);
-//                final var alt = CFGConstructor.constructCFG(compUnit);
-            alt.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = alt.get(functionName);
-                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-                alt.put(functionName, optimizedCfg);
-            });
-        }
         if (optConfig.cp()) {
             alt.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = alt.get(functionName);
@@ -77,7 +66,6 @@ public class IRUtil {
         if (optConfig.cf()) {
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         }
-
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
 

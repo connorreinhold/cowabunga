@@ -35,7 +35,7 @@ import cyr7.x86.ASMUtil.TilerConf;
 public class CLI {
 
     private static final Optimization[] SUPPORTED_OPTIMIZATIONS = {
-        Optimization.CF, Optimization.REG
+        Optimization.CF, Optimization.REG, Optimization.DCE, Optimization.CP
     };
 
     final static private String usage = "xic [options] <source files>";
