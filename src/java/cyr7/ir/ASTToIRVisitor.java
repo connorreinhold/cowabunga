@@ -912,13 +912,7 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         if (n.expr instanceof LiteralIntExprNode) {
             BigInteger literal = new BigInteger(((LiteralIntExprNode) n.expr).contents);
             if (literal.bitLength() == 64) {
-                return OneOfTwo.ofFirst(make.IRBinOp(IRBinOp.OpType.SUB,
-                        make.IRBinOp(IRBinOp.OpType.SUB,
-                                make.IRConst(0),
-                                make.IRConst(literal.subtract(new BigInteger("1")).longValue())
-                                ),
-                        make.IRConst(1)
-                ));
+                return OneOfTwo.ofFirst(make.IRConst(Long.MIN_VALUE));
             }
         }
 

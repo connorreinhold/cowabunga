@@ -1,4 +1,0 @@
-Pass: binop
-Pass: call args
-Pass: assign
-Pass: assign2

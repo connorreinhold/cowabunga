@@ -9,7 +9,7 @@ public class TestArrayClobber extends TestProgram {
 
     @Override
     protected String expected() {
-        return "No Clobbering: Array\n" +
+        return "Clobbered: Array\n" +
                 "No Clobbering: Int\n";
     }
 }

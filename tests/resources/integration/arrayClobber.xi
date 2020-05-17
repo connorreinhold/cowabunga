@@ -2,7 +2,7 @@ use io
 use conv
 assert(b:bool, message:int[]) {
     if (b) println("No Clobbering: " + message)
-    else { println("Clobbered 💀: " + message) }
+    else { println("Clobbered: " + message) }
 }
 
 inc(a:int[]): int { a[0] = a[0] + 1 return a[0] }
