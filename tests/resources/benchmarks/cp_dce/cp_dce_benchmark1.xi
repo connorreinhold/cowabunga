@@ -11,7 +11,7 @@ main(args: int[][]) {
     }
     a = randomCall(1,2,3);
     z: int = {1, 2, 3, 4, 5, 6, 7}[a];
-    if (z != 7) z = {}[0]; else return;
+    if (z != 7) z = {}[0]; else { return; }
 }
 randomCall(a: int, b: int, c: int): int {
     // Copy propagate dead assignments
