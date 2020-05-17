@@ -12,7 +12,7 @@ public class TestPrintSpam extends TestProgram {
     @Override
     protected String expected() {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 5_000; i++) {
+        for (int i = 0; i < 1_000; i++) {
             sb.append("Hello World!").append("\n");
         }
         return sb.toString();
@@ -40,6 +40,11 @@ public class TestPrintSpam extends TestProgram {
     @Override
     void testLirAllEnabled() throws Exception {
         super.testLirAllEnabled();
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocator() throws Exception {
     }
 
 }

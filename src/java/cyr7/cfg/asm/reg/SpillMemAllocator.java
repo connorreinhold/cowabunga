@@ -38,6 +38,10 @@ final class SpillMemAllocator {
         newTemps.clear();
     }
 
+    public void addNewTemp(ASMTempRegArg temp) {
+        newTemps.add(temp);
+    }
+
     public Set<ASMTempRegArg> newTemps() {
         return Collections.unmodifiableSet(newTemps);
     }

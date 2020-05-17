@@ -52,4 +52,8 @@ final class Moves {
         }
     }
 
+    public void clearMoveList() {
+        nodeToMoves.clear();
+    }
+
 }

@@ -1,10 +1,11 @@
 package cyr7.integration.galeshapley;
 
-import cyr7.integration.Run.RunConfiguration;
-import cyr7.integration.TestProgram;
+import static cyr7.integration.galeshapley.TestGaleShapley0.parseGaleShapleyArgs;
+
 import org.junit.jupiter.api.Tag;
 
-import static cyr7.integration.galeshapley.TestGaleShapley0.parseGaleShapleyArgs;
+import cyr7.integration.Run.RunConfiguration;
+import cyr7.integration.TestProgram;
 
 @Tag("core")
 public class TestGaleShapley3 extends TestProgram {

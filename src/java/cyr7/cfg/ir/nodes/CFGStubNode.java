@@ -1,6 +1,8 @@
 package cyr7.cfg.ir.nodes;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
@@ -49,5 +51,28 @@ public class CFGStubNode extends CFGNode {
     public CFGNode copy(List<CFGNode> out) {
         throw new UnsupportedOperationException(
                 "A self loop cannot be copied");
+    }
+    public Set<String> defs() {
+        throw new AssertionError("Stub node has no definition set");
+    }
+
+    @Override
+    public Set<String> uses() {
+        throw new AssertionError("Stub node has no use set");
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        throw new AssertionError("Stub node has no gen mapping");
+    }
+
+    @Override
+    public Set<String> kills() {
+        throw new AssertionError("Stub node has no kill set");
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        throw new AssertionError("Stub node has no dfa sets");
     }
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -17,10 +18,9 @@ import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
-import cyr7.x86.pattern.BiPatternBuilder;
 import cyr7.ir.nodes.IRConst;
-import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.x86.pattern.BiPatternBuilder;
 
 public class BasicInductionVariableVisitor
         implements IrCFGVisitor<Optional<Void>> {
@@ -33,9 +33,9 @@ public class BasicInductionVariableVisitor
 
     // Pass in the set of nodes that form the loop.
     public BasicInductionVariableVisitor(Set<CFGNode> reachable) {
-        this.visited = new HashSet<CFGNode>();
-        this.invalid = new HashSet<String>();
-        this.ivStrideMap = new HashMap<String, Long>();
+        this.visited = new HashSet<>();
+        this.invalid = new HashSet<>();
+        this.ivStrideMap = new HashMap<>();
         this.reachable = reachable;
     }
 
@@ -74,7 +74,7 @@ public class BasicInductionVariableVisitor
             n.out().get(0).accept(this);
             return Optional.empty();
         }
-        
+
         var tempPlusConst = BiPatternBuilder
                 .left()
                 .instOf(IRTemp.class)
@@ -83,7 +83,7 @@ public class BasicInductionVariableVisitor
                 .instOf(IRConst.class)
                 .finish()
                 .enableCommutes();
-        
+
         var tempMinusConst = BiPatternBuilder
                 .left()
                 .instOf(IRTemp.class)
@@ -94,7 +94,7 @@ public class BasicInductionVariableVisitor
 
         if (n.value instanceof IRBinOp) {
             IRBinOp binOp = (IRBinOp) n.value;
-            if (binOp.opType() == OpType.ADD && 
+            if (binOp.opType() == OpType.ADD &&
                     tempPlusConst.matches(new Object[]{binOp.left(), binOp.right()})) {
                 ivStrideMap.put(n.variable, tempPlusConst.rightObj().value());
             } else if (binOp.opType() == OpType.SUB &&
@@ -106,12 +106,12 @@ public class BasicInductionVariableVisitor
         } else {
             invalid.add(n.variable);
         }
-        
+
         visited.add(n);
         n.out().get(0).accept(this);
         return Optional.empty();
     }
-    
+
     @Override
     public Optional<Void> visit(CFGMemAssignNode n) {
         if (visited.contains(n) || !reachable.contains(n)) {
@@ -140,5 +140,11 @@ public class BasicInductionVariableVisitor
     @Override
     public Optional<Void> visit(CFGSelfLoopNode n) {
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CFGBlockNode n) {
+        throw new UnsupportedOperationException("Basic Induction Variable"
+                + " Visitor does not have support for basic blocks");
     }
 }

@@ -1,5 +1,13 @@
 package cyr7.cfg.ir.dot;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -10,13 +18,6 @@ import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import polyglot.util.Pair;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class IrCFGDotVisitor implements IrCFGVisitor<Optional<Void>> {
 
@@ -114,6 +115,15 @@ public class IrCFGDotVisitor implements IrCFGVisitor<Optional<Void>> {
 
     @Override
     public Optional<Void> visit(CFGSelfLoopNode n) {
+        if (nodeToLabel.containsKey(n)) {
+            return Optional.empty();
+        }
+        addDotInfo(n);
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CFGBlockNode n) {
         if (nodeToLabel.containsKey(n)) {
             return Optional.empty();
         }

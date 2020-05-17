@@ -1,6 +1,9 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
@@ -15,6 +18,7 @@ public class CFGStartNode extends CFGNode {
         super(location);
         this.out = out;
         this.updateIns();
+        repOk();
     }
 
     @Override
@@ -40,6 +44,7 @@ public class CFGStartNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
+        repOk();
     }
 
     @Override
@@ -61,5 +66,34 @@ public class CFGStartNode extends CFGNode {
     public CFGNode copy(List<CFGNode> out) {
         assert out.size() == 1;
         return new CFGStartNode(this.location(), out.get(0));
+    }
+
+    @Override
+    public Set<String> defs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> uses() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        return Collections.emptyMap();
+    }
+
+    /**
+     * Although the returned set is empty, this {@link CFGStartNode node}
+     * actually kills everything.
+     */
+    @Override
+    public Set<String> kills() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        return;
     }
 }

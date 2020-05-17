@@ -5,14 +5,13 @@ import cyr7.ir.IdGenerator;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.x86.abst.ASMAbstract;
-import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.reg_allocator.ASMGenerator;
+import cyr7.x86.reg_allocator.ASMTrivialRegAllocGenerator;
 import cyr7.x86.tiler.TilerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public final class ASMRegAllocGenerator implements ASMGenerator {
 
@@ -27,85 +26,56 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
 
     @Override
     public List<ASMLine> generate(IRCompUnit compUnit) {
+        ASMTrivialRegAllocGenerator trivialGenerator
+            = new ASMTrivialRegAllocGenerator(tilerFactory, generator);
         List<ASMLine> lines = new ArrayList<>();
 
         for (IRFuncDecl funcDecl : compUnit.functions().values()) {
-            lines.addAll(generate(funcDecl));
+            try {
+                lines.addAll(generate(funcDecl));
+            } catch (RegisterAllocationFailedException e) {
+                lines.addAll(trivialGenerator.generate(funcDecl));
+            }
         }
 
         return lines;
     }
 
-    private List<ASMLine> generate(IRFuncDecl funcDecl) {
+    @Override
+    public List<ASMLine> generate(IRFuncDecl funcDecl) throws RegisterAllocationFailedException {
         List<ASMLine> abstractASM
             = ASMAbstract.generateBody(funcDecl, generator, tilerFactory);
 
-//        System.out.println("--- ABSTRACT ASSEMBLY ---");
-//        print(abstractASM);
-
-        SpillMemAllocator spillAllocator = new SpillMemAllocator();
-        int count = 0;
-        RegisterAllocator registerAllocator;
-        do {
-            registerAllocator
-                = new RegisterAllocator(abstractASM, funcDecl.name(), generator);
-            registerAllocator.run();
-
-            CLI.debugPrint("Spilled nodes: " + registerAllocator.spilledNodes().stream().map(ASMArg::getIntelArg).collect(Collectors.joining(", ")));
-            if (!registerAllocator.spilledNodes().isEmpty()) {
-                SpillProgramRewriter rewriter = new SpillProgramRewriter(
-                    generator,
-                    abstractASM,
-                    registerAllocator.spilledNodes(),
-                    spillAllocator);
-                rewriter.run();
-
-                abstractASM = rewriter.rewritten();
-
-                CLI.debugPrint("Iterations: " + ++count);
-            }
-        } while (!registerAllocator.spilledNodes().isEmpty());
+        RegisterAllocator registerAllocator
+            = new RegisterAllocator(abstractASM, funcDecl.name(), generator);
+        registerAllocator.run();
 
         CLI.debugPrint("--- REGISTER ALLOCATED ---");
         print(registerAllocator.program());
-        CLI.debugPrint(registerAllocator.coalescedMoves().toString());
-
-//        var keyvalues = registerAllocator.coloring().entrySet().stream().sorted(Comparator.comparing(x -> x.getKey().getIntelArg())).collect(Collectors.toList());
-//        for (var keyvalue : keyvalues) {
-//            System.out.println(keyvalue.getKey().getIntelArg() + " -> " + registerAllocator.registers()[keyvalue.getValue()].getIntelArg());
-//        }
-
-        FinalProgramRewriter rewriter = new FinalProgramRewriter(
-            registerAllocator.precolored(),
-            registerAllocator.program(),
-            registerAllocator.coloring(),
-            registerAllocator.registers(),
-            registerAllocator.coalescedMoves(),
-            registerAllocator.alias());
-        rewriter.run();
 
         List<ASMLine> prologue = ASMAbstract.createPrologue(
             funcDecl.name(),
-            spillAllocator.allocatedTemps());
+            registerAllocator.numSpilledTemps());
 
         List<ASMLine> epilogue = ASMAbstract.createEpilogue(
-            spillAllocator.allocatedTemps());
+            registerAllocator.numSpilledTemps());
 
         List<ASMLine> lines = new ArrayList<>(
-            prologue.size() + rewriter.rewritten().size() + epilogue.size());
+            prologue.size() + registerAllocator.program().size() + epilogue.size());
         lines.addAll(prologue);
-        lines.addAll(rewriter.rewritten());
+        lines.addAll(registerAllocator.program());
         lines.addAll(epilogue);
         CLI.debugPrint("--- FINAL PROGRAM ---");
         print(lines);
+        CLI.debugPrint("--- END FINAL PROGRAM ---");
         return lines;
     }
 
-    private void print(List<ASMLine> lines) {
+    public static void print(List<ASMLine> lines) {
         for (int i = 0; i < lines.size(); i++) {
             CLI.debugPrint(String.format("%2d: %s", i, lines.get(i).getIntelAssembly()));
         }
-        System.out.flush();
+        System.err.flush();
     }
 
 }

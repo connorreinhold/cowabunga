@@ -114,8 +114,7 @@ public class CFGConstructorVisitor implements MyIRVisitor<CFGNode> {
 
     @Override
     public CFGNode visit(IRCJump n) {
-        assert !n.hasFalseLabel();  // IR should be lowered, meaning false
-                                    // branches are fall-throughs.
+        // IR should be lowered, meaning false branches are fall-throughs.
         String trueBranch = n.trueLabel();
         if (this.labelToCFG.containsKey(trueBranch)) {
             return new CFGIfNode(n.location(),

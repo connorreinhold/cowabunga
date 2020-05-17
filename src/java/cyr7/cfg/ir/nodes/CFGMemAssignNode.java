@@ -1,11 +1,16 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.ir.nodes.IRExpr;
+import cyr7.ir.visit.IRExprVarsVisitor;
+import cyr7.util.Sets;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGMemAssignNode extends CFGNode {
@@ -13,6 +18,8 @@ public class CFGMemAssignNode extends CFGNode {
     public IRExpr target;
     public IRExpr value;
     private CFGNode out;
+
+    private Set<String> useSet;
 
     public CFGMemAssignNode(
         Location location,
@@ -24,7 +31,11 @@ public class CFGMemAssignNode extends CFGNode {
         this.target = target;
         this.value = value;
         this.out = out;
+
+        this.refreshDfaSets();
+
         this.updateIns();
+        repOk();
     }
 
     public CFGNode outNode() {
@@ -50,6 +61,7 @@ public class CFGMemAssignNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
+        repOk();
     }
 
     @Override
@@ -73,5 +85,31 @@ public class CFGMemAssignNode extends CFGNode {
     public CFGNode copy(List<CFGNode> out) {
         assert out.size() == 1;
         return new CFGMemAssignNode(this.location(), target, value, out.get(0));
+    }
+    
+    public Set<String> defs() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public Set<String> uses() {
+        return Collections.unmodifiableSet(this.useSet);
+    }
+
+    @Override
+    public Map<String, String> gens() {
+        return Collections.emptyMap();
+    }
+
+    @Override
+    public Set<String> kills() {
+        return Collections.emptySet();
+    }
+
+    @Override
+    public void refreshDfaSets() {
+        this.useSet = Sets.union(
+                value.accept(IRExprVarsVisitor.INSTANCE),
+                target.accept(IRExprVarsVisitor.INSTANCE));
     }
 }

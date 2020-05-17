@@ -1,5 +1,6 @@
 package cyr7.cfg.asm.reg;
 
+import cyr7.cli.CLI;
 import cyr7.x86.asm.ASMAddrExpr;
 import cyr7.x86.asm.ASMArg;
 import cyr7.x86.asm.ASMInstr;
@@ -26,7 +27,7 @@ final class FinalProgramRewriter implements Runnable {
     private final HashSet<Integer> coalescedMoves;
     private final Alias alias;
 
-    private final List<ASMLine> rewritten = new ArrayList<>();
+    private final ArrayList<ASMLine> rewritten = new ArrayList<>();
 
     public FinalProgramRewriter(
         Set<ASMTempRegArg> precolored,
@@ -44,7 +45,7 @@ final class FinalProgramRewriter implements Runnable {
         this.alias = alias;
     }
 
-    public List<ASMLine> rewritten() {
+    public ArrayList<ASMLine> rewritten() {
         return rewritten;
     }
 
@@ -56,6 +57,7 @@ final class FinalProgramRewriter implements Runnable {
 
         for (int i = program.size() - 2; i >= 0; i--) {
             if (coalescedMoves.contains(i)) {
+                CLI.debugPrint("Coalesced: " + program.get(i).getIntelAssembly(false, true));
                 continue;
             }
 

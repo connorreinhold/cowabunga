@@ -3,10 +3,10 @@ package cyr7.ir.cfg;
 import java.util.HashMap;
 import java.util.Map;
 
-import cyr7.cfg.ir.nodes.CFGNode;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.ir.constructor.CFGConstructor;
+import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.ir.nodes.IRCJump;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRConst;
@@ -30,7 +30,7 @@ class TestGenerateBasicCFG {
 
         var comp = new IRCompUnit(loc, "base", map);
 
-        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
 
         System.out.println(result);
 
@@ -49,7 +49,7 @@ class TestGenerateBasicCFG {
 
         var comp = new IRCompUnit(loc, "base", map);
 
-        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
 
         System.out.println(result);
     }
@@ -69,7 +69,7 @@ class TestGenerateBasicCFG {
 
         var comp = new IRCompUnit(loc, "base", map);
 
-        Map<String, CFGNode> result = CFGConstructor.constructCFG(comp);
+        Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
 
         System.out.println(result);
     }

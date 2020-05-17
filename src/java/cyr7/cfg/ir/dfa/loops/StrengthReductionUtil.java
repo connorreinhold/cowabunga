@@ -6,42 +6,24 @@ import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.Reader;
 import java.io.Writer;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.Stack;
-import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.CFGUtil;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
-import cyr7.cfg.ir.nodes.CFGCallNode;
-import cyr7.cfg.ir.nodes.CFGIfNode;
-import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
-import cyr7.cfg.ir.nodes.CFGReturnNode;
-import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
-import cyr7.cfg.ir.nodes.CFGVarAssignNode;
-import cyr7.cfg.ir.opt.IRTempToConstant;
-import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import cyr7.cli.OptConfig;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
-import cyr7.ir.IdGenerator;
-import cyr7.ir.nodes.IRCallStmt;
 import cyr7.ir.nodes.IRCompUnit;
-import cyr7.ir.nodes.IRConst;
-import cyr7.util.Sets;
 
 public class StrengthReductionUtil {
-    
+
     public static void main(String[] args) throws Exception {
         File f = new File("tests/resources/testJunk.xi");
         FileReader fr = new FileReader(f);
@@ -53,12 +35,12 @@ public class StrengthReductionUtil {
             "testJunk.xi",
             null,
             OptConfig.none(),
-            idGenerator
-            );
-        Map<String, CFGNode> cfgResult = CFGConstructor.constructCFG(lowered);
-        CFGStartNode start = (CFGStartNode) cfgResult.get("_Imain_paai");
-        
-        DfaResult<Set<CFGNode>> result = 
+
+            new DefaultIdGenerator());
+        Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
+        CFGStartNode start = cfgResult.get("_Imain_paai");
+
+        DfaResult<Set<CFGNode>> result =
                 WorklistAnalysis.analyze(start, DominatorAnalysis.INSTANCE);
 
         Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
@@ -91,16 +73,16 @@ public class StrengthReductionUtil {
                     for(CFGNode inc: out.in()) {
                         inc.replaceOutEdge(out, newUnrolledHead);
                     }
+
                 }
             }
         }
     }
     
-    
     // Precondition: tail is dominated by head.
     public static Set<CFGNode> backwardsSearch(Set<CFGNode> tailNodes, CFGNode head) {
-        Set<CFGNode> reachable = new HashSet<CFGNode>();
-        Stack<CFGNode> nodes = new Stack<CFGNode>();
+        Set<CFGNode> reachable = new HashSet<>();
+        Stack<CFGNode> nodes = new Stack<>();
         for(CFGNode tail: tailNodes) {
             nodes.push(tail);
         }

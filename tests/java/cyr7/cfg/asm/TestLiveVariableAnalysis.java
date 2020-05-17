@@ -57,7 +57,7 @@ public class TestLiveVariableAnalysis {
             nodes[2]);
         nodes[0] = new AsmCFGStartNode(nodes[1]);
 
-        Map<AsmCFGNode, Set<ASMTempRegArg>> result
+        Map<AsmCFGNode, Set<? extends ASMTempRegArg>> result
             = WorklistAnalysis.analyze((AsmCFGStartNode) nodes[0],
             new LiveVariableAnalysis("_Imain_i"));
 
@@ -67,16 +67,14 @@ public class TestLiveVariableAnalysis {
         assertEquals(liveVariables("b", "c", "e"), result.get(nodes[3]));
         assertEquals(liveVariables("c", "e"), result.get(nodes[4]));
         assertEquals(liveVariables("d"), result.get(nodes[5]));
-        assertEquals(
-            Sets.union(Set.of(ASMReg.RAX), Set.of(ASMConstants.CALLEE_SAVED_REGISTERS)),
-            result.get(nodes[6]));
+        assertEquals(Set.of(ASMReg.RAX), result.get(nodes[6]));
     }
 
     private static Set<ASMTempRegArg> liveVariables(String... tempNames) {
         // union in the callee saved registers
         return Sets.union(
             Arrays.stream(tempNames).map(arg::temp).collect(Collectors.toSet()),
-            Set.of(ASMConstants.CALLEE_SAVED_REGISTERS));
+            Set.of());
     }
 
 }

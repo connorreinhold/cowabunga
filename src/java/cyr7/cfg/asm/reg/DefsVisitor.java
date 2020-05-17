@@ -13,6 +13,7 @@ import cyr7.x86.asm.ASMReg;
 import cyr7.x86.asm.ASMTempRegArg;
 
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
@@ -71,10 +72,15 @@ final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
             case CALLQ:
                 String mangledName = ((ASMLabelArg) instr.args.get(0)).label;
                 // A call defs its return registers and all
-                // non-callee-saved registers (i.e. caller-saved registers)
+                // non-callee-saved registers (i.e. caller-saved registers + arg registers)
                 return Sets.union(
                     MangledNameParser.returnRegisters(mangledName),
-                    Set.of(ASMConstants.CALLER_SAVED_REGISTERS));
+                    Sets.difference(
+                        Sets.union(
+                            Set.of(ASMConstants.CALLER_SAVED_REGISTERS),
+                            Set.of(ASMConstants.ARGUMENT_REGISTERS)
+                        ),
+                        Set.of(ASMReg.RSP, ASMReg.RBP)));
 
             case JMP:
                 return Set.of();
@@ -106,7 +112,9 @@ final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
 
     @Override
     public Set<ASMTempRegArg> visit(AsmCFGStartNode n) {
-        return Collections.emptySet();
+        return Sets.difference(Set.of(
+            ASMConstants.CALLER_SAVED_REGISTERS
+        ), Set.of(ASMReg.RBP, ASMReg.RSP));
     }
 
 }

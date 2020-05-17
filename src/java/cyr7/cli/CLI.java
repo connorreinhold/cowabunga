@@ -12,12 +12,8 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
-import cyr7.cfg.ir.CFGUtil;
-import cyr7.cfg.ir.nodes.CFGNode;
-import cyr7.x86.ASMUtil.TilerConf;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -26,17 +22,20 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
+import cyr7.cfg.ir.CFGUtil;
+import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.ir.IRUtil;
 import cyr7.lexer.LexerUtil;
 import cyr7.parser.ParserUtil;
 import cyr7.typecheck.IxiFileOpener;
 import cyr7.typecheck.TypeCheckUtil;
 import cyr7.x86.ASMUtil;
+import cyr7.x86.ASMUtil.TilerConf;
 
 public class CLI {
 
     private static final Optimization[] SUPPORTED_OPTIMIZATIONS = {
-        Optimization.CF, Optimization.REG
+        Optimization.CF, Optimization.REG, Optimization.DCE, Optimization.CP
     };
 
     final static private String usage = "xic [options] <source files>";
@@ -363,12 +362,12 @@ public class CLI {
     static CommandLine parseCommand(String[] args)
             throws ParseException {
         boolean hasBeenDisabled = false;
+        boolean noModifier = true;
         for (int i = 0; i < args.length; i++) {
             if (args[i].startsWith("-O")) {
                 String optShort = args[i].substring(args[i].indexOf('O') + 1);
-                boolean noModifier = true;
-
                 if (optShort.startsWith("-no-")) {
+                    // Disable only optimization <opt>
                     optShort = optShort.substring(optShort.indexOf("-no-") + 4);
                     noModifier = false;
                 } else if (!hasBeenDisabled) {
@@ -390,6 +389,7 @@ public class CLI {
                     default:
                         break;
                 }
+                args[i] = "";
             }
         }
 
@@ -702,7 +702,7 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    Map<String, CFGNode> functions = CFGUtil.generateAllInitialDot(
+                    Map<String, CFGStartNode> functions = CFGUtil.generateAllInitialDot(
                             input,
                             filename,
                             opener
@@ -726,7 +726,7 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    Map<String, CFGNode> functions =
+                    Map<String, CFGStartNode> functions =
                         CFGUtil.generateAllFinalDot(
                             input,
                             filename,
@@ -734,7 +734,6 @@ public class CLI {
                             optConfig);
                     for (String f: functions.keySet()) {
                         String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_final";
-                        System.out.println(functionFilename);
                         output = getWriter(destinationRoot.getAbsolutePath(),
                                 functionFilename,
                                 "dot");
@@ -809,14 +808,11 @@ public class CLI {
                     input = getReader(filename);
                     output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
                     ASMUtil.writeASM(input, output, filename, opener, optConfig, tiler);
-
-                    if (debugPrintingEnabled) {
-                        input = getReader(filename);
-                        ASMUtil.printDebugASM(input, filename, opener, optConfig);
-                    }
                 } catch (Exception e) {
                     debugPrint(e);
-                    writer.write(e.getMessage());
+                    if (e.getMessage() != null) {
+                        writer.write(e.getMessage());
+                    }
                 }
                 closeIOStreams(input, output);
             }
@@ -870,6 +866,12 @@ public class CLI {
     public static <T> void lazyDebugPrint(T capture, Function<T, String> lazyString) {
         if (debugPrintingEnabled) {
             System.err.println("DEBUG: " + lazyString.apply(capture));
+        }
+    }
+
+    public static <T> void lazyDebugPrint(Runnable runnable) {
+        if (debugPrintingEnabled) {
+            runnable.run();
         }
     }
 
