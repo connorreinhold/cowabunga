@@ -2,7 +2,7 @@ main(args: int[][]) {
     a: int = 150;
     b: int = a;
     arr: int[] = {1,2,3,4,5,6,7,8,9,10}
-    b = doMischievousComp(arr);
+    b = doMischievousComp(arr); // Even though b is not used, func should run.
     if (arr[0] != 1000) {
         // Should not run if doMischievousComp(arr) is kept
         arr[1000] = 12;
