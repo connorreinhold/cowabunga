@@ -90,7 +90,7 @@ public class IRTempReplacer {
         @Override
         public IRExpr visit(IRTemp n) {
             String key = n.name();
-            while (this.mapping.containsKey(key)) {
+            if (this.mapping.containsKey(key)) {
                 key = this.mapping.get(key);
                 n = new IRTemp(n.location(), key);
             }
