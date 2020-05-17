@@ -35,7 +35,7 @@ public final class OptConfig {
         } else {
             return enabledOptimizations
                 .stream()
-                .map(opt -> opt.name().toLowerCase())
+                .map(opt -> "-O" + opt.name().toLowerCase())
                 .collect(Collectors.toList());
         }
     }
