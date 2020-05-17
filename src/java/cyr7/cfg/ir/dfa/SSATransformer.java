@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 import java.util.Set;
 
 import cyr7.cfg.ir.dfa.loops.DominatorAnalysis;
@@ -15,14 +16,13 @@ import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
-import cyr7.cfg.ir.nodes.CFGNodeFactory;
+import cyr7.cfg.ir.nodes.CFGPhiFunction;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
-import cyr7.ir.nodes.IRPhiFuncNode;
 
 public class SSATransformer {
 
@@ -36,8 +36,119 @@ public class SSATransformer {
 
         final var phiFuncsInserted = insertPhiFunctions(phiLocations, start);
 
+        final var varsNamed = RenameVariable.execute(phiFuncsInserted, defsites);
+
         return start;
     }
+
+    private static class RenameVariable {
+
+        private RenameVariable() {}
+
+        public static CFGStartNode execute(final CFGStartNode start,
+                Map<String, Set<CFGNode>> defsites) {
+            final Map<String, Integer> count = new HashMap<>();
+            final Map<String, Deque<Integer>> stack = new HashMap<>();
+            defsites.keySet().forEach(a -> {
+                count.put(a, 0);
+                stack.put(a, new ArrayDeque<>());
+                stack.get(a).push(0);
+            });
+            return nameVariables(count, stack, start);
+        }
+
+        private static CFGStartNode nameVariables(
+                final Map<String, Integer> count,
+                final Map<String, Deque<Integer>> stack,
+                final CFGStartNode start) {
+
+            final Set<CFGNode> visited = new HashSet<>();
+            final Queue<CFGNode> worklist = new ArrayDeque<>();
+            final var visitor = new Visitor(count, stack);
+            worklist.add(start);
+            while (!worklist.isEmpty()) {
+                final var node = worklist.remove();
+                node.accept(visitor);
+                visited.add(node);
+                for (CFGNode out: node.out()) {
+                    if (!visited.contains(out) && !worklist.contains(out)) {
+                        worklist.add(start);
+                    }
+                }
+            }
+            return start;
+        }
+
+        private static class Visitor implements IrCFGVisitor<CFGNode> {
+
+            private final Map<String, Integer> count;
+            private final Map<String, Deque<Integer>> stack;
+
+            public Visitor(final Map<String, Integer> count,
+                    final Map<String, Deque<Integer>> stack) {
+                this.count = count;
+                this.stack = stack;
+            }
+
+            @Override
+            public CFGNode visit(CFGCallNode n) {
+
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGIfNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGVarAssignNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGMemAssignNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGReturnNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGStartNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGSelfLoopNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGBlockNode n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+            @Override
+            public CFGNode visit(CFGPhiFunction n) {
+                // TODO Auto-generated method stub
+                return null;
+            }
+
+        }
+
+    }
+
+
 
     private static CFGStartNode insertPhiFunctions(
             final Map<String, Set<CFGNode>> phiLocations,
@@ -57,9 +168,7 @@ public class SSATransformer {
         });
 
         final var visitor = new PhiFunctionInsertVisitor(requiredPhiFuncMap);
-        requiredPhiFuncMap.keySet().forEach(node -> {
-            node.accept(visitor);
-        });
+        requiredPhiFuncMap.keySet().forEach(node -> node.accept(visitor));
 
         return start;
     }
@@ -75,7 +184,6 @@ public class SSATransformer {
 
         @Override
         public CFGNode visit(CFGCallNode n) {
-            final CFGNodeFactory make = new CFGNodeFactory(n.location());
             final var paramSize = n.in().size();
             if (paramSize > 1 && requiredPhiFuncMap.containsKey(n)) {
                 final var setOfVars = requiredPhiFuncMap.get(n);
@@ -84,8 +192,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                    base = make.VarAssign(var, phi, base);
+                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -101,7 +208,6 @@ public class SSATransformer {
 
         @Override
         public CFGNode visit(CFGIfNode n) {
-            final CFGNodeFactory make = new CFGNodeFactory(n.location());
             final var paramSize = n.in().size();
             if (paramSize > 1 && requiredPhiFuncMap.containsKey(n)) {
                 final var setOfVars = requiredPhiFuncMap.get(n);
@@ -109,8 +215,7 @@ public class SSATransformer {
 
                 if (setOfVars.size() == 1) {
                     for (String var: setOfVars) {
-                        final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                        final var phiNode = make.VarAssign(var, phi, n);
+                        final var phiNode = new CFGPhiFunction(n.location(), paramSize, var, n);
                         for (CFGNode in: incoming) {
                             n.in().remove(in);
                             in.replaceOutEdge(n, phiNode);
@@ -121,8 +226,7 @@ public class SSATransformer {
 
                 CFGNode base = new CFGStubNode();
                 for (String var: setOfVars) {
-                    final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                    base = make.VarAssign(var, phi, base);
+                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, n);
                 for (CFGNode in: incoming) {
@@ -137,7 +241,6 @@ public class SSATransformer {
 
         @Override
         public CFGNode visit(CFGVarAssignNode n) {
-            final CFGNodeFactory make = new CFGNodeFactory(n.location());
             final var paramSize = n.in().size();
             if (paramSize > 1 && requiredPhiFuncMap.containsKey(n)) {
                 final var setOfVars = requiredPhiFuncMap.get(n);
@@ -146,8 +249,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                    base = make.VarAssign(var, phi, base);
+                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -163,7 +265,6 @@ public class SSATransformer {
 
         @Override
         public CFGNode visit(CFGMemAssignNode n) {
-            final CFGNodeFactory make = new CFGNodeFactory(n.location());
             final var paramSize = n.in().size();
             if (paramSize > 1 && requiredPhiFuncMap.containsKey(n)) {
                 final var setOfVars = requiredPhiFuncMap.get(n);
@@ -172,8 +273,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                    base = make.VarAssign(var, phi, base);
+                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -194,7 +294,6 @@ public class SSATransformer {
 
         @Override
         public CFGNode visit(CFGStartNode n) {
-            final CFGNodeFactory make = new CFGNodeFactory(n.location());
             final var paramSize = n.in().size();
             if (paramSize > 1 && requiredPhiFuncMap.containsKey(n)) {
                 final var setOfVars = requiredPhiFuncMap.get(n);
@@ -203,8 +302,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                    base = make.VarAssign(var, phi, base);
+                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -225,7 +323,6 @@ public class SSATransformer {
 
         @Override
         public CFGNode visit(CFGBlockNode n) {
-            final CFGNodeFactory make = new CFGNodeFactory(n.location());
             final var paramSize = n.in().size();
             if (paramSize > 1 && requiredPhiFuncMap.containsKey(n)) {
                 final var setOfVars = requiredPhiFuncMap.get(n);
@@ -233,8 +330,7 @@ public class SSATransformer {
 
                 if (setOfVars.size() == 1) {
                     for (String var: setOfVars) {
-                        final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                        final var phiNode = make.VarAssign(var, phi, n);
+                        final var phiNode = new CFGPhiFunction(n.location(), paramSize, var, n);
                         for (CFGNode in: incoming) {
                             n.in().remove(in);
                             in.replaceOutEdge(n, phiNode);
@@ -244,8 +340,7 @@ public class SSATransformer {
                 }
                 CFGNode base = new CFGStubNode();
                 for (String var: setOfVars) {
-                    final var phi = new IRPhiFuncNode(n.location(), var, paramSize);
-                    base = make.VarAssign(var, phi, base);
+                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, n);
                 for (CFGNode in: incoming) {
@@ -256,6 +351,12 @@ public class SSATransformer {
             } else {
                 return n;
             }
+        }
+
+        @Override
+        public CFGNode visit(CFGPhiFunction n) {
+            // TODO Auto-generated method stub
+            return null;
         }
 
     }

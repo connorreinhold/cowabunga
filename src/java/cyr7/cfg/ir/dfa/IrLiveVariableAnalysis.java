@@ -9,6 +9,7 @@ import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGPhiFunction;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
@@ -104,6 +105,12 @@ public enum IrLiveVariableAnalysis implements BackwardDataflowAnalysis<IrLiveVar
 
         @Override
         public IrLiveVarLattice transfer(CFGBlockNode n, IrLiveVarLattice out) {
+            return transfer(n.uses(), out.liveVars, n.defs());
+        }
+
+        @Override
+        public IrLiveVarLattice transfer(CFGPhiFunction n,
+                IrLiveVarLattice out) {
             return transfer(n.uses(), out.liveVars, n.defs());
         }
     }
