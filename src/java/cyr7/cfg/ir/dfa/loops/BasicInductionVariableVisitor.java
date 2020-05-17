@@ -39,6 +39,10 @@ public class BasicInductionVariableVisitor
         this.reachable = reachable;
     }
 
+    public Map<String, Long> ivStrideMap() {
+        return ivStrideMap;
+    }
+    
     @Override
     public Optional<Void> visit(CFGCallNode n) {
         if (visited.contains(n) || !reachable.contains(n)) {

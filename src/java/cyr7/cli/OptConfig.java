@@ -40,6 +40,10 @@ public final class OptConfig {
         }
     }
 
+    public boolean lu() {
+        return enabledOptimizations.contains(Optimization.LU);
+    }
+    
     public boolean cf() {
         return enabledOptimizations.contains(Optimization.CF);
     }
