@@ -7,6 +7,7 @@ import cyr7.ir.nodes.IRFuncDecl;
 import cyr7.x86.abst.ASMAbstract;
 import cyr7.x86.asm.ASMLine;
 import cyr7.x86.reg_allocator.ASMGenerator;
+import cyr7.x86.reg_allocator.ASMTrivialRegAllocGenerator;
 import cyr7.x86.tiler.TilerFactory;
 
 import java.util.ArrayList;
@@ -25,23 +26,26 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
 
     @Override
     public List<ASMLine> generate(IRCompUnit compUnit) {
+        ASMTrivialRegAllocGenerator trivialGenerator
+            = new ASMTrivialRegAllocGenerator(tilerFactory, generator);
         List<ASMLine> lines = new ArrayList<>();
 
         for (IRFuncDecl funcDecl : compUnit.functions().values()) {
-            lines.addAll(generate(funcDecl));
+            try {
+                lines.addAll(generate(funcDecl));
+            } catch (RegisterAllocationFailedException e) {
+                lines.addAll(trivialGenerator.generate(funcDecl));
+            }
         }
 
         return lines;
     }
 
-    private List<ASMLine> generate(IRFuncDecl funcDecl) {
+    @Override
+    public List<ASMLine> generate(IRFuncDecl funcDecl) throws RegisterAllocationFailedException {
         List<ASMLine> abstractASM
             = ASMAbstract.generateBody(funcDecl, generator, tilerFactory);
 
-//        System.out.println("--- ABSTRACT ASSEMBLY ---");
-//        print(abstractASM);
-
-        print(abstractASM);
         RegisterAllocator registerAllocator
             = new RegisterAllocator(abstractASM, funcDecl.name(), generator);
         registerAllocator.run();

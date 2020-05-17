@@ -808,14 +808,11 @@ public class CLI {
                     input = getReader(filename);
                     output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
                     ASMUtil.writeASM(input, output, filename, opener, optConfig, tiler);
-
-                    if (debugPrintingEnabled) {
-                        input = getReader(filename);
-                        ASMUtil.printDebugASM(input, filename, opener, optConfig);
-                    }
                 } catch (Exception e) {
                     debugPrint(e);
-                    writer.write(e.getMessage());
+                    if (e.getMessage() != null) {
+                        writer.write(e.getMessage());
+                    }
                 }
                 closeIOStreams(input, output);
             }

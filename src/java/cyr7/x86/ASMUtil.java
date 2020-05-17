@@ -58,16 +58,12 @@ public final class ASMUtil {
             IxiFileOpener fileOpener,
             OptConfig optConfig,
             TilerConf tiler
-    ) {
-        try {
-            writer.append(".intel_syntax noprefix").append(System.lineSeparator());
+    ) throws Exception {
+        writer.append(".intel_syntax noprefix").append(System.lineSeparator());
 
-            List<ASMLine> lines = generateASM(reader, filename, fileOpener, optConfig, tiler);
-            for (ASMLine line: lines) {
-                writer.append(line.getIntelAssembly()).append(System.lineSeparator());
-            }
-        } catch (Exception e) {
-            System.out.println(e.getMessage());
+        List<ASMLine> lines = generateASM(reader, filename, fileOpener, optConfig, tiler);
+        for (ASMLine line: lines) {
+            writer.append(line.getIntelAssembly()).append(System.lineSeparator());
         }
     }
 

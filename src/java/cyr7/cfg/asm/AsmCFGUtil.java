@@ -4,8 +4,10 @@ import cyr7.cfg.asm.dot.AsmCFGAnalysisDotVisitor;
 import cyr7.cfg.asm.dot.AsmCFGDotVisitor;
 import cyr7.cfg.asm.nodes.AsmCFGNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
+import cyr7.cli.CLI;
 import polyglot.util.Pair;
 
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
@@ -13,6 +15,14 @@ import java.util.Map;
 import java.util.function.Function;
 
 public final class AsmCFGUtil {
+
+    public static void debugPrintDotForFunctionAsm(AsmCFGStartNode node) {
+        CLI.lazyDebugPrint(() -> {
+            CLI.debugPrint("<-- ASM CFG --> ");
+            outputDotForFunctionAsm(node, new OutputStreamWriter(System.err));
+            CLI.debugPrint("<-- ASM CFG --> ");
+        });
+    }
 
     public static void printDotForFunctionAsm(AsmCFGStartNode node) {
         outputDotForFunctionAsm(node, new OutputStreamWriter(System.out));

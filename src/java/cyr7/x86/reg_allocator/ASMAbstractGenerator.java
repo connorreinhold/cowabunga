@@ -27,17 +27,7 @@ public class ASMAbstractGenerator implements ASMGenerator {
     }
 
     @Override
-    public List<ASMLine> generate(IRCompUnit compUnit) {
-        List<ASMLine> lines = new ArrayList<>();
-
-        for (IRFuncDecl funcDecl : compUnit.functions().values()) {
-            lines.addAll(generate(funcDecl));
-        }
-
-        return lines;
-    }
-
-    private List<ASMLine> generate(IRFuncDecl funcDecl) {
+    public List<ASMLine> generate(IRFuncDecl funcDecl) {
         List<ASMLine> body
             = ASMAbstract.generateBody(funcDecl, generator, tilerFactory);
         List<ASMTempArg> uniqueTemps = uniqueTemps(body);
