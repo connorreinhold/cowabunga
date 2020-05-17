@@ -231,5 +231,4 @@ public class IRBinOp extends IRExpr_c {
         }
         return lhs + operation + rhs;
     }
-
 }

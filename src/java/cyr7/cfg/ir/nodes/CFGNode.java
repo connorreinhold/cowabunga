@@ -48,5 +48,7 @@ public abstract class CFGNode {
     }
 
     public abstract void replaceOutEdge(CFGNode previous, CFGNode newTarget);
+    
+    public abstract CFGNode copy(List<CFGNode> out);
 
 }

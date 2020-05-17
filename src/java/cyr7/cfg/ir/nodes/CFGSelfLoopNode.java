@@ -41,4 +41,9 @@ public class CFGSelfLoopNode extends CFGNode {
                 "The out nodes of a self loop cannot be replaced");
     }
 
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        return new CFGSelfLoopNode();
+    }
+
 }

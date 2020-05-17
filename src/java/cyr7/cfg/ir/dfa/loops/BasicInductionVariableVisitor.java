@@ -25,19 +25,17 @@ import cyr7.ir.nodes.IRTemp;
 public class BasicInductionVariableVisitor
         implements IrCFGVisitor<Optional<Void>> {
 
-    // Keep track of basic induction variables
-    Set<String> inductionVars;
+    // Keep track of basic induction variables mapped to stride
+    Map<String, Long> ivStrideMap;
+    Set<String> invalid;
     Set<CFGNode> visited;
     Set<CFGNode> reachable;
-
-    // If Temp a = ____ of wrong format, a cannot be a basic IV
-    Set<String> invalidVars;
 
     // Pass in the set of nodes that form the loop.
     public BasicInductionVariableVisitor(Set<CFGNode> reachable) {
         this.visited = new HashSet<CFGNode>();
-        this.inductionVars = new HashSet<String>();
-        this.invalidVars = new HashSet<String>();
+        this.invalid = new HashSet<String>();
+        this.ivStrideMap = new HashMap<String, Long>();
         this.reachable = reachable;
     }
 
@@ -64,8 +62,16 @@ public class BasicInductionVariableVisitor
 
     @Override
     public Optional<Void> visit(CFGVarAssignNode n) {
-        if (visited.contains(n) || invalidVars.contains(n.variable)
+        if (visited.contains(n) || invalid.contains(n.variable)
                 || !reachable.contains(n)) {
+            n.out().get(0).accept(this);
+            return Optional.empty();
+        }
+        
+        if(ivStrideMap.containsKey(n.variable)) {
+            ivStrideMap.remove(n.variable);
+            invalid.add(n.variable);
+            n.out().get(0).accept(this);
             return Optional.empty();
         }
         
@@ -90,15 +96,15 @@ public class BasicInductionVariableVisitor
             IRBinOp binOp = (IRBinOp) n.value;
             if (binOp.opType() == OpType.ADD && 
                     tempPlusConst.matches(new Object[]{binOp.left(), binOp.right()})) {
-                inductionVars.add(n.variable);
+                ivStrideMap.put(n.variable, tempPlusConst.rightObj().value());
             } else if (binOp.opType() == OpType.SUB &&
                     tempMinusConst.matches(new Object[]{binOp.left(), binOp.right()})) {
-                inductionVars.add(n.variable);
+                ivStrideMap.put(n.variable, -tempMinusConst.rightObj().value());
             } else {
-                invalidVars.add(n.variable);
+                invalid.add(n.variable);
             }
         } else {
-            invalidVars.add(n.variable);
+            invalid.add(n.variable);
         }
         
         visited.add(n);

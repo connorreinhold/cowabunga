@@ -43,4 +43,10 @@ public class CFGReturnNode extends CFGNode {
     public String toString() {
         return "(return)";
     }
+
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 0;
+        return new CFGReturnNode(this.location());
+    }
 }

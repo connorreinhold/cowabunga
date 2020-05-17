@@ -45,4 +45,9 @@ public class CFGStubNode extends CFGNode {
         return "Stub";
     }
 
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        throw new UnsupportedOperationException(
+                "A self loop cannot be copied");
+    }
 }

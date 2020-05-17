@@ -64,4 +64,10 @@ public class CFGCallNode extends CFGNode {
         String callString = call.toString().replaceAll("\n", "");
         return callString;
     }
+    
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGCallNode(this.location(), call, out.get(0));
+    }
 }

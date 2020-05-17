@@ -56,4 +56,10 @@ public class CFGStartNode extends CFGNode {
     public String toString() {
         return "start";
     }
+    
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGStartNode(this.location(), out.get(0));
+    }
 }

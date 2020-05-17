@@ -67,4 +67,10 @@ public class CFGVarAssignNode extends CFGNode {
                                   .replaceAll("\n", "");
         return String.format("%s=%s", variable, valueString);
     }
+    
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGVarAssignNode(this.location(), variable, value, out.get(0));
+    }
 }

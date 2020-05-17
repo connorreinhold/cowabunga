@@ -78,4 +78,10 @@ public class CFGIfNode extends CFGNode {
         String condString = cond.toString().replaceAll("\n", "");
         return String.format("if(%s)", condString);
     }
+
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 2;
+        return new CFGIfNode(this.location(), out.get(0), out.get(1), cond);
+    }
 }

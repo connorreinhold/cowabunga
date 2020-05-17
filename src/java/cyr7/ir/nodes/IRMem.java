@@ -107,4 +107,10 @@ public class IRMem extends IRExpr_c {
     public String userFriendlyString() {
         return "[ " + this.memType + " ]";
     }
+
+    @Override
+    public IRExpr clone() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 }

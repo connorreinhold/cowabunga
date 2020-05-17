@@ -68,4 +68,10 @@ public class CFGMemAssignNode extends CFGNode {
         String valueString = target.toString().replaceAll("\n", "");
         return targetString + "=" + valueString;
     }
+
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGMemAssignNode(this.location(), target, value, out.get(0));
+    }
 }
