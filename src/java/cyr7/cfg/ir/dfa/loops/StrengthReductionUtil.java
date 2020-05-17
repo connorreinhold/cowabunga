@@ -72,8 +72,8 @@ public class StrengthReductionUtil {
 
     // Precondition: tail is dominated by head.
     public static Set<CFGNode> backwardsSearch(CFGNode tail, CFGNode head) {
-        Set<CFGNode> reachable = new HashSet<CFGNode>();
-        Stack<CFGNode> nodes = new Stack<CFGNode>();
+        Set<CFGNode> reachable = new HashSet<>();
+        Stack<CFGNode> nodes = new Stack<>();
         nodes.push(tail);
         while(nodes.size() > 0) {
             CFGNode next = nodes.pop();

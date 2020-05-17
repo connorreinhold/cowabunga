@@ -1,14 +1,6 @@
 package cyr7.integration;
 
-import cyr7.cli.OptConfig;
-import cyr7.cli.Optimization;
-import cyr7.cli.OptimizationSetting;
-import cyr7.integration.Run.RunConfiguration;
-import cyr7.x86.ASMUtil.TilerConf;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Timeout;
-import org.junit.jupiter.api.condition.EnabledOnOs;
-import org.junit.jupiter.api.condition.OS;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
@@ -24,7 +16,15 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.OS;
+
+import cyr7.cli.OptConfig;
+import cyr7.cli.Optimization;
+import cyr7.integration.Run.RunConfiguration;
+import cyr7.x86.ASMUtil.TilerConf;
 
 public abstract class TestProgram {
 
@@ -44,8 +44,6 @@ public abstract class TestProgram {
 
     @Test
     void testLirNoOptimizations() throws Exception {
-        final var setting = new OptimizationSetting();
-        setting.completeDisableOptimizations();
         String result = Run.lirRun(Run.getFile(filename()),
             OptConfig.none(),
             configuration());
@@ -54,9 +52,6 @@ public abstract class TestProgram {
 
     @Test
     void testLirCfoldEnabled() throws Exception {
-        final var setting = new OptimizationSetting();
-        setting.softDisableAll();
-        setting.setOptimization(Optimization.CF, true);
         String result = Run.lirRun(Run.getFile(filename()),
             OptConfig.cfOnly(),
             configuration());

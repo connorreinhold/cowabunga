@@ -8,7 +8,6 @@ import java.io.Writer;
 import cyr7.ast.Node;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
-import cyr7.cfg.ir.opt.CCPOptimization;
 import cyr7.cfg.ir.opt.CopyPropagationOptimization;
 import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cli.CLI;
@@ -27,6 +26,8 @@ import edu.cornell.cs.cs4120.util.CodeWriterSExpPrinter;
 import edu.cornell.cs.cs4120.util.SExpPrinter;
 
 public class IRUtil {
+
+    private IRUtil() {}
 
     public static IRCompUnit lower(
         IRCompUnit compUnit,
@@ -49,13 +50,14 @@ public class IRUtil {
                 final var functionToBlocks =
                         TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
                 final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+
+                // This is here if we want to use CFGs without Blocks.
 //                compUnit = TraceOptimizer.optimize(compUnit, generator);
 //                final var alt = CFGConstructor.constructCFG(compUnit);
                 alt.keySet().stream().forEach(functionName -> {
                     var optimizedCfg = alt.get(functionName);
                     optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
                     optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-                    optimizedCfg = CCPOptimization.optimize(optimizedCfg);
 
                     alt.put(functionName, optimizedCfg);
                 });
@@ -63,17 +65,6 @@ public class IRUtil {
                         CFGFlattener.flatten(compUnit.location(), compUnit.name(), alt);
                 compUnit = alternateIR;
             }
-
-//            compUnit = TraceOptimizer.optimize(compUnit, generator);
-//            Map<String, CFGStartNode> cfg = CFGConstructor.constructCFG(compUnit);
-//            cfg.keySet().stream().forEach(functionName -> {
-//                var optimizedCfg = cfg.get(functionName);
-////                optimizedCfg = CCPOptimization.optimize(optimizedCfg);
-////                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
-//                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-//                cfg.put(functionName, optimizedCfg);
-//            });
-//            compUnit = CFGFlattener.flatten(compUnit.location(), compUnit.name(), cfg);
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         } else {
             compUnit = TraceOptimizer.optimize(compUnit, generator);

@@ -18,7 +18,7 @@ import polyglot.util.Pair;
 public final class WorklistAnalysis {
 
     public static <L> DfaResult<L> analyzeSubsection(
-            CFGStartNode start,
+            CFGNode start,
             Set<CFGNode> reachable,
             ForwardDataflowAnalysis<L> analysis) {
         return runAnalysis(start, reachable, analysis);
@@ -92,7 +92,7 @@ public final class WorklistAnalysis {
     }
 
     private static <L> DfaResult<L> runAnalysis(
-            CFGStartNode start,
+            CFGNode start,
             Set<CFGNode> allNodes,
             ForwardDataflowAnalysis<L> analysis) {
 

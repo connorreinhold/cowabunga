@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
@@ -32,9 +33,9 @@ public class BasicInductionVariableVisitor
 
     // Pass in the set of nodes that form the loop.
     public BasicInductionVariableVisitor(Set<CFGNode> reachable) {
-        this.visited = new HashSet<CFGNode>();
-        this.inductionVars = new HashSet<String>();
-        this.invalidVars = new HashSet<String>();
+        this.visited = new HashSet<>();
+        this.inductionVars = new HashSet<>();
+        this.invalidVars = new HashSet<>();
         this.reachable = reachable;
     }
 
@@ -131,5 +132,11 @@ public class BasicInductionVariableVisitor
     @Override
     public Optional<Void> visit(CFGSelfLoopNode n) {
         return Optional.empty();
+    }
+
+    @Override
+    public Optional<Void> visit(CFGBlockNode n) {
+        throw new UnsupportedOperationException("Basic Induction Variable"
+                + " Visitor does not have support for basic blocks");
     }
 }
