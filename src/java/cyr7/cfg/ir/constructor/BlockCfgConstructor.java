@@ -211,22 +211,29 @@ public class BlockCfgConstructor {
                 this.successor = stmt.accept(this);
             }
             if (this.successor == finalStub && this.outNode.isEmpty()) {
+                // No blocks or instructions were made
                 return new Pair<>(labelSets, this.nodeOfNextBlock);
             } else if (this.successor == finalStub && this.outNode.isPresent()) {
+                // There is only a CJump or a Return node in this block.
                 return new Pair<>(labelSets, this.outNode.get());
             } else if (this.depth == 1 && this.outNode.isEmpty()) {
+                // There is a single instruction. Easier use to specific CFG
+                // node than to create a block. No CJump or Return node.
                 this.successor.replaceOutEdge(finalStub, this.nodeOfNextBlock);
                 return new Pair<>(labelSets, this.successor);
             } else if (this.depth == 1 && this.outNode.isPresent()) {
+                // There is a single instruction. Easier use to specific CFG
+                // node than to create a block. There is a CJump or Return node.
                 this.successor.replaceOutEdge(finalStub, this.outNode.get());
                 return new Pair<>(labelSets, this.successor);
             } else if (this.outNode.isEmpty()) {
-                // Create a block
+                // Create a block. There is no CJump or Return node.
                 final var block = new CFGBlockNode(new Location(-1, -1),
                                          this.successor,
                                          this.nodeOfNextBlock);
                 return new Pair<>(labelSets, block);
             } else {
+             // Create a block. There is a CJump or Return node at the end.
                 final var block = new CFGBlockNode(new Location(-1, -1),
                         this.successor,
                         this.outNode.get());

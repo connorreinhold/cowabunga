@@ -56,11 +56,14 @@ public class IRUtil {
             });
         }
         if (optConfig.dce()) {
-            alt.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = alt.get(functionName);
-                optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
-                alt.put(functionName, optimizedCfg);
-            });
+            // Perform dead code removal 3 times to be safe.
+            for (int i = 0; i < 3; i++) {
+                alt.keySet().stream().forEach(functionName -> {
+                    var optimizedCfg = alt.get(functionName);
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                    alt.put(functionName, optimizedCfg);
+                });
+            }
         }
         compUnit = CFGFlattener.flatten(alt, compUnit);
         if (optConfig.cf()) {
