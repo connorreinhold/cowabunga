@@ -86,6 +86,10 @@ public class DeadCodeElimOptimization {
             this.result = Collections.unmodifiableMap(result);
         }
 
+        /**
+         * Do not remove even if assigned variable is dead, since side effects
+         * may occur.
+         */
         @Override
         public CFGNode visit(CFGCallNode n) {
             return n;
