@@ -37,6 +37,7 @@ tests/xth/xthScriptIntegration
 *.s
 *.s_COMPLEX
 *.s_BASIC
+*.exe
 
 # <-- COWABUNGA SPECIFIC
 
