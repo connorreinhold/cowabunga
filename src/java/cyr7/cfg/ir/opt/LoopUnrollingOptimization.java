@@ -2,9 +2,11 @@ package cyr7.cfg.ir.opt;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,20 +28,23 @@ import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cli.OptConfig;
+import cyr7.cli.Optimization;
 import cyr7.ir.DefaultIdGenerator;
 import cyr7.ir.IRUtil;
+import cyr7.ir.interpret.IRSimulator;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRConst;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
+import cyr7.typecheck.IxiFileOpener;
 import java_cup.runtime.ComplexSymbolFactory;
 
 public class LoopUnrollingOptimization {
     
     // The number of copies made per loop
-    final static int LOOP_UNROLL_FACTOR = 5;
+    final static int LOOP_UNROLL_FACTOR = 3;
     
     private LoopUnrollingOptimization() {}
     
@@ -109,7 +114,7 @@ public class LoopUnrollingOptimization {
                                     new IRConst(l, LOOP_UNROLL_FACTOR - 1)));
                     // i + c(n-1) < u
                     IRExpr newCond = new IRBinOp(l, op, newLHS, rhs);
-                    CFGNode unrolledHeader = new CFGIfNode(head.location(), epilogue, nextPointer, newCond);
+                    CFGNode unrolledHeader = new CFGIfNode(head.location(), nextPointer, epilogue, newCond);
                     
                     for(CFGNode in: unrollStub.in()) {
                         in.replaceOutEdge(unrollStub, unrolledHeader);
@@ -126,6 +131,7 @@ public class LoopUnrollingOptimization {
     // and have it point to [nextPointer]
     private static CFGNode copyNode(CFGNode toCopy, CFGNode headRef, 
             CFGNode nextPointer, Map<CFGNode, CFGNode> copies) {
+        
         if (copies.containsKey(toCopy)) {
             return copies.get(toCopy);
         }
@@ -168,6 +174,8 @@ public class LoopUnrollingOptimization {
             Map<CFGNode, Set<CFGNode>> dominators) {
         
         Set<CFGNode> nodesAnalyzed = new HashSet<>();
+        Set<CFGNode> headersRemoved = new HashSet<>();
+        
         for(Map.Entry<CFGNode, Set<CFGNode>> pair: dominators.entrySet()) {
             CFGNode node = pair.getKey();
             for(CFGNode out: node.out()) {
@@ -175,20 +183,21 @@ public class LoopUnrollingOptimization {
                 if (pair.getValue().contains(out) && !nodesAnalyzed.contains(out)) {
                     Set<CFGNode> tailNodes = new HashSet<>();
                     for (CFGNode tailNode: out.in()) {
-                        // take union of backwards search from all tailnodes from the head
-                        // Need to check if contains because it is possible it was replaced
+                        // Take union of backwards search from all tailnodes from the head
                         if (dominators.containsKey(tailNode) && dominators.get(tailNode).contains(out)) {
                             tailNodes.add(tailNode);
                         }
                     }
                     Set<CFGNode> reachable = backwardsSearch(tailNodes, out);
                     nodesAnalyzed.addAll(reachable);
+                    
                     CFGNode newUnrolledHead = LoopUnrollingOptimization.optimizeLoop(out, reachable);
                     for(CFGNode inc: out.in()) {
-                        if (!reachable.contains(inc)) {
+                        if (!reachable.contains(inc) && !headersRemoved.contains(inc)) {
                             inc.replaceOutEdge(out, newUnrolledHead);
                         }
                     }
+                    headersRemoved.add(out);
 
                 }
             }
@@ -222,19 +231,62 @@ public class LoopUnrollingOptimization {
         BufferedReader br  = new BufferedReader(fr);
         Reader reader = new BufferedReader(br);
         DefaultIdGenerator idGenerator = new DefaultIdGenerator();
-        IRCompUnit lowered = IRUtil.generateIR(
+        
+        /*
+         * IRCompUnit lowered = IRUtil.irRun(
             reader,
             "testJunk.xi",
             null,
             OptConfig.none(),
 
             new DefaultIdGenerator());
+         */
+        
+        IRCompUnit lowered = IRUtil.generateIR(
+            reader,
+            "testJunk.xi",
+            new Opener(),
+            OptConfig.of(Optimization.LU),
+            new DefaultIdGenerator());
+
+        //System.out.println(lowered);
         Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
+        CFGStartNode start = cfgResult.get("_Imain_paai");
+        Writer writer = new PrintWriter(System.out);
+        CFGUtil.outputDotForFunctionIR(start, writer);
+            
+        System.out.println("Success");
+        
+        /*Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
         CFGStartNode start = cfgResult.get("_Imain_paai");
         optimize(start);
         
         Writer writer = new PrintWriter(System.out);
-        CFGUtil.outputDotForFunctionIR(start, writer);
+        CFGUtil.outputDotForFunctionIR(start, writer);*/
          
     }
+    
 }
+
+class Opener implements IxiFileOpener {
+    @Override
+    public Reader openIxiLibraryFile(String name) throws FileNotFoundException {
+        if (name.equals("conv")) {
+            return new StringReader(
+                "parseInt(str: int[]): int, bool\n"
+                    + "unparseInt(n: int): int[]\n"
+            );
+        } else if (name.equals("io")) {
+            return new StringReader(
+                "print(str: int[])\n"
+                    + "println(str: int[])\n"
+                    + "readln() : int[]\n"
+                    + "getchar() : int\n"
+                    + "eof() : bool\n"
+            );
+        } else {
+            throw new FileNotFoundException(name);
+        }
+    }
+}
+

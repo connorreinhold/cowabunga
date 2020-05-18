@@ -45,6 +45,14 @@ public abstract class TestProgram {
             configuration());
         assertEquals(expected(), result);
     }
+    
+    @Test
+    void testLirLoopUnrolling() throws Exception {
+        String result = Run.lirRun(Run.getFile(filename()),
+                OptConfig.of(Optimization.LU),
+                configuration());
+            assertEquals(expected(), result);
+    }
 
     @Test
     void testLirAllEnabled() throws Exception {

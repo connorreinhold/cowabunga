@@ -97,7 +97,7 @@ public final class CFGUtil {
         IrCFGDotVisitor dv = new IrCFGDotVisitor();
         node.accept(dv);
         printer.println("digraph nfa {");
-        printer.println("    node [shape=circle]");
+        printer.println("    node [shape=rectangle]");
         for(String label: dv.getDotNodes()) {
             printer.println("    \""+label+"\"");
         }
