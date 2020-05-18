@@ -9,6 +9,7 @@ import java.util.Set;
 import cyr7.cfg.ir.dfa.BackwardTransferFunction;
 import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
+import cyr7.ir.interpret.Configuration;
 import cyr7.ir.nodes.IRExpr;
 import cyr7.ir.nodes.IRTemp;
 import cyr7.ir.visit.IRExprVarsVisitor;
@@ -117,7 +118,9 @@ public class CFGVarAssignNode extends CFGNode {
         this.genSet = new HashMap<>();
         if (value instanceof IRTemp) {
             String source = ((IRTemp)value).name();
-            genSet.put(variable, source);
+            if (!source.startsWith(Configuration.ABSTRACT_ARG_PREFIX)) {
+                genSet.put(variable, source);
+            }
         }
     }
 }

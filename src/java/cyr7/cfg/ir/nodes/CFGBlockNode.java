@@ -15,7 +15,14 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGBlockNode extends CFGNode {
 
+    /**
+     * A node in the block can only be a varAssignNode, memAssignNode, or
+     * callNode.
+     * <p>
+     * The last node in the block is indicated by a CFGStubNode.
+     */
     public CFGNode block;
+
     private CFGNode outNode;
 
     private Set<String> useSet;

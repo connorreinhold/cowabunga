@@ -911,7 +911,8 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
         // intercept -2^64 as literal and make it 0-(e-1)-1
         if (n.expr instanceof LiteralIntExprNode) {
             BigInteger literal = new BigInteger(((LiteralIntExprNode) n.expr).contents);
-            BigInteger max = new BigInteger(String.valueOf(Long.MAX_VALUE + 1));
+            BigInteger max = new BigInteger(String.valueOf(Long.MIN_VALUE));
+            max = max.negate();
             if (literal.equals(max)) {
                 return OneOfTwo.ofFirst(make.IRConst(Long.MIN_VALUE));
             }
