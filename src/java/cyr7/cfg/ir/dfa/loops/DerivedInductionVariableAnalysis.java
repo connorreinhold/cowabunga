@@ -149,7 +149,7 @@ public class DerivedInductionVariableAnalysis implements ForwardDataflowAnalysis
                 in = basicIVMap;
             }
             String variable = n.variable;
-            Map<String, InductionVariable> updatedMap = new HashMap<String, InductionVariable>(in);
+            Map<String, InductionVariable> updatedMap = new HashMap<>(in);
             if (n.value instanceof IRBinOp) {
                 IRBinOp expr = (IRBinOp) n.value;
 

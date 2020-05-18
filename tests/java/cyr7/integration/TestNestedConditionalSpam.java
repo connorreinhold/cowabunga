@@ -16,7 +16,12 @@ public class TestNestedConditionalSpam extends TestProgram {
 
     @Disabled
     @Override
-    protected void testRegisterAllocator() throws Exception {
+    protected void testRegisterAllocator() {
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorWithOptimizations() {
     }
 
 }

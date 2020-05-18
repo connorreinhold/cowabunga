@@ -44,7 +44,12 @@ public class TestPrintSpam extends TestProgram {
 
     @Disabled
     @Override
-    protected void testRegisterAllocator() throws Exception {
+    protected void testRegisterAllocator() {
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorWithOptimizations() {
     }
 
 }
