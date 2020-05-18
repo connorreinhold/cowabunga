@@ -69,7 +69,7 @@ public class IRUtil {
         }
 
         compUnit = CFGFlattener.flatten(alt, compUnit);
-
+/*
         if (optConfig.lu()) {
             final var loopUnrollCFG = CFGConstructor.constructCFG(compUnit);
             loopUnrollCFG.keySet().stream().forEach(functionName -> {
@@ -80,7 +80,7 @@ public class IRUtil {
                 }
             });
             compUnit = CFGFlattener.flatten(loopUnrollCFG, compUnit);
-        }
+        }*/
 
         if (optConfig.cf()) {
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
