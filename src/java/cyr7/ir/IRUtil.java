@@ -45,11 +45,11 @@ public class IRUtil {
         }
 
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
-//        final var functionToBlocks =
-//                TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
-//        final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
-        compUnit = TraceOptimizer.optimize(compUnit, generator);
-        final var alt = CFGConstructor.constructCFG(compUnit);
+        final var functionToBlocks =
+                TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
+        final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+//        compUnit = TraceOptimizer.optimize(compUnit, generator);
+//        final var alt = CFGConstructor.constructCFG(compUnit);
         if (optConfig.cp()) {
             alt.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = alt.get(functionName);

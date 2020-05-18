@@ -87,14 +87,16 @@ public class IRTempReplacer {
             return n;
         }
 
+        /**
+         * Traverses to the oldest copy.
+         */
         @Override
         public IRExpr visit(IRTemp n) {
             String key = n.name();
-            if (this.mapping.containsKey(key)) {
+            while (this.mapping.containsKey(key)) {
                 key = this.mapping.get(key);
-                n = new IRTemp(n.location(), key);
             }
-            return n;
+            return new IRTemp(n.location(), key);
         }
 
         @Override
