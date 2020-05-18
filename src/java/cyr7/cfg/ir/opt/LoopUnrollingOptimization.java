@@ -164,8 +164,6 @@ public class LoopUnrollingOptimization {
         return startNode;
     }
     
-    
-    
     public static void runIVAnalysis(
             Map<CFGNode, Set<CFGNode>> dominators) {
         

@@ -69,9 +69,11 @@ public class IRUtil {
         if (optConfig.lu()) {
             final var loopUnrollCFG = CFGConstructor.constructCFG(compUnit);
             loopUnrollCFG.keySet().stream().forEach(functionName -> {
-                var optimizedCfg = loopUnrollCFG.get(functionName);
-                optimizedCfg = LoopUnrollingOptimization.optimize(optimizedCfg);
-                loopUnrollCFG.put(functionName, optimizedCfg);
+                if (!functionName.equals("_I*premain*_p")) {
+                    var optimizedCfg = loopUnrollCFG.get(functionName);
+                    optimizedCfg = LoopUnrollingOptimization.optimize(optimizedCfg);
+                    loopUnrollCFG.put(functionName, optimizedCfg);
+                }
             });
             compUnit = CFGFlattener.flatten(loopUnrollCFG, compUnit);
         }
@@ -81,10 +83,8 @@ public class IRUtil {
         }
 
         CLI.lazyDebugPrint(compUnit, unit -> "Lowered MIR: \n" + unit);
-
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
         CLI.debugPrint("Actually Canonical? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
-
         return compUnit;
     }
 

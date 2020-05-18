@@ -143,7 +143,7 @@ public final class Run {
 
         FunctionDeclNode premain = new FunctionDeclNode(LOC,
             new FunctionHeaderDeclNode(LOC,
-                "premain",
+                "*premain*",
                 List.of(),
                 List.of()
             ),
@@ -189,7 +189,7 @@ public final class Run {
             new PrintStream(outputStream)
         );
         System.setIn(systemIn);
-        sim.call("_Ipremain_p", 0);
+        sim.call("_I*premain*_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 
@@ -223,7 +223,7 @@ public final class Run {
         );
         System.setIn(systemIn);
 
-        sim.call("_Ipremain_p", 0);
+        sim.call("_I*premain*_p", 0);
         return new String(outputStream.toByteArray(), Charset.defaultCharset());
     }
 
