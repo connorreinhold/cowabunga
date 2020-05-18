@@ -4,7 +4,7 @@ import cyr7.cli.Optimization;
 
 public class BenchmarkCpDce1 extends Benchmark {
     @Override
-    String filename() {
+    protected String filename() {
         return "benchmarks/cp_dce/cp_dce_benchmark1";
     }
 

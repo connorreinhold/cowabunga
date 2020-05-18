@@ -2,14 +2,14 @@ package cyr7.benchmark;
 
 import cyr7.cli.Optimization;
 
-public class BenchmarkCpDce3 extends Benchmark {
+public class BenchmarkReg2 extends Benchmark {
     @Override
     protected String filename() {
-        return "benchmarks/cp_dce/cp_dce_benchmark3";
+        return "benchmarks/reg/reg_benchmark2";
     }
 
     @Override
     Optimization[] testedOptimizations() {
-        return new Optimization[] { Optimization.CP, Optimization.DCE };
+        return new Optimization[] { Optimization.REG };
     }
 }
