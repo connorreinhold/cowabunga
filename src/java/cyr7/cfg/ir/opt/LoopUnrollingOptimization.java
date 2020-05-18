@@ -48,6 +48,70 @@ public class LoopUnrollingOptimization {
     
     private LoopUnrollingOptimization() {}
     
+    public static CFGStartNode optimize(CFGNode start) {
+        CFGStartNode startNode = (CFGStartNode)start;
+        DfaResult<Set<CFGNode>> result =
+                WorklistAnalysis.analyze(startNode, DominatorAnalysis.INSTANCE);
+
+        Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
+        runIVAnalysis(cleanedDominators);
+        return startNode;
+    }
+    
+    public static void runIVAnalysis(
+            Map<CFGNode, Set<CFGNode>> dominators) {
+        
+        Set<CFGNode> nodesAnalyzed = new HashSet<>();
+        Set<CFGNode> headersRemoved = new HashSet<>();
+        
+        for(Map.Entry<CFGNode, Set<CFGNode>> pair: dominators.entrySet()) {
+            CFGNode node = pair.getKey();
+            for(CFGNode out: node.out()) {
+                // If there is an out edge to a dominator of this node, there's a loop
+                if (pair.getValue().contains(out) && !nodesAnalyzed.contains(out)) {
+                    Set<CFGNode> tailNodes = new HashSet<>();
+                    for (CFGNode tailNode: out.in()) {
+                        // Take union of backwards search from all tailnodes from the head
+                        if (dominators.containsKey(tailNode) && dominators.get(tailNode).contains(out)) {
+                            tailNodes.add(tailNode);
+                        }
+                    }
+                    Set<CFGNode> reachable = backwardsSearch(tailNodes, out);
+                    nodesAnalyzed.addAll(reachable);
+                    
+                    CFGNode newUnrolledHead = LoopUnrollingOptimization.optimizeLoop(out, reachable);
+                    for(CFGNode inc: out.in()) {
+                        if (!reachable.contains(inc) && !headersRemoved.contains(inc)) {
+                            inc.replaceOutEdge(out, newUnrolledHead);
+                        }
+                    }
+                    headersRemoved.add(out);
+
+                }
+            }
+        }
+    }
+    
+    // Precondition: tail is dominated by head.
+    public static Set<CFGNode> backwardsSearch(Set<CFGNode> tailNodes, CFGNode head) {
+        Set<CFGNode> reachable = new HashSet<>();
+        Stack<CFGNode> nodes = new Stack<>();
+        for(CFGNode tail: tailNodes) {
+            nodes.push(tail);
+        }
+        while(nodes.size() > 0) {
+            CFGNode next = nodes.pop();
+            for (CFGNode in: next.in()) {
+                if (in != head && !reachable.contains(in)) {
+                    nodes.push(in);
+                }
+            }
+            reachable.add(next);
+        }
+        reachable.add(head);
+        return reachable;
+    }
+    
     public static CFGNode optimizeLoop(CFGNode head, Set<CFGNode> reachable) {
         BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
         head.accept(bv);
@@ -127,7 +191,7 @@ public class LoopUnrollingOptimization {
         return head;
     }
     
-    // headRef is used to find the last node in this iteration of the loop, 
+    // HeadRef is used to find the last node in this iteration of the loop, 
     // and have it point to [nextPointer]
     private static CFGNode copyNode(CFGNode toCopy, CFGNode headRef, 
             CFGNode nextPointer, Map<CFGNode, CFGNode> copies) {
@@ -159,134 +223,4 @@ public class LoopUnrollingOptimization {
         return copy;
         
     }
-    
-    public static CFGStartNode optimize(CFGNode start) {
-        CFGStartNode startNode = (CFGStartNode)start;
-        DfaResult<Set<CFGNode>> result =
-                WorklistAnalysis.analyze(startNode, DominatorAnalysis.INSTANCE);
-
-        Map<CFGNode, Set<CFGNode>> cleanedDominators = DominatorUtil.generateMap(result.out());
-        runIVAnalysis(cleanedDominators);
-        return startNode;
-    }
-    
-    public static void runIVAnalysis(
-            Map<CFGNode, Set<CFGNode>> dominators) {
-        
-        Set<CFGNode> nodesAnalyzed = new HashSet<>();
-        Set<CFGNode> headersRemoved = new HashSet<>();
-        
-        for(Map.Entry<CFGNode, Set<CFGNode>> pair: dominators.entrySet()) {
-            CFGNode node = pair.getKey();
-            for(CFGNode out: node.out()) {
-                // If there is an out edge to a dominator of this node, there's a loop
-                if (pair.getValue().contains(out) && !nodesAnalyzed.contains(out)) {
-                    Set<CFGNode> tailNodes = new HashSet<>();
-                    for (CFGNode tailNode: out.in()) {
-                        // Take union of backwards search from all tailnodes from the head
-                        if (dominators.containsKey(tailNode) && dominators.get(tailNode).contains(out)) {
-                            tailNodes.add(tailNode);
-                        }
-                    }
-                    Set<CFGNode> reachable = backwardsSearch(tailNodes, out);
-                    nodesAnalyzed.addAll(reachable);
-                    
-                    CFGNode newUnrolledHead = LoopUnrollingOptimization.optimizeLoop(out, reachable);
-                    for(CFGNode inc: out.in()) {
-                        if (!reachable.contains(inc) && !headersRemoved.contains(inc)) {
-                            inc.replaceOutEdge(out, newUnrolledHead);
-                        }
-                    }
-                    headersRemoved.add(out);
-
-                }
-            }
-        }
-    }
-    
-    // Precondition: tail is dominated by head.
-    public static Set<CFGNode> backwardsSearch(Set<CFGNode> tailNodes, CFGNode head) {
-        Set<CFGNode> reachable = new HashSet<>();
-        Stack<CFGNode> nodes = new Stack<>();
-        for(CFGNode tail: tailNodes) {
-            nodes.push(tail);
-        }
-        while(nodes.size() > 0) {
-            CFGNode next = nodes.pop();
-            for (CFGNode in: next.in()) {
-                if (in != head && !reachable.contains(in)) {
-                    nodes.push(in);
-                }
-            }
-            reachable.add(next);
-        }
-        reachable.add(head);
-        return reachable;
-    }
-    
-    
-    public static void main(String[] args) throws Exception {
-        File f = new File("tests/resources/testJunk.xi");
-        FileReader fr = new FileReader(f);
-        BufferedReader br  = new BufferedReader(fr);
-        Reader reader = new BufferedReader(br);
-        DefaultIdGenerator idGenerator = new DefaultIdGenerator();
-        
-        /*
-         * IRCompUnit lowered = IRUtil.irRun(
-            reader,
-            "testJunk.xi",
-            null,
-            OptConfig.none(),
-
-            new DefaultIdGenerator());
-         */
-        
-        IRCompUnit lowered = IRUtil.generateIR(
-            reader,
-            "testJunk.xi",
-            new Opener(),
-            OptConfig.of(Optimization.LU),
-            new DefaultIdGenerator());
-
-        //System.out.println(lowered);
-        Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
-        CFGStartNode start = cfgResult.get("_Imain_paai");
-        Writer writer = new PrintWriter(System.out);
-        CFGUtil.outputDotForFunctionIR(start, writer);
-            
-        System.out.println("Success");
-        
-        /*Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
-        CFGStartNode start = cfgResult.get("_Imain_paai");
-        optimize(start);
-        
-        Writer writer = new PrintWriter(System.out);
-        CFGUtil.outputDotForFunctionIR(start, writer);*/
-         
-    }
-    
 }
-
-class Opener implements IxiFileOpener {
-    @Override
-    public Reader openIxiLibraryFile(String name) throws FileNotFoundException {
-        if (name.equals("conv")) {
-            return new StringReader(
-                "parseInt(str: int[]): int, bool\n"
-                    + "unparseInt(n: int): int[]\n"
-            );
-        } else if (name.equals("io")) {
-            return new StringReader(
-                "print(str: int[])\n"
-                    + "println(str: int[])\n"
-                    + "readln() : int[]\n"
-                    + "getchar() : int\n"
-                    + "eof() : bool\n"
-            );
-        } else {
-            throw new FileNotFoundException(name);
-        }
-    }
-}
-
