@@ -56,6 +56,7 @@ import cyr7.ast.toplevel.XiProgramNode;
 import cyr7.ast.type.PrimitiveTypeNode;
 import cyr7.ast.type.TypeExprArrayNode;
 import cyr7.ir.interpret.Configuration;
+import cyr7.ir.lowering.LoweringVisitor.Result;
 import cyr7.ir.nodes.IRBinOp;
 import cyr7.ir.nodes.IRBinOp.OpType;
 import cyr7.ir.nodes.IRCompUnit;
@@ -416,9 +417,12 @@ public class ASTToIRVisitor extends AbstractVisitor<OneOfTwo<IRExpr, IRStmt>> {
     @Override
     public OneOfTwo<IRExpr, IRStmt> visit(ProcedureStmtNode n) {
         IRNodeFactory make = new IRNodeFactory_c(n.getLocation());
-
-        return OneOfTwo.ofSecond(make.IRExp(n.procedureCall.accept(this)
-                                                           .assertFirst()));
+        List<IRExpr> params = n.procedureCall.parameters.stream()
+            .map(stmt -> stmt.accept(this).assertFirst())
+            .collect(Collectors.toList());
+        var fType = n.procedureCall.getFunctionType().get();
+        String encodedName = assemblyFunctionName(n.procedureCall.identifier, fType);
+        return OneOfTwo.ofSecond(make.IRCallStmt(List.of(), make.IRName(encodedName), params));
     }
 
     @Override

@@ -50,8 +50,8 @@ public final class ASMRegAllocGenerator implements ASMGenerator {
             = new RegisterAllocator(abstractASM, funcDecl.name(), generator);
         registerAllocator.run();
 
-        CLI.debugPrint("--- REGISTER ALLOCATED ---");
-        print(registerAllocator.program());
+//        CLI.debugPrint("--- REGISTER ALLOCATED ---");
+//        print(registerAllocator.program());
 
         List<ASMLine> prologue = ASMAbstract.createPrologue(
             funcDecl.name(),

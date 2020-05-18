@@ -35,7 +35,7 @@ import cyr7.x86.ASMUtil.TilerConf;
 public class CLI {
 
     private static final Optimization[] SUPPORTED_OPTIMIZATIONS = {
-        Optimization.CF, Optimization.REG, Optimization.DCE, Optimization.CP
+        Optimization.CF, Optimization.REG, Optimization.DCE, Optimization.COPY
     };
 
     final static private String usage = "xic [options] <source files>";
@@ -376,19 +376,7 @@ public class CLI {
                 }
 
                 Optimization opt = Optimization.parse(optShort);
-
-                switch(opt) {
-                    case CF:
-                        optConfig.set(Optimization.CF, noModifier);
-                        args[i] = "";
-                        break;
-                    case REG:
-                        optConfig.set(Optimization.REG, noModifier);
-                        args[i] = "";
-                        break;
-                    default:
-                        break;
-                }
+                optConfig.set(opt, noModifier);
                 args[i] = "";
             }
         }

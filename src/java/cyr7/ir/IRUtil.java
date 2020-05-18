@@ -74,6 +74,7 @@ public class IRUtil {
 
         CLI.debugPrint("Actually Const Folded? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
         CLI.debugPrint("Actually Canonical? " + compUnit.aggregateChildren(new CheckConstFoldedIRVisitor()));
+        CLI.debugPrint("Optimizations Performed: " + optConfig.convertToCLI());
 
         return compUnit;
     }

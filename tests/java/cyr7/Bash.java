@@ -113,15 +113,10 @@ public enum Bash {
         command[0] = exe.getAbsolutePath();
         System.arraycopy(args, 0, command, 1, args.length);
 
-        String result = Bash.executeCommand(
+        return Bash.executeCommand(
             false,
             stdinFile,
             command);
-        if (!result.isEmpty()) {
-            System.err.println(result);
-        }
-
-        return result;
     }
 
     public static String executeCommand(
@@ -130,7 +125,7 @@ public enum Bash {
         String... command)
         throws InterruptedException, IOException {
 
-//        System.out.println(String.join(" ", command));
+        System.out.println(String.join(" ", command));
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
         var redirectedTarget = File.createTempFile("redirect", null);
