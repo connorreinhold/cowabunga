@@ -39,15 +39,19 @@ import java_cup.runtime.ComplexSymbolFactory;
 public class LoopUnrollingOptimization {
     
     // The number of copies made per loop
-    final static int LOOP_UNROLL_FACTOR = 3;
+    final static int LOOP_UNROLL_FACTOR = 5;
     
     private LoopUnrollingOptimization() {}
     
     public static CFGNode optimizeLoop(CFGNode head, Set<CFGNode> reachable) {
         BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
         head.accept(bv);
-        
         Map<String, Long> ivStrideMap = bv.ivStrideMap();
+        
+        if (reachable.size() > 15) {
+            // too large of a loop
+            return head;
+        }
         
         if (head instanceof CFGIfNode) {
             CFGIfNode ifNode = (CFGIfNode) head;
@@ -55,17 +59,26 @@ public class LoopUnrollingOptimization {
                 IRBinOp guard = (IRBinOp) ifNode.cond;
                 String potentialIV = null;
                 OpType op = null;
-                Long constant = null;
+                IRExpr rhs = null;
+                Long potentialIVInc = null;
                 if (guard.left() instanceof IRTemp) {
                     potentialIV = ((IRTemp) guard.left()).name();
+                    potentialIVInc = ivStrideMap.get(potentialIV);
                 }
-                if (guard.opType() == OpType.LT || guard.opType() == OpType.LEQ) {
+                if (potentialIVInc != null && potentialIVInc > 0 && 
+                        (guard.opType() == OpType.LT || guard.opType() == OpType.LEQ)) {
                     op = guard.opType();
                 }
-                if (guard.right() instanceof IRConst) {
-                    constant = ((IRConst) guard.right()).value();
+                
+                if (potentialIVInc != null && potentialIVInc < 0 &&
+                        (guard.opType() == OpType.GT || guard.opType() == OpType.GEQ)) {
+                    op = guard.opType();
                 }
-                if (potentialIV != null && op != null && constant != null && ivStrideMap.containsKey(potentialIV)) {
+                    
+                if (guard.right() instanceof IRExpr) {
+                    rhs = (IRExpr) guard.right();
+                }
+                if (potentialIV != null && op != null && rhs != null && ivStrideMap.containsKey(potentialIV)) {
                     CFGStubNode epilogueStub = new CFGStubNode();
                     CFGNode epilogueBody = copyNode(head.out().get(0), head, 
                             epilogueStub, new HashMap<CFGNode, CFGNode>());
@@ -95,13 +108,13 @@ public class LoopUnrollingOptimization {
                             new IRBinOp(l, OpType.MUL, new IRConst(l, ivStrideMap.get(potentialIV)), 
                                     new IRConst(l, LOOP_UNROLL_FACTOR - 1)));
                     // i + c(n-1) < u
-                    IRExpr newCond = new IRBinOp(l, op, newLHS, new IRConst(l, constant));
+                    IRExpr newCond = new IRBinOp(l, op, newLHS, rhs);
                     CFGNode unrolledHeader = new CFGIfNode(head.location(), epilogue, nextPointer, newCond);
                     
                     for(CFGNode in: unrollStub.in()) {
                         in.replaceOutEdge(unrollStub, unrolledHeader);
                     }
-
+                    
                     return unrolledHeader;
                 }
             }
@@ -109,38 +122,36 @@ public class LoopUnrollingOptimization {
         return head;
     }
     
-    private static CFGNode copyNode(CFGNode toCopy, CFGNode oldPointer, 
+    // headRef is used to find the last node in this iteration of the loop, 
+    // and have it point to [nextPointer]
+    private static CFGNode copyNode(CFGNode toCopy, CFGNode headRef, 
             CFGNode nextPointer, Map<CFGNode, CFGNode> copies) {
         if (copies.containsKey(toCopy)) {
             return copies.get(toCopy);
         }
-        
-        if (toCopy.out().contains(oldPointer)) {
-            CFGNode lastNode = toCopy.copy(List.of(nextPointer));
-            copies.put(toCopy, lastNode);
-            return lastNode;
-        } else {
-            List<CFGNode> copiedOutNodes = new ArrayList<CFGNode>();
-            List<CFGStubNode> stubNodes = new ArrayList<CFGStubNode>();
-            for (CFGNode out: toCopy.out()) {
-                if (copies.containsKey(out)) {
-                    copiedOutNodes.add(copies.get(out));
-                } else {
-                    CFGStubNode copyStub = new CFGStubNode();
-                    copies.put(toCopy, copyStub);
-                    stubNodes.add(copyStub);
-                    copiedOutNodes.add(copyNode(out, oldPointer, nextPointer, copies));
-                }
+        List<CFGNode> copiedOutNodes = new ArrayList<CFGNode>();
+        List<CFGStubNode> stubNodes = new ArrayList<CFGStubNode>();
+        for (CFGNode out: toCopy.out()) {
+            if (out == headRef) {;
+                copiedOutNodes.add(nextPointer);
+            } else if (copies.containsKey(out)) {
+                copiedOutNodes.add(copies.get(out));
+            } else {
+                CFGStubNode copyStub = new CFGStubNode();
+                copies.put(toCopy, copyStub);
+                stubNodes.add(copyStub);
+                copiedOutNodes.add(copyNode(out, headRef, nextPointer, copies));
             }
-            CFGNode copy = toCopy.copy(copiedOutNodes);
-            for(CFGStubNode stub: stubNodes) {
-                for(CFGNode in: stub.in()) {
-                    in.replaceOutEdge(stub, copy);
-                }
-            }
-            copies.put(toCopy, copy);
-            return copy;
         }
+        CFGNode copy = toCopy.copy(copiedOutNodes);
+        for(CFGStubNode stub: stubNodes) {
+            for(CFGNode in: stub.in()) {
+                in.replaceOutEdge(stub, copy);
+            }
+        }
+        copies.put(toCopy, copy);
+        return copy;
+        
     }
     
     public static CFGStartNode optimize(CFGNode start) {
@@ -176,7 +187,9 @@ public class LoopUnrollingOptimization {
                     nodesAnalyzed.addAll(reachable);
                     CFGNode newUnrolledHead = LoopUnrollingOptimization.optimizeLoop(out, reachable);
                     for(CFGNode inc: out.in()) {
-                        inc.replaceOutEdge(out, newUnrolledHead);
+                        if (!reachable.contains(inc)) {
+                            inc.replaceOutEdge(out, newUnrolledHead);
+                        }
                     }
 
                 }
