@@ -8,7 +8,7 @@ main(args: int[][]) {
         arr[1000] = 12;
     }
 }
-doBigComputations(arr: int[]): int {
+doMischievousComp(arr: int[]): int {
     i: int = 0;
     while (i < length(arr)) {
         a: int = 12; b: int = 123; c: int = 1243;
