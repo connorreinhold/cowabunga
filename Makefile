@@ -13,6 +13,7 @@ benchmark:
 test.all:
 	./xic-build -ea
 	gradle test
+	gradle benchmark
 	make xth.test
 
 gradle.test:
