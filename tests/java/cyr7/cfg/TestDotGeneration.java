@@ -9,6 +9,7 @@ import java.io.StringReader;
 
 import cyr7.cfg.ir.CFGUtil;
 import cyr7.cli.OptConfig;
+import cyr7.cli.Optimization;
 import org.junit.jupiter.api.Test;
 
 import cyr7.ir.IRUtil;
@@ -56,7 +57,7 @@ class TestDotGeneration {
 
         Reader r = new StringReader(prgmString);
         FileWriter w = new FileWriter("output.dot");
-        OptConfig config = OptConfig.cfOnly();
+        OptConfig config = OptConfig.of(Optimization.CF);
         try {
             IRUtil.irGen(r, new PrintWriter(System.out), "main", new Opener(), config);
             CFGUtil.generateDot(r, w, "main", new Opener(), config, "_Imain_p");

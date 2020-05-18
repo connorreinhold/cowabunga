@@ -41,7 +41,7 @@ public abstract class TestProgram {
     @Test
     void testLirCfoldEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
-            OptConfig.cfOnly(),
+            OptConfig.of(Optimization.CF),
             configuration());
         assertEquals(expected(), result);
     }

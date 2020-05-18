@@ -11,10 +11,6 @@ public final class OptConfig {
         return new OptConfig(Set.of());
     }
 
-    public static OptConfig cfOnly() {
-        return new OptConfig(Set.of(Optimization.CF));
-    }
-
     public static OptConfig allEnabled() {
         return new OptConfig(Set.of(Optimization.values()));
     }
@@ -44,16 +40,16 @@ public final class OptConfig {
         return enabledOptimizations.contains(Optimization.CF);
     }
 
+    public boolean copy() {
+        return enabledOptimizations.contains(Optimization.COPY);
+    }
+
     public boolean reg() {
         return enabledOptimizations.contains(Optimization.REG);
     }
 
     public boolean dce() {
         return enabledOptimizations.contains(Optimization.DCE);
-    }
-
-    public boolean cp() {
-        return enabledOptimizations.contains(Optimization.CP);
     }
 
     public void set(Optimization opt, boolean enabled) {

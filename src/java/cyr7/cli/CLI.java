@@ -12,6 +12,7 @@ import java.io.Writer;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import org.apache.commons.cli.CommandLine;
@@ -35,7 +36,8 @@ import cyr7.x86.ASMUtil.TilerConf;
 public class CLI {
 
     private static final Optimization[] SUPPORTED_OPTIMIZATIONS = {
-        Optimization.CF, Optimization.REG, Optimization.DCE, Optimization.COPY
+        Optimization.CF, Optimization.REG, Optimization.DCE, Optimization.COPY,
+        Optimization.LU
     };
 
     final static private String usage = "xic [options] <source files>";
@@ -375,9 +377,11 @@ public class CLI {
                     hasBeenDisabled = true;
                 }
 
-                Optimization opt = Optimization.parse(optShort);
-                optConfig.set(opt, noModifier);
-                args[i] = "";
+                Optional<Optimization> possibleOpt = Optimization.parse(optShort);
+                if (possibleOpt.isPresent()) {
+                    optConfig.set(possibleOpt.get(), noModifier);
+                    args[i] = "";
+                }
             }
         }
 

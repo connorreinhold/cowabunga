@@ -48,7 +48,7 @@ public class IRUtil {
         final var functionToBlocks =
                 TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
         final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
-        if (optConfig.cp()) {
+        if (optConfig.copy()) {
             alt.keySet().stream().forEach(functionName -> {
                 var optimizedCfg = alt.get(functionName);
                 optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
