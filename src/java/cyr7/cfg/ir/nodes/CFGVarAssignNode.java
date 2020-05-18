@@ -82,7 +82,7 @@ public class CFGVarAssignNode extends CFGNode {
                                   .replaceAll("\n", "");
         return String.format("%s=%s", variable, valueString);
     }
-    
+
     @Override
     public CFGNode copy(List<CFGNode> out) {
         assert out.size() == 1;
@@ -111,7 +111,12 @@ public class CFGVarAssignNode extends CFGNode {
 
     @Override
     public void refreshDfaSets() {
-        this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);
+        if (this.value instanceof IRTemp
+            && ((IRTemp)this.value).name().equals(this.variable)) {
+            this.useSet = Collections.emptySet();
+        } else {
+            this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);
+        }
         this.defSet = Collections.singleton(variable);
 
         this.killSet = Collections.singleton(variable);

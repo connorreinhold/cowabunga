@@ -104,9 +104,9 @@ public class DeadCodeElimOptimization {
         public CFGNode visit(CFGVarAssignNode n) {
             // If variable is not defined, then remove from graph. Unless
             // it is being assigned to a return value temp.
-            Set<String> defined = this.result.get(n).liveVars;
+            Set<String> liveVars = this.result.get(n).liveVars;
             if (!this.isAReturn(n.variable)
-                    && !defined.contains(n.variable)) {
+                    && !liveVars.contains(n.variable)) {
                 // Remove n from the graph.
                 // For every incoming node, replace their out node with
                 // this node's out node.
