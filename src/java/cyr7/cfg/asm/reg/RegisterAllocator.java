@@ -114,13 +114,14 @@ final class RegisterAllocator {
         int iterations = 0;
         boolean rerun;
         do {
-            CLI.debugPrint("Iterations: " + iterations++);
-            CLI.lazyDebugPrint(() -> {
-                for (int i = 0; i < functionBody.size(); i++) {
-                    CLI.debugPrint(String.format("%3d: %s", i, functionBody.get(i).getIntelAssembly()));
-                }
-                System.err.flush();
-            });
+            iterations++;
+            CLI.debugPrint("Iterations: " + iterations);
+//            CLI.lazyDebugPrint(() -> {
+//                for (int i = 0; i < functionBody.size(); i++) {
+//                    CLI.debugPrint(String.format("%3d: %s", i, functionBody.get(i).getIntelAssembly()));
+//                }
+//                System.err.flush();
+//            });
 
             if (iterations >= RegisterAllocator.MAX_ITERATIONS) {
                 throw new RegisterAllocationFailedException(iterations);

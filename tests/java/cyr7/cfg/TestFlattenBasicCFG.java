@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
+import cyr7.cli.Optimization;
 import org.junit.jupiter.api.Test;
 
 import cyr7.cfg.ir.constructor.CFGConstructor;
@@ -73,7 +74,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main(): int { a:int = 3; while (true) { while(true) { } } if (133 > 0) { return 43 } return 12 }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "while.xi", null, OptConfig.cfOnly(),
+                "while.xi", null, OptConfig.of(Optimization.CF),
                 new DefaultIdGenerator());
 
         Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
@@ -87,7 +88,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main() { while (true) { } }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "while.xi", null, OptConfig.cfOnly(),
+                "while.xi", null, OptConfig.of(Optimization.CF),
                 new DefaultIdGenerator());
 
         Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
@@ -102,7 +103,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main(): int { return 13 }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "return.xi", null, OptConfig.cfOnly(),
+                "return.xi", null, OptConfig.of(Optimization.CF),
                 new DefaultIdGenerator());
         Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
         this.testWithAlternateFlattener(new LinkedList<>(result.values()).get(0));
@@ -123,7 +124,7 @@ class TestFlattenBasicCFG {
                 + "}";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "nestedControls.xi", null, OptConfig.cfOnly(),
+                "nestedControls.xi", null, OptConfig.of(Optimization.CF),
                 new DefaultIdGenerator());
 
         Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);
@@ -136,7 +137,7 @@ class TestFlattenBasicCFG {
         String prgmString = "main() { }";
 
         IRCompUnit comp = IRUtil.generateIR(new StringReader(prgmString),
-                "nestedControls.xi", null, OptConfig.cfOnly(),
+                "nestedControls.xi", null, OptConfig.of(Optimization.CF),
                 new DefaultIdGenerator());
 
         Map<String, CFGStartNode> result = CFGConstructor.constructCFG(comp);

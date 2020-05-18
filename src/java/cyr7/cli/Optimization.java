@@ -1,5 +1,7 @@
 package cyr7.cli;
 
+import java.util.Optional;
+
 public enum Optimization {
 
     CF,
@@ -15,8 +17,7 @@ public enum Optimization {
     LICM,
     PRE,
     CP,
-    VN,
-    UNSUPPORTED;
+    VN;
 
     @Override
     public String toString() {
@@ -54,11 +55,11 @@ public enum Optimization {
         }
     }
 
-    public static Optimization parse(String s) {
+    public static Optional<Optimization> parse(String s) {
         try {
-            return Optimization.valueOf(s.toUpperCase());
+            return Optional.of(Optimization.valueOf(s.toUpperCase()));
         } catch (IllegalArgumentException e) {
-            return UNSUPPORTED;
+            return Optional.empty();
         }
     }
 }
