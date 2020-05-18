@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @Tag("benchmark")
 public abstract class Benchmark {
 
-    abstract String filename();
+    protected abstract String filename();
 
     abstract Optimization[] testedOptimizations();
 
