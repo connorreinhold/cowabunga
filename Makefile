@@ -6,6 +6,10 @@ myparser:
 
 cowabunga: myparser mylexer
 
+benchmark:
+	./xic-build
+	gradle benchmark
+
 test.all:
 	./xic-build
 	gradle test
