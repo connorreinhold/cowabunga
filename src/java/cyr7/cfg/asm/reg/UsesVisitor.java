@@ -14,6 +14,7 @@ import cyr7.x86.asm.ASMTempRegArg;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 final class UsesVisitor implements AsmCFGVisitor<Set<? extends ASMTempRegArg>> {
@@ -62,12 +63,17 @@ final class UsesVisitor implements AsmCFGVisitor<Set<? extends ASMTempRegArg>> {
             case IMULQ:
                 if (instr.args.size() == 2) {
                     return getAllArgs(instr);
-                }
-                // fall-through intentionally
-            case IDIVQ:
-                if (instr.args.get(0) instanceof ASMTempRegArg) {
+                } else if (instr.args.size() == 1 && instr.args.get(0) instanceof ASMTempRegArg) {
                     return Set.of((ASMTempRegArg) instr.args.get(0), ASMReg.RAX);
                 } else {
+                    assert false;
+                    return Set.of();
+                }
+            case IDIVQ:
+                if (instr.args.size() == 1 && instr.args.get(0) instanceof ASMTempRegArg) {
+                    return Set.of((ASMTempRegArg) instr.args.get(0), ASMReg.RAX, ASMReg.RDX);
+                } else {
+                    assert false;
                     return Set.of();
                 }
 
