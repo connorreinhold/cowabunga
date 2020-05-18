@@ -10,7 +10,6 @@ import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.opt.CopyPropagationOptimization;
 import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
-import cyr7.cfg.ir.opt.LoopUnrollingOptimization;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -66,21 +65,21 @@ public class IRUtil {
                 });
             }
         }
-        
+
         compUnit = CFGFlattener.flatten(alt, compUnit);
-        
-        if (optConfig.lu()) {
-            final var loopUnrollCFG = CFGConstructor.constructCFG(compUnit);
-            loopUnrollCFG.keySet().stream().forEach(functionName -> {
-                if (!functionName.equals("_I*premain*_p")) {
-                    var optimizedCfg = loopUnrollCFG.get(functionName);
-                    optimizedCfg = LoopUnrollingOptimization.optimize(optimizedCfg);
-                    loopUnrollCFG.put(functionName, optimizedCfg);
-                }
-            });
-            compUnit = CFGFlattener.flatten(loopUnrollCFG, compUnit);
-        }
-        
+
+//        if (optConfig.lu()) {
+//            final var loopUnrollCFG = CFGConstructor.constructCFG(compUnit);
+//            loopUnrollCFG.keySet().stream().forEach(functionName -> {
+//                if (!functionName.equals("_I*premain*_p")) {
+//                    var optimizedCfg = loopUnrollCFG.get(functionName);
+//                    optimizedCfg = LoopUnrollingOptimization.optimize(optimizedCfg);
+//                    loopUnrollCFG.put(functionName, optimizedCfg);
+//                }
+//            });
+//            compUnit = CFGFlattener.flatten(loopUnrollCFG, compUnit);
+//        }
+
         if (optConfig.cf()) {
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         }
