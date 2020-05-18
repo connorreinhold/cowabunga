@@ -48,7 +48,7 @@ public abstract class Benchmark {
         long totalTime = 0;
         for (int i = 0; i < repetitions; i++) {
             Instant start = Instant.now();
-            Bash.executeFile(exe, filename(), "", new String[] {});
+            Bash.executeFile(exe, filename(), "", new String[]{});
             Instant end = Instant.now();
             totalTime += ChronoUnit.MILLIS.between(start, end);
         }
@@ -58,12 +58,22 @@ public abstract class Benchmark {
     @EnabledOnOs({OS.LINUX})
     @Test
     void benchmark() throws Exception {
-        long unoptimizedMillis
-            = runBenchmark(OptConfig.none());
-        long optimizedMillis
-            = runBenchmark(OptConfig.of(testedOptimizations()));
-        System.out.println("Unoptimized: " + unoptimizedMillis);
-        System.out.println("Optimized: " + optimizedMillis);
+        OptConfig noOpts = OptConfig.none();
+        long unoptimizedMillis = runBenchmark(noOpts);
+        System.out.println("No optimizations: " + unoptimizedMillis);
+
+        OptConfig testedOpts = OptConfig.of(testedOptimizations());
+        long optimizedMillis = runBenchmark(testedOpts);
+        System.out.println(
+            "Tested optimizations ("
+                + testedOpts.convertToCLI() + "):"
+                + optimizedMillis);
+
+        OptConfig allOpts = OptConfig.allEnabled();
+        long fullyOptimizedMillis = runBenchmark(allOpts);
+        System.out.println(
+            "All optimizations: " + fullyOptimizedMillis);
+
         assertTrue(100 < optimizedMillis && optimizedMillis < 10000,
             "Benchmark test cases must execute between 1s and 3s");
         assertTrue(optimizedMillis < unoptimizedMillis,
