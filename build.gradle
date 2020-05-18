@@ -68,3 +68,17 @@ task coreTest(type: Test) {
         exceptionFormat = 'full'
     }
 }
+
+task benchmark(type: Test) {
+    dependsOn assemble
+    useJUnitPlatform {
+        includeTags 'benchmark'
+    }
+    enableAssertions = true
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        showStackTraces = true
+        exceptionFormat = 'full'
+    }
+}

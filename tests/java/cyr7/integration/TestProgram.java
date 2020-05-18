@@ -4,7 +4,6 @@ import cyr7.Bash;
 import cyr7.cli.OptConfig;
 import cyr7.cli.Optimization;
 import cyr7.integration.Run.RunConfiguration;
-import cyr7.ir.interpret.Configuration;
 import cyr7.x86.ASMUtil.TilerConf;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -12,10 +11,6 @@ import org.junit.jupiter.api.condition.EnabledOnOs;
 import org.junit.jupiter.api.condition.OS;
 
 import java.io.File;
-import java.io.FileWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -66,7 +61,6 @@ public abstract class TestProgram {
     private String getTestXiFilename() {
         return "tests/resources/integration/" + filename() + ".xi";
     }
-
 
     private void runAssemblyTest(
         TilerConf tilerConf,

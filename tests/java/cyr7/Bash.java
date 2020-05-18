@@ -41,10 +41,13 @@ public enum Bash {
 
         arguments.addAll(optConfig.convertToCLI());
         arguments.add(filename);
-        System.out.println(Bash.executeCommand(
+        String result = Bash.executeCommand(
             true,
             Optional.empty(),
-            arguments.toArray(new String[0])));
+            arguments.toArray(new String[0]));
+        if (!result.isEmpty()) {
+            System.err.println(result);
+        }
     }
 
     public static File linkExecutable(String filename)
@@ -68,13 +71,16 @@ public enum Bash {
         tmpFile.setReadable(true);
         tmpFile.setWritable(true);
         tmpFile.deleteOnExit();
-        System.out.println(Bash.executeCommand(
+        String result = Bash.executeCommand(
             true,
             Optional.empty(),
             linkerFile.getAbsolutePath(),
             filename,
             "-o",
-            tmpFile.getAbsolutePath()));
+            tmpFile.getAbsolutePath());
+        if (!result.isEmpty()) {
+            System.err.println(result);
+        }
 
         return tmpFile;
     }
@@ -111,6 +117,10 @@ public enum Bash {
             false,
             stdinFile,
             command);
+        if (!result.isEmpty()) {
+            System.err.println(result);
+        }
+
         return result;
     }
 
@@ -120,7 +130,7 @@ public enum Bash {
         String... command)
         throws InterruptedException, IOException {
 
-        System.out.print(String.join(" ", command));
+//        System.out.println(String.join(" ", command));
         ProcessBuilder process = new ProcessBuilder(command);
         process.directory(new File("."));
         var redirectedTarget = File.createTempFile("redirect", null);

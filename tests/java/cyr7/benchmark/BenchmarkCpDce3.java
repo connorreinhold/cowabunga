@@ -1,0 +1,15 @@
+package cyr7.benchmark;
+
+import cyr7.cli.Optimization;
+
+public class BenchmarkCpDce3 extends Benchmark {
+    @Override
+    String filename() {
+        return "benchmarks/cp_dce/cp_dce_benchmark3";
+    }
+
+    @Override
+    Optimization[] testedOptimizations() {
+        return new Optimization[] { Optimization.CP, Optimization.DCE };
+    }
+}
