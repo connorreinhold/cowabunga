@@ -79,6 +79,11 @@ public class SSATransformer {
             return start;
         }
 
+        /**
+         * This visitor will rename variables based on the algorithm described
+         * by Appel.
+         *
+         */
         private static class Visitor implements IrCFGVisitor<CFGNode> {
 
             private final Map<String, Integer> count;
@@ -92,7 +97,6 @@ public class SSATransformer {
 
             @Override
             public CFGNode visit(CFGCallNode n) {
-
                 return null;
             }
 

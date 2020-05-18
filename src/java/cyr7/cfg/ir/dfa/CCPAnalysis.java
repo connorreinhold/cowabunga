@@ -11,6 +11,7 @@ import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGPhiFunction;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
@@ -431,6 +432,11 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 topNode = topNode.out().get(0);
             }
             return traversedLattice;
+        }
+
+        @Override
+        public LatticeElement transfer(CFGPhiFunction n, LatticeElement in) {
+
         }
 
     }
