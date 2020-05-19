@@ -67,6 +67,23 @@ public class IRUtil {
                 });
             }
         }
+        if (optConfig.copy()) {
+            alt.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = alt.get(functionName);
+                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                alt.put(functionName, optimizedCfg);
+            });
+        }
+        if (optConfig.dce()) {
+            // Perform dead code removal 3 times to be safe.
+            for (int i = 0; i < 3; i++) {
+                alt.keySet().stream().forEach(functionName -> {
+                    var optimizedCfg = alt.get(functionName);
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                    alt.put(functionName, optimizedCfg);
+                });
+            }
+        }
 
         compUnit = CFGFlattener.flatten(alt, compUnit);
 /*
