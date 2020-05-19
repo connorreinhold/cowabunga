@@ -2,12 +2,12 @@ package cyr7.cfg.ir.ssa;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -20,6 +20,7 @@ import cyr7.cfg.ir.nodes.CFGPhiFunctionBlock;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
+import cyr7.cfg.ir.nodes.CFGStubNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
 import cyr7.cfg.ir.opt.IRTempReplacer;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
@@ -27,6 +28,11 @@ import cyr7.ir.nodes.IRCallStmt;
 
 public class SSATransformer {
 
+    /**
+     * Returns a CFG that uses phi-function blocks.
+     * @param start
+     * @return
+     */
     public static CFGStartNode convert(CFGStartNode start) {
         // Create the dominance frontier.
         final var domTreeComp = new DominatorTreeComputer(start);
@@ -38,10 +44,8 @@ public class SSATransformer {
 
         final var phiFuncsInserted = insertPhiFunctions(phiLocations, start);
 
-        final var varsNamed = RenameVariable
+        return RenameVariable
                         .execute(phiFuncsInserted, childrenNodes, defsites);
-
-        return start;
     }
 
     private static class RenameVariable {
@@ -60,34 +64,65 @@ public class SSATransformer {
                 stack.put(a, new ArrayDeque<>());
                 stack.get(a).push(0);
             });
-            return nameVariables(count, stack, domTree, start);
+
+            final var visitor = new Visitor(count, stack);
+            nameVariables(count, stack, domTree, start, visitor);
+            return start;
         }
 
 
-        private static CFGStartNode nameVariables(
+        private static void nameVariables(
                 final Map<String, Integer> count,
                 final Map<String, Deque<Integer>> stack,
-                Map<CFGNode, Set<CFGNode>> domTree,
-                final CFGStartNode start) {
+                final Map<CFGNode, Set<CFGNode>> domTree,
+                final CFGNode node,
+                final Visitor visitor) {
 
-            final Set<CFGNode> visited = new HashSet<>();
-            final Queue<CFGNode> worklist = new ArrayDeque<>();
-            final var visitor = new Visitor(count, stack);
-            worklist.add(start);
-            while (!worklist.isEmpty()) {
-                final var node = worklist.remove();
-                if (visited.contains(node)) continue;
+            List<String> definitions = new ArrayList<>();
 
-                node.accept(visitor);  // First part of rename(n)
+            // First part of rename(n)
+            if (node instanceof CFGPhiFunctionBlock) {
+                // We'll write the case for phi functions here, so
+                // that we don't need to add a node to the visitor file.
+                // If needed, we can add it to the visitor and copy the
+                // following into the visitor.
+                // stack and count values are the same as the ones in the
+                // visitor b/c of referencing.
+                final var phi = (CFGPhiFunctionBlock)node;
+                final var defs = phi.mappings.keySet();
+                for (String def: defs) {
+                    final int i = count.get(def) + 1;
+                    definitions.add(def);
+                    count.put(def, i);
+                    stack.get(def).push(i);
+                    List<String> args = phi.mappings.remove(def);
+                    phi.mappings.put(def + "_" + i, args);
+                }
+            } else {
+                definitions.addAll(node.accept(visitor));
+                node.refreshDfaSets();
+            }
 
-                visited.add(node);
-                for (CFGNode out: domTree.get(node)) {
-                    if (!visited.contains(out)) {
-                        worklist.add(start);
+            // for each successor y of node, check for phi functions
+            for (CFGNode y: node.out()) {
+                if (y instanceof CFGPhiFunctionBlock) {
+                    final var phi = (CFGPhiFunctionBlock)y;
+                    final int j = phi.in().indexOf(node);
+                    final var defs = phi.mappings.keySet();
+                    for (String def: defs) {
+                        final var args = phi.mappings.get(def);
+                        final var arg = args.get(j);
+                        final int i = stack.get(arg).peek();
+                        args.set(j, arg + "_" + i);
                     }
                 }
             }
-            return start;
+            for (CFGNode out: domTree.get(node)) {
+                nameVariables(count, stack, domTree, out, visitor);
+            }
+            for (String def: definitions) {
+                stack.get(def).pop();
+            }
         }
 
         /**
@@ -98,7 +133,7 @@ public class SSATransformer {
          * Rename(n) function in Algorithm 19.7.
          *
          */
-        private static class Visitor implements IrCFGVisitor<CFGNode> {
+        private static class Visitor implements IrCFGVisitor<List<String>> {
 
             private final Map<String, Integer> count;
             private final Map<String, Deque<Integer>> stack;
@@ -110,7 +145,7 @@ public class SSATransformer {
             }
 
             @Override
-            public CFGNode visit(CFGCallNode n) {
+            public List<String> visit(CFGCallNode n) {
                 Map<String, String> tempReplaceMapping = new HashMap<>();
                 for (String use: n.uses()) {
                     final int i = stack.get(use).peek();
@@ -121,6 +156,8 @@ public class SSATransformer {
                                     .replace(arg, tempReplaceMapping))
                                     .collect(Collectors.toList());
 
+                List<String> originalCollectors = n.call.collectors();
+
                 List<String> collectors = new ArrayList<>();
                 for (String def: n.call.collectors()) {
                     final int i = count.get(def) + 1;
@@ -130,49 +167,76 @@ public class SSATransformer {
                 }
                 n.call = new IRCallStmt(n.call.location(), collectors,
                                         n.call.target(), newArgs);
-                return n;
+                return originalCollectors;
             }
 
             @Override
-            public CFGNode visit(CFGIfNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGIfNode n) {
+                Map<String, String> tempReplaceMapping = new HashMap<>();
+                for (String use: n.uses()) {
+                    final int i = stack.get(use).peek();
+                    tempReplaceMapping.put(use, use + "_" + i);
+                }
+                n.cond = IRTempReplacer.replace(n.cond, tempReplaceMapping);
+                return Collections.emptyList();
             }
 
             @Override
-            public CFGNode visit(CFGVarAssignNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGVarAssignNode n) {
+                Map<String, String> tempReplaceMapping = new HashMap<>();
+                for (String use: n.uses()) {
+                    final int i = stack.get(use).peek();
+                    tempReplaceMapping.put(use, use + "_" + i);
+                }
+                n.value = IRTempReplacer.replace(n.value, tempReplaceMapping);
+
+                final int i = count.get(n.variable) + 1;
+                final String originalVar = n.variable;
+                count.put(n.variable, i);
+                stack.get(n.variable).push(i);
+                n.variable = n.variable + "_" + i;
+
+                return List.of(originalVar);
+
             }
 
             @Override
-            public CFGNode visit(CFGMemAssignNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGMemAssignNode n) {
+                Map<String, String> tempReplaceMapping = new HashMap<>();
+                for (String use: n.uses()) {
+                    final int i = stack.get(use).peek();
+                    tempReplaceMapping.put(use, use + "_" + i);
+                }
+
+                n.target = IRTempReplacer.replace(n.target, tempReplaceMapping);
+                n.value = IRTempReplacer.replace(n.value, tempReplaceMapping);
+                return Collections.emptyList();
             }
 
             @Override
-            public CFGNode visit(CFGReturnNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGReturnNode n) {
+                return Collections.emptyList();
             }
 
             @Override
-            public CFGNode visit(CFGStartNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGStartNode n) {
+                return Collections.emptyList();
             }
 
             @Override
-            public CFGNode visit(CFGSelfLoopNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGSelfLoopNode n) {
+                return Collections.emptyList();
             }
 
             @Override
-            public CFGNode visit(CFGBlockNode n) {
-                // TODO Auto-generated method stub
-                return null;
+            public List<String> visit(CFGBlockNode n) {
+                List<String> definitions = new ArrayList<>();
+                var topNode = n.block;
+                while (!(topNode instanceof CFGStubNode)) {
+                    definitions.addAll(topNode.accept(this));
+                    topNode = topNode.out().get(0);
+                }
+                return definitions;
             }
 
         }
