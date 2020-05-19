@@ -14,15 +14,15 @@ public abstract class CFGNode {
 
     protected final List<CFGNode> in;
 
-    protected void repOk() {
+    protected boolean repOk() {
         for (CFGNode n: this.out()) {
-            if (!n.in().contains(this)) throw new RuntimeException();
+            if (!n.in().contains(this)) return false;
         }
         for (CFGNode n: this.in()) {
-            if (!n.out().contains(this)) {
-                throw new RuntimeException();
+            if (!n.out().contains(this)) { return false;
             }
         }
+        return true;
     }
 
     private final Location location;
@@ -61,7 +61,7 @@ public abstract class CFGNode {
     }
 
     public abstract void replaceOutEdge(CFGNode previous, CFGNode newTarget);
-    
+
     public abstract CFGNode copy(List<CFGNode> out);
 
 
