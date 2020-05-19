@@ -93,4 +93,13 @@ public class CFGPhiFunctionBlock extends CFGNode {
         throw new UnsupportedOperationException("Do not copy phi function");
     }
 
+    @Override
+    public String toString() {
+        StringBuffer buffer = new StringBuffer();
+        this.mappings.forEach((target, args) -> {
+            buffer.append(target + " = φ(" + String.join(", ", args) + ")\n");
+        });
+        return buffer.toString();
+    }
+
 }

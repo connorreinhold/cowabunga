@@ -35,14 +35,18 @@ public class SSATransformer {
      */
     public static CFGStartNode convert(CFGStartNode start) {
         // Create the dominance frontier.
-        final var domTreeComp = new DominatorTreeComputer(start);
-        final var domFrontier = domTreeComp.computeDFMap();
-        final var childrenNodes = domTreeComp.getChildren();
+        var domTreeComp = new DominatorTreeComputer(start);
+        var domFrontier = domTreeComp.computeDFMap();
+        var childrenNodes = domTreeComp.getChildren();
 
         final var defsites = getDefsites(start);
         final var phiLocations = computePhiFuncLoc(defsites, domFrontier, start);
 
         final var phiFuncsInserted = insertPhiFunctions(phiLocations, start);
+
+        domTreeComp = new DominatorTreeComputer(phiFuncsInserted);
+        domFrontier = domTreeComp.computeDFMap();
+        childrenNodes = domTreeComp.getChildren();
 
         return RenameVariable
                         .execute(phiFuncsInserted, childrenNodes, defsites);
