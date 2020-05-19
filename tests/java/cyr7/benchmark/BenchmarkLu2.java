@@ -1,10 +1,9 @@
 package cyr7.benchmark;
 
-import cyr7.cli.Optimization;
-
 import java.util.Collection;
 import java.util.List;
 
+import cyr7.cli.Optimization;
 public class BenchmarkLu2 extends IRBenchmark {
     @Override
     protected String filename() {
