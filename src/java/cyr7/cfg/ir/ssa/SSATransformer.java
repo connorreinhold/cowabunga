@@ -93,9 +93,8 @@ public class SSATransformer {
                 // stack and count values are the same as the ones in the
                 // visitor b/c of referencing.
                 final var phi = (CFGPhiFunctionBlock)node;
-                final var defs = phi.mappings.keySet();
+                final var defs = Set.copyOf(phi.mappings.keySet());
                 defs.stream().forEach(def -> {
-                    System.out.println(def);
                     final int i = count.get(def) + 1;
                     definitions.add(def);
                     count.put(def, i);
