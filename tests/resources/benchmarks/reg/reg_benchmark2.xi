@@ -1,5 +1,5 @@
 use io use conv main(args: int[][]) {z: int = 0 counter: int = 0
-while (z < 50000000) { a: int = 5 b: int = a-5 c: int = a+b-1
+while (z < 30000000) { a: int = 5 b: int = a-5 c: int = a+b-1
 d: int = a+b-c+2 e: int = a-b+c*d+3 f: int = a-b+c*d-e+4
 g: int = a-b+c*d-e*f+5 h: int = a-b+c*d-e*f-g-6 i: int = a-b+c*d-e*f-g / h-7
 j: int = a-b+c*d-e*f-g / h+i-8 k: int = 5 l: int = k-5 n: int = k+l-1
