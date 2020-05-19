@@ -1,6 +1,7 @@
 package cyr7.cfg.ir.ssa;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -8,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
@@ -19,7 +21,9 @@ import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
+import cyr7.cfg.ir.opt.IRTempReplacer;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
+import cyr7.ir.nodes.IRCallStmt;
 
 public class SSATransformer {
 
@@ -107,7 +111,26 @@ public class SSATransformer {
 
             @Override
             public CFGNode visit(CFGCallNode n) {
-                return null;
+                Map<String, String> tempReplaceMapping = new HashMap<>();
+                for (String use: n.uses()) {
+                    final int i = stack.get(use).peek();
+                    tempReplaceMapping.put(use, use + "_" + i);
+                }
+                final var newArgs = n.call.args()
+                                    .stream().map(arg -> IRTempReplacer
+                                    .replace(arg, tempReplaceMapping))
+                                    .collect(Collectors.toList());
+
+                List<String> collectors = new ArrayList<>();
+                for (String def: n.call.collectors()) {
+                    final int i = count.get(def) + 1;
+                    count.put(def, i);
+                    stack.get(def).push(i);
+                    collectors.add(def + "_" + i);
+                }
+                n.call = new IRCallStmt(n.call.location(), collectors,
+                                        n.call.target(), newArgs);
+                return n;
             }
 
             @Override
