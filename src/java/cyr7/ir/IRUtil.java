@@ -223,7 +223,9 @@ public class IRUtil {
         Node result = ParserUtil.parseNode(reader, filename, false);
         TypeCheckUtil.typeCheck(result, fileOpener);
 
-        return (IRCompUnit) result.accept(new ASTToIRVisitor(generator)).assertSecond();
+        IRCompUnit compUnit = (IRCompUnit) result.accept(new ASTToIRVisitor(generator)).assertSecond();
+        compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
+        return compUnit;
     }
 
     public static IRCompUnit generateIR(

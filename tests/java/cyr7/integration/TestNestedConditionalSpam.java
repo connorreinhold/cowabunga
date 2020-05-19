@@ -21,7 +21,25 @@ public class TestNestedConditionalSpam extends TestProgram {
 
     @Disabled
     @Override
-    protected void testRegisterAllocatorWithOptimizations() {
+    protected void testRegisterAllocatorCopyAndDCE() throws Exception {
+        super.testRegisterAllocatorCopyAndDCE();
     }
 
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorLoopUnrolling() throws Exception {
+        super.testRegisterAllocatorLoopUnrolling();
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorConstantFolding() throws Exception {
+        super.testRegisterAllocatorConstantFolding();
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorAllOptimizations() throws Exception {
+        super.testRegisterAllocatorAllOptimizations();
+    }
 }

@@ -15,4 +15,5 @@ public class BenchmarkLu3 extends IRBenchmark {
     Collection<? extends Optimization> testedOptimizations() {
         return List.of(Optimization.LU);
     }
+
 }
