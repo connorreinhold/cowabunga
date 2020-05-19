@@ -2,8 +2,6 @@ package cyr7.benchmark;
 
 import cyr7.Bash;
 import cyr7.cli.OptConfig;
-import cyr7.cli.Optimization;
-import cyr7.util.Sets;
 import cyr7.x86.ASMUtil.TilerConf;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -13,8 +11,6 @@ import org.junit.jupiter.api.condition.OS;
 import java.io.File;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 

@@ -49,7 +49,25 @@ public class TestPrintSpam extends TestProgram {
 
     @Disabled
     @Override
-    protected void testRegisterAllocatorWithOptimizations() {
+    protected void testRegisterAllocatorAllOptimizations() {
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorConstantFolding() throws Exception {
+        super.testRegisterAllocatorConstantFolding();
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorCopyAndDCE() throws Exception {
+        super.testRegisterAllocatorCopyAndDCE();
+    }
+
+    @Disabled
+    @Override
+    protected void testRegisterAllocatorLoopUnrolling() throws Exception {
+        super.testRegisterAllocatorLoopUnrolling();
     }
 
 }

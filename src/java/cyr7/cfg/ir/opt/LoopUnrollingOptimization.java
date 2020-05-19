@@ -218,49 +218,4 @@ public class LoopUnrollingOptimization {
         
     }
     
-    public static void main(String[] args) throws Exception {
-        File f = new File("tests/resources/testJunk.xi");
-        FileReader fr = new FileReader(f);
-        BufferedReader br  = new BufferedReader(fr);
-        Reader reader = new BufferedReader(br);
-        DefaultIdGenerator idGenerator = new DefaultIdGenerator();
-
-        /*
-         * IRCompUnit lowered = IRUtil.irRun(
-            reader,
-            "testJunk.xi",
-            null,
-            OptConfig.none(),
-            new DefaultIdGenerator());
-         */
-
-        IRCompUnit lowered = IRUtil.generateIR(
-            reader,
-            "testJunk.xi",
-            null,
-            OptConfig.none(),
-            new DefaultIdGenerator());
-
-        //IRSimulator sim = new IRSimulator(lowered);
-        //long retVal = sim.call("_Imain_paai", 0);
-        
-        System.out.println(lowered);
-        Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
-        for(Map.Entry<String, CFGStartNode> entry: cfgResult.entrySet()) {
-            System.out.println(entry.getKey());
-            Writer writer = new PrintWriter(System.out);
-            CFGUtil.outputDotForFunctionIR(entry.getValue(), writer);
-        }
-
-        System.out.println("Success");
-
-        /*Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
-        CFGStartNode start = cfgResult.get("_Imain_paai");
-        optimize(start);
-        
-        Writer writer = new PrintWriter(System.out);
-        CFGUtil.outputDotForFunctionIR(start, writer);*/
-
-    }
-
 }

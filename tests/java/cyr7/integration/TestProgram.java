@@ -55,6 +55,14 @@ public abstract class TestProgram {
     }
 
     @Test
+    void testLirCopyAndDce() throws Exception {
+        String result = Run.lirRun(Run.getFile(filename()),
+            OptConfig.of(Optimization.COPY, Optimization.DCE),
+            configuration());
+        assertEquals(expected(), result);
+    }
+
+    @Test
     void testLirAllEnabled() throws Exception {
         String result = Run.lirRun(Run.getFile(filename()),
             OptConfig.allEnabled(),
@@ -108,8 +116,29 @@ public abstract class TestProgram {
     @Timeout(value=60) // seconds
     @EnabledOnOs({OS.LINUX})
     @Test
-    protected void testRegisterAllocatorWithOptimizations() throws Exception {
+    protected void testRegisterAllocatorAllOptimizations() throws Exception {
         runAssemblyTest(TilerConf.COMPLEX, OptConfig.allEnabled());
+    }
+
+    @Timeout(value=60) // seconds
+    @EnabledOnOs({OS.LINUX})
+    @Test
+    protected void testRegisterAllocatorLoopUnrolling() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, OptConfig.of(Optimization.LU));
+    }
+
+    @Timeout(value=60) // seconds
+    @EnabledOnOs({OS.LINUX})
+    @Test
+    protected void testRegisterAllocatorCopyAndDCE() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, OptConfig.of(Optimization.COPY, Optimization.DCE));
+    }
+
+    @Timeout(value=60) // seconds
+    @EnabledOnOs({OS.LINUX})
+    @Test
+    protected void testRegisterAllocatorConstantFolding() throws Exception {
+        runAssemblyTest(TilerConf.COMPLEX, OptConfig.of(Optimization.CF));
     }
 
 }
