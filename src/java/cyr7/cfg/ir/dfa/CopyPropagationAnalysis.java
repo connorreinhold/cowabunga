@@ -11,7 +11,6 @@ import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
-import cyr7.cfg.ir.nodes.CFGPhiFunction;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
@@ -96,11 +95,6 @@ public enum CopyPropagationAnalysis implements
                 return in;
             }
 
-            @Override
-            public CopyPropLattice transfer(CFGPhiFunction n,
-                    CopyPropLattice in) {
-                return in.clone();
-            }
         };
     }
 

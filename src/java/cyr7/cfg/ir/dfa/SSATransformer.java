@@ -16,7 +16,7 @@ import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
 import cyr7.cfg.ir.nodes.CFGNode;
-import cyr7.cfg.ir.nodes.CFGPhiFunction;
+import cyr7.cfg.ir.nodes.CFGPhiFunctionBlock;
 import cyr7.cfg.ir.nodes.CFGReturnNode;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
@@ -142,12 +142,6 @@ public class SSATransformer {
                 return null;
             }
 
-            @Override
-            public CFGNode visit(CFGPhiFunction n) {
-                // TODO Auto-generated method stub
-                return null;
-            }
-
         }
 
     }
@@ -196,7 +190,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
+                    base = new CFGPhiFunctionBlock(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -219,7 +213,7 @@ public class SSATransformer {
 
                 if (setOfVars.size() == 1) {
                     for (String var: setOfVars) {
-                        final var phiNode = new CFGPhiFunction(n.location(), paramSize, var, n);
+                        final var phiNode = new CFGPhiFunctionBlock(n.location(), paramSize, var, n);
                         for (CFGNode in: incoming) {
                             n.in().remove(in);
                             in.replaceOutEdge(n, phiNode);
@@ -230,7 +224,7 @@ public class SSATransformer {
 
                 CFGNode base = new CFGStubNode();
                 for (String var: setOfVars) {
-                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
+                    base = new CFGPhiFunctionBlock(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, n);
                 for (CFGNode in: incoming) {
@@ -253,7 +247,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
+                    base = new CFGPhiFunctionBlock(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -277,7 +271,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
+                    base = new CFGPhiFunctionBlock(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -306,7 +300,7 @@ public class SSATransformer {
                 n.replaceOutEdge(originalOutNode, new CFGStubNode());
                 CFGNode base = n;
                 for (String var: setOfVars) {
-                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
+                    base = new CFGPhiFunctionBlock(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, originalOutNode);
                 final List<CFGNode> incoming = List.copyOf(n.in());
@@ -334,7 +328,7 @@ public class SSATransformer {
 
                 if (setOfVars.size() == 1) {
                     for (String var: setOfVars) {
-                        final var phiNode = new CFGPhiFunction(n.location(), paramSize, var, n);
+                        final var phiNode = new CFGPhiFunctionBlock(n.location(), paramSize, var, n);
                         for (CFGNode in: incoming) {
                             n.in().remove(in);
                             in.replaceOutEdge(n, phiNode);
@@ -344,7 +338,7 @@ public class SSATransformer {
                 }
                 CFGNode base = new CFGStubNode();
                 for (String var: setOfVars) {
-                    base = new CFGPhiFunction(n.location(), paramSize, var, base);
+                    base = new CFGPhiFunctionBlock(n.location(), paramSize, var, base);
                 }
                 final var blockNode = new CFGBlockNode(n.location(), base, n);
                 for (CFGNode in: incoming) {
@@ -357,11 +351,6 @@ public class SSATransformer {
             }
         }
 
-        @Override
-        public CFGNode visit(CFGPhiFunction n) {
-            // TODO Auto-generated method stub
-            return null;
-        }
 
     }
 

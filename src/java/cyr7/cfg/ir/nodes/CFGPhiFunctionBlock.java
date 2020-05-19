@@ -12,13 +12,13 @@ import cyr7.cfg.ir.dfa.ForwardTransferFunction;
 import cyr7.cfg.ir.visitor.IrCFGVisitor;
 import java_cup.runtime.ComplexSymbolFactory.Location;
 
-public class CFGPhiFunction extends CFGNode {
+public class CFGPhiFunctionBlock extends CFGNode {
 
     public String variable;
     public List<String> arguments;
     private CFGNode out;
 
-    public CFGPhiFunction(Location location, int numOfIncoming,
+    public CFGPhiFunctionBlock(Location location, int numOfIncoming,
             String variable, CFGNode out) {
         super(location);
         this.variable = variable;
@@ -37,19 +37,19 @@ public class CFGPhiFunction extends CFGNode {
 
     @Override
     public <T> T accept(IrCFGVisitor<T> visitor) {
-        return visitor.visit(this);
+        throw new AssertionError("Do not use a visitor on phi-function block.");
     }
 
     @Override
     public <T> List<T> acceptForward(
             ForwardTransferFunction<T> transferFunction, T input) {
-        return List.of(transferFunction.transfer(this, input));
+        throw new AssertionError("Do not use a transfer function on phi-function block.");
     }
 
     @Override
     public <T> T acceptBackward(BackwardTransferFunction<T> transferFunction,
             T input) {
-        return transferFunction.transfer(this, input);
+        throw new AssertionError("Do not use a transfer function on phi-function block.");
     }
 
     @Override
