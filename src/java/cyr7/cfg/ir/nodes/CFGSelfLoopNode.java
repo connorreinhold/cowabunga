@@ -51,7 +51,8 @@ public class CFGSelfLoopNode extends CFGNode {
     public CFGNode copy(List<CFGNode> out) {
         return new CFGSelfLoopNode();
     }
-    
+
+    @Override
     public Set<String> defs() {
         return Collections.emptySet();
     }
@@ -74,6 +75,11 @@ public class CFGSelfLoopNode extends CFGNode {
     @Override
     public void refreshDfaSets() {
         return;
+    }
+
+    @Override
+    public String toString() {
+        return "∞";
     }
 
 }
