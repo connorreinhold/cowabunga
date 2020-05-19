@@ -20,7 +20,7 @@ import cyr7.cfg.ir.CFGUtil;
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.dfa.DfaResult;
 import cyr7.cfg.ir.dfa.WorklistAnalysis;
-import cyr7.cfg.ir.dfa.loops.BasicInductionVariableVisitor;
+import cyr7.cfg.ir.dfa.loops.BasicInductionVariableUtil;
 import cyr7.cfg.ir.dfa.loops.DominatorAnalysis;
 import cyr7.cfg.ir.dfa.loops.DominatorUtil;
 import cyr7.cfg.ir.nodes.CFGIfNode;
@@ -44,7 +44,8 @@ import java_cup.runtime.ComplexSymbolFactory;
 public class LoopUnrollingOptimization {
     
     // The number of copies made per loop
-    final static int LOOP_UNROLL_FACTOR = 100;
+    final static long LOOP_UNROLL_FACTOR_LOW = 3;
+    final static long LOOP_UNROLL_FACTOR_HIGH = 10;
     
     private LoopUnrollingOptimization() {}
     
@@ -113,11 +114,16 @@ public class LoopUnrollingOptimization {
     }
     
     public static CFGNode optimizeLoop(CFGNode head, Set<CFGNode> reachable) {
-        BasicInductionVariableVisitor bv = new BasicInductionVariableVisitor(reachable);
-        head.accept(bv);
-        Map<String, Long> ivStrideMap = bv.ivStrideMap();
+        Map<String, Long> ivStrideMap = BasicInductionVariableUtil.execute(head, reachable);
         
-        if (head instanceof CFGIfNode) {
+        long loop_unroll_factor = -1;
+        if (reachable.size() < 5) {
+            loop_unroll_factor = LOOP_UNROLL_FACTOR_HIGH;
+        } else if (reachable.size() < 50) {
+            loop_unroll_factor = LOOP_UNROLL_FACTOR_LOW;
+        }
+        
+        if (loop_unroll_factor > 0 && head instanceof CFGIfNode) {
             CFGIfNode ifNode = (CFGIfNode) head;
             if (ifNode.cond instanceof IRBinOp) {
                 IRBinOp guard = (IRBinOp) ifNode.cond;
@@ -141,6 +147,10 @@ public class LoopUnrollingOptimization {
                     
                 if (guard.right() instanceof IRExpr) {
                     rhs = (IRExpr) guard.right();
+                    if (rhs instanceof IRConst && potentialIVInc != null) {
+                        loop_unroll_factor = Math.min(loop_unroll_factor,
+                                Math.floorDiv(((IRConst) rhs).value(),potentialIVInc));
+                    }
                 }
                 if (potentialIV != null && op != null && rhs != null && ivStrideMap.containsKey(potentialIV)) {
                     CFGStubNode epilogueStub = new CFGStubNode();
@@ -153,7 +163,7 @@ public class LoopUnrollingOptimization {
                     
                     CFGNode nextPointer = epilogue;
                     CFGStubNode unrollStub = new CFGStubNode();
-                    for(int i = 0; i < LOOP_UNROLL_FACTOR; i++) {
+                    for(int i = 0; i < loop_unroll_factor; i++) {
                         CFGNode loopCopy;
                         if (i == 0) {
                             loopCopy = copyNode(head.out().get(0), head, 
@@ -170,7 +180,7 @@ public class LoopUnrollingOptimization {
                     // i + c(n-1)
                     IRExpr newLHS = new IRBinOp(l, OpType.ADD, new IRTemp(l, potentialIV), 
                             new IRBinOp(l, OpType.MUL, new IRConst(l, ivStrideMap.get(potentialIV)), 
-                                    new IRConst(l, LOOP_UNROLL_FACTOR - 1)));
+                                    new IRConst(l, loop_unroll_factor - 1)));
                     // i + c(n-1) < u
                     IRExpr newCond = new IRBinOp(l, op, newLHS, rhs);
                     CFGNode unrolledHeader = new CFGIfNode(head.location(), nextPointer, epilogue, newCond);
