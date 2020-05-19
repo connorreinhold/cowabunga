@@ -86,7 +86,11 @@ public class DominatorTreeComputer {
             if (dfnum.containsKey(node)) {
                 continue; // Goto next. Dfnum already computed
             }
+
             this.bucket.put(node, new HashSet<>());
+            this.idomChildren.put(node, new HashSet<>());
+            this.bucket.put(node, new HashSet<>());
+
             this.dfnum.put(node, N);
             this.vertex.put(N, node);
             this.parent.put(node, immediateParent);
@@ -136,12 +140,16 @@ public class DominatorTreeComputer {
      * {@code dominators().get(n)} is the immediate dominator of {@code n}.
      */
     public Map<CFGNode, CFGNode> dominators() {
+        if (this.computedDomTree) {
+            return Map.copyOf(this.idom);
+        }
         N = 0;
         this.bucket.clear();
         this.dfnum.clear();
         this.semi.clear();
         this.ancestors.clear();
         this.idom.clear();
+        this.idomChildren.clear();
         this.sameDom.clear();
 
         this.numberNodesDFS();
@@ -212,8 +220,10 @@ public class DominatorTreeComputer {
      * @return
      */
     private void computeChildren() {
+        if (this.computedChildren) {
+            return;
+        }
         final var allNodes = this.idom.keySet();
-        this.idomChildren.clear();
         final Map<CFGNode, Set<CFGNode>> children = new HashMap<>();
         allNodes.forEach(node -> {
             final var dominator = this.idom.get(node);
@@ -269,6 +279,7 @@ public class DominatorTreeComputer {
             return Map.copyOf(this.domFrontier);
         if (!this.computedDomTree)
             this.dominators();
+
         final var allNodes = this.idom.keySet();
         allNodes.forEach(this::computeDF);
         this.computedDomFrontier = true;
