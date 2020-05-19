@@ -44,7 +44,7 @@ import java_cup.runtime.ComplexSymbolFactory;
 public class LoopUnrollingOptimization {
     
     // The number of copies made per loop
-    final static int LOOP_UNROLL_FACTOR = 3;
+    final static int LOOP_UNROLL_FACTOR = 100;
     
     private LoopUnrollingOptimization() {}
     
@@ -117,11 +117,6 @@ public class LoopUnrollingOptimization {
         head.accept(bv);
         Map<String, Long> ivStrideMap = bv.ivStrideMap();
         
-        if (reachable.size() > 15) {
-            // too large of a loop
-            return head;
-        }
-        
         if (head instanceof CFGIfNode) {
             CFGIfNode ifNode = (CFGIfNode) head;
             if (ifNode.cond instanceof IRBinOp) {
@@ -183,7 +178,6 @@ public class LoopUnrollingOptimization {
                     for(CFGNode in: unrollStub.in()) {
                         in.replaceOutEdge(unrollStub, unrolledHeader);
                     }
-                    
                     return unrolledHeader;
                 }
             }
