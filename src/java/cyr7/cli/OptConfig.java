@@ -1,5 +1,6 @@
 package cyr7.cli;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -17,6 +18,10 @@ public final class OptConfig {
 
     public static OptConfig of(Optimization... optimizations) {
         return new OptConfig(Set.of(optimizations));
+    }
+
+    public static OptConfig of(Collection<? extends Optimization> optimizations) {
+        return new OptConfig(new HashSet<>(optimizations));
     }
 
     private final HashSet<Optimization> enabledOptimizations;

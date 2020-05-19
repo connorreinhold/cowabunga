@@ -3,11 +3,11 @@ package cyr7.benchmark;
 import cyr7.cli.OptConfig;
 import cyr7.cli.Optimization;
 
-public class BenchmarkReg3 extends Benchmark {
+public class BenchmarkReg4 extends Benchmark {
 
     @Override
     protected String filename() {
-        return "benchmarks/reg/reg_benchmark3";
+        return "benchmarks/reg/reg_benchmark4";
     }
 
     @Override

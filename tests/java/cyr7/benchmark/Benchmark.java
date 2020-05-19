@@ -3,6 +3,7 @@ package cyr7.benchmark;
 import cyr7.Bash;
 import cyr7.cli.OptConfig;
 import cyr7.cli.Optimization;
+import cyr7.util.Sets;
 import cyr7.x86.ASMUtil.TilerConf;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -12,6 +13,8 @@ import org.junit.jupiter.api.condition.OS;
 import java.io.File;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Collection;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -20,7 +23,8 @@ public abstract class Benchmark {
 
     protected abstract String filename();
 
-    abstract Optimization[] testedOptimizations();
+    abstract OptConfig preOptimizations();
+    abstract OptConfig postOptimizations();
 
     int repetitions() {
         // override this if you want to change the number of reps
@@ -58,25 +62,19 @@ public abstract class Benchmark {
     @EnabledOnOs({OS.LINUX})
     @Test
     void benchmark() throws Exception {
-        OptConfig noOpts = OptConfig.none();
-        long unoptimizedMillis = runBenchmark(noOpts);
-        System.out.println("No optimizations: " + unoptimizedMillis);
+        OptConfig pre = preOptimizations();
+        long preMillis = runBenchmark(pre);
+        System.out.println("Pre-optimization (" + pre.convertToCLI() + "): " + preMillis + "ms");
 
-        OptConfig testedOpts = OptConfig.of(testedOptimizations());
+        OptConfig post = postOptimizations();
+        long postMillis = runBenchmark(post);
+        System.out.println("Post-optimization (" + post.convertToCLI() + "):" + postMillis + "ms");
 
-        // https://piazza.com/class/k5eh0c04nur545?cid=493
-        // enable reg as well
-        testedOpts.set(Optimization.REG, true);
-        long optimizedMillis = runBenchmark(testedOpts);
-        System.out.println(
-            "Tested optimizations ("
-                + testedOpts.convertToCLI() + "):"
-                + optimizedMillis);
-
-        assertTrue(100 < optimizedMillis && optimizedMillis < 10000,
+        assertTrue(500 < postMillis && postMillis < 3000,
             "Benchmark test cases must execute between 1s and 3s");
-        assertTrue(optimizedMillis < unoptimizedMillis,
+        assertTrue(postMillis < preMillis,
             "Unoptimized version was faster than optimized version.");
+        System.out.println(String.format("Percent improvement: %.2f%%", (double) preMillis / (double) postMillis * 100.0));
     }
 
 }
