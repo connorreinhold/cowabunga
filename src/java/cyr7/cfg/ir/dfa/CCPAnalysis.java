@@ -11,6 +11,7 @@ import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGPhiFunctionBlock;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGStubNode;
@@ -431,6 +432,37 @@ public enum CCPAnalysis implements ForwardDataflowAnalysis<LatticeElement> {
                 topNode = topNode.out().get(0);
             }
             return traversedLattice;
+        }
+
+        @Override
+        public LatticeElement transfer(CFGPhiFunctionBlock n,
+                LatticeElement in) {
+            if (in.unreachable()) {
+                return LatticeElement.unreachable;
+            }
+
+            final Map<String, VLatticeElement> newMappings = new HashMap<>();
+            n.mappings.forEach((var, args) -> {
+                newMappings.put(var, VLatticeElement.top);
+                for (String a: args) {
+                    final var valueOfA = in.getValue(a);
+                    if (valueOfA.isBot()) {
+                        newMappings.put(var, VLatticeElement.bot);
+                        break;
+                    } else {
+                        // currentValue can never be bot in this branch.
+                        final var currentValue = newMappings.get(var);
+                        if (currentValue.isTop()) {
+                            newMappings.put(var, valueOfA);
+                        } else {
+                            newMappings.put(var, VLatticeElement.bot);
+                        }
+                    }
+                }
+            });
+            return in.modified(values -> {
+                values.putAll(newMappings);
+            });
         }
 
     }

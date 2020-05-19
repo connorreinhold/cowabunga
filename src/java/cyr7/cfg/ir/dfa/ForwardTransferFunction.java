@@ -4,6 +4,7 @@ import cyr7.cfg.ir.nodes.CFGBlockNode;
 import cyr7.cfg.ir.nodes.CFGCallNode;
 import cyr7.cfg.ir.nodes.CFGIfNode;
 import cyr7.cfg.ir.nodes.CFGMemAssignNode;
+import cyr7.cfg.ir.nodes.CFGPhiFunctionBlock;
 import cyr7.cfg.ir.nodes.CFGSelfLoopNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
 import cyr7.cfg.ir.nodes.CFGVarAssignNode;
@@ -25,5 +26,7 @@ public interface ForwardTransferFunction<L> {
     L transfer(CFGSelfLoopNode n, L in);
 
     L transfer(CFGBlockNode n, L in);
+
+    L transfer(CFGPhiFunctionBlock n, L in);
 
 }
