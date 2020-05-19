@@ -15,7 +15,7 @@ public class CFGSelfLoopNode extends CFGNode {
     public CFGSelfLoopNode() {
         super(new Location(-1, -1));
         this.in.add(this);
-        repOk();
+        assert repOk();
     }
 
     @Override

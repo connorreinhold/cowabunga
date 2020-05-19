@@ -32,7 +32,7 @@ public class CFGBlockNode extends CFGNode {
     private Set<String> killSet;
     private Map<String, String> genSet;
 
-    private void blockRepOk() {
+    private boolean blockRepOk() {
         final var defined = new HashSet<String>();
         var topNode = block;
         var previous = block;
@@ -63,6 +63,7 @@ public class CFGBlockNode extends CFGNode {
             if (topNode instanceof CFGStubNode)
                 break;
         }
+        return true;
     }
 
     /**
@@ -79,8 +80,8 @@ public class CFGBlockNode extends CFGNode {
 
         this.refreshDfaSets();
 
-        repOk();
-        blockRepOk();
+        assert repOk();
+        assert blockRepOk();
     }
 
     @Override
@@ -129,7 +130,7 @@ public class CFGBlockNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
-        repOk();
+        assert repOk();
     }
 
     @Override

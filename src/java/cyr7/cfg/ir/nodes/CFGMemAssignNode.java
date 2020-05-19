@@ -35,7 +35,7 @@ public class CFGMemAssignNode extends CFGNode {
         this.refreshDfaSets();
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     public CFGNode outNode() {
@@ -61,7 +61,7 @@ public class CFGMemAssignNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
-        repOk();
+        assert repOk();
     }
 
     @Override

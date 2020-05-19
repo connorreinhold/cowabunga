@@ -30,7 +30,7 @@ public class CFGIfNode extends CFGNode {
         this.refreshDfaSets();
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class CFGIfNode extends CFGNode {
         }
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
 
