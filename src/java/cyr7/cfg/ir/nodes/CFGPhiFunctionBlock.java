@@ -1,8 +1,7 @@
 package cyr7.cfg.ir.nodes;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,19 +13,21 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGPhiFunctionBlock extends CFGNode {
 
-    public String variable;
-    public List<String> arguments;
+    public Map<String, List<String>> mappings;
     private CFGNode out;
 
-    public CFGPhiFunctionBlock(Location location, int numOfIncoming,
-            String variable, CFGNode out) {
+    public CFGPhiFunctionBlock(Location location, CFGNode out,
+            int numOfIncoming, Set<String> variables) {
         super(location);
-        this.variable = variable;
         this.out = out;
 
-        this.arguments = new ArrayList<>();
-        for (int i = 0; i < numOfIncoming; i++) {
-            this.arguments.add(variable);
+        this.mappings = new HashMap<>();
+        for (String v: variables) {
+            final List<String> arguments = new ArrayList<>();
+            for (int i = 0; i < numOfIncoming; i++) {
+                arguments.add(v);
+            }
+            this.mappings.put(v, arguments);
         }
     }
 
@@ -64,32 +65,32 @@ public class CFGPhiFunctionBlock extends CFGNode {
 
     @Override
     public Set<String> defs() {
-        return Collections.singleton(this.variable);
+        throw new UnsupportedOperationException("Do not use defs set of phi-function");
     }
 
     @Override
     public Set<String> uses() {
-        return new HashSet<>(this.arguments);
+        throw new UnsupportedOperationException("Do not use uses set of phi-function");
     }
 
     @Override
     public Map<String, String> gens() {
-        return Collections.emptyMap();
+        throw new UnsupportedOperationException("Do not use gen set of phi-function");
     }
 
     @Override
     public Set<String> kills() {
-        return Collections.singleton(this.variable);
+        throw new UnsupportedOperationException("Do not use kill set of phi-function");
     }
 
     @Override
     public void refreshDfaSets() {
-        return;
+        throw new UnsupportedOperationException("No data to refresh");
     }
 
     @Override
     public CFGNode copy(List<CFGNode> out) {
-        throw new UnsupportedOperationException("Do not copy phi functtion");
+        throw new UnsupportedOperationException("Do not copy phi function");
     }
 
 }
