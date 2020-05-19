@@ -77,8 +77,11 @@ final class DefsVisitor implements AsmCFGVisitor<Set<ASMTempRegArg>> {
                     MangledNameParser.returnRegisters(mangledName),
                     Sets.difference(
                         Sets.union(
-                            Set.of(ASMConstants.CALLER_SAVED_REGISTERS),
-                            Set.of(ASMConstants.ARGUMENT_REGISTERS)
+                            Sets.union(
+                                Set.of(ASMConstants.CALLER_SAVED_REGISTERS),
+                                Set.of(ASMConstants.ARGUMENT_REGISTERS)
+                            ),
+                            Set.of(ASMConstants.RETURN_REGISTERS)
                         ),
                         Set.of(ASMReg.RSP, ASMReg.RBP)));
 

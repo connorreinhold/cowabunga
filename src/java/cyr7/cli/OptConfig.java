@@ -1,5 +1,6 @@
 package cyr7.cli;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,16 +12,16 @@ public final class OptConfig {
         return new OptConfig(Set.of());
     }
 
-    public static OptConfig cfOnly() {
-        return new OptConfig(Set.of(Optimization.CF));
-    }
-
     public static OptConfig allEnabled() {
         return new OptConfig(Set.of(Optimization.values()));
     }
 
     public static OptConfig of(Optimization... optimizations) {
         return new OptConfig(Set.of(optimizations));
+    }
+
+    public static OptConfig of(Collection<? extends Optimization> optimizations) {
+        return new OptConfig(new HashSet<>(optimizations));
     }
 
     private final HashSet<Optimization> enabledOptimizations;
@@ -40,8 +41,16 @@ public final class OptConfig {
         }
     }
 
+    public boolean lu() {
+        return enabledOptimizations.contains(Optimization.LU);
+    }
+    
     public boolean cf() {
         return enabledOptimizations.contains(Optimization.CF);
+    }
+
+    public boolean copy() {
+        return enabledOptimizations.contains(Optimization.COPY);
     }
 
     public boolean reg() {
@@ -50,10 +59,6 @@ public final class OptConfig {
 
     public boolean dce() {
         return enabledOptimizations.contains(Optimization.DCE);
-    }
-
-    public boolean cp() {
-        return enabledOptimizations.contains(Optimization.CP);
     }
 
     public void set(Optimization opt, boolean enabled) {

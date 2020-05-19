@@ -15,7 +15,7 @@ public class CFGReturnNode extends CFGNode {
     public CFGReturnNode(Location location) {
         super(location);
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -30,7 +30,7 @@ public class CFGReturnNode extends CFGNode {
 
     @Override
     public void replaceOutEdge(CFGNode stub, CFGNode n) {
-        repOk();
+        assert repOk();
         return;
     }
 
@@ -50,6 +50,11 @@ public class CFGReturnNode extends CFGNode {
     }
 
     @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 0;
+        return new CFGReturnNode(this.location());
+    }
+    
     public Set<String> defs() {
         return Collections.emptySet();
     }

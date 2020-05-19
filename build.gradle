@@ -45,7 +45,9 @@ sourceSets {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'benchmark'
+    }
     enableAssertions = true
     testLogging {
         events "passed", "skipped", "failed"
@@ -59,6 +61,20 @@ task coreTest(type: Test) {
     dependsOn assemble
     useJUnitPlatform {
         includeTags 'core'
+    }
+    enableAssertions = true
+    testLogging {
+        events "passed", "skipped", "failed"
+        showStandardStreams = true
+        showStackTraces = true
+        exceptionFormat = 'full'
+    }
+}
+
+task benchmark(type: Test) {
+    dependsOn assemble
+    useJUnitPlatform {
+        includeTags 'benchmark'
     }
     enableAssertions = true
     testLogging {

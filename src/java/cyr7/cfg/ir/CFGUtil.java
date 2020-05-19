@@ -1,10 +1,5 @@
 package cyr7.cfg.ir;
 
-import java.io.PrintWriter;
-import java.io.Reader;
-import java.io.Writer;
-import java.util.Map;
-
 import cyr7.cfg.ir.constructor.CFGConstructor;
 import cyr7.cfg.ir.dot.IrCFGDotVisitor;
 import cyr7.cfg.ir.flatten.CFGFlattener;
@@ -17,7 +12,13 @@ import cyr7.ir.nodes.IRCompUnit;
 import cyr7.ir.nodes.IRSeq;
 import cyr7.typecheck.IxiFileOpener;
 import polyglot.util.Pair;
-
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.Map;
 public final class CFGUtil {
 
     /**
@@ -76,12 +77,27 @@ public final class CFGUtil {
         return CFGConstructor.constructCFG(lowered);
     }
 
+    public static void testGenerateDotAsm() throws Exception {
+        File f = new File("tests/resources/testJunk.xi");
+        FileReader fr = new FileReader(f);
+        BufferedReader br  = new BufferedReader(fr);
+        Reader reader = new BufferedReader(br);
+        IRCompUnit lowered = IRUtil.generateIR(
+                reader,
+                "testJunk.xi",
+                null,
+                OptConfig.none(), new DefaultIdGenerator());
+        CFGNode startNode = CFGConstructor.constructCFG(lowered).get("_Imain_paai");
+        Writer writer = new PrintWriter(System.out);
+        outputDotForFunctionIR(startNode, writer);
+    }
+    
     public static void outputDotForFunctionIR(CFGNode node, Writer writer) {
         PrintWriter printer = new PrintWriter(writer);
         IrCFGDotVisitor dv = new IrCFGDotVisitor();
         node.accept(dv);
         printer.println("digraph nfa {");
-        printer.println("    node [shape=circle]");
+        printer.println("    node [shape=rectangle]");
         for(String label: dv.getDotNodes()) {
             printer.println("    \""+label+"\"");
         }

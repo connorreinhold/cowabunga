@@ -31,7 +31,7 @@ public class CFGCallNode extends CFGNode {
         this.refreshDfaSets();
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     public CFGNode outNode() {
@@ -57,7 +57,7 @@ public class CFGCallNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -76,6 +76,12 @@ public class CFGCallNode extends CFGNode {
     public String toString() {
         String callString = call.toString().replaceAll("\n", "");
         return callString;
+    }
+    
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGCallNode(this.location(), call, out.get(0));
     }
 
     @Override

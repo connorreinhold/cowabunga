@@ -2,6 +2,7 @@ package cyr7.cfg.ir.dfa.loops;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,7 +68,7 @@ public final class DominatorUtil {
                     meet = outEdges.getValue();
                 }
                 // A node is dominated by itself
-                meet.add(outEdges.getKey());
+                meet = Sets.union(meet, List.of(outEdges.getKey()));
                 map.put(outEdges.getKey(), meet);
             }
         }

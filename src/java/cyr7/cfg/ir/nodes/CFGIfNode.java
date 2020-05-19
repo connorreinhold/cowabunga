@@ -30,7 +30,7 @@ public class CFGIfNode extends CFGNode {
         this.refreshDfaSets();
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -67,7 +67,7 @@ public class CFGIfNode extends CFGNode {
         }
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
 
@@ -90,6 +90,11 @@ public class CFGIfNode extends CFGNode {
     }
 
     @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 2;
+        return new CFGIfNode(this.location(), out.get(0), out.get(1), cond);
+    }
+    
     public Set<String> defs() {
         return Collections.emptySet();
     }
@@ -113,5 +118,4 @@ public class CFGIfNode extends CFGNode {
     public void refreshDfaSets() {
         this.useSet = cond.accept(IRExprVarsVisitor.INSTANCE);
     }
-
 }

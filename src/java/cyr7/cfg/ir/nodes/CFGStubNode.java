@@ -48,6 +48,10 @@ public class CFGStubNode extends CFGNode {
     }
 
     @Override
+    public CFGNode copy(List<CFGNode> out) {
+        throw new UnsupportedOperationException(
+                "A self loop cannot be copied");
+    }
     public Set<String> defs() {
         throw new AssertionError("Stub node has no definition set");
     }
@@ -71,5 +75,4 @@ public class CFGStubNode extends CFGNode {
     public void refreshDfaSets() {
         throw new AssertionError("Stub node has no dfa sets");
     }
-
 }

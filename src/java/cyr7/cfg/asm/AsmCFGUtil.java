@@ -33,7 +33,7 @@ public final class AsmCFGUtil {
         AsmCFGDotVisitor dv = new AsmCFGDotVisitor();
         node.accept(dv);
         printer.println("digraph nfa {");
-        printer.println("    node [shape=oval]");
+        printer.println("    node [shape=rectangle]");
         for(String label: dv.getDotNodes()) {
             printer.println("    \""+label+"\"");
         }

@@ -35,7 +35,7 @@ public class CFGMemAssignNode extends CFGNode {
         this.refreshDfaSets();
 
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     public CFGNode outNode() {
@@ -61,7 +61,7 @@ public class CFGMemAssignNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -82,6 +82,11 @@ public class CFGMemAssignNode extends CFGNode {
     }
 
     @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGMemAssignNode(this.location(), target, value, out.get(0));
+    }
+    
     public Set<String> defs() {
         return Collections.emptySet();
     }

@@ -18,7 +18,7 @@ public class CFGStartNode extends CFGNode {
         super(location);
         this.out = out;
         this.updateIns();
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -44,7 +44,7 @@ public class CFGStartNode extends CFGNode {
             throw new UnsupportedOperationException(
                     "Cannot replace node arbitrarily.");
         }
-        repOk();
+        assert repOk();
     }
 
     @Override
@@ -60,6 +60,12 @@ public class CFGStartNode extends CFGNode {
     @Override
     public String toString() {
         return "start";
+    }
+    
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        assert out.size() == 1;
+        return new CFGStartNode(this.location(), out.get(0));
     }
 
     @Override

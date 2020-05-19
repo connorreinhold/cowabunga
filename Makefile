@@ -6,17 +6,22 @@ myparser:
 
 cowabunga: myparser mylexer
 
+benchmark:
+	./xic-build -ea
+	gradle benchmark
+
 test.all:
-	./xic-build
+	./xic-build -ea
 	gradle test
+	gradle benchmark
 	make xth.test
 
 gradle.test:
-	./xic-build
+	./xic-build -ea
 	gradle test
 
 gradle.coreTest:
-	./xic-build
+	./xic-build -ea
 	gradle coreTest
 
 xth.test:
