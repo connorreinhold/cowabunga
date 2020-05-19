@@ -1,5 +1,5 @@
 main(args: int[][]) {try(1000);}// Copy propagation in loops
-try(count:int){i: int = 0;a: int;while (i < 1000000) {if count==0 {return;}
+try(count:int){i: int = 0;a: int;while (i < 100000) {if count==0 {return;}
 b:int=a;c:int=b;d:int=c;e:int=d;f:int=e;g:int=f;h:int=g;x:int=h;y:int=x;w:int=y;
 b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;b=13;
 c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;c=13;
@@ -8,9 +8,9 @@ e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;e=13;
 f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;f=13;
 g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;g=13;
 h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;h=13;
-x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;x=13;
-y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;y=13;
-w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;w=13;
+w=p(0,0,0);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);
+w=p(w,w,w);w=p(w,d,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);
+w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);w=p(w,w,w);
 a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;a=d;
 d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;d=d;
 i = i + a;}a = p(1,2,3);a = p(3,2,1);a = p(1,3,2);a = p(2,3,1);a = p(2,1,3);
