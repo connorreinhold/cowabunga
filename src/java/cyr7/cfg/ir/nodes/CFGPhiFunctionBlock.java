@@ -31,6 +31,10 @@ public class CFGPhiFunctionBlock extends CFGNode {
         }
     }
 
+    public CFGNode outNode() {
+        return out;
+    }
+
     @Override
     public List<CFGNode> out() {
         return List.of(out);
