@@ -87,4 +87,9 @@ public class CFGPhiFunction extends CFGNode {
         return;
     }
 
+    @Override
+    public CFGNode copy(List<CFGNode> out) {
+        throw new UnsupportedOperationException("Do not copy phi functtion");
+    }
+
 }
