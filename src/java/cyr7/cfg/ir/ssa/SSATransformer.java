@@ -94,14 +94,15 @@ public class SSATransformer {
                 // visitor b/c of referencing.
                 final var phi = (CFGPhiFunctionBlock)node;
                 final var defs = phi.mappings.keySet();
-                for (String def: defs) {
+                defs.stream().forEach(def -> {
+                    System.out.println(def);
                     final int i = count.get(def) + 1;
                     definitions.add(def);
                     count.put(def, i);
                     stack.get(def).push(i);
                     List<String> args = phi.mappings.remove(def);
                     phi.mappings.put(def + "_" + i, args);
-                }
+                });
             } else {
                 definitions.addAll(node.accept(visitor));
                 node.refreshDfaSets();
@@ -193,6 +194,11 @@ public class SSATransformer {
                     tempReplaceMapping.put(use, use + "_" + i);
                 }
                 n.value = IRTempReplacer.replace(n.value, tempReplaceMapping);
+
+                // To ignore var assignments to returns.
+                if (n.defs().isEmpty()) {
+                    return List.of();
+                }
 
                 final int i = count.get(n.variable) + 1;
                 final String originalVar = n.variable;

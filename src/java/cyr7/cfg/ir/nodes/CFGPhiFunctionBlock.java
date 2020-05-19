@@ -13,7 +13,7 @@ import java_cup.runtime.ComplexSymbolFactory.Location;
 
 public class CFGPhiFunctionBlock extends CFGNode {
 
-    public Map<String, List<String>> mappings;
+    public final Map<String, List<String>> mappings;
     private CFGNode out;
 
     public CFGPhiFunctionBlock(Location location, CFGNode out,

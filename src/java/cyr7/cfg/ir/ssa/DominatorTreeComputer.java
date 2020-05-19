@@ -268,6 +268,18 @@ public class DominatorTreeComputer {
         if (!this.computedChildren)
             this.dominators();
 
+        for (CFGNode c: this.idomChildren.keySet()) {
+            for (CFGNode other: this.idomChildren.keySet()) {
+                if (c != other) {
+                    if (this.idomChildren.get(other).stream().anyMatch(v -> {
+                        return this.idomChildren.get(c).contains(v);
+                    })) {
+                        throw new AssertionError("Dom Trees should have unique children");
+                    }
+                }
+            }
+        }
+
         return Map.copyOf(this.idomChildren);
     }
 

@@ -11,6 +11,8 @@ import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.opt.CopyPropagationOptimization;
 import cyr7.cfg.ir.opt.DeadCodeElimOptimization;
 import cyr7.cfg.ir.opt.LoopUnrollingOptimization;
+import cyr7.cfg.ir.ssa.SSAReverter;
+import cyr7.cfg.ir.ssa.SSATransformer;
 import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.ir.block.TraceOptimizer;
@@ -49,6 +51,13 @@ public class IRUtil {
         final var functionToBlocks =
                 TraceOptimizer.getOptimizedBasicBlocks(compUnit, generator);
         final var alt = CFGConstructor.constructBlockCFG(functionToBlocks);
+
+        alt.keySet().stream().forEach(functionName -> {
+            final var cfg = alt.get(functionName);
+            final var ssa = SSATransformer.convert(cfg);
+            final var reverted = SSAReverter.revert(ssa);
+            alt.put(functionName, reverted);
+        });
 
         if (optConfig.copy()) {
             alt.keySet().stream().forEach(functionName -> {
@@ -103,9 +112,9 @@ public class IRUtil {
                 });
             }
         }
-        
+
         compUnit = CFGFlattener.flatten(secondPhase, compUnit);
-        
+
         if (optConfig.lu()) {
             final var loopUnrollCFG = CFGConstructor.constructCFG(compUnit);
             loopUnrollCFG.keySet().stream().forEach(functionName -> {
@@ -117,7 +126,7 @@ public class IRUtil {
             });
             compUnit = CFGFlattener.flatten(loopUnrollCFG, compUnit);
         }
-        
+
         if (optConfig.cf()) {
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         }
