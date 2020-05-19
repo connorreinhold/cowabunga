@@ -36,7 +36,7 @@ import java.util.stream.IntStream;
 
 final class RegisterAllocator {
 
-    public static final int MAX_ITERATIONS = 20;
+    public static final int MAX_ITERATIONS = 50;
 
     public static final ASMReg[] REGISTERS = {
         ASMReg.RAX,
