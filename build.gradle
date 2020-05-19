@@ -45,7 +45,9 @@ sourceSets {
 }
 
 test {
-    useJUnitPlatform()
+    useJUnitPlatform {
+        excludeTags 'benchmark'
+    }
     enableAssertions = true
     testLogging {
         events "passed", "skipped", "failed"

@@ -63,16 +63,15 @@ public abstract class Benchmark {
         System.out.println("No optimizations: " + unoptimizedMillis);
 
         OptConfig testedOpts = OptConfig.of(testedOptimizations());
+
+        // https://piazza.com/class/k5eh0c04nur545?cid=493
+        // enable reg as well
+        testedOpts.set(Optimization.REG, true);
         long optimizedMillis = runBenchmark(testedOpts);
         System.out.println(
             "Tested optimizations ("
                 + testedOpts.convertToCLI() + "):"
                 + optimizedMillis);
-
-        OptConfig allOpts = OptConfig.allEnabled();
-        long fullyOptimizedMillis = runBenchmark(allOpts);
-        System.out.println(
-            "All optimizations: " + fullyOptimizedMillis);
 
         assertTrue(100 < optimizedMillis && optimizedMillis < 10000,
             "Benchmark test cases must execute between 1s and 3s");
