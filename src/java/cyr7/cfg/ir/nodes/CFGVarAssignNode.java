@@ -123,7 +123,8 @@ public class CFGVarAssignNode extends CFGNode {
         this.genSet = new HashMap<>();
         if (value instanceof IRTemp) {
             String source = ((IRTemp)value).name();
-            if (!source.startsWith(Configuration.ABSTRACT_ARG_PREFIX)) {
+            if (!source.startsWith(Configuration.ABSTRACT_ARG_PREFIX)
+                    && !source.equals(this.variable)) {
                 genSet.put(variable, source);
             }
         }

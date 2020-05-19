@@ -67,8 +67,42 @@ public class IRUtil {
                 });
             }
         }
-
+        if (optConfig.copy()) {
+            alt.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = alt.get(functionName);
+                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                alt.put(functionName, optimizedCfg);
+            });
+        }
+        if (optConfig.dce()) {
+            // Perform dead code removal 3 times to be safe.
+            for (int i = 0; i < 3; i++) {
+                alt.keySet().stream().forEach(functionName -> {
+                    var optimizedCfg = alt.get(functionName);
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                    alt.put(functionName, optimizedCfg);
+                });
+            }
+        }
         compUnit = CFGFlattener.flatten(alt, compUnit);
+        final var secondPhase = CFGConstructor.constructCFG(compUnit);
+        if (optConfig.copy()) {
+            secondPhase.keySet().stream().forEach(functionName -> {
+                var optimizedCfg = secondPhase.get(functionName);
+                optimizedCfg = CopyPropagationOptimization.optimize(optimizedCfg);
+                secondPhase.put(functionName, optimizedCfg);
+            });
+        }
+        if (optConfig.dce()) {
+            // Perform dead code removal 3 times to be safe.
+            for (int i = 0; i < 3; i++) {
+                secondPhase.keySet().stream().forEach(functionName -> {
+                    var optimizedCfg = secondPhase.get(functionName);
+                    optimizedCfg = DeadCodeElimOptimization.optimize(optimizedCfg);
+                    secondPhase.put(functionName, optimizedCfg);
+                });
+            }
+        }
 /*
         if (optConfig.lu()) {
             final var loopUnrollCFG = CFGConstructor.constructCFG(compUnit);
@@ -81,7 +115,8 @@ public class IRUtil {
             });
             compUnit = CFGFlattener.flatten(loopUnrollCFG, compUnit);
         }*/
-
+        
+        compUnit = CFGFlattener.flatten(secondPhase, compUnit);
         if (optConfig.cf()) {
             compUnit = (IRCompUnit)compUnit.accept(new IRConstFoldVisitor()).assertSecond();
         }

@@ -1,7 +1,9 @@
 package cyr7.cfg.ir.nodes;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -152,20 +154,61 @@ public class CFGBlockNode extends CFGNode {
 
     @Override
     public void refreshDfaSets() {
+        this.killSet = new HashSet<>();
+        this.defSet = new HashSet<>();
         this.useSet = new HashSet<>();
         this.genSet = new HashMap<>();
-        this.defSet = new HashSet<>();
-        this.killSet = new HashSet<>();
+        this.initKillSet();
+        this.initDefSet();
+        this.initUseSet();
+        this.initGenSet();
+    }
 
+    private void initUseSet() {
+        final Deque<CFGNode> blockStack = new ArrayDeque<>();
         var topNode = this.block;
         while (!(topNode instanceof CFGStubNode)) {
-            this.useSet.addAll(topNode.uses());
-            this.defSet.addAll(topNode.defs());
-            this.genSet.putAll(topNode.gens());
+            blockStack.push(topNode);
+            topNode = topNode.out().get(0);
+        }
+        while (!blockStack.isEmpty()) {
+            final var node = blockStack.pop();
+            this.useSet.removeAll(node.defs());
+            this.useSet.addAll(node.uses());
+        }
+        this.useSet = Collections.unmodifiableSet(this.useSet);
+    }
+
+    /**
+     * All defined variables defined are killed.
+     */
+    private void initKillSet() {
+        var topNode = this.block;
+        while (!(topNode instanceof CFGStubNode)) {
             this.killSet.addAll(topNode.kills());
             topNode = topNode.out().get(0);
         }
-        return;
+        this.killSet = Collections.unmodifiableSet(this.killSet);
+    }
+
+    private void initDefSet() {
+        var topNode = this.block;
+        while (!(topNode instanceof CFGStubNode)) {
+            this.defSet.addAll(topNode.defs());
+            topNode = topNode.out().get(0);
+        }
+        this.defSet = Collections.unmodifiableSet(this.defSet);
+    }
+
+    private void initGenSet() {
+        var topNode = this.block;
+        while (!(topNode instanceof CFGStubNode)) {
+            topNode.kills().forEach(this.genSet::remove);;
+            this.genSet.values().removeAll(topNode.kills());
+            topNode.gens().forEach((x, y) -> this.genSet.put(x, y));
+            topNode = topNode.out().get(0);
+        }
+        this.genSet = Collections.unmodifiableMap(this.genSet);
     }
 
     @Override
