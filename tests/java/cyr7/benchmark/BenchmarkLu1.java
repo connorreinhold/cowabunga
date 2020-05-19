@@ -1,9 +1,9 @@
 package cyr7.benchmark;
 
-import cyr7.cli.Optimization;
-
 import java.util.Collection;
 import java.util.List;
+
+import cyr7.cli.Optimization;
 
 public class BenchmarkLu1 extends IRBenchmark {
     @Override
