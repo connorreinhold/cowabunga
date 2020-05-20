@@ -6,7 +6,7 @@ main(args: int[][]) {
     }
 }
 iterate() {
-    i: int = 0; bound:int = 1000000; while (i < bound) {i = i + 1;}
+    i: int = 0; bound:int = 5000000; while (i < bound) {i = i + 1;}
     while (i > -bound) {i = i - 2;} while (i < bound) {i = i + 3;}
     while (i > -bound) {i = i - 4;} while (i < bound) {i = i + 5;}
     while (i > -bound) {i = i - 6;} while (i < bound) {i = i + 7;}
