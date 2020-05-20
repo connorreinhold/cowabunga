@@ -1,7 +1,6 @@
 package cyr7.cfg.ir.dfa.loops;
 
 import java.util.ArrayDeque;
-import java.util.Deque;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;

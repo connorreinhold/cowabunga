@@ -1,7 +1,7 @@
 main(args: int[][]) {
     // calculate 20^7
     total:int = 0 
-    num:int = 20
+    num:int = 21
     a:int = 0; while (a < num) {
     b:int = num; a = a + 1; while (b > 0) {
     c:int = 0; b = b - 1; while (c < num) {
