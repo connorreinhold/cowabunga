@@ -474,6 +474,7 @@ public class CLI {
                 case "ro":
                     for (Optimization optimization : SUPPORTED_OPTIMIZATIONS) {
                         writer.write(optimization.name().toLowerCase());
+                        writer.write('\n');
                     }
                     break;
                 case "l":
@@ -505,32 +506,36 @@ public class CLI {
                     break;
                 }
                 case "oir": {
-                    Phase p = Phase.parse(cmd.getOptionValue("oir"));
-                    switch (p) {
-                        case INITIAL:
-                            wantsInitialIRGen = true;
-                            break;
-                        case FINAL:
-                            wantsFinalIRGen = true;
-                            break;
-                        default:
-                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("oir"));
-                            break;
+                    for (String option : cmd.getOptionValues("oir")) {
+                        Phase p = Phase.parse(option);
+                        switch (p) {
+                            case INITIAL:
+                                wantsInitialIRGen = true;
+                                break;
+                            case FINAL:
+                                wantsFinalIRGen = true;
+                                break;
+                            default:
+                                writer.write("Unrecognized phase option: " + cmd.getOptionValue("oir"));
+                                break;
+                        }
                     }
                     break;
                 }
                 case "ocfg": {
-                    Phase p = Phase.parse(cmd.getOptionValue("ocfg"));
-                    switch (p) {
-                        case INITIAL:
-                            wantsInitialDotGen = true;
-                            break;
-                        case FINAL:
-                            wantsFinalDotGen = true;
-                            break;
-                        default:
-                            writer.write("Unrecognized phase option: " + cmd.getOptionValue("ocfg"));
-                            break;
+                    for (String option : cmd.getOptionValues("ocfg")) {
+                        Phase p = Phase.parse(option);
+                        switch (p) {
+                            case INITIAL:
+                                wantsInitialDotGen = true;
+                                break;
+                            case FINAL:
+                                wantsFinalDotGen = true;
+                                break;
+                            default:
+                                writer.write("Unrecognized phase option: " + cmd.getOptionValue("ocfg"));
+                                break;
+                        }
                     }
                     break;
                 }

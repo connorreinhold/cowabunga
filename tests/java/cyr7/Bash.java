@@ -1,5 +1,6 @@
 package cyr7;
 
+import cyr7.cli.CLI;
 import cyr7.cli.OptConfig;
 import cyr7.integration.Run.RunConfiguration;
 import cyr7.x86.ASMUtil.TilerConf;
@@ -30,10 +31,9 @@ public enum Bash {
     public static void compileToAssembly(
         String filename,
         TilerConf tilerConf,
-        OptConfig optConfig) throws IOException, InterruptedException {
+        OptConfig optConfig) {
 
         List<String> arguments = new ArrayList<>(List.of(
-            "./xic",
             "-libpath",
             libpath(),
             "-tiler",
@@ -41,13 +41,10 @@ public enum Bash {
 
         arguments.addAll(optConfig.convertToCLI());
         arguments.add(filename);
-        String result = Bash.executeCommand(
-            true,
-            Optional.empty(),
-            arguments.toArray(new String[0]));
-        if (!result.isEmpty()) {
-            System.err.println(result);
-        }
+
+        System.out.println("./xic " + String.join(" ", arguments));
+
+        CLI.main(arguments.toArray(String[]::new));
     }
 
     public static File linkExecutable(String filename)

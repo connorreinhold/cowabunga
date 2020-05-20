@@ -4,7 +4,6 @@ import cyr7.cfg.asm.AsmCFGUtil;
 import cyr7.cfg.asm.constructor.AsmCFGConstructor;
 import cyr7.cfg.asm.constructor.AsmCFGUnreachableNodeCleaner;
 import cyr7.cfg.asm.dfa.WorklistAnalysis;
-import cyr7.cfg.asm.dot.AsmCFGAnalysisDotVisitor;
 import cyr7.cfg.asm.nodes.AsmCFGNode;
 import cyr7.cfg.asm.nodes.AsmCFGSourceNode;
 import cyr7.cfg.asm.nodes.AsmCFGStartNode;
@@ -326,7 +325,6 @@ final class RegisterAllocator {
         if (degree == K) {
             enableMoves(Sets.union(Set.of(m), graph.adjacent(m)));
 
-            assert worklists.spill.contains(m);
             worklists.spill.remove(m);
 
             if (moves.nodeIsMoveRelated(m)) {

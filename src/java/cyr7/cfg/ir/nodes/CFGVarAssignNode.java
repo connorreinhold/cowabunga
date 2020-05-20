@@ -112,8 +112,7 @@ public class CFGVarAssignNode extends CFGNode {
     @Override
     public void refreshDfaSets() {
         if (this.value instanceof IRTemp
-            && (((IRTemp)this.value).name().equals(this.variable)
-            || ((IRTemp)this.value).name().startsWith(Configuration.ABSTRACT_ARG_PREFIX))) {
+            && ((IRTemp)this.value).name().startsWith(Configuration.ABSTRACT_ARG_PREFIX)) {
             this.useSet = Collections.emptySet();
         } else {
             this.useSet = value.accept(IRExprVarsVisitor.INSTANCE);

@@ -1,7 +1,8 @@
 package cyr7.cfg.ir;
 
 import cyr7.cfg.ir.constructor.CFGConstructor;
-import cyr7.cfg.ir.dot.IrCFGDotVisitor;
+import cyr7.cfg.ir.dot.IrCFGDotUtil;
+import cyr7.cfg.ir.dot.IrCFGDotUtil.DotData;
 import cyr7.cfg.ir.flatten.CFGFlattener;
 import cyr7.cfg.ir.nodes.CFGNode;
 import cyr7.cfg.ir.nodes.CFGStartNode;
@@ -94,15 +95,14 @@ public final class CFGUtil {
     
     public static void outputDotForFunctionIR(CFGNode node, Writer writer) {
         PrintWriter printer = new PrintWriter(writer);
-        IrCFGDotVisitor dv = new IrCFGDotVisitor();
-        node.accept(dv);
+        DotData data = IrCFGDotUtil.execute(node);
         printer.println("digraph nfa {");
         printer.println("    node [shape=rectangle]");
-        for(String label: dv.getDotNodes()) {
+        for(String label: data.nodes()) {
             printer.println("    \""+label+"\"");
         }
         printer.println();
-        for(Pair<String, String> edge:dv.getDotEdges()) {
+        for(Pair<String, String> edge: data.edges()) {
             String edgeName = "    \""+edge.part1()+"\" -> \""+edge.part2()+"\"";
             printer.println(edgeName);
         }

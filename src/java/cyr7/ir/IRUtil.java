@@ -234,7 +234,7 @@ public class IRUtil {
 
         IRCompUnit compUnit = (IRCompUnit) result.accept(new ASTToIRVisitor(generator)).assertSecond();
         compUnit = compUnit.accept(new LoweringVisitor(generator)).assertThird();
-        return compUnit;
+        return TraceOptimizer.optimize(compUnit, generator);
     }
 
     public static IRCompUnit generateIR(

@@ -227,5 +227,4 @@ public class LoopUnrollingOptimization {
         return copy;
         
     }
-    
 }
