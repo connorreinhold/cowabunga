@@ -1,6 +1,6 @@
 main(args: int[][]) {
     i:int = 0
-    while (i < 100) {
+    while (i < 200) {
         iterate()
         i = i + 1
     }
