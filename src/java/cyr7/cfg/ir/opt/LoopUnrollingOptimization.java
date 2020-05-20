@@ -227,22 +227,4 @@ public class LoopUnrollingOptimization {
         return copy;
         
     }
-    
-    public static void main(String[] args) throws Exception {
-        File f = new File("tests/resources/testJunk.xi");
-        FileReader fr = new FileReader(f);
-        BufferedReader br  = new BufferedReader(fr);
-        Reader reader = new BufferedReader(br);
-        IRCompUnit lowered = IRUtil.generateIR(
-            reader,
-            "testJunk.xi",
-            null,
-            OptConfig.none(),
-            new DefaultIdGenerator());
-
-        Map<String, CFGStartNode> cfgResult = CFGConstructor.constructCFG(lowered);
-
-        CFGUtil.outputDotForFunctionIR(cfgResult.get("_Imain_paai"), new PrintWriter(System.out));
-
-    }
 }
