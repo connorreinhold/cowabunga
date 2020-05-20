@@ -5,7 +5,7 @@ main(args: int[][]) {
     x: int[] = "Hi"
     counter: int = 0
     asserter: int[] = {0}
-    while i < 15000 {
+    while i < 10000 {
         x = x + "Hello"
         i = i + 1
 

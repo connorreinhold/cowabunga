@@ -1,11 +1,10 @@
 plugins {
     id 'java'
+    id 'jacoco'
 }
 
 group 'cs4120.cyr7'
 version '1.0'
-
-sourceCompatibility = 11
 
 repositories {
     mavenCentral()
@@ -55,6 +54,7 @@ test {
         showStackTraces = true
         exceptionFormat = 'full'
     }
+    finalizedBy jacocoTestReport
 }
 
 task coreTest(type: Test) {

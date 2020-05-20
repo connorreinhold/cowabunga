@@ -326,7 +326,6 @@ final class RegisterAllocator {
         if (degree == K) {
             enableMoves(Sets.union(Set.of(m), graph.adjacent(m)));
 
-            assert worklists.spill.contains(m);
             worklists.spill.remove(m);
 
             if (moves.nodeIsMoveRelated(m)) {
