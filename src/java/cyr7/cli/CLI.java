@@ -474,6 +474,7 @@ public class CLI {
                 case "ro":
                     for (Optimization optimization : SUPPORTED_OPTIMIZATIONS) {
                         writer.write(optimization.name().toLowerCase());
+                        writer.write('\n');
                     }
                     break;
                 case "l":
