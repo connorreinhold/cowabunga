@@ -609,7 +609,11 @@ public class CLI {
                 debugPrint("Lexing file: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "lexed");
+                    output = getWriter(
+                        destinationRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)),
+                        "lexed");
                     LexerUtil.lex(input, output, filename);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -621,7 +625,7 @@ public class CLI {
                 debugPrint("Parsing file: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "parsed");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, getMainFilename(Path.of(filename)), "parsed");
                     ParserUtil.parse(input, output, filename, isIXI);
                 } catch (Exception e) {
                     writer.write(e.getMessage());
@@ -636,7 +640,7 @@ public class CLI {
                 debugPrint("Typechecking file: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "typed");
+                    output = getWriter(destinationRoot.getAbsolutePath(), filename, getMainFilename(Path.of(filename)), "typed");
                     TypeCheckUtil.typeCheck(
                         input,
                         output,
@@ -652,18 +656,17 @@ public class CLI {
             if (wantsInitialIRGen) {
                 debugPrint("Generate initial intermediate code for: " + filename);
                 try {
-                    Path path = Path.of(filename);
-                    String irFilename = getMainFilename(path) + "_initial";
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(),
-                            irFilename,
-                            "ir");
+                    output = getWriter(
+                        destinationRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)) + "_initial",
+                        "ir");
                     IRUtil.initialIRGen(
-                            input,
-                            output,
-                            irFilename,
-                            opener
-                    );
+                        input,
+                        output,
+                        filename,
+                        opener);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
@@ -674,19 +677,18 @@ public class CLI {
             if (wantsFinalIRGen) {
                 debugPrint("Generate final intermediate code for: " + filename);
                 try {
-                    Path path = Path.of(filename);
-                    String irFilename = getMainFilename(path) + "_final";
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(),
-                            irFilename,
-                            "ir");
+                    output = getWriter(
+                        destinationRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)) + "_final",
+                        "ir");
                     IRUtil.irGen(
                         input,
                         output,
-                        path.getFileName().toString(),
+                        filename,
                         opener,
-                        optConfig
-                    );
+                        optConfig);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
@@ -699,18 +701,26 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    Map<String, CFGStartNode> functions = CFGUtil.generateAllInitialDot(
+                    Map<String, CFGStartNode> functions =
+                        CFGUtil.generateAllInitialDot(
                             input,
                             filename,
-                            opener
-                    );
-                    for (String f: functions.keySet()) {
-                        String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_initial";
+                            opener);
+                    for (String f : functions.keySet()) {
+                        String functionFilename =
+                            getMainFilename(path)
+                                + "_"
+                                + demangleFunction(f)
+                                + "_initial";
                         System.out.println();
-                        output = getWriter(destinationRoot.getAbsolutePath(),
-                                functionFilename,
-                                "dot");
-                        CFGUtil.outputDotForFunctionIR(functions.get(f), output);
+                        output = getWriter(
+                            destinationRoot.getAbsolutePath(),
+                            filename,
+                            functionFilename,
+                            "dot");
+                        CFGUtil.outputDotForFunctionIR(
+                            functions.get(f),
+                            output);
                     }
                 } catch (Exception e) {
                     debugPrint(e);
@@ -730,11 +740,19 @@ public class CLI {
                             opener,
                             optConfig);
                     for (String f: functions.keySet()) {
-                        String functionFilename = getMainFilename(path) + "_" + demangleFunction(f) + "_final";
-                        output = getWriter(destinationRoot.getAbsolutePath(),
-                                functionFilename,
-                                "dot");
-                        CFGUtil.outputDotForFunctionIR(functions.get(f), output);
+                        String functionFilename =
+                            getMainFilename(path)
+                                + "_"
+                                + demangleFunction(f)
+                                + "_final";
+                        output = getWriter(
+                            destinationRoot.getAbsolutePath(),
+                            filename,
+                            functionFilename,
+                            "dot");
+                        CFGUtil.outputDotForFunctionIR(
+                            functions.get(f),
+                            output);
                     }
                 } catch (Exception e) {
                     debugPrint(e);
@@ -747,7 +765,11 @@ public class CLI {
                 try {
                     Path path = Path.of(filename);
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "ir");
+                    output = getWriter(
+                        destinationRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)),
+                        "ir");
                     IRUtil.irGen(
                         input,
                         output,
@@ -766,14 +788,17 @@ public class CLI {
                     "code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "mir_run");
+                    output = getWriter(
+                        destinationRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)),
+                        "mir_run");
                     IRUtil.mirRun(
-                            input,
-                            output,
-                            filename,
-                            isIXI,
-                            opener
-                    );
+                        input,
+                        output,
+                        filename,
+                        isIXI,
+                        opener);
                 } catch (Exception e) {
                     debugPrint(e);
                     writer.write(e.getMessage());
@@ -785,7 +810,11 @@ public class CLI {
                 debugPrint("Generate and interpret intermediate code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(destinationRoot.getAbsolutePath(), filename, "ir_run");
+                    output = getWriter(
+                        destinationRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)),
+                        "ir_run");
                     IRUtil.irRun(
                         input,
                         output,
@@ -803,8 +832,18 @@ public class CLI {
                 debugPrint("Generate and interpret assembly code for: " + filename);
                 try {
                     input = getReader(filename);
-                    output = getWriter(assemblyRoot.getAbsolutePath(), filename, "s");
-                    ASMUtil.writeASM(input, output, filename, opener, optConfig, tiler);
+                    output = getWriter(
+                        assemblyRoot.getAbsolutePath(),
+                        filename,
+                        getMainFilename(Path.of(filename)),
+                        "s");
+                    ASMUtil.writeASM(
+                        input,
+                        output,
+                        filename,
+                        opener,
+                        optConfig,
+                        tiler);
                 } catch (Exception e) {
                     debugPrint(e);
                     if (e.getMessage() != null) {
@@ -824,13 +863,11 @@ public class CLI {
         return new BufferedReader(new FileReader(sourcePath.toFile()));
     }
 
-    private static Writer getWriter(String absolutePath, String relativePath, String fileExtension)
+    private static Writer getWriter(String absolutePath, String relativePath, String filename, String fileExtension)
             throws IOException {
-        Path destPath = Paths.get(absolutePath,
-                relativePath).getParent();
-        File dest = new File(destPath.toFile(), String.format("%s." +
-                        fileExtension,
-                getMainFilename(Path.of(relativePath))));
+        Path destPath = Paths.get(absolutePath, relativePath).getParent();
+        File dest = new File(destPath.toFile(),
+            String.format("%s.%s", filename, fileExtension));
         if (!dest.exists()) {
             // Create directories if they don't exist
             dest.getParentFile().mkdirs();
