@@ -7,7 +7,10 @@ make cowabunga
 
 gradle assemble --no-daemon
 
-echo "Compiler built: $(dirname $(readlink -f $0))"
+PHYS_DIR=`pwd -P`
+RESULT=$PHYS_DIR/xic
 
-echo 'java -jar "'"$(dirname "$(readlink -f "$0")")"'/build/libs/cowabunga-1.0.jar" "$@"' > xic
+echo "Compiler built: $RESULT"
+
+echo 'java -jar "'$PHYS_DIR'/build/libs/cowabunga-1.0.jar" "$@"' > xic
 chmod +x xic
