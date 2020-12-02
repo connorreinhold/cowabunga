@@ -24,7 +24,7 @@ import java.math.BigInteger;
 %yylexthrow}
 
 %{
-    
+
     private String filename;
 
     public MyLexer(java.io.Reader in, String filename) {
@@ -34,29 +34,29 @@ import java.math.BigInteger;
 
     public final static String maxIntegerString = "9223372036854775808";
     public final static BigInteger maxInteger = new BigInteger(maxIntegerString); // 2^63
-    
+
     protected ComplexSymbol symbol(int id) {
        String name = sym.terminalNames[id];
         return new ComplexSymbol(name, id,
-            new Location(filename, yyline+1,yycolumn+1,yychar),
-            new Location(filename, yyline+1,yycolumn+yylength(),yychar+yylength()));
+            new Location(filename, yyline+1,yycolumn+1,(int)yychar),
+            new Location(filename, yyline+1,yycolumn+yylength(),(int)yychar+yylength()));
     }
 
     protected ComplexSymbol symbol(int id, Object val) {
        String name = sym.terminalNames[id];
-        Location left = new Location(filename, yyline+1,yycolumn+1,yychar);
+        Location left = new Location(filename, yyline+1,yycolumn+1,(int)yychar);
         Location right = new Location(filename, yyline+1,
-                                yycolumn+yylength(), 
-                               yychar+yylength());
-                               
+                                yycolumn+yylength(),
+                               (int)yychar+yylength());
+
         return new ComplexSymbol(name, id, left, right, val);
     }
-    
+
     protected ComplexSymbol symbol(int id, String val, int line, int col) {
        String name = sym.terminalNames[id];
         Location left = new Location(filename, line+1,col+1);
         Location right = new Location(filename, line + 1, col + 1 + val.length());
-                               
+
         return new ComplexSymbol(name, id, left, right, val);
     }
 
@@ -70,50 +70,50 @@ import java.math.BigInteger;
       private StringBuffer buffer;
       private int lineNumber;
       private int columnNumber;
-      
+
       public LexerStringBuffer() {
          buffer = new StringBuffer();
          lineNumber = -1;
          columnNumber = -1;
       }
-      
+
       private void clear() {
          buffer.delete(0, buffer.length());
          lineNumber = -1;
          columnNumber = -1;
       }
-      
+
       public void init(int line, int column) {
          this.clear();
          lineNumber = line;
          columnNumber = column;
       }
-      
+
       public void append(String s) {
          buffer.append(s);
       }
-      
+
       public int getLineNumber() {
          return lineNumber;
       }
-      
+
       public int getColumnNumber() {
          return columnNumber;
       }
-      
+
       public ComplexSymbol generateSymbol(int id) {
          return symbol(id, buffer.toString(), lineNumber, columnNumber);
       }
-      
+
       public String toString() {
          return buffer.toString();
       }
-      
+
    }
-   
+
     private LexerStringBuffer stringBuffer = new LexerStringBuffer();
     private LexerStringBuffer charBuffer = new LexerStringBuffer();
-    
+
 %}
 
 %eofval{
@@ -139,7 +139,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 <YYINITIAL> {
     {Whitespace}        { /* IGNORE */ }
     "//"            { yybegin(COMMENT); }
-    
+
     "use"               { return symbol(sym.USE); }
     "if"                { return symbol(sym.IF); }
     "while"             { return symbol(sym.WHILE); }
@@ -152,13 +152,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "true"              { return symbol(sym.BOOL_LITERAL, true); }
     "false"             { return symbol(sym.BOOL_LITERAL, false); }
-    
+
     0
-       { 
+       {
           return symbol(sym.INT_LITERAL, "0");
       }
-      
-    {Integer}   
+
+    {Integer}
         {
             String num = yytext();
             BigInteger n;
@@ -178,16 +178,16 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
                                     num, yyline, yycolumn, filename);
             }
         }
-    
-    \'   
-       { 
+
+    \'
+       {
           charBuffer.init(yyline, yycolumn);
-          yybegin(CHARACTER); 
+          yybegin(CHARACTER);
        }
-    
-    \"                  
-       { 
-          stringBuffer.init(yyline, yycolumn); 
+
+    \"
+       {
+          stringBuffer.init(yyline, yycolumn);
           yybegin(STRING);
        }
 
@@ -225,13 +225,13 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
     "&"                 { return symbol(sym.LOGICAL_AND); }
     "|"                 { return symbol(sym.LOGICAL_OR); }
-    
-    .               
-       { 
+
+    .
+       {
           throw new cyr7.exceptions.lexer.InvalidTokenException(yytext(),
-                                              yyline, 
+                                              yyline,
                                               yycolumn,
-                                              filename); 
+                                              filename);
       }
 }
 
@@ -242,21 +242,21 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 
 <CHARACTER> {
     /* No characters */
-    {Newline}         
+    {Newline}
        {
           yybegin(YYINITIAL);
           throw new cyr7.exceptions.lexer.MultiLineCharacterException(
-                charBuffer.getLineNumber(), 
+                charBuffer.getLineNumber(),
                 charBuffer.getColumnNumber(),
-                filename); 
+                filename);
        }
-       
-    \'               
+
+    \'
        {
           yybegin(YYINITIAL);
           throw new cyr7.exceptions.lexer.InvalidCharacterLiteralException(
-                "''", 
-                charBuffer.getLineNumber(), 
+                "''",
+                charBuffer.getLineNumber(),
                 charBuffer.getColumnNumber(),
                 filename);
        }
@@ -266,42 +266,42 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\t|\t            {yybegin(CHAR_END); charBuffer.append("\t"); }
     \\r               {yybegin(CHAR_END); charBuffer.append("\r"); }
     \\f|\f            {yybegin(CHAR_END); charBuffer.append("\f"); }
-    
-    {Hex}            
+
+    {Hex}
        {
-          yybegin(CHAR_END); 
-          charBuffer.append(fromHex(yytext())); 
+          yybegin(CHAR_END);
+          charBuffer.append(fromHex(yytext()));
        }
-       
+
     \\'               {yybegin(CHAR_END); charBuffer.append("'"); }
     \\\"            {yybegin(CHAR_END); charBuffer.append("\""); }
     \\\\            {yybegin(CHAR_END); charBuffer.append("\\"); }
-    
+
     /*Invalid escape characters*/
-    \\[^]            
+    \\[^]
        {
           yybegin(YYINITIAL);
           throw new cyr7.exceptions.lexer.InvalidCharacterLiteralException(
-             "'" + charBuffer.toString() + "'", 
-             charBuffer.getLineNumber(), 
+             "'" + charBuffer.toString() + "'",
+             charBuffer.getLineNumber(),
              charBuffer.getColumnNumber(),
              filename);
-       } 
+       }
 }
 
 <CHAR_END> {
-   \'               
+   \'
       {
-         yybegin(YYINITIAL); 
-         return charBuffer.generateSymbol(sym.CHAR_LITERAL); 
+         yybegin(YYINITIAL);
+         return charBuffer.generateSymbol(sym.CHAR_LITERAL);
       }
-      
-   [^\']      
+
+   [^\']
       {
-         yybegin(YYINITIAL); 
+         yybegin(YYINITIAL);
          throw new cyr7.exceptions.lexer.InvalidCharacterLiteralException(
-            "'" + charBuffer.toString() + yytext(), 
-            charBuffer.getLineNumber(), 
+            "'" + charBuffer.toString() + yytext(),
+            charBuffer.getLineNumber(),
             charBuffer.getColumnNumber(),
             filename);
       }
@@ -316,21 +316,21 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
 }
 
 <STRING> {
-   {Newline}            
+   {Newline}
       {
          yybegin(YYINITIAL);
          throw new cyr7.exceptions.lexer.MultiLineStringException(
-            stringBuffer.getLineNumber(), 
+            stringBuffer.getLineNumber(),
             stringBuffer.getColumnNumber(),
-            filename); 
+            filename);
       }
-      
-    \"                  
+
+    \"
        {
-          yybegin(YYINITIAL); 
-          return stringBuffer.generateSymbol(sym.STRING_LITERAL); 
+          yybegin(YYINITIAL);
+          return stringBuffer.generateSymbol(sym.STRING_LITERAL);
        }
-       
+
     \\n                {stringBuffer.append("\n");}
     \\t|\t            {stringBuffer.append("\t");}
     \\r               {stringBuffer.append("\r");}
@@ -339,18 +339,18 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
     \\'               {stringBuffer.append("'");}
     \\\"            {stringBuffer.append("\"");}
     \\\\                 {stringBuffer.append("\\");}
-    
+
             // Invalid Escape Characters
-    \\[^]            
+    \\[^]
        {
           throw new cyr7.exceptions.lexer.InvalidStringEscapeCharacterException(
-             yytext(), 
-             yyline, 
+             yytext(),
+             yyline,
              yycolumn,
              filename);
        }
-           
-    <<EOF>> 
+
+    <<EOF>>
         {
             throw new cyr7.exceptions.lexer.NonTerminatingStringException(
                 stringBuffer.toString(),
@@ -358,7 +358,7 @@ Hex = \\x(([(a-f|A-F)0-9]){1,4})
                 stringBuffer.getColumnNumber(),
                 filename);
         }
-        
+
     .    {stringBuffer.append(yytext()); }
 }
 
